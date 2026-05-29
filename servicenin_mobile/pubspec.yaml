@@ -1,0 +1,33 @@
+name: servicenin
+description: ServiceNin — Smart Citizen Super App (Dhaka). Flutter (Android + iOS).
+publish_to: "none"
+version: 0.1.0+1
+
+environment:
+  sdk: ">=3.3.0 <4.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  # Networking
+  dio: ^5.4.3
+  # Secure token storage (iOS Keychain / Android Keystore)
+  flutter_secure_storage: ^9.2.2
+  # State management
+  flutter_riverpod: ^2.5.1
+  # Routing with auth guards
+  go_router: ^14.2.0
+  # Fonts (Plus Jakarta Sans + Hind Siliguri for Bangla)
+  google_fonts: ^6.2.1
+  # Local non-sensitive prefs (locale, onboarding-seen)
+  shared_preferences: ^2.2.3
+  # Biometric gate (Face ID / fingerprint) — designed for in signup
+  local_auth: ^2.2.0
+
+dev_dependencies:
+  flutter_lints: ^4.0.0
+  flutter_test:
+    sdk: flutter
+
+flutter:
+  uses-material-design: true
