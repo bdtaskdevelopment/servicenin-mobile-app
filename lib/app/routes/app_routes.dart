@@ -1,0 +1,71 @@
+part of 'app_pages.dart';
+
+abstract class Routes {
+  Routes._();
+  static const SPLASH = _Paths.SPLASH;
+  static const AUTH = _Paths.AUTH;
+  static const OTP = _Paths.OTP;
+  static const REGISTRATION = _Paths.REGISTRATION;
+  static const SEARCH = _Paths.SEARCH;
+  static const FORGOT_PASSWORD = _Paths.FORGOT_PASSWORD;
+  static const HOME = _Paths.HOME;
+  static const LEAVE = _Paths.LEAVE;
+  static const LEAVE_APPLY = _Paths.LEAVE_APPLY;
+  static const NOTIFICATIONS = _Paths.NOTIFICATIONS;
+  static const NOTICES = _Paths.NOTICES;
+  static const REWARDS = _Paths.REWARDS;
+  static const LOAN = _Paths.LOAN;
+  static const SETTINGS = _Paths.SETTINGS;
+  static const PROFILE_DETAILS = _Paths.PROFILE_DETAILS;
+  static const SHORT_LEAVE_APPLY = _Paths.SHORT_LEAVE_APPLY;
+  static const ADD_LOAN = _Paths.ADD_LOAN;
+  static const BENEFITS = _Paths.BENEFITS;
+  static const APPLY_BENEFIT = _Paths.APPLY_BENEFIT;
+  static const PROJECTS = _Paths.PROJECTS;
+  static const ADD_PROJECT = _Paths.ADD_PROJECT;
+  static const DOCUMENTS = _Paths.DOCUMENTS;
+  static const HR_POLICY = _Paths.HR_POLICY;
+  static const LEAVE_DETAIL = _Paths.LEAVE_DETAIL;
+  static const EDIT_PROJECT = _Paths.EDIT_PROJECT;
+  static const PROJECT_DETAIL = _Paths.PROJECT_DETAIL;
+  static const ALL_TASKS = _Paths.ALL_TASKS;
+  static const SPRINTS = _Paths.SPRINTS;
+  static const USE_CASES = _Paths.USE_CASES;
+  static const DAILY_TASKS     = _Paths.DAILY_TASKS;
+  static const ADD_DAILY_TASK  = _Paths.ADD_DAILY_TASK;
+}
+
+abstract class _Paths {
+  _Paths._();
+  static const SPLASH = '/splash';
+  static const AUTH = '/auth';
+  static const OTP = '/otp';
+  static const REGISTRATION = '/registration';
+  static const SEARCH = '/search';
+  static const FORGOT_PASSWORD = '/forgot-password';
+  static const HOME = '/home';
+  static const LEAVE = '/leave';
+  static const LEAVE_APPLY = '/leave-apply';
+  static const SHORT_LEAVE_APPLY = '/short-leave-apply';
+  static const ADD_LOAN = '/add-loan';
+  static const BENEFITS = '/benefits';
+  static const APPLY_BENEFIT = '/apply-benefit';
+  static const PROJECTS = '/projects';
+  static const ADD_PROJECT = '/add-project';
+  static const DOCUMENTS = '/documents';
+  static const HR_POLICY = '/hr-policy';
+  static const NOTIFICATIONS = '/notifications';
+  static const NOTICES = '/notices';
+  static const REWARDS = '/rewards';
+  static const LOAN = '/loan';
+  static const SETTINGS = '/settings';
+  static const PROFILE_DETAILS = '/profile-details';
+  static const LEAVE_DETAIL = '/leave-detail';
+  static const EDIT_PROJECT = '/edit-project';
+  static const PROJECT_DETAIL = '/project-detail';
+  static const ALL_TASKS = '/all-tasks';
+  static const SPRINTS = '/sprints';
+  static const USE_CASES = '/use-cases';
+  static const DAILY_TASKS    = '/daily-tasks';
+  static const ADD_DAILY_TASK = '/add-daily-task';
+}
