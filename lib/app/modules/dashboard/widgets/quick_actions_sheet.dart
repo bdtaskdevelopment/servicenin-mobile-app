@@ -4,6 +4,8 @@ import 'package:get/get.dart';
 import '../../../core/values/app_colors.dart';
 import '../../../core/values/sn_catalog.dart';
 import '../../../data/models/sn_service.dart';
+import '../../../routes/app_pages.dart';
+import '../controllers/dashboard_controller.dart';
 
 /// "Quick Actions" bottom sheet opened from the center nav button.
 class QuickActionsSheet extends StatelessWidget {
@@ -70,10 +72,34 @@ class _QuickItem extends StatelessWidget {
   const _QuickItem({required this.action});
   final QuickAction action;
 
+  void _go() {
+    Get.back(); // close the sheet first
+    switch (action.name) {
+      case 'Need\nBlood':
+        Get.toNamed(Routes.BLOOD);
+        break;
+      case 'Ambulance':
+        Get.toNamed(Routes.AMBULANCE);
+        break;
+      case 'Quick Pay':
+        Get.toNamed(Routes.NAGARIK);
+        break;
+      case 'Find\nDoctor':
+        Get.toNamed(Routes.HEALTHCARE);
+        break;
+      case 'Track\nOrder':
+        // Not a page — jump the dashboard to the "Orders" tab.
+        if (Get.isRegistered<DashboardController>()) {
+          Get.find<DashboardController>().changeTab(2);
+        }
+        break;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () => Get.back(),
+      onTap: _go,
       child: Column(
         children: [
           Container(

@@ -25,10 +25,12 @@ class _MyAppState extends State<MyApp> {
 
     SystemChrome.setSystemUIOverlayStyle(
       const SystemUiOverlayStyle(
-        statusBarColor: AppColors.appColorSecond,
-        statusBarIconBrightness: Brightness.light,
-        systemNavigationBarColor: AppColors.appColorSecond,
-        systemNavigationBarIconBrightness: Brightness.light,
+        statusBarColor: AppColors.white,
+        statusBarIconBrightness: Brightness.dark, // Android status icons
+        statusBarBrightness: Brightness.light, // iOS status icons
+        systemNavigationBarColor: AppColors.white,
+        systemNavigationBarIconBrightness: Brightness.dark,
+        systemNavigationBarDividerColor: AppColors.white,
       ),
     );
     return GetMaterialApp(

@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 
 import '../../../core/values/app_colors.dart';
 import '../../../data/models/sn_service.dart';
+import '../../../global_widget/service_app_bar.dart';
 import '../controllers/orders_controller.dart';
 
 class OrdersView extends GetView<OrdersController> {
@@ -12,26 +13,18 @@ class OrdersView extends GetView<OrdersController> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.white,
-      body: SafeArea(
-        bottom: false,
-        child: ListView(
-          padding: const EdgeInsets.fromLTRB(16, 16, 16, 100),
-          children: [
-            const Text(
-              'My Orders',
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.w800,
-                color: Color(0xFF0F172A),
-              ),
-            ),
-            const SizedBox(height: 18),
-            ...controller.orders.map((o) => Padding(
-                  padding: const EdgeInsets.only(bottom: 12),
-                  child: _OrderCard(order: o),
-                )),
-          ],
-        ),
+      appBar: ServiceAppBar(
+        title: 'My Orders',
+        subtitle: '${controller.orders.length}টি অর্ডার · সব সেবা',
+      ),
+      body: ListView(
+        padding: const EdgeInsets.fromLTRB(16, 12, 16, 100),
+        children: [
+          ...controller.orders.map((o) => Padding(
+                padding: const EdgeInsets.only(bottom: 12),
+                child: _OrderCard(order: o),
+              )),
+        ],
       ),
     );
   }

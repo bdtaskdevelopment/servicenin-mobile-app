@@ -1,0 +1,299 @@
+import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+
+import '../../../core/values/app_colors.dart';
+import '../controllers/account_controller.dart';
+
+const _navy = Color(0xFF1E2A4A);
+const _tileSel = Color(0xFFE3E7F5);
+
+class EditProfileView extends GetView<AccountController> {
+  const EditProfileView({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: const Color(0xFFF1F3F6),
+      body: SafeArea(
+        child: GetBuilder<AccountController>(
+          builder: (con) => Column(
+            children: [
+              // Header
+              Padding(
+                padding: const EdgeInsets.fromLTRB(8, 6, 16, 4),
+                child: Row(
+                  children: [
+                    IconButton(
+                      splashRadius: 22,
+                      onPressed: () => Get.back(),
+                      icon: const Icon(Icons.arrow_back_ios_new_rounded,
+                          size: 20, color: Color(0xFF1A1A1A)),
+                    ),
+                    const Text('Edit profile',
+                        style: TextStyle(
+                            fontSize: 19,
+                            fontWeight: FontWeight.w800,
+                            color: Color(0xFF0F172A))),
+                  ],
+                ),
+              ),
+              Expanded(
+                child: ListView(
+                  padding: const EdgeInsets.fromLTRB(16, 10, 16, 16),
+                  children: [
+                    // Avatar with camera badge
+                    Center(
+                      child: Stack(
+                        children: [
+                          Container(
+                            width: 84,
+                            height: 84,
+                            decoration: BoxDecoration(
+                                color: const Color(0xFFE3E7F5),
+                                borderRadius: BorderRadius.circular(24)),
+                            alignment: Alignment.center,
+                            child: Text(con.initial,
+                                style: const TextStyle(
+                                    color: _navy,
+                                    fontSize: 32,
+                                    fontWeight: FontWeight.w800)),
+                          ),
+                          Positioned(
+                            right: 0,
+                            bottom: 0,
+                            child: Container(
+                              width: 28,
+                              height: 28,
+                              decoration: BoxDecoration(
+                                  color: _navy,
+                                  shape: BoxShape.circle,
+                                  border: Border.all(
+                                      color: const Color(0xFFF1F3F6),
+                                      width: 2.5)),
+                              child: const Icon(Icons.photo_camera_outlined,
+                                  color: Colors.white, size: 14),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    // Phone (login) verified card
+                    Container(
+                      padding: const EdgeInsets.all(14),
+                      decoration: BoxDecoration(
+                          color: AppColors.white,
+                          borderRadius: BorderRadius.circular(14)),
+                      child: Row(
+                        children: [
+                          const Icon(Icons.call_outlined,
+                              size: 20, color: Color(0xFF334155)),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const Text('PHONE (LOGIN)',
+                                    style: TextStyle(
+                                        fontSize: 10.5,
+                                        fontWeight: FontWeight.w700,
+                                        color: Color(0xFF94A3B8),
+                                        letterSpacing: 0.6)),
+                                const SizedBox(height: 2),
+                                Text(con.maskedPhone,
+                                    style: const TextStyle(
+                                        fontSize: 15,
+                                        fontWeight: FontWeight.w800,
+                                        color: Color(0xFF0F172A))),
+                              ],
+                            ),
+                          ),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 10, vertical: 5),
+                            decoration: BoxDecoration(
+                                color: const Color(0xFFDCFCE7),
+                                borderRadius: BorderRadius.circular(20)),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: const [
+                                Icon(Icons.circle,
+                                    size: 7, color: Color(0xFF16A34A)),
+                                SizedBox(width: 5),
+                                Text('Verified',
+                                    style: TextStyle(
+                                        fontSize: 11,
+                                        fontWeight: FontWeight.w700,
+                                        color: Color(0xFF15803D))),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 14),
+                    _InputCard(label: 'FULL NAME', initial: con.fullName),
+                    const SizedBox(height: 14),
+                    _InputCard(label: 'EMAIL', initial: con.email),
+                    const SizedBox(height: 16),
+                    const _Label('GENDER'),
+                    const SizedBox(height: 10),
+                    Row(
+                      children: List.generate(con.genders.length, (i) {
+                        final g = con.genders[i];
+                        final sel = con.gender == g;
+                        return Expanded(
+                          child: Padding(
+                            padding: EdgeInsets.only(
+                                right: i == con.genders.length - 1 ? 0 : 10),
+                            child: GestureDetector(
+                              onTap: () => con.setGender(g),
+                              child: Container(
+                                height: 50,
+                                alignment: Alignment.center,
+                                decoration: BoxDecoration(
+                                  color: sel ? _tileSel : AppColors.white,
+                                  borderRadius: BorderRadius.circular(12),
+                                  border: Border.all(
+                                      color: sel
+                                          ? _navy
+                                          : const Color(0xFFE2E8F0),
+                                      width: sel ? 1.6 : 1.2),
+                                ),
+                                child: Text(g,
+                                    style: TextStyle(
+                                        fontSize: 14.5,
+                                        fontWeight: FontWeight.w700,
+                                        color: sel
+                                            ? _navy
+                                            : const Color(0xFF334155))),
+                              ),
+                            ),
+                          ),
+                        );
+                      }),
+                    ),
+                    const SizedBox(height: 16),
+                    const _Label('BLOOD GROUP'),
+                    const SizedBox(height: 10),
+                    GridView.count(
+                      crossAxisCount: 4,
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      mainAxisSpacing: 10,
+                      crossAxisSpacing: 10,
+                      childAspectRatio: 1.7,
+                      children: con.bloodGroups.map((b) {
+                        final sel = con.bloodGroup == b;
+                        return GestureDetector(
+                          onTap: () => con.setBloodGroup(b),
+                          child: Container(
+                            alignment: Alignment.center,
+                            decoration: BoxDecoration(
+                              color: sel ? _navy : AppColors.white,
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(
+                                  color: sel
+                                      ? _navy
+                                      : const Color(0xFFE2E8F0),
+                                  width: sel ? 1.6 : 1.2),
+                            ),
+                            child: Text(b,
+                                style: TextStyle(
+                                    fontSize: 14.5,
+                                    fontWeight: FontWeight.w800,
+                                    color: sel
+                                        ? Colors.white
+                                        : const Color(0xFF0F172A))),
+                          ),
+                        );
+                      }).toList(),
+                    ),
+                    const SizedBox(height: 16),
+                    const _Label('ADDRESS'),
+                    const SizedBox(height: 10),
+                    _InputCard(label: null, initial: con.address, maxLines: 2),
+                  ],
+                ),
+              ),
+              // Save
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+                child: SizedBox(
+                  width: double.infinity,
+                  height: 54,
+                  child: ElevatedButton(
+                    onPressed: con.saveProfile,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: _navy,
+                      foregroundColor: Colors.white,
+                      elevation: 0,
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(14)),
+                    ),
+                    child: const Text('Save changes',
+                        style: TextStyle(
+                            fontSize: 16, fontWeight: FontWeight.w800)),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _Label extends StatelessWidget {
+  const _Label(this.text);
+  final String text;
+  @override
+  Widget build(BuildContext context) => Text(text,
+      style: const TextStyle(
+          fontSize: 12,
+          fontWeight: FontWeight.w700,
+          color: Color(0xFF94A3B8),
+          letterSpacing: 0.6));
+}
+
+class _InputCard extends StatelessWidget {
+  const _InputCard({required this.label, required this.initial, this.maxLines = 1});
+  final String? label;
+  final String initial;
+  final int maxLines;
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.fromLTRB(16, 12, 16, 6),
+      decoration: BoxDecoration(
+          color: AppColors.white, borderRadius: BorderRadius.circular(14)),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          if (label != null) ...[
+            Text(label!,
+                style: const TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w700,
+                    color: Color(0xFF94A3B8),
+                    letterSpacing: 0.6)),
+          ],
+          TextField(
+            maxLines: maxLines,
+            controller: TextEditingController(text: initial),
+            style: const TextStyle(
+                fontSize: 15.5,
+                fontWeight: FontWeight.w700,
+                color: Color(0xFF0F172A)),
+            decoration: const InputDecoration(
+              isDense: true,
+              contentPadding: EdgeInsets.symmetric(vertical: 8),
+              border: InputBorder.none,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}

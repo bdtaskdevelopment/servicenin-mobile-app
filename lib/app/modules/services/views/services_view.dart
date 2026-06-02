@@ -14,24 +14,13 @@ class ServicesView extends GetView<ServicesController> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.white,
-      appBar: const ServiceAppBar(),
+      appBar: ServiceAppBar(
+        title: 'All Services',
+        subtitle: '${controller.services.length}টি সেবা · এক অ্যাকাউন্টে',
+      ),
       body: ListView(
-        padding: const EdgeInsets.fromLTRB(16, 8, 16, 100),
+        padding: const EdgeInsets.fromLTRB(16, 12, 16, 100),
         children: [
-          const Text(
-            'All Services',
-            style: TextStyle(
-              fontSize: 22,
-              fontWeight: FontWeight.w800,
-              color: Color(0xFF0F172A),
-            ),
-          ),
-          const SizedBox(height: 4),
-          const Text(
-            '১২টি সেবা · এক অ্যাকাউন্টে',
-            style: TextStyle(fontSize: 13, color: Color(0xFF94A3B8)),
-          ),
-          const SizedBox(height: 18),
           GridView.builder(
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),

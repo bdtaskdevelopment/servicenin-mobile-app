@@ -76,10 +76,11 @@ class AppTheme {
       titleTextStyle: TextStyle(color: AppColors.white, fontSize: 18),
       iconTheme: IconThemeData(color: AppColors.white),
       systemOverlayStyle: SystemUiOverlayStyle(
-        statusBarColor: AppColors.appColor,
-        statusBarIconBrightness: Brightness.light,
-        systemNavigationBarColor: AppColors.appColor,
-        systemNavigationBarIconBrightness: Brightness.light,
+        statusBarColor: AppColors.white,
+        statusBarIconBrightness: Brightness.dark,
+        statusBarBrightness: Brightness.light,
+        systemNavigationBarColor: AppColors.white,
+        systemNavigationBarIconBrightness: Brightness.dark,
       ),
     ),
     tabBarTheme: TabBarThemeData(

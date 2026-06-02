@@ -9,11 +9,15 @@ import '../routes/app_pages.dart';
 class ServiceAppBar extends StatelessWidget implements PreferredSizeWidget {
   const ServiceAppBar({
     super.key,
+    this.title = 'ServiceNin',
+    this.subtitle = 'আপনার শহর, আপনার সেবা',
     this.onSearch,
     this.onNotifications,
     this.hasNotification = true,
   });
 
+  final String title;
+  final String subtitle;
   final VoidCallback? onSearch;
   final VoidCallback? onNotifications;
   final bool hasNotification;
@@ -36,19 +40,19 @@ class ServiceAppBar extends StatelessWidget implements PreferredSizeWidget {
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisAlignment: MainAxisAlignment.center,
-              children: const [
+              children: [
                 Text(
-                  'ServiceNin',
-                  style: TextStyle(
+                  title,
+                  style: const TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.w800,
                     color: Color(0xFF0F172A),
                   ),
                 ),
-                SizedBox(height: 2),
+                const SizedBox(height: 2),
                 Text(
-                  'আপনার শহর, আপনার সেবা',
-                  style: TextStyle(fontSize: 11, color: Color(0xFF94A3B8)),
+                  subtitle,
+                  style: const TextStyle(fontSize: 11, color: Color(0xFF94A3B8)),
                 ),
               ],
             ),

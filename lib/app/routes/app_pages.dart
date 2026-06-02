@@ -25,6 +25,39 @@ import '../modules/physio/views/physio_sessions_view.dart';
 import '../modules/physio/views/physio_center_view.dart';
 import '../modules/physio/views/physio_book_view.dart';
 import '../modules/physio/views/physio_booked_view.dart';
+import '../modules/matchmaking/bindings/matchmaking_binding.dart';
+import '../modules/matchmaking/views/matchmaking_view.dart';
+import '../modules/matchmaking/views/my_biodata_view.dart';
+import '../modules/matchmaking/views/biodata_detail_view.dart';
+import '../modules/matchmaking/views/interests_view.dart';
+import '../modules/jobs/bindings/jobs_binding.dart';
+import '../modules/jobs/views/jobs_view.dart';
+import '../modules/jobs/views/my_applications_view.dart';
+import '../modules/jobs/views/job_detail_view.dart';
+import '../modules/jobs/views/job_apply_view.dart';
+import '../modules/jobs/views/post_job_view.dart';
+import '../modules/funeral/bindings/funeral_binding.dart';
+import '../modules/funeral/views/funeral_view.dart';
+import '../modules/funeral/views/funeral_request_view.dart';
+import '../modules/funeral/views/funeral_done_view.dart';
+import '../modules/education/bindings/education_binding.dart';
+import '../modules/education/views/education_view.dart';
+import '../modules/education/views/education_center_view.dart';
+import '../modules/education/views/course_enquiry_view.dart';
+import '../modules/education/views/enquiry_done_view.dart';
+import '../modules/nagarik/bindings/nagarik_binding.dart';
+import '../modules/nagarik/views/nagarik_view.dart';
+import '../modules/nagarik/views/nagarik_reports_view.dart';
+import '../modules/nagarik/views/report_issue_view.dart';
+import '../modules/nagarik/views/report_status_view.dart';
+import '../modules/nagarik/views/nagarik_chat_view.dart';
+import '../modules/account/bindings/account_binding.dart';
+import '../modules/account/views/profile_view.dart';
+import '../modules/account/views/edit_profile_view.dart';
+import '../modules/account/views/my_activity_view.dart';
+import '../modules/account/views/settings_view.dart';
+import '../modules/account/views/privacy_policy_view.dart';
+import '../modules/account/views/delete_account_view.dart';
 import '../modules/information/bindings/information_binding.dart';
 import '../modules/information/views/information_view.dart';
 import '../modules/information/views/emergency_hotlines_view.dart';
@@ -206,6 +239,141 @@ class AppPages {
       name: _Paths.PHYSIO_BOOKED,
       page: () => const PhysioBookedView(),
       binding: PhysioBinding(),
+    ),
+    GetPage(
+      name: _Paths.MATCHMAKING,
+      page: () => const MatchmakingView(),
+      binding: MatchmakingBinding(),
+    ),
+    GetPage(
+      name: _Paths.MATCHMAKING_BIODATA,
+      page: () => const MyBiodataView(),
+      binding: MatchmakingBinding(),
+    ),
+    GetPage(
+      name: _Paths.MATCHMAKING_PROFILE,
+      page: () => const BiodataDetailView(),
+      binding: MatchmakingBinding(),
+    ),
+    GetPage(
+      name: _Paths.MATCHMAKING_INTERESTS,
+      page: () => const InterestsView(),
+      binding: MatchmakingBinding(),
+    ),
+    GetPage(
+      name: _Paths.JOBS,
+      page: () => const JobsView(),
+      binding: JobsBinding(),
+    ),
+    GetPage(
+      name: _Paths.JOBS_APPLICATIONS,
+      page: () => const MyApplicationsView(),
+      binding: JobsBinding(),
+    ),
+    GetPage(
+      name: _Paths.JOBS_DETAIL,
+      page: () => const JobDetailView(),
+      binding: JobsBinding(),
+    ),
+    GetPage(
+      name: _Paths.JOBS_APPLY,
+      page: () => const JobApplyView(),
+      binding: JobsBinding(),
+    ),
+    GetPage(
+      name: _Paths.JOBS_POST,
+      page: () => const PostJobView(),
+      binding: JobsBinding(),
+    ),
+    GetPage(
+      name: _Paths.FUNERAL,
+      page: () => const FuneralView(),
+      binding: FuneralBinding(),
+    ),
+    GetPage(
+      name: _Paths.FUNERAL_REQUEST,
+      page: () => const FuneralRequestView(),
+      binding: FuneralBinding(),
+    ),
+    GetPage(
+      name: _Paths.FUNERAL_DONE,
+      page: () => const FuneralDoneView(),
+      binding: FuneralBinding(),
+    ),
+    GetPage(
+      name: _Paths.EDUCATION,
+      page: () => const EducationView(),
+      binding: EducationBinding(),
+    ),
+    GetPage(
+      name: _Paths.EDUCATION_CENTER,
+      page: () => const EducationCenterView(),
+      binding: EducationBinding(),
+    ),
+    GetPage(
+      name: _Paths.EDUCATION_ENQUIRY,
+      page: () => const CourseEnquiryView(),
+      binding: EducationBinding(),
+    ),
+    GetPage(
+      name: _Paths.EDUCATION_DONE,
+      page: () => const EnquiryDoneView(),
+      binding: EducationBinding(),
+    ),
+    GetPage(
+      name: _Paths.NAGARIK,
+      page: () => const NagarikView(),
+      binding: NagarikBinding(),
+    ),
+    GetPage(
+      name: _Paths.NAGARIK_REPORTS,
+      page: () => const NagarikReportsView(),
+      binding: NagarikBinding(),
+    ),
+    GetPage(
+      name: _Paths.NAGARIK_REPORT_ISSUE,
+      page: () => const ReportIssueView(),
+      binding: NagarikBinding(),
+    ),
+    GetPage(
+      name: _Paths.NAGARIK_STATUS,
+      page: () => const ReportStatusView(),
+      binding: NagarikBinding(),
+    ),
+    GetPage(
+      name: _Paths.NAGARIK_CHAT,
+      page: () => const NagarikChatView(),
+      binding: NagarikBinding(),
+    ),
+    GetPage(
+      name: _Paths.ACCOUNT_PROFILE,
+      page: () => const ProfileView(),
+      binding: AccountBinding(),
+    ),
+    GetPage(
+      name: _Paths.ACCOUNT_EDIT,
+      page: () => const EditProfileView(),
+      binding: AccountBinding(),
+    ),
+    GetPage(
+      name: _Paths.ACCOUNT_ACTIVITY,
+      page: () => const MyActivityView(),
+      binding: AccountBinding(),
+    ),
+    GetPage(
+      name: _Paths.ACCOUNT_SETTINGS,
+      page: () => const SettingsView(),
+      binding: AccountBinding(),
+    ),
+    GetPage(
+      name: _Paths.ACCOUNT_PRIVACY,
+      page: () => const PrivacyPolicyView(),
+      binding: AccountBinding(),
+    ),
+    GetPage(
+      name: _Paths.ACCOUNT_DELETE,
+      page: () => const DeleteAccountView(),
+      binding: AccountBinding(),
     ),
     GetPage(
       name: _Paths.INFORMATION_HOTLINES,
