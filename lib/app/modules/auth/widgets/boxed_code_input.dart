@@ -18,6 +18,7 @@ class BoxedCodeInput extends StatefulWidget {
     this.onChanged,
     this.onCompleted,
     this.autoFocus = false,
+    this.accentColor,
   });
 
   final int length;
@@ -27,6 +28,7 @@ class BoxedCodeInput extends StatefulWidget {
   final ValueChanged<String>? onChanged;
   final ValueChanged<String>? onCompleted;
   final bool autoFocus;
+  final Color? accentColor;
 
   @override
   State<BoxedCodeInput> createState() => _BoxedCodeInputState();
@@ -76,6 +78,7 @@ class _BoxedCodeInputState extends State<BoxedCodeInput> {
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: List.generate(widget.length, (i) {
         final filled = _controllers[i].text.isNotEmpty;
+        final accent = widget.accentColor ?? AppColors.brandOrange;
         return SizedBox(
           width: widget.boxSize,
           height: widget.boxSize + 4,
@@ -114,18 +117,13 @@ class _BoxedCodeInputState extends State<BoxedCodeInput> {
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                   borderSide: BorderSide(
-                    color: filled
-                        ? AppColors.brandOrange
-                        : const Color(0xFFE2E8F0),
+                    color: filled ? accent : const Color(0xFFE2E8F0),
                     width: filled ? 1.6 : 1.2,
                   ),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
-                  borderSide: const BorderSide(
-                    color: AppColors.brandOrange,
-                    width: 1.6,
-                  ),
+                  borderSide: BorderSide(color: accent, width: 1.6),
                 ),
               ),
               onChanged: (v) {

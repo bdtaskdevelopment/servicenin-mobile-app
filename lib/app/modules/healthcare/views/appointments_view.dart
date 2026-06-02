@@ -1,0 +1,254 @@
+import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+
+import '../../../core/values/app_colors.dart';
+import '../../../routes/app_pages.dart';
+import '../controllers/appointments_controller.dart';
+
+const _green = Color(0xFF15803D);
+const _tile = Color(0xFFD9F7E6);
+
+class AppointmentsView extends GetView<AppointmentsController> {
+  const AppointmentsView({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return DefaultTabController(
+      length: 2,
+      child: Scaffold(
+        backgroundColor: const Color(0xFFF7F8FA),
+        appBar: AppBar(
+          backgroundColor: AppColors.white,
+          surfaceTintColor: AppColors.white,
+          elevation: 0,
+          scrolledUnderElevation: 0,
+          titleSpacing: 0,
+          leading: IconButton(
+            onPressed: () => Get.back(),
+            icon: const Icon(Icons.arrow_back_ios_new_rounded,
+                size: 20, color: Color(0xFF1A1A1A)),
+          ),
+          title: const Text('My appointments',
+              style: TextStyle(
+                  fontSize: 19,
+                  fontWeight: FontWeight.w800,
+                  color: Color(0xFF0F172A))),
+          bottom: const TabBar(
+            indicatorColor: _green,
+            indicatorWeight: 2.5,
+            labelColor: _green,
+            unselectedLabelColor: Color(0xFF94A3B8),
+            labelStyle:
+                TextStyle(fontSize: 14.5, fontWeight: FontWeight.w700),
+            unselectedLabelStyle:
+                TextStyle(fontSize: 14.5, fontWeight: FontWeight.w600),
+            tabs: [
+              Tab(text: 'Upcoming'),
+              Tab(text: 'Completed'),
+            ],
+          ),
+        ),
+        body: TabBarView(
+          children: [
+            _List(items: controller.upcoming),
+            _List(items: controller.completed),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _List extends StatelessWidget {
+  const _List({required this.items});
+  final List<Appointment> items;
+
+  @override
+  Widget build(BuildContext context) {
+    if (items.isEmpty) {
+      return const Center(
+        child: Text('No appointments',
+            style: TextStyle(color: Color(0xFF94A3B8))),
+      );
+    }
+    return ListView(
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
+      children: items.map((a) => Padding(
+            padding: const EdgeInsets.only(bottom: 12),
+            child: _ApptCard(appt: a),
+          )).toList(),
+    );
+  }
+}
+
+class _ApptCard extends StatelessWidget {
+  const _ApptCard({required this.appt});
+  final Appointment appt;
+
+  @override
+  Widget build(BuildContext context) {
+    final isUpcoming = appt.status == ApptStatus.upcoming;
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: AppColors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+              color: Colors.black.withValues(alpha: 0.03),
+              blurRadius: 10,
+              offset: const Offset(0, 3)),
+        ],
+      ),
+      child: Column(
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 48,
+                height: 48,
+                decoration: BoxDecoration(
+                    color: _tile, borderRadius: BorderRadius.circular(12)),
+                alignment: Alignment.center,
+                child: Text(appt.initials,
+                    style: const TextStyle(
+                        color: _green,
+                        fontSize: 15,
+                        fontWeight: FontWeight.w800)),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(appt.name,
+                        style: const TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w800,
+                            color: Color(0xFF0F172A))),
+                    const SizedBox(height: 2),
+                    Text('${appt.specialty} · ${appt.relation}',
+                        style: const TextStyle(
+                            fontSize: 12.5, color: Color(0xFF94A3B8))),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 8),
+              _StatusPill(upcoming: isUpcoming),
+            ],
+          ),
+          const Padding(
+            padding: EdgeInsets.symmetric(vertical: 12),
+            child: _DashedDivider(),
+          ),
+          Row(
+            children: [
+              Icon(appt.icon, size: 16, color: const Color(0xFF94A3B8)),
+              const SizedBox(width: 6),
+              Expanded(
+                child: Text(appt.line,
+                    style: const TextStyle(
+                        fontSize: 12.5, color: Color(0xFF64748B))),
+              ),
+              const SizedBox(width: 8),
+              if (appt.token != null)
+                Row(
+                  children: [
+                    const Text('Token ',
+                        style: TextStyle(
+                            fontSize: 12.5, color: Color(0xFF94A3B8))),
+                    Text(appt.token!,
+                        style: const TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w800,
+                            color: Color(0xFF0F172A))),
+                  ],
+                )
+              else if (appt.rx)
+                GestureDetector(
+                  onTap: () => Get.toNamed(Routes.HEALTHCARE_PRESCRIPTION),
+                  child: Row(
+                    children: const [
+                      Icon(Icons.bookmark_border_rounded,
+                          size: 16, color: _green),
+                      SizedBox(width: 4),
+                      Text('Rx',
+                          style: TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w800,
+                              color: _green)),
+                    ],
+                  ),
+                ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _StatusPill extends StatelessWidget {
+  const _StatusPill({required this.upcoming});
+  final bool upcoming;
+
+  @override
+  Widget build(BuildContext context) {
+    if (upcoming) {
+      return Container(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+        decoration: BoxDecoration(
+            color: const Color(0xFFDCFCE7),
+            borderRadius: BorderRadius.circular(20)),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: const [
+            Icon(Icons.circle, size: 7, color: Color(0xFF16A34A)),
+            SizedBox(width: 4),
+            Text('Upcoming',
+                style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w700,
+                    color: _green)),
+          ],
+        ),
+      );
+    }
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+      decoration: BoxDecoration(
+          color: const Color(0xFFEDF1EE),
+          borderRadius: BorderRadius.circular(20)),
+      child: const Text('Completed',
+          style: TextStyle(
+              fontSize: 11,
+              fontWeight: FontWeight.w700,
+              color: Color(0xFF475569))),
+    );
+  }
+}
+
+class _DashedDivider extends StatelessWidget {
+  const _DashedDivider();
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (context, c) {
+        const dash = 5.0;
+        const gap = 4.0;
+        final count = (c.maxWidth / (dash + gap)).floor();
+        return Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: List.generate(
+            count,
+            (_) => Container(
+              width: dash,
+              height: 1,
+              color: const Color(0xFFE2E8F0),
+            ),
+          ),
+        );
+      },
+    );
+  }
+}

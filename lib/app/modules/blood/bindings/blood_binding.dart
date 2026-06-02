@@ -1,0 +1,15 @@
+import 'package:get/get.dart';
+
+import '../controllers/blood_controller.dart';
+import '../controllers/donation_flow_controller.dart';
+import '../controllers/need_blood_controller.dart';
+
+class BloodBinding extends Bindings {
+  @override
+  void dependencies() {
+    Get.lazyPut<BloodController>(() => BloodController(), fenix: true);
+    Get.lazyPut<NeedBloodController>(() => NeedBloodController(), fenix: true);
+    Get.lazyPut<DonationFlowController>(() => DonationFlowController(),
+        fenix: true);
+  }
+}

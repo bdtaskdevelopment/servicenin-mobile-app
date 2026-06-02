@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import '../../../core/utils/service_nav.dart';
 import '../../../core/values/app_colors.dart';
 import '../../../global_widget/service_app_bar.dart';
 import '../../../global_widget/sn_service_tile.dart';
@@ -42,8 +43,10 @@ class ServicesView extends GetView<ServicesController> {
               crossAxisSpacing: 12,
               childAspectRatio: 0.86,
             ),
-            itemBuilder: (_, i) =>
-                SnServiceTile(service: controller.services[i]),
+            itemBuilder: (_, i) => SnServiceTile(
+              service: controller.services[i],
+              onTap: () => ServiceNav.open(controller.services[i]),
+            ),
           ),
         ],
       ),

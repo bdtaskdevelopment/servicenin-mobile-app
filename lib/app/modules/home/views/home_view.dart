@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../../core/values/app_colors.dart';
+import '../../../core/utils/service_nav.dart';
 import '../../../core/values/sn_catalog.dart';
 import '../../../data/models/sn_service.dart';
 import '../../../global_widget/section_header.dart';
@@ -47,8 +48,10 @@ class HomeView extends GetView<HomeController> {
                     crossAxisSpacing: 12,
                     childAspectRatio: 0.86,
                   ),
-                  itemBuilder: (_, i) =>
-                      SnServiceTile(service: SnCatalog.services[i]),
+                  itemBuilder: (_, i) => SnServiceTile(
+                    service: SnCatalog.services[i],
+                    onTap: () => ServiceNav.open(SnCatalog.services[i]),
+                  ),
                 ),
               ),
               const SizedBox(height: 24),

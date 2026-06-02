@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import '../../../core/utils/service_nav.dart';
 import '../../../core/values/app_colors.dart';
 import '../../../data/models/sn_service.dart';
 import '../controllers/search_controller.dart';
@@ -180,7 +181,9 @@ class _ServiceRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return GestureDetector(
+      onTap: () => ServiceNav.open(service),
+      child: Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
       decoration: BoxDecoration(
         color: AppColors.white,
@@ -204,6 +207,7 @@ class _ServiceRow extends StatelessWidget {
           const Icon(Icons.keyboard_arrow_right_rounded,
               color: Color(0xFFCBD5E1)),
         ],
+      ),
       ),
     );
   }
