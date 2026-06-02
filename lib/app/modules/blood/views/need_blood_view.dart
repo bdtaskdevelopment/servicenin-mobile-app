@@ -36,26 +36,51 @@ class NeedBloodView extends GetView<NeedBloodController> {
                       const SizedBox(height: 12),
                       _UrgencyRow(con: con),
                       const SizedBox(height: 22),
-                      const _SectionLabel('HOSPITAL & CONTACT'),
+                      const _SectionLabel('WHEN NEEDED'),
                       const SizedBox(height: 12),
-                      _InfoCard(
-                        icon: Icons.local_hospital_outlined,
-                        label: 'HOSPITAL',
-                        value: con.hospital,
+                      _TapCard(
+                        icon: Icons.calendar_today_outlined,
+                        label: 'DATE & TIME',
+                        value: con.neededDate,
+                        onTap: () => _pickDate(context, con),
+                      ),
+                      const SizedBox(height: 22),
+                      const _SectionLabel('CONTACT DETAILS'),
+                      const SizedBox(height: 12),
+                      _LabeledInput(
+                        label: 'NAME',
+                        controller: con.name,
+                        hint: 'Full name',
                       ),
                       const SizedBox(height: 12),
-                      _InfoCard(
-                        icon: Icons.location_on_outlined,
-                        label: 'PATIENT LOCATION',
-                        value: con.patientLocation,
-                        pill: 'GPS',
+                      _LabeledInput(
+                        label: 'EMAIL',
+                        controller: con.email,
+                        hint: 'you@example.com',
+                        keyboard: TextInputType.emailAddress,
                       ),
                       const SizedBox(height: 12),
-                      _InfoCard(
-                        icon: Icons.person_outline_rounded,
-                        label: 'CONTACT PERSON',
-                        value: con.contactPerson,
-                        pill: 'From profile',
+                      _LabeledInput(
+                        label: 'PHONE NUMBER',
+                        controller: con.phone,
+                        hint: '01XXXXXXXXX',
+                        keyboard: TextInputType.phone,
+                      ),
+                      const SizedBox(height: 12),
+                      _LabeledInput(
+                        label: 'ADDRESS',
+                        controller: con.address,
+                        hint: 'House, road, area, city',
+                        maxLines: 2,
+                      ),
+                      const SizedBox(height: 22),
+                      const _SectionLabel('DESCRIPTION'),
+                      const SizedBox(height: 12),
+                      _InputCard(
+                        controller: con.description,
+                        hint:
+                            'Patient condition, donor instructions, anything else…',
+                        maxLines: 4,
                       ),
                     ],
                   );
@@ -293,82 +318,191 @@ class _UrgencyRow extends StatelessWidget {
   }
 }
 
-// ── Info card (hospital / location / contact) ───────────────────────
-class _InfoCard extends StatelessWidget {
-  const _InfoCard({
+// ── Date picker ─────────────────────────────────────────────────────
+const _months = [
+  'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+  'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
+];
+
+Future<void> _pickDate(BuildContext context, NeedBloodController con) async {
+  final now = DateTime.now();
+  final picked = await showDatePicker(
+    context: context,
+    initialDate: now,
+    firstDate: now,
+    lastDate: now.add(const Duration(days: 60)),
+    builder: (ctx, child) => Theme(
+      data: Theme.of(ctx).copyWith(
+        colorScheme: const ColorScheme.light(primary: _red),
+      ),
+      child: child!,
+    ),
+  );
+  if (picked != null) {
+    con.setNeededDate('${picked.day} ${_months[picked.month - 1]} ${picked.year}');
+  }
+}
+
+// ── Tappable card (date) ────────────────────────────────────────────
+class _TapCard extends StatelessWidget {
+  const _TapCard({
     required this.icon,
     required this.label,
     required this.value,
-    this.pill,
+    required this.onTap,
   });
-
   final IconData icon;
   final String label;
   final String value;
-  final String? pill;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: AppColors.white,
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(color: const Color(0xFFEDEFF2)),
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 42,
+              height: 42,
+              decoration: BoxDecoration(
+                color: const Color(0xFFFDE4E4),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Icon(icon, size: 20, color: _red),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(label,
+                      style: const TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w700,
+                          color: Color(0xFF94A3B8),
+                          letterSpacing: 0.5)),
+                  const SizedBox(height: 3),
+                  Text(value,
+                      style: const TextStyle(
+                          fontSize: 14.5,
+                          fontWeight: FontWeight.w700,
+                          color: Color(0xFF0F172A))),
+                ],
+              ),
+            ),
+            const SizedBox(width: 8),
+            const Icon(Icons.keyboard_arrow_down_rounded,
+                color: Color(0xFF94A3B8)),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// ── Input card (meeting address / description) ──────────────────────
+class _InputCard extends StatelessWidget {
+  const _InputCard({
+    required this.controller,
+    required this.hint,
+    this.maxLines = 1,
+  });
+  final TextEditingController controller;
+  final String hint;
+  final int maxLines;
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
       decoration: BoxDecoration(
         color: AppColors.white,
         borderRadius: BorderRadius.circular(14),
         border: Border.all(color: const Color(0xFFEDEFF2)),
       ),
-      child: Row(
+      child: TextField(
+        controller: controller,
+        maxLines: maxLines,
+        style: const TextStyle(
+            fontSize: 14.5,
+            fontWeight: FontWeight.w600,
+            color: Color(0xFF0F172A)),
+        decoration: InputDecoration(
+          isDense: true,
+          hintText: hint,
+          hintStyle: const TextStyle(
+              fontSize: 14.5,
+              fontWeight: FontWeight.w500,
+              color: Color(0xFFB6C0CC)),
+          border: InputBorder.none,
+          contentPadding: const EdgeInsets.symmetric(vertical: 14),
+        ),
+      ),
+    );
+  }
+}
+
+// ── Labeled input (name / email / phone / address) ──────────────────
+class _LabeledInput extends StatelessWidget {
+  const _LabeledInput({
+    required this.label,
+    required this.controller,
+    required this.hint,
+    this.keyboard,
+    this.maxLines = 1,
+  });
+
+  final String label;
+  final TextEditingController controller;
+  final String hint;
+  final TextInputType? keyboard;
+  final int maxLines;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.fromLTRB(16, 12, 16, 6),
+      decoration: BoxDecoration(
+        color: AppColors.white,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: const Color(0xFFEDEFF2)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(
-            width: 42,
-            height: 42,
-            decoration: BoxDecoration(
-              color: const Color(0xFFFDE4E4),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Icon(icon, size: 20, color: _red),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(label,
-                    style: const TextStyle(
-                        fontSize: 11,
-                        fontWeight: FontWeight.w700,
-                        color: Color(0xFF94A3B8),
-                        letterSpacing: 0.5)),
-                const SizedBox(height: 3),
-                Text(value,
-                    style: const TextStyle(
-                        fontSize: 14.5,
-                        fontWeight: FontWeight.w700,
-                        color: Color(0xFF0F172A))),
-              ],
+          Text(label,
+              style: const TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w700,
+                  color: Color(0xFF94A3B8),
+                  letterSpacing: 0.5)),
+          TextField(
+            controller: controller,
+            keyboardType: keyboard,
+            maxLines: maxLines,
+            style: const TextStyle(
+                fontSize: 15,
+                fontWeight: FontWeight.w700,
+                color: Color(0xFF0F172A)),
+            decoration: InputDecoration(
+              isDense: true,
+              contentPadding: const EdgeInsets.symmetric(vertical: 8),
+              border: InputBorder.none,
+              hintText: hint,
+              hintStyle: const TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w500,
+                  color: Color(0xFFB6C0CC)),
             ),
           ),
-          if (pill != null) ...[
-            const SizedBox(width: 8),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
-              decoration: BoxDecoration(
-                color: const Color(0xFFDCFCE7),
-                borderRadius: BorderRadius.circular(20),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const Icon(Icons.circle, size: 7, color: Color(0xFF16A34A)),
-                  const SizedBox(width: 4),
-                  Text(pill!,
-                      style: const TextStyle(
-                          fontSize: 11,
-                          fontWeight: FontWeight.w700,
-                          color: Color(0xFF15803D))),
-                ],
-              ),
-            ),
-          ],
         ],
       ),
     );

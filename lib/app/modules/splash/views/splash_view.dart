@@ -13,8 +13,9 @@ class SplashView extends StatelessWidget {
   Widget build(BuildContext context) {
     SystemChrome.setSystemUIOverlayStyle(
       const SystemUiOverlayStyle(
-        statusBarColor: Colors.transparent,
-        statusBarIconBrightness: Brightness.light,
+        statusBarColor: AppColors.white,
+        statusBarIconBrightness: Brightness.dark,
+        statusBarBrightness: Brightness.light,
         systemNavigationBarColor: AppColors.white,
         systemNavigationBarIconBrightness: Brightness.dark,
       ),
@@ -23,6 +24,7 @@ class SplashView extends StatelessWidget {
     return GetBuilder<SplashController>(
       builder: (splashCon) {
         return Scaffold(
+          backgroundColor: AppColors.white,
           body: Container(
             width: double.infinity,
             height: double.infinity,
@@ -31,10 +33,11 @@ class SplashView extends StatelessWidget {
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
                 colors: [
-                  AppColors.brandOrangeLight,
-                  AppColors.brandOrange,
-                  AppColors.brandOrangeDark,
+                  AppColors.white,
+                  AppColors.white,
+                  Color(0xFFFFE8D8), // soft brand-orange tint
                 ],
+                stops: [0.0, 0.5, 1.0],
               ),
             ),
             child: SafeArea(
@@ -43,61 +46,65 @@ class SplashView extends StatelessWidget {
                   // ── Centered logo + title block ───────────────
                   Expanded(
                     child: Center(
-                      child: BounceInDown(
-                        duration: const Duration(milliseconds: 900),
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            // SN logo card
-                            Container(
-                              width: 96,
-                              height: 96,
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          // App logo — fades in & slides from the left
+                          FadeInLeft(
+                            duration: const Duration(milliseconds: 800),
+                            child: Container(
+                              width: 132,
+                              height: 132,
+                              padding: const EdgeInsets.all(18),
                               decoration: BoxDecoration(
                                 color: AppColors.white,
-                                borderRadius: BorderRadius.circular(24),
+                                borderRadius: BorderRadius.circular(32),
                                 boxShadow: [
                                   BoxShadow(
-                                    color: AppColors.black.withValues(alpha: 0.18),
-                                    blurRadius: 24,
-                                    offset: const Offset(0, 8),
+                                    color: AppColors.brandOrange
+                                        .withValues(alpha: 0.18),
+                                    blurRadius: 32,
+                                    offset: const Offset(0, 12),
                                   ),
                                 ],
                               ),
-                              alignment: Alignment.center,
-                              child: const Text(
-                                'SN',
-                                style: TextStyle(
-                                  color: AppColors.brandOrange,
-                                  fontSize: 34,
-                                  fontWeight: FontWeight.w800,
-                                  letterSpacing: -0.5,
+                              child: Image.asset(
+                                'assets/image/service_logo.png',
+                                fit: BoxFit.contain,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 26),
+                          // Name + tagline — fade in & slide from the right
+                          FadeInRight(
+                            duration: const Duration(milliseconds: 800),
+                            delay: const Duration(milliseconds: 250),
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: const [
+                                Text(
+                                  'ServiceNin',
+                                  style: TextStyle(
+                                    color: Color(0xFF0F172A),
+                                    fontSize: 30,
+                                    fontWeight: FontWeight.w800,
+                                    letterSpacing: 0.2,
+                                  ),
                                 ),
-                              ),
+                                SizedBox(height: 8),
+                                Text(
+                                  'আপনার শহর, আপনার সেবা',
+                                  style: TextStyle(
+                                    color: Color(0xFF94A3B8),
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w500,
+                                    fontStyle: FontStyle.italic,
+                                  ),
+                                ),
+                              ],
                             ),
-                            const SizedBox(height: 22),
-                            // App name
-                            const Text(
-                              'ServiceNin',
-                              style: TextStyle(
-                                color: AppColors.white,
-                                fontSize: 30,
-                                fontWeight: FontWeight.w700,
-                                letterSpacing: 0.2,
-                              ),
-                            ),
-                            const SizedBox(height: 8),
-                            // Bangla tagline
-                            const Text(
-                              'আপনার শহর, আপনার সেবা',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 14,
-                                fontWeight: FontWeight.w500,
-                                fontStyle: FontStyle.italic,
-                              ),
-                            ),
-                          ],
-                        ),
+                          ),
+                        ],
                       ),
                     ),
                   ),
@@ -107,19 +114,10 @@ class SplashView extends StatelessWidget {
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Container(
-                          width: 6,
-                          height: 6,
-                          decoration: const BoxDecoration(
-                            color: AppColors.white,
-                            shape: BoxShape.circle,
-                          ),
-                        ),
-                        const SizedBox(height: 14),
-                        Text(
+                        const Text(
                           'v1.0.0',
                           style: TextStyle(
-                            color: AppColors.white.withValues(alpha: 0.85),
+                            color: Color(0xFF94A3B8),
                             fontSize: 12,
                             fontWeight: FontWeight.w500,
                             letterSpacing: 0.5,

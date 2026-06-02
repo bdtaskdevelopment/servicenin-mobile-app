@@ -73,18 +73,14 @@ class ServiceAppBar extends StatelessWidget implements PreferredSizeWidget {
     return Container(
       width: 40,
       height: 40,
+      padding: const EdgeInsets.all(5),
       decoration: BoxDecoration(
         color: AppColors.brandOrange.withValues(alpha: 0.12),
         borderRadius: BorderRadius.circular(12),
       ),
-      alignment: Alignment.center,
-      child: const Text(
-        'SN',
-        style: TextStyle(
-          color: AppColors.brandOrange,
-          fontSize: 16,
-          fontWeight: FontWeight.w800,
-        ),
+      child: Image.asset(
+        'assets/image/service_logo.png',
+        fit: BoxFit.contain,
       ),
     );
   }

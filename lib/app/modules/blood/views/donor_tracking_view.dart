@@ -164,18 +164,19 @@ class DonorTrackingView extends GetView<DonationFlowController> {
                       const SizedBox(height: 14),
                       // Action buttons
                       Row(
-                        children: const [
+                        children: [
                           Expanded(
                               child: _ActionBtn(
                                   icon: Icons.chat_bubble_outline_rounded,
-                                  label: 'Chat')),
-                          SizedBox(width: 10),
-                          Expanded(
+                                  label: 'Chat',
+                                  onTap: con.openChat)),
+                          const SizedBox(width: 10),
+                          const Expanded(
                               child: _ActionBtn(
                                   icon: Icons.call_outlined,
                                   label: 'Voice call')),
-                          SizedBox(width: 10),
-                          Expanded(
+                          const SizedBox(width: 10),
+                          const Expanded(
                               child: _ActionBtn(
                                   icon: Icons.share_outlined,
                                   label: 'Live location')),
@@ -307,29 +308,33 @@ class _MapPainter extends CustomPainter {
 
 // ── Action button ───────────────────────────────────────────────────
 class _ActionBtn extends StatelessWidget {
-  const _ActionBtn({required this.icon, required this.label});
+  const _ActionBtn({required this.icon, required this.label, this.onTap});
   final IconData icon;
   final String label;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(vertical: 12),
-      decoration: BoxDecoration(
-        color: AppColors.white,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: const Color(0xFFEDEFF2)),
-      ),
-      child: Column(
-        children: [
-          Icon(icon, color: _red, size: 22),
-          const SizedBox(height: 6),
-          Text(label,
-              style: const TextStyle(
-                  fontSize: 11.5,
-                  fontWeight: FontWeight.w600,
-                  color: Color(0xFF334155))),
-        ],
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 12),
+        decoration: BoxDecoration(
+          color: AppColors.white,
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(color: const Color(0xFFEDEFF2)),
+        ),
+        child: Column(
+          children: [
+            Icon(icon, color: _red, size: 22),
+            const SizedBox(height: 6),
+            Text(label,
+                style: const TextStyle(
+                    fontSize: 11.5,
+                    fontWeight: FontWeight.w600,
+                    color: Color(0xFF334155))),
+          ],
+        ),
       ),
     );
   }

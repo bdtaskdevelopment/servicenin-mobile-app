@@ -83,6 +83,8 @@ abstract class Routes {
   static const BLOOD_TRACKING = _Paths.BLOOD_TRACKING;
   static const BLOOD_CONFIRMED = _Paths.BLOOD_CONFIRMED;
   static const BLOOD_LEADERBOARD = _Paths.BLOOD_LEADERBOARD;
+  static const BLOOD_MY_DONORS = _Paths.BLOOD_MY_DONORS;
+  static const BLOOD_DONOR_CHAT = _Paths.BLOOD_DONOR_CHAT;
   static const FORGOT_PASSWORD = _Paths.FORGOT_PASSWORD;
   static const HOME = _Paths.HOME;
   static const LEAVE = _Paths.LEAVE;
@@ -194,6 +196,8 @@ abstract class _Paths {
   static const BLOOD_TRACKING = '/blood-tracking';
   static const BLOOD_CONFIRMED = '/blood-confirmed';
   static const BLOOD_LEADERBOARD = '/blood-leaderboard';
+  static const BLOOD_MY_DONORS = '/blood-my-donors';
+  static const BLOOD_DONOR_CHAT = '/blood-donor-chat';
   static const FORGOT_PASSWORD = '/forgot-password';
   static const HOME = '/home';
   static const LEAVE = '/leave';

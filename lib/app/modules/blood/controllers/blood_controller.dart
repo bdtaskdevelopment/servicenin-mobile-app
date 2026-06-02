@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import '../../../routes/app_pages.dart';
+
 enum BloodSeverity { critical, urgent, routine }
 
 extension BloodSeverityX on BloodSeverity {
@@ -117,4 +119,68 @@ class BloodController extends GetxController {
     selectedRequest = request;
     update();
   }
+
+  // ── Connected donors (re-contact anytime) ───────────────────────────
+  final List<ConnectedDonor> connectedDonors = const [
+    ConnectedDonor(
+      initials: 'TA',
+      name: 'Tanvir Ahmed',
+      group: 'O+',
+      area: 'Gulshan · 0.8 km',
+      phone: '01711-202345',
+      lastDonation: 'Donated 12 May · Square Hospital',
+    ),
+    ConnectedDonor(
+      initials: 'RU',
+      name: 'Rahim Uddin',
+      group: 'B+',
+      area: 'Banani · 2.1 km',
+      phone: '01712-556677',
+      lastDonation: 'Donated 28 Apr · DMCH',
+    ),
+    ConnectedDonor(
+      initials: 'NA',
+      name: 'Nasrin Akter',
+      group: 'A+',
+      area: 'Dhanmondi · 4.6 km',
+      phone: '01713-889900',
+      lastDonation: 'Donated 3 Mar · Labaid',
+    ),
+  ];
+
+  ConnectedDonor? selectedDonor;
+
+  void openMyDonors() => Get.toNamed(Routes.BLOOD_MY_DONORS);
+
+  void openDonorChat(ConnectedDonor donor) {
+    selectedDonor = donor;
+    update();
+    Get.toNamed(Routes.BLOOD_DONOR_CHAT);
+  }
+
+  void callDonor(ConnectedDonor donor) {
+    Get.snackbar(
+      donor.name,
+      'Calling ${donor.phone}…',
+      snackPosition: SnackPosition.BOTTOM,
+      margin: const EdgeInsets.all(12),
+    );
+  }
+}
+
+class ConnectedDonor {
+  const ConnectedDonor({
+    required this.initials,
+    required this.name,
+    required this.group,
+    required this.area,
+    required this.phone,
+    required this.lastDonation,
+  });
+  final String initials;
+  final String name;
+  final String group;
+  final String area;
+  final String phone;
+  final String lastDonation;
 }

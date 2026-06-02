@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../../routes/app_pages.dart';
+import 'blood_controller.dart';
 
 class Donor {
   const Donor({
@@ -142,6 +143,22 @@ class DonationFlowController extends GetxController {
     statusStep = 3;
     update();
     Get.offNamed(Routes.BLOOD_CONFIRMED);
+  }
+
+  /// Open a chat with the donor currently being tracked.
+  void openChat() {
+    final d = selected;
+    if (d != null && Get.isRegistered<BloodController>()) {
+      Get.find<BloodController>().selectedDonor = ConnectedDonor(
+        initials: d.initials,
+        name: d.name,
+        group: d.group,
+        area: '${d.distance} km away',
+        phone: '01700-000000',
+        lastDonation: '${d.donations} donations',
+      );
+    }
+    Get.toNamed(Routes.BLOOD_DONOR_CHAT);
   }
 
   void viewLeaderboard() => Get.toNamed(Routes.BLOOD_LEADERBOARD);

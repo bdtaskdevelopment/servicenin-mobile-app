@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../../routes/app_pages.dart';
@@ -12,10 +13,23 @@ class NeedBloodController extends GetxController {
   int units = 2;
   BloodSeverity severity = BloodSeverity.critical;
 
-  // Pre-filled details (from GPS / profile in a real build).
-  final String hospital = 'Square Hospital, Panthapath';
-  final String patientLocation = 'GPS · West Panthapath, Dhaka';
-  final String contactPerson = 'Tanzil Ahmed · 01711-***123';
+  // When the blood is needed.
+  String neededDate = 'Today · ASAP';
+  void setNeededDate(String value) {
+    neededDate = value;
+    update();
+  }
+
+  // Contact details.
+  final TextEditingController name =
+      TextEditingController(text: 'Tanzil Ahmed');
+  final TextEditingController email =
+      TextEditingController(text: 'tanzil@example.com');
+  final TextEditingController phone =
+      TextEditingController(text: '01711-XXXXXX');
+  final TextEditingController address =
+      TextEditingController(text: 'House 32, Road 11, Gulshan-2, Dhaka');
+  final TextEditingController description = TextEditingController();
 
   void setGroup(String value) {
     group = value;
@@ -43,5 +57,15 @@ class NeedBloodController extends GetxController {
 
   void broadcast() {
     Get.toNamed(Routes.BLOOD_FINDING);
+  }
+
+  @override
+  void onClose() {
+    name.dispose();
+    email.dispose();
+    phone.dispose();
+    address.dispose();
+    description.dispose();
+    super.onClose();
   }
 }

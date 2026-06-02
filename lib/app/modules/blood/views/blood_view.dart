@@ -50,6 +50,11 @@ class BloodView extends GetView<BloodController> {
                   ),
                   const SizedBox(height: 14),
                   _DonorCard(con: controller),
+                  const SizedBox(height: 12),
+                  GestureDetector(
+                    onTap: controller.openMyDonors,
+                    child: _MyDonorsCard(count: controller.connectedDonors.length),
+                  ),
                   const SizedBox(height: 22),
                   _RequestsHeader(
                       onSeeAll: () => Get.toNamed(Routes.BLOOD_REQUESTS)),
@@ -237,6 +242,69 @@ class _DonorCard extends StatelessWidget {
               ],
             ),
           ),
+        ],
+      ),
+    );
+  }
+}
+
+// ── My connected donors card ────────────────────────────────────────
+class _MyDonorsCard extends StatelessWidget {
+  const _MyDonorsCard({required this.count});
+  final int count;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: AppColors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: const Color(0xFFEDEFF2)),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 44,
+            height: 44,
+            decoration: BoxDecoration(
+              color: const Color(0xFFFDE4E4),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: const Icon(Icons.groups_outlined,
+                size: 22, color: Color(0xFFE11D48)),
+          ),
+          const SizedBox(width: 12),
+          const Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('My donors',
+                    style: TextStyle(
+                        fontSize: 14.5,
+                        fontWeight: FontWeight.w800,
+                        color: Color(0xFF0F172A))),
+                SizedBox(height: 2),
+                Text('Stay in touch · call or message anytime',
+                    style: TextStyle(fontSize: 12, color: Color(0xFF94A3B8))),
+              ],
+            ),
+          ),
+          const SizedBox(width: 8),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+            decoration: BoxDecoration(
+              color: const Color(0xFFFDE4E4),
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: Text('$count',
+                style: const TextStyle(
+                    fontSize: 12.5,
+                    fontWeight: FontWeight.w800,
+                    color: Color(0xFFE11D48))),
+          ),
+          const SizedBox(width: 6),
+          const Icon(Icons.chevron_right_rounded, color: Color(0xFF94A3B8)),
         ],
       ),
     );

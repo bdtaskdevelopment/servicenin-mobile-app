@@ -66,8 +66,29 @@ class _QuickButton extends StatelessWidget {
         clipBehavior: Clip.antiAlias,
         child: InkWell(
           onTap: QuickActionsSheet.show,
-          child: const Icon(Icons.auto_awesome_rounded,
-              color: Colors.white, size: 28),
+          child: Stack(
+            alignment: Alignment.center,
+            children: [
+              const Text(
+                'SN',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 23,
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: -1,
+                ),
+              ),
+              Positioned(
+                top: 11,
+                right: 12,
+                child: Icon(
+                  Icons.auto_awesome_rounded,
+                  size: 11,
+                  color: Colors.white.withValues(alpha: 0.95),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -129,19 +150,15 @@ class _BottomNav extends StatelessWidget {
                   Icon(
                     active ? item.$3 : item.$2,
                     size: 24,
-                    color: active
-                        ? AppColors.brandOrange
-                        : const Color(0xFF94A3B8),
+                    color: active ? AppColors.brandOrange : Colors.black,
                   ),
                   const SizedBox(height: 3),
                   Text(
                     item.$4,
                     style: TextStyle(
                       fontSize: 11,
-                      fontWeight: active ? FontWeight.w700 : FontWeight.w400,
-                      color: active
-                          ? AppColors.brandOrange
-                          : const Color(0xFF94A3B8),
+                      fontWeight: FontWeight.w700,
+                      color: active ? AppColors.brandOrange : Colors.black,
                     ),
                   ),
                 ],
