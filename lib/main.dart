@@ -4,6 +4,7 @@ import 'package:internet_checker_plus/internet_checker_plus.dart';
 import 'package:servicenin/app/core/helpers/app_helper.dart';
 // import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:get_storage/get_storage.dart';
 // import 'package:internet_checker_plus/internet_level.dart';
@@ -16,6 +17,17 @@ void main() async {
 
   // runZonedGuarded(() async{
     WidgetsFlutterBinding.ensureInitialized();
+
+    // White system navigation bar (with dark buttons) from the very start —
+    // applies on the splash and every page that follows.
+    SystemChrome.setSystemUIOverlayStyle(
+      const SystemUiOverlayStyle(
+        systemNavigationBarColor: Colors.white,
+        systemNavigationBarIconBrightness: Brightness.dark,
+        systemNavigationBarDividerColor: Colors.white,
+      ),
+    );
+
     AppDependencyInjection.init();
 
     

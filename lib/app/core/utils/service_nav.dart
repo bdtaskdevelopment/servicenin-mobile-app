@@ -29,7 +29,7 @@ class ServiceNav {
       case 'Physio':
         Get.toNamed(Routes.PHYSIO);
         break;
-      case 'Matchmaking':
+      case 'Marriage':
         Get.toNamed(Routes.MATCHMAKING);
         break;
       case 'Jobs':

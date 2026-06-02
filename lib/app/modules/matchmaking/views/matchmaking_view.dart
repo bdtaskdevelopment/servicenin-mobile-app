@@ -33,7 +33,7 @@ class MatchmakingView extends GetView<MatchmakingController> {
                   const Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('Matchmaking',
+                      Text('Marriage',
                           style: TextStyle(
                               fontSize: 19,
                               fontWeight: FontWeight.w800,

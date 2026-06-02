@@ -81,9 +81,6 @@ class _QuickItem extends StatelessWidget {
       case 'Ambulance':
         Get.toNamed(Routes.AMBULANCE);
         break;
-      case 'Quick Pay':
-        Get.toNamed(Routes.NAGARIK);
-        break;
       case 'Find\nDoctor':
         Get.toNamed(Routes.HEALTHCARE);
         break;

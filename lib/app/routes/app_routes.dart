@@ -53,6 +53,7 @@ abstract class Routes {
   static const ACCOUNT_ACTIVITY = _Paths.ACCOUNT_ACTIVITY;
   static const ACCOUNT_SETTINGS = _Paths.ACCOUNT_SETTINGS;
   static const ACCOUNT_PRIVACY = _Paths.ACCOUNT_PRIVACY;
+  static const ACCOUNT_TERMS = _Paths.ACCOUNT_TERMS;
   static const ACCOUNT_DELETE = _Paths.ACCOUNT_DELETE;
   static const INFORMATION_HOTLINES = _Paths.INFORMATION_HOTLINES;
   static const INFORMATION_GUIDES = _Paths.INFORMATION_GUIDES;
@@ -163,6 +164,7 @@ abstract class _Paths {
   static const ACCOUNT_ACTIVITY = '/account-activity';
   static const ACCOUNT_SETTINGS = '/account-settings';
   static const ACCOUNT_PRIVACY = '/account-privacy';
+  static const ACCOUNT_TERMS = '/account-terms';
   static const ACCOUNT_DELETE = '/account-delete';
   static const INFORMATION_HOTLINES = '/information-hotlines';
   static const INFORMATION_GUIDES = '/information-guides';

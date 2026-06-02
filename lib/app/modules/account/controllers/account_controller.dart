@@ -150,6 +150,7 @@ class AccountController extends GetxController {
   void openActivity() => Get.toNamed(Routes.ACCOUNT_ACTIVITY);
   void openSettings() => Get.toNamed(Routes.ACCOUNT_SETTINGS);
   void openPrivacy() => Get.toNamed(Routes.ACCOUNT_PRIVACY);
+  void openTerms() => Get.toNamed(Routes.ACCOUNT_TERMS);
   void openDeleteAccount() => Get.toNamed(Routes.ACCOUNT_DELETE);
 
   void saveProfile() {

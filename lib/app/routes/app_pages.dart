@@ -57,6 +57,7 @@ import '../modules/account/views/edit_profile_view.dart';
 import '../modules/account/views/my_activity_view.dart';
 import '../modules/account/views/settings_view.dart';
 import '../modules/account/views/privacy_policy_view.dart';
+import '../modules/account/views/terms_view.dart';
 import '../modules/account/views/delete_account_view.dart';
 import '../modules/information/bindings/information_binding.dart';
 import '../modules/information/views/information_view.dart';
@@ -368,6 +369,11 @@ class AppPages {
     GetPage(
       name: _Paths.ACCOUNT_PRIVACY,
       page: () => const PrivacyPolicyView(),
+      binding: AccountBinding(),
+    ),
+    GetPage(
+      name: _Paths.ACCOUNT_TERMS,
+      page: () => const TermsView(),
       binding: AccountBinding(),
     ),
     GetPage(

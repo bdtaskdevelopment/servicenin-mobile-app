@@ -100,6 +100,7 @@ class SettingsView extends GetView<AccountController> {
                           const _AboutDivider(),
                           _AboutRow(
                             label: 'Terms of service',
+                            onTap: con.openTerms,
                             trailing: const Icon(
                                 Icons.chevron_right_rounded,
                                 color: Color(0xFF94A3B8)),
@@ -110,12 +111,6 @@ class SettingsView extends GetView<AccountController> {
                             onTap: con.openPrivacy,
                             trailing: const Icon(
                                 Icons.chevron_right_rounded,
-                                color: Color(0xFF94A3B8)),
-                          ),
-                          const _AboutDivider(),
-                          _AboutRow(
-                            label: 'Rate the app',
-                            trailing: const Icon(Icons.star_border_rounded,
                                 color: Color(0xFF94A3B8)),
                           ),
                         ],
