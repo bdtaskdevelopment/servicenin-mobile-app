@@ -149,8 +149,15 @@ class JobsController extends GetxController {
     'Internship',
     'Remote',
   ];
+  final List<String> postExperiences = const [
+    'Fresher',
+    '1-2 years',
+    '2-4 years',
+    '5+ years',
+  ];
   int postCategoryIndex = 0;
   int postTypeIndex = 0;
+  int postExperienceIndex = 0;
   void setPostCategory(int i) {
     postCategoryIndex = i;
     update();
@@ -158,6 +165,11 @@ class JobsController extends GetxController {
 
   void setPostType(int i) {
     postTypeIndex = i;
+    update();
+  }
+
+  void setPostExperience(int i) {
+    postExperienceIndex = i;
     update();
   }
 

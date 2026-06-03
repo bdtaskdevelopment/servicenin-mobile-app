@@ -24,7 +24,7 @@ class _NagarikChatViewState extends State<NagarikChatView> {
   final TextEditingController _input = TextEditingController();
   final List<_Msg> _messages = [
     const _Msg(
-        'My holding tax payment failed but the amount was deducted from bKash.',
+        'My holding tax payment failed but the amount was deducted from  bKash.',
         true,
         'Mon 10:12'),
     const _Msg(

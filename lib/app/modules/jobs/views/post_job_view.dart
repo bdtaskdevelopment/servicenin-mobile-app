@@ -112,6 +112,17 @@ class PostJobView extends GetView<JobsController> {
                       ),
                     ),
                     const SizedBox(height: 14),
+                    _FieldLabel('EXPERIENCE'),
+                    _DropdownField(
+                      value: con.postExperiences[con.postExperienceIndex],
+                      onTap: () => _pick(
+                        title: 'Experience',
+                        options: con.postExperiences,
+                        selected: con.postExperienceIndex,
+                        onSelect: con.setPostExperience,
+                      ),
+                    ),
+                    const SizedBox(height: 14),
                     const _FieldLabel('LOCATION'),
                     const _InputField(hint: 'e.g. Gulshan, Dhaka'),
                     const SizedBox(height: 14),
@@ -125,8 +136,21 @@ class PostJobView extends GetView<JobsController> {
                     const SizedBox(height: 14),
                     const _FieldLabel('DESCRIPTION'),
                     const _InputField(
-                        hint: 'Describe responsibilities & requirements…',
+                        hint: 'Short overview of the role…', maxLines: 3),
+                    const SizedBox(height: 14),
+                    const _FieldLabel('SKILLS'),
+                    const _InputField(
+                        hint: 'e.g. React, TypeScript, REST APIs', maxLines: 2),
+                    const SizedBox(height: 14),
+                    const _FieldLabel('RESPONSIBILITIES'),
+                    const _InputField(
+                        hint: 'Key responsibilities for the role…',
                         maxLines: 4),
+                    const SizedBox(height: 14),
+                    const _FieldLabel('COMPANY BENEFITS'),
+                    const _InputField(
+                        hint: 'e.g. Festival bonus, health coverage, lunch…',
+                        maxLines: 3),
                   ],
                 ),
               ),

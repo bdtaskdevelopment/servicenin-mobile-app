@@ -26,7 +26,7 @@ class NagarikReportsView extends GetView<NagarikController> {
           leading: IconButton(
             onPressed: () => Get.back(),
             icon: const Icon(Icons.arrow_back_ios_new_rounded,
-                size: 20, color: Color(0xFF1A1A1A)),
+                size: 20, color: Color(0xFF1A1A1A)), 
           ),
           title: const Text('My reports',
               style: TextStyle(
