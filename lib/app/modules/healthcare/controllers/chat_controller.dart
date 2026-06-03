@@ -24,7 +24,7 @@ class ChatController extends GetxController {
         true,
         '2:12 PM'),
     const ChatMessage(
-        'Good. Continue the Bisoprolol and reduce salt. See me at 3:40 today, token 14.',
+        'Good. Continue the Bisoprolol and reduce salt. See me at 3:40 today, serial 14.',
         false,
         '2:13 PM'),
     const ChatMessage('Thank you, I will be there.', true, '2:14 PM'),

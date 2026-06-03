@@ -118,24 +118,28 @@ class PatientDetailsView extends GetView<BookingController> {
                           ),
                         );
                       }),
-                      Container(
-                        padding: const EdgeInsets.symmetric(vertical: 14),
-                        decoration: BoxDecoration(
-                          color: AppColors.white,
-                          borderRadius: BorderRadius.circular(14),
-                          border: Border.all(color: const Color(0xFFE2E8F0)),
-                        ),
-                        child: const Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(Icons.add, size: 18, color: _green),
-                            SizedBox(width: 6),
-                            Text('Add a family member',
-                                style: TextStyle(
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w700,
-                                    color: _green)),
-                          ],
+                      GestureDetector(
+                        onTap: () => _showAddPatientSheet(con),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                          decoration: BoxDecoration(
+                            color: AppColors.white,
+                            borderRadius: BorderRadius.circular(14),
+                            border:
+                                Border.all(color: const Color(0xFFE2E8F0)),
+                          ),
+                          child: const Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(Icons.add, size: 18, color: _green),
+                              SizedBox(width: 6),
+                              Text('Add a family member',
+                                  style: TextStyle(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w700,
+                                      color: _green)),
+                            ],
+                          ),
                         ),
                       ),
                       const SizedBox(height: 18),
@@ -252,6 +256,255 @@ class PatientDetailsView extends GetView<BookingController> {
               ],
             );
           },
+        ),
+      ),
+    );
+  }
+}
+
+void _showAddPatientSheet(BookingController con) {
+  Get.bottomSheet(
+    _AddPatientSheet(con: con),
+    isScrollControlled: true,
+    backgroundColor: Colors.transparent,
+  );
+}
+
+class _AddPatientSheet extends StatefulWidget {
+  const _AddPatientSheet({required this.con});
+  final BookingController con;
+
+  @override
+  State<_AddPatientSheet> createState() => _AddPatientSheetState();
+}
+
+class _AddPatientSheetState extends State<_AddPatientSheet> {
+  final _name = TextEditingController();
+  final _relation = TextEditingController();
+  final _age = TextEditingController();
+  String _gender = 'M';
+  String _blood = 'B+';
+
+  static const _groups = ['A+', 'A-', 'B+', 'B-', 'O+', 'O-', 'AB+', 'AB-'];
+
+  bool get _valid => _name.text.trim().isNotEmpty;
+
+  @override
+  void dispose() {
+    _name.dispose();
+    _relation.dispose();
+    _age.dispose();
+    super.dispose();
+  }
+
+  void _save() {
+    if (!_valid) return;
+    final age = _age.text.trim();
+    final info = [
+      if (age.isNotEmpty) '$age yrs',
+      _gender,
+      _blood,
+    ].join(' · ');
+    widget.con.addPatient(
+      name: _name.text.trim(),
+      relation: _relation.text.trim().isEmpty ? 'Family' : _relation.text.trim(),
+      info: info,
+    );
+    Get.back();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: const BoxDecoration(
+        color: AppColors.white,
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      padding: EdgeInsets.fromLTRB(
+          20, 12, 20, 20 + MediaQuery.of(context).viewInsets.bottom),
+      child: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Center(
+              child: Container(
+                width: 42,
+                height: 4,
+                decoration: BoxDecoration(
+                    color: const Color(0xFFE2E8F0),
+                    borderRadius: BorderRadius.circular(4)),
+              ),
+            ),
+            const SizedBox(height: 18),
+            const Text('Add a family member',
+                style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w800,
+                    color: Color(0xFF0F172A))),
+            const SizedBox(height: 16),
+            const _Label('FULL NAME'),
+            const SizedBox(height: 8),
+            _SheetField(
+                controller: _name,
+                hint: 'e.g. Rokeya Begum',
+                onChanged: (_) => setState(() {})),
+            const SizedBox(height: 14),
+            const _Label('RELATION'),
+            const SizedBox(height: 8),
+            _SheetField(controller: _relation, hint: 'e.g. Mother, Son'),
+            const SizedBox(height: 14),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const _Label('AGE'),
+                      const SizedBox(height: 8),
+                      _SheetField(
+                          controller: _age,
+                          hint: 'e.g. 61',
+                          keyboard: TextInputType.number),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const _Label('GENDER'),
+                      const SizedBox(height: 8),
+                      Row(
+                        children: [
+                          _genderBtn('M'),
+                          const SizedBox(width: 8),
+                          _genderBtn('F'),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 14),
+            const _Label('BLOOD GROUP'),
+            const SizedBox(height: 10),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: _groups.map((g) {
+                final sel = _blood == g;
+                return GestureDetector(
+                  onTap: () => setState(() => _blood = g),
+                  child: Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 16, vertical: 9),
+                    decoration: BoxDecoration(
+                      color: sel ? _green : AppColors.white,
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(
+                          color: sel ? _green : const Color(0xFFE2E8F0)),
+                    ),
+                    child: Text(g,
+                        style: TextStyle(
+                            fontSize: 13.5,
+                            fontWeight: FontWeight.w800,
+                            color:
+                                sel ? Colors.white : const Color(0xFF334155))),
+                  ),
+                );
+              }).toList(),
+            ),
+            const SizedBox(height: 20),
+            SizedBox(
+              width: double.infinity,
+              height: 54,
+              child: ElevatedButton(
+                onPressed: _valid ? _save : null,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: _green,
+                  foregroundColor: Colors.white,
+                  disabledBackgroundColor: const Color(0xFFA7D8BC),
+                  disabledForegroundColor: Colors.white,
+                  elevation: 0,
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(14)),
+                ),
+                child: const Text('Add member',
+                    style:
+                        TextStyle(fontSize: 16, fontWeight: FontWeight.w800)),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _genderBtn(String g) {
+    final sel = _gender == g;
+    return Expanded(
+      child: GestureDetector(
+        onTap: () => setState(() => _gender = g),
+        child: Container(
+          height: 48,
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+            color: sel ? _green : AppColors.white,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: sel ? _green : const Color(0xFFE2E8F0)),
+          ),
+          child: Text(g,
+              style: TextStyle(
+                  fontSize: 14.5,
+                  fontWeight: FontWeight.w800,
+                  color: sel ? Colors.white : const Color(0xFF334155))),
+        ),
+      ),
+    );
+  }
+}
+
+class _SheetField extends StatelessWidget {
+  const _SheetField({
+    required this.controller,
+    required this.hint,
+    this.keyboard,
+    this.onChanged,
+  });
+  final TextEditingController controller;
+  final String hint;
+  final TextInputType? keyboard;
+  final ValueChanged<String>? onChanged;
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF7F8FA),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: const Color(0xFFE2E8F0)),
+      ),
+      child: TextField(
+        controller: controller,
+        keyboardType: keyboard,
+        onChanged: onChanged,
+        style: const TextStyle(
+            fontSize: 15,
+            fontWeight: FontWeight.w700,
+            color: Color(0xFF0F172A)),
+        decoration: InputDecoration(
+          isDense: true,
+          contentPadding: const EdgeInsets.symmetric(vertical: 14),
+          border: InputBorder.none,
+          hintText: hint,
+          hintStyle: const TextStyle(
+              fontSize: 15,
+              fontWeight: FontWeight.w500,
+              color: Color(0xFFB6C0CC)),
         ),
       ),
     );

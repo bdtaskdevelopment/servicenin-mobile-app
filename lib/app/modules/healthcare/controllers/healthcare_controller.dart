@@ -1,11 +1,38 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import '../../../routes/app_pages.dart';
+
 class HcDepartment {
   const HcDepartment(this.name, this.icon, this.color);
   final String name;
   final IconData icon;
   final Color color;
+}
+
+class FamilyMember {
+  const FamilyMember({
+    required this.name,
+    required this.relation,
+    required this.age,
+    required this.gender,
+    required this.bloodGroup,
+    required this.color,
+  });
+  final String name;
+  final String relation;
+  final String age;
+  final String gender;
+  final String bloodGroup;
+  final Color color;
+
+  String get initials {
+    final parts = name.trim().split(' ');
+    if (parts.length >= 2 && parts[0].isNotEmpty && parts[1].isNotEmpty) {
+      return '${parts[0][0]}${parts[1][0]}'.toUpperCase();
+    }
+    return name.isNotEmpty ? name[0].toUpperCase() : '?';
+  }
 }
 
 class HcDoctor {
@@ -41,6 +68,59 @@ class HealthcareController extends GetxController {
     mode = m;
     update();
   }
+
+  // ── Family members ──────────────────────────────────────────────────
+  final List<FamilyMember> family = [
+    const FamilyMember(
+        name: 'Tanzil Ahmed',
+        relation: 'Self',
+        age: '31',
+        gender: 'M',
+        bloodGroup: 'B+',
+        color: Color(0xFF16A34A)),
+    const FamilyMember(
+        name: 'Ayesha Ahmed',
+        relation: 'Spouse',
+        age: '29',
+        gender: 'F',
+        bloodGroup: 'O+',
+        color: Color(0xFFEC4899)),
+    const FamilyMember(
+        name: 'Rafi Ahmed',
+        relation: 'Son',
+        age: '6',
+        gender: 'M',
+        bloodGroup: 'B+',
+        color: Color(0xFF14B8A6)),
+  ];
+
+  static const List<Color> _familyColors = [
+    Color(0xFF0F7A52),
+    Color(0xFFF59E0B),
+    Color(0xFF6366F1),
+    Color(0xFFE11D48),
+    Color(0xFF14B8A6),
+  ];
+
+  void addFamilyMember({
+    required String name,
+    required String relation,
+    required String age,
+    required String gender,
+    required String bloodGroup,
+  }) {
+    family.add(FamilyMember(
+      name: name,
+      relation: relation,
+      age: age,
+      gender: gender,
+      bloodGroup: bloodGroup,
+      color: _familyColors[family.length % _familyColors.length],
+    ));
+    update();
+  }
+
+  void openFamily() => Get.toNamed(Routes.HEALTHCARE_FAMILY);
 
   final List<HcDepartment> departments = const [
     HcDepartment('কার্ডিও', Icons.favorite, Color(0xFF0F172A)),

@@ -264,15 +264,6 @@ class PrescriptionView extends GetView<PrescriptionController> {
                             color: Color(0xFF334155),
                             height: 1.5)),
                   ),
-                  const SizedBox(height: 18),
-                  Row(
-                    children: [
-                      Expanded(
-                          child: _OutlineBtn(label: 'Order medicines')),
-                      const SizedBox(width: 12),
-                      Expanded(child: _OutlineBtn(label: 'Book follow-up')),
-                    ],
-                  ),
                 ],
               ),
             ),
@@ -306,26 +297,3 @@ class PrescriptionView extends GetView<PrescriptionController> {
   }
 }
 
-class _OutlineBtn extends StatelessWidget {
-  const _OutlineBtn({required this.label});
-  final String label;
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      height: 50,
-      child: OutlinedButton(
-        onPressed: () {},
-        style: OutlinedButton.styleFrom(
-          side: const BorderSide(color: Color(0xFFE2E8F0)),
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        ),
-        child: Text(label,
-            style: const TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w700,
-                color: Color(0xFF0F172A))),
-      ),
-    );
-  }
-}

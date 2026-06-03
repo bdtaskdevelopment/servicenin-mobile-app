@@ -166,7 +166,7 @@ class ChooseSlotView extends GetView<BookingController> {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: const [
                           _Label('TIME'),
-                          Text('Token assigned at booking',
+                          Text('Serial assigned at booking',
                               style: TextStyle(
                                   fontSize: 11.5,
                                   fontWeight: FontWeight.w600,
@@ -218,7 +218,7 @@ class ChooseSlotView extends GetView<BookingController> {
                       ),
                       const SizedBox(height: 14),
                       const Text(
-                          'Serial / token, not a fixed time — arrive 15 min early.',
+                          'Serial, not a fixed time — arrive 15 min early.',
                           style: TextStyle(
                               fontSize: 12, color: Color(0xFFE07A1F))),
                     ],

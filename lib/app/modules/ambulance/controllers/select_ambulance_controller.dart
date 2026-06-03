@@ -98,6 +98,7 @@ class SelectAmbulanceController extends GetxController {
     update();
   }
 
+  SelectableAmbulance get selectedAmbulance => types[selected];
   String get estFare => types[selected].est;
   int get totalTypes => types.length;
   int get totalAvailable => types.fold(0, (sum, t) => sum + t.avail);

@@ -2,14 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../../routes/app_pages.dart';
-
-class FareLine {
-  const FareLine(this.label, this.sub, this.amount, {this.discount = false});
-  final String label;
-  final String sub;
-  final String amount;
-  final bool discount;
-}
+import 'select_ambulance_controller.dart';
 
 class PayMethod {
   const PayMethod(this.name, this.sub, this.color);
@@ -19,23 +12,44 @@ class PayMethod {
 }
 
 class FareController extends GetxController {
-  final String area = 'Gulshan-2 · Dhaka';
-  final String hospital = 'United Hsp.';
-  final String pickupDistance = 'Pickup · 3.2 km';
+  SelectableAmbulance get _amb =>
+      Get.find<SelectAmbulanceController>().selectedAmbulance;
 
-  final String vehicle = 'ICU Ambulance · BD-1234';
-  final String vehicleSub = 'Ventilator · Paramedic on-board';
-  final String eta = 'ETA 6 min';
+  String get vehicle => _amb.name;
+  String get vehicleSub => _amb.desc;
+  String get eta => 'ETA ${_amb.eta}';
 
-  final List<FareLine> lines = const [
-    FareLine('Base fare', 'ICU Ambulance', '৳2,500'),
-    FareLine('Distance', '3.2 km × ৳80', '৳256'),
-    FareLine('Emergency surcharge', 'Priority dispatch', '৳200'),
-    FareLine('Waiting charge', '~4 min @ ৳5/min', '৳20'),
-    FareLine('Equipment', 'Oxygen + ventilator', '৳150'),
-    FareLine('Vulnerable discount', 'Senior citizen (5%)', '-৳158', discount: true),
-  ];
-  final String total = '৳2,968';
+  int get base => _amb.base;
+  int get perKm => _amb.perKm;
+
+  // Extra distance (per km) — optional add-on.
+  bool extraEnabled = true;
+  final TextEditingController extraKmCtrl = TextEditingController(text: '5');
+  int get extraKm => int.tryParse(extraKmCtrl.text.trim()) ?? 0;
+
+  void toggleExtra(bool v) {
+    extraEnabled = v;
+    update();
+  }
+
+  void onExtraKmChanged(String _) => update();
+
+  int get extraFare => extraEnabled ? extraKm * perKm : 0;
+  int get totalAmount => base + extraFare;
+
+  String _fmt(int n) {
+    final s = n.toString();
+    final b = StringBuffer();
+    for (int i = 0; i < s.length; i++) {
+      if (i > 0 && (s.length - i) % 3 == 0) b.write(',');
+      b.write(s[i]);
+    }
+    return b.toString();
+  }
+
+  String get baseStr => '৳${_fmt(base)}';
+  String get extraStr => '৳${_fmt(extraFare)}';
+  String get total => '৳${_fmt(totalAmount)}';
 
   final List<PayMethod> methods = const [
     PayMethod('Cash', 'on arrival', Color(0xFF0F172A)),
@@ -49,6 +63,12 @@ class FareController extends GetxController {
   void selectMethod(int i) {
     selectedMethod = i;
     update();
+  }
+
+  @override
+  void onClose() {
+    extraKmCtrl.dispose();
+    super.onClose();
   }
 
   void confirmDispatch() => Get.toNamed(Routes.AMBULANCE_DISPATCHING);

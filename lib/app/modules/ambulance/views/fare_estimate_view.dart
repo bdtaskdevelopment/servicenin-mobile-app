@@ -1,11 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'package:latlong2/latlong.dart';
 
 import '../../../core/values/app_colors.dart';
+import '../../../global_widget/sn_map.dart';
+import '../controllers/ambulance_controller.dart';
 import '../controllers/fare_controller.dart';
 
 const _navy = Color(0xFF1E2A4A);
 const _red = Color(0xFFE23744);
+const _green = Color(0xFF16A34A);
 
 class FareEstimateView extends GetView<FareController> {
   const FareEstimateView({super.key});
@@ -51,11 +56,11 @@ class FareEstimateView extends GetView<FareController> {
                   return ListView(
                     padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
                     children: [
-                      _MapCard(con: con),
+                      const _MapCard(),
                       const SizedBox(height: 14),
                       _VehicleCard(con: con),
                       const SizedBox(height: 14),
-                      _BreakdownCard(con: con),
+                      _FareCard(con: con),
                       const SizedBox(height: 14),
                       _TotalCard(con: con),
                       const SizedBox(height: 18),
@@ -76,8 +81,6 @@ class FareEstimateView extends GetView<FareController> {
                           );
                         }),
                       ),
-                      const SizedBox(height: 16),
-                      _PromoCard(),
                     ],
                   );
                 },
@@ -125,46 +128,31 @@ class _Label extends StatelessWidget {
 }
 
 class _MapCard extends StatelessWidget {
-  const _MapCard({required this.con});
-  final FareController con;
+  const _MapCard();
   @override
   Widget build(BuildContext context) {
+    final amb = Get.find<AmbulanceController>();
+    final mid = LatLng(
+      (amb.pickupPoint.latitude + amb.destPoint.latitude) / 2,
+      (amb.pickupPoint.longitude + amb.destPoint.longitude) / 2,
+    );
     return ClipRRect(
       borderRadius: BorderRadius.circular(16),
       child: SizedBox(
         height: 150,
-        child: Stack(
-          children: [
-            Positioned.fill(child: CustomPaint(painter: _FareMapPainter())),
-            Positioned(
-              left: 10,
-              top: 10,
-              child: _pill(con.area, const Color(0xFF0F172A)),
-            ),
-            Positioned(
-              right: 10,
-              top: 10,
-              child: _pill('🏥 ${con.hospital}', _red),
-            ),
-            Positioned(
-              left: 10,
-              bottom: 10,
-              child: _pill(con.pickupDistance, const Color(0xFF1E2A4A)),
-            ),
+        child: SnMap(
+          center: mid,
+          zoom: 7.2,
+          interactive: false,
+          route: [amb.pickupPoint, amb.destPoint],
+          markers: [
+            SnMapMarker(amb.pickupPoint, _green, Icons.my_location_rounded),
+            SnMapMarker(amb.destPoint, _red, Icons.location_on_rounded),
           ],
         ),
       ),
     );
   }
-
-  Widget _pill(String text, Color color) => Container(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-        decoration: BoxDecoration(
-            color: AppColors.white, borderRadius: BorderRadius.circular(20)),
-        child: Text(text,
-            style: TextStyle(
-                fontSize: 11.5, fontWeight: FontWeight.w700, color: color)),
-      );
 }
 
 class _VehicleCard extends StatelessWidget {
@@ -224,58 +212,165 @@ class _VehicleCard extends StatelessWidget {
   }
 }
 
-class _BreakdownCard extends StatelessWidget {
-  const _BreakdownCard({required this.con});
+class _FareCard extends StatelessWidget {
+  const _FareCard({required this.con});
   final FareController con;
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
       decoration: BoxDecoration(
         color: AppColors.white,
         borderRadius: BorderRadius.circular(14),
         border: Border.all(color: const Color(0xFFEDEFF2)),
       ),
       child: Column(
-        children: List.generate(con.lines.length, (i) {
-          final l = con.lines[i];
-          return Column(
-            children: [
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 12),
-                child: Row(
+        children: [
+          // Base fare
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 14),
+            child: Row(
+              children: [
+                const Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('Base fare',
+                          style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w700,
+                              color: Color(0xFF0F172A))),
+                      SizedBox(height: 1),
+                      Text('Includes pickup & standard distance',
+                          style: TextStyle(
+                              fontSize: 11.5, color: Color(0xFF94A3B8))),
+                    ],
+                  ),
+                ),
+                Text(con.baseStr,
+                    style: const TextStyle(
+                        fontSize: 14.5,
+                        fontWeight: FontWeight.w800,
+                        color: Color(0xFF0F172A))),
+              ],
+            ),
+          ),
+          const Divider(height: 1, color: Color(0xFFF1F5F9)),
+          // Extra distance per km (toggle + tick + input)
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 12),
+            child: Column(
+              children: [
+                Row(
                   children: [
+                    // Tick toggle
+                    GestureDetector(
+                      onTap: () => con.toggleExtra(!con.extraEnabled),
+                      child: Container(
+                        width: 24,
+                        height: 24,
+                        decoration: BoxDecoration(
+                          color: con.extraEnabled
+                              ? _navy
+                              : Colors.transparent,
+                          borderRadius: BorderRadius.circular(7),
+                          border: Border.all(
+                              color: con.extraEnabled
+                                  ? _navy
+                                  : const Color(0xFFCBD5E1),
+                              width: 1.8),
+                        ),
+                        child: con.extraEnabled
+                            ? const Icon(Icons.check_rounded,
+                                size: 15, color: Colors.white)
+                            : null,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(l.label,
-                              style: const TextStyle(
+                          const Text('Extra distance',
+                              style: TextStyle(
                                   fontSize: 14,
                                   fontWeight: FontWeight.w700,
                                   color: Color(0xFF0F172A))),
                           const SizedBox(height: 1),
-                          Text(l.sub,
+                          Text('৳${con.perKm} per km',
                               style: const TextStyle(
                                   fontSize: 11.5, color: Color(0xFF94A3B8))),
                         ],
                       ),
                     ),
-                    Text(l.amount,
-                        style: TextStyle(
+                    Text(con.extraStr,
+                        style: const TextStyle(
                             fontSize: 14.5,
                             fontWeight: FontWeight.w800,
-                            color: l.discount
-                                ? const Color(0xFF16A34A)
-                                : const Color(0xFF0F172A))),
+                            color: Color(0xFF0F172A))),
                   ],
                 ),
-              ),
-              if (i != con.lines.length - 1)
-                const Divider(height: 1, color: Color(0xFFF1F5F9)),
-            ],
-          );
-        }),
+                if (con.extraEnabled) ...[
+                  const SizedBox(height: 12),
+                  Row(
+                    children: [
+                      const Text('Extra km',
+                          style: TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w600,
+                              color: Color(0xFF64748B))),
+                      const Spacer(),
+                      SizedBox(
+                        width: 120,
+                        child: Container(
+                          padding:
+                              const EdgeInsets.symmetric(horizontal: 12),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFF7F8FA),
+                            borderRadius: BorderRadius.circular(10),
+                            border:
+                                Border.all(color: const Color(0xFFE2E8F0)),
+                          ),
+                          child: Row(
+                            children: [
+                              Expanded(
+                                child: TextField(
+                                  controller: con.extraKmCtrl,
+                                  onChanged: con.onExtraKmChanged,
+                                  keyboardType: TextInputType.number,
+                                  inputFormatters: [
+                                    FilteringTextInputFormatter.digitsOnly
+                                  ],
+                                  textAlign: TextAlign.center,
+                                  style: const TextStyle(
+                                      fontSize: 15,
+                                      fontWeight: FontWeight.w800,
+                                      color: Color(0xFF0F172A)),
+                                  decoration: const InputDecoration(
+                                    isDense: true,
+                                    contentPadding:
+                                        EdgeInsets.symmetric(vertical: 12),
+                                    border: InputBorder.none,
+                                    hintText: '0',
+                                  ),
+                                ),
+                              ),
+                              const Text('km',
+                                  style: TextStyle(
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.w700,
+                                      color: Color(0xFF94A3B8))),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -295,10 +390,10 @@ class _TotalCard extends StatelessWidget {
       ),
       child: Row(
         children: [
-          Expanded(
+          const Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
-              children: const [
+              children: [
                 Text('ESTIMATED TOTAL',
                     style: TextStyle(
                         fontSize: 12,
@@ -368,83 +463,4 @@ class _PayCard extends StatelessWidget {
       ),
     );
   }
-}
-
-class _PromoCard extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: const Color(0xFFFFF7E6),
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: const Color(0xFFFCE3A8)),
-      ),
-      child: Row(
-        children: [
-          Container(
-            width: 40,
-            height: 40,
-            decoration: BoxDecoration(
-                color: AppColors.brandOrange,
-                borderRadius: BorderRadius.circular(10)),
-            child: const Icon(Icons.percent_rounded,
-                color: Colors.white, size: 20),
-          ),
-          const SizedBox(width: 12),
-          const Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text('Apply promo code',
-                    style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w700,
-                        color: Color(0xFFB45309))),
-                SizedBox(height: 2),
-                Text('3 codes available for you',
-                    style: TextStyle(fontSize: 12, color: Color(0xFFB45309))),
-              ],
-            ),
-          ),
-          const Icon(Icons.chevron_right_rounded, color: Color(0xFFB45309)),
-        ],
-      ),
-    );
-  }
-}
-
-class _FareMapPainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    canvas.drawRect(
-        Offset.zero & size, Paint()..color = const Color(0xFFE3EAF1));
-    final block = Paint()..color = const Color(0xFFD7E0E9);
-    void b(double x, double y, double w, double h) => canvas.drawRRect(
-        RRect.fromRectAndRadius(
-            Rect.fromLTWH(x, y, w, h), const Radius.circular(6)),
-        block);
-    b(size.width * 0.06, size.height * 0.16, 56, 36);
-    b(size.width * 0.40, size.height * 0.12, 60, 36);
-    b(size.width * 0.74, size.height * 0.45, 56, 36);
-    b(size.width * 0.10, size.height * 0.60, 56, 34);
-
-    final route = Paint()
-      ..color = const Color(0xFF1E2A4A)
-      ..strokeWidth = 4
-      ..strokeCap = StrokeCap.round;
-    final start = Offset(size.width * 0.40, size.height * 0.55);
-    final end = Offset(size.width * 0.88, size.height * 0.18);
-    for (int i = 0; i < 18; i += 2) {
-      canvas.drawLine(Offset.lerp(start, end, i / 18)!,
-          Offset.lerp(start, end, (i + 1) / 18)!, route);
-    }
-    // pickup pulse
-    canvas.drawCircle(start, 20, Paint()..color = const Color(0x33E23744));
-    canvas.drawCircle(start, 9, Paint()..color = const Color(0xFFE23744));
-    canvas.drawCircle(start, 3.5, Paint()..color = Colors.white);
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }

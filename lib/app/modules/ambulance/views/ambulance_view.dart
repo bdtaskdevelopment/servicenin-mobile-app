@@ -1,13 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:latlong2/latlong.dart';
 
 import '../../../core/values/app_colors.dart';
 import '../../../global_widget/custom_app_bar.dart';
+import '../../../global_widget/sn_map.dart';
 import '../../../routes/app_pages.dart';
 import '../controllers/ambulance_controller.dart';
+import '../controllers/select_ambulance_controller.dart';
 
 const _red = Color(0xFFE23744);
-const _indigo = Color(0xFF6366F1);
+const _green = Color(0xFF16A34A);
 
 class AmbulanceView extends GetView<AmbulanceController> {
   const AmbulanceView({super.key});
@@ -15,9 +18,10 @@ class AmbulanceView extends GetView<AmbulanceController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.white,
+      backgroundColor: const Color(0xFFF7F8FA),
       appBar: CustomAppBar(
         title: 'Ambulance',
+        backgroundColor: AppColors.white,
         actions: [
           IconButton(
             onPressed: () => Get.toNamed(Routes.AMBULANCE_NOTIFICATIONS),
@@ -28,69 +32,69 @@ class AmbulanceView extends GetView<AmbulanceController> {
       ),
       body: GetBuilder<AmbulanceController>(
         builder: (con) {
+          final ambulances = Get.find<SelectAmbulanceController>().types;
+          final top5 = ambulances.take(5).toList();
           return ListView(
             padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
             children: [
-              _LocationCard(location: con.currentLocation),
-              const SizedBox(height: 14),
-              GestureDetector(
-                onTap: () => Get.toNamed(Routes.AMBULANCE_BOOKING),
-                child: const _EmergencyCard(),
-              ),
-              const SizedBox(height: 14),
-              GestureDetector(
-                onTap: () => Get.toNamed(Routes.AMBULANCE_SCHEDULE),
-                child: const _ScheduleCard(),
-              ),
-              const SizedBox(height: 22),
-              GestureDetector(
-                onTap: () => Get.toNamed(Routes.AMBULANCE_SELECT),
-                child: _SectionHeader(
-                    title: 'Choose ambulance type', action: 'See all →'),
-              ),
-              const SizedBox(height: 14),
-              SizedBox(
-                height: 150,
-                child: ListView.separated(
-                  scrollDirection: Axis.horizontal,
-                  padding: EdgeInsets.zero,
-                  itemCount: con.types.length,
-                  separatorBuilder: (_, _) => const SizedBox(width: 12),
-                  itemBuilder: (_, i) => _TypeCard(
-                    type: con.types[i],
-                    selected: con.selectedType == i,
-                    onTap: () => Get.toNamed(Routes.AMBULANCE_SELECT),
-                  ),
-                ),
-              ),
+              _LocationSection(con: con),
               const SizedBox(height: 22),
               Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text('Nearby ambulances',
-                          style: TextStyle(
-                              fontSize: 17,
-                              fontWeight: FontWeight.w800,
-                              color: Color(0xFF0F172A))),
-                      const SizedBox(height: 2),
-                      Text('${con.nearbyAvailable} available · ${con.radius}',
-                          style: const TextStyle(
-                              fontSize: 12.5, color: Color(0xFF94A3B8))),
-                    ],
+                  const Text('Available ambulances',
+                      style: TextStyle(
+                          fontSize: 17,
+                          fontWeight: FontWeight.w800,
+                          color: Color(0xFF0F172A))),
+                  const Spacer(),
+                  GestureDetector(
+                    onTap: con.openSeeAll,
+                    child: const Text('See all →',
+                        style: TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w700,
+                            color: AppColors.brandOrange)),
                   ),
                 ],
               ),
               const SizedBox(height: 12),
-              _MapCard(area: con.area),
-              const SizedBox(height: 22),
-              _SectionHeader(title: 'Recent bookings', action: 'History →'),
-              const SizedBox(height: 12),
-              ...con.bookings.map((b) => Padding(
+              ...List.generate(top5.length, (i) => Padding(
                     padding: const EdgeInsets.only(bottom: 12),
-                    child: _BookingCard(booking: b),
+                    child: _AmbulanceCard(
+                      amb: top5[i],
+                      onTap: () {
+                        final sel = Get.find<SelectAmbulanceController>();
+                        sel.selectType(i);
+                        sel.proceed();
+                      },
+                    ),
+                  )),
+              const SizedBox(height: 12),
+              Row(
+                children: [
+                  const Text('Recent bookings',
+                      style: TextStyle(
+                          fontSize: 17,
+                          fontWeight: FontWeight.w800,
+                          color: Color(0xFF0F172A))),
+                  const Spacer(),
+                  GestureDetector(
+                    onTap: con.openBookings,
+                    child: const Text('See all →',
+                        style: TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w700,
+                            color: AppColors.brandOrange)),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              ...con.bookings.take(2).map((b) => Padding(
+                    padding: const EdgeInsets.only(bottom: 12),
+                    child: GestureDetector(
+                      onTap: () => con.trackBooking(b),
+                      child: _BookingCard(booking: b),
+                    ),
                   )),
             ],
           );
@@ -100,440 +104,368 @@ class AmbulanceView extends GetView<AmbulanceController> {
   }
 }
 
-// ── Current location ────────────────────────────────────────────────
-class _LocationCard extends StatelessWidget {
-  const _LocationCard({required this.location});
-  final String location;
+// ── Location (pickup + destination) with map preview ────────────────
+class _LocationSection extends StatelessWidget {
+  const _LocationSection({required this.con});
+  final AmbulanceController con;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: AppColors.white,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: const Color(0xFFEDEFF2)),
-      ),
-      child: Row(
-        children: [
-          Container(
-            width: 38,
-            height: 38,
-            decoration: BoxDecoration(
-              color: const Color(0xFFFDE4E4),
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: const Icon(Icons.location_on_outlined,
-                color: _red, size: 20),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text('CURRENT LOCATION',
-                    style: TextStyle(
-                        fontSize: 10.5,
-                        fontWeight: FontWeight.w700,
-                        color: Color(0xFF94A3B8),
-                        letterSpacing: 0.5)),
-                const SizedBox(height: 2),
-                Text(location,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                        fontSize: 13.5,
-                        fontWeight: FontWeight.w700,
-                        color: Color(0xFF0F172A))),
-              ],
-            ),
-          ),
-          const SizedBox(width: 8),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(10),
-              border: Border.all(color: const Color(0xFFE2E8F0)),
-            ),
-            child: const Text('Change',
-                style: TextStyle(
-                    fontSize: 12.5,
-                    fontWeight: FontWeight.w700,
-                    color: Color(0xFF334155))),
-          ),
-        ],
-      ),
+    final mid = LatLng(
+      (con.pickupPoint.latitude + con.destPoint.latitude) / 2,
+      (con.pickupPoint.longitude + con.destPoint.longitude) / 2,
     );
-  }
-}
-
-// ── Emergency CTA ───────────────────────────────────────────────────
-class _EmergencyCard extends StatelessWidget {
-  const _EmergencyCard();
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [_red, Color(0xFFC2182B)],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        borderRadius: BorderRadius.circular(18),
-      ),
-      child: Stack(
-        children: [
-          Positioned(
-            right: -6,
-            top: -10,
-            bottom: -10,
-            child: Icon(Icons.add_rounded,
-                size: 120, color: Colors.white.withValues(alpha: 0.12)),
-          ),
-          Row(
+    return Column(
+      children: [
+        // Map preview
+        SizedBox(
+          height: 150,
+          child: Stack(
             children: [
-              Container(
-                width: 54,
-                height: 54,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  border: Border.all(
-                      color: Colors.white.withValues(alpha: 0.6), width: 2),
-                ),
-                child: const Icon(Icons.airport_shuttle_rounded,
-                    color: Colors.white, size: 26),
-              ),
-              const SizedBox(width: 14),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text('EMERGENCY · 999',
-                        style: TextStyle(
-                            color: Color(0xFFFFDADE),
-                            fontSize: 11,
-                            fontWeight: FontWeight.w700,
-                            letterSpacing: 0.5)),
-                    const SizedBox(height: 2),
-                    const Text('Call Ambulance Now',
-                        style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 20,
-                            fontWeight: FontWeight.w800)),
-                    const SizedBox(height: 3),
-                    Text('২ ট্যাপ আম্বুলেন্স · Avg pickup 6 min',
-                        style: TextStyle(
-                            color: Colors.white.withValues(alpha: 0.9),
-                            fontSize: 12)),
-                  ],
+              Positioned.fill(
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(16),
+                  child: SnMap(
+                    center: mid,
+                    zoom: 7.2,
+                    interactive: false,
+                    route: [con.pickupPoint, con.destPoint],
+                    markers: [
+                      SnMapMarker(
+                          con.pickupPoint, _green, Icons.my_location_rounded),
+                      SnMapMarker(
+                          con.destPoint, _red, Icons.location_on_rounded),
+                    ],
+                  ),
                 ),
               ),
-              const Icon(Icons.chevron_right_rounded, color: Colors.white),
+              Positioned(
+                right: 10,
+                top: 10,
+                child: InkWell(
+                  onTap: con.refreshMap,
+                  customBorder: const CircleBorder(),
+                  child: Container(
+                    width: 38,
+                    height: 38,
+                    decoration: BoxDecoration(
+                      color: AppColors.white,
+                      shape: BoxShape.circle,
+                      boxShadow: [
+                        BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.12),
+                            blurRadius: 6),
+                      ],
+                    ),
+                    child: const Icon(Icons.refresh_rounded,
+                        size: 20, color: Color(0xFF1A1A1A)),
+                  ),
+                ),
+              ),
             ],
           ),
-        ],
+        ),
+        const SizedBox(height: 12),
+        // Pickup + destination selectors
+        Container(
+          padding: const EdgeInsets.all(14),
+          decoration: BoxDecoration(
+            color: AppColors.white,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: const Color(0xFFEDEFF2)),
+          ),
+          child: Column(
+            children: [
+              _LocBlock(
+                dotColor: _green,
+                label: 'PICKUP',
+                division: con.pickupDivision,
+                zilla: con.pickupZillaName,
+                onDivision: () => _pickDivision(con, pickup: true),
+                onZilla: () => _pickZilla(con, pickup: true),
+              ),
+              const Padding(
+                padding: EdgeInsets.symmetric(vertical: 12),
+                child: Divider(height: 1, color: Color(0xFFF1F5F9)),
+              ),
+              _LocBlock(
+                dotColor: _red,
+                label: 'DESTINATION',
+                division: con.destDivision,
+                zilla: con.destZillaName,
+                onDivision: () => _pickDivision(con, pickup: false),
+                onZilla: () => _pickZilla(con, pickup: false),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  void _pickDivision(AmbulanceController con, {required bool pickup}) {
+    final cur = pickup ? con.pickupDiv : con.destDiv;
+    _sheet(
+      title: 'Select division',
+      options: con.divisions,
+      selected: cur,
+      onSelect: (i) => pickup ? con.setPickupDiv(i) : con.setDestDiv(i),
+    );
+  }
+
+  void _pickZilla(AmbulanceController con, {required bool pickup}) {
+    final div = pickup ? con.pickupDiv : con.destDiv;
+    final cur = pickup ? con.pickupZilla : con.destZilla;
+    _sheet(
+      title: 'Select zilla',
+      options: con.zillasOf(div).map((z) => z.name).toList(),
+      selected: cur,
+      onSelect: (i) => pickup ? con.setPickupZilla(i) : con.setDestZilla(i),
+    );
+  }
+
+  void _sheet({
+    required String title,
+    required List<String> options,
+    required int selected,
+    required void Function(int) onSelect,
+  }) {
+    Get.bottomSheet(
+      isScrollControlled: true,
+      Container(
+        constraints: BoxConstraints(maxHeight: Get.height * 0.7),
+        decoration: const BoxDecoration(
+          color: AppColors.white,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        ),
+        padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Center(
+              child: Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                    color: const Color(0xFFE2E8F0),
+                    borderRadius: BorderRadius.circular(2)),
+              ),
+            ),
+            const SizedBox(height: 14),
+            Text(title,
+                style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w800,
+                    color: Color(0xFF0F172A))),
+            const SizedBox(height: 8),
+            Flexible(
+              child: ListView(
+                shrinkWrap: true,
+                padding: EdgeInsets.only(
+                    bottom: MediaQuery.of(Get.context!).padding.bottom + 8),
+                children: List.generate(options.length, (i) {
+                  final sel = i == selected;
+                  return ListTile(
+                    contentPadding: EdgeInsets.zero,
+                    onTap: () {
+                      onSelect(i);
+                      Get.back();
+                    },
+                    title: Text(options[i],
+                        style: TextStyle(
+                            fontSize: 15,
+                            fontWeight:
+                                sel ? FontWeight.w800 : FontWeight.w500,
+                            color: sel ? _red : const Color(0xFF334155))),
+                    trailing: sel
+                        ? const Icon(Icons.check_rounded, color: _red)
+                        : null,
+                  );
+                }),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
 }
 
-// ── Schedule card ───────────────────────────────────────────────────
-class _ScheduleCard extends StatelessWidget {
-  const _ScheduleCard();
+class _LocBlock extends StatelessWidget {
+  const _LocBlock({
+    required this.dotColor,
+    required this.label,
+    required this.division,
+    required this.zilla,
+    required this.onDivision,
+    required this.onZilla,
+  });
+  final Color dotColor;
+  final String label;
+  final String division;
+  final String zilla;
+  final VoidCallback onDivision;
+  final VoidCallback onZilla;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: AppColors.white,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: const Color(0xFFE2E8F0)),
-      ),
-      child: Row(
-        children: [
-          Container(
-            width: 40,
-            height: 40,
-            decoration: BoxDecoration(
-              color: _indigo.withValues(alpha: 0.12),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: const Icon(Icons.calendar_month_rounded,
-                color: _indigo, size: 22),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: const [
-                Text('Schedule an ambulance',
-                    style: TextStyle(
-                        fontSize: 14.5,
-                        fontWeight: FontWeight.w700,
-                        color: Color(0xFF0F172A))),
-                SizedBox(height: 2),
-                Text('For pre-booked transfers · checkups · dialysis',
-                    style:
-                        TextStyle(fontSize: 12, color: Color(0xFF94A3B8))),
-              ],
-            ),
-          ),
-          const Icon(Icons.chevron_right_rounded, color: Color(0xFF94A3B8)),
-        ],
-      ),
-    );
-  }
-}
-
-// ── Section header ──────────────────────────────────────────────────
-class _SectionHeader extends StatelessWidget {
-  const _SectionHeader({required this.title, required this.action});
-  final String title;
-  final String action;
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(title,
-            style: const TextStyle(
-                fontSize: 17,
-                fontWeight: FontWeight.w800,
-                color: Color(0xFF0F172A))),
-        Text(action,
-            style: const TextStyle(
-                fontSize: 13,
-                fontWeight: FontWeight.w700,
-                color: AppColors.brandOrange)),
+        Row(
+          children: [
+            Container(
+              width: 10,
+              height: 10,
+              decoration: BoxDecoration(color: dotColor, shape: BoxShape.circle),
+            ),
+            const SizedBox(width: 8),
+            Text(label,
+                style: const TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w700,
+                    color: Color(0xFF94A3B8),
+                    letterSpacing: 0.6)),
+          ],
+        ),
+        const SizedBox(height: 8),
+        Row(
+          children: [
+            Expanded(child: _DropChip(label: 'Division', value: division, onTap: onDivision)),
+            const SizedBox(width: 10),
+            Expanded(child: _DropChip(label: 'Zilla', value: zilla, onTap: onZilla)),
+          ],
+        ),
       ],
     );
   }
 }
 
-// ── Ambulance type card ─────────────────────────────────────────────
-class _TypeCard extends StatelessWidget {
-  const _TypeCard(
-      {required this.type, required this.selected, required this.onTap});
-  final AmbulanceType type;
-  final bool selected;
+class _DropChip extends StatelessWidget {
+  const _DropChip(
+      {required this.label, required this.value, required this.onTap});
+  final String label;
+  final String value;
   final VoidCallback onTap;
-
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        width: 150,
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+        decoration: BoxDecoration(
+          color: const Color(0xFFF7F8FA),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: const Color(0xFFE2E8F0)),
+        ),
+        child: Row(
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(label,
+                      style: const TextStyle(
+                          fontSize: 10,
+                          fontWeight: FontWeight.w600,
+                          color: Color(0xFF94A3B8))),
+                  const SizedBox(height: 2),
+                  Text(value,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                          fontSize: 13.5,
+                          fontWeight: FontWeight.w800,
+                          color: Color(0xFF0F172A))),
+                ],
+              ),
+            ),
+            const Icon(Icons.keyboard_arrow_down_rounded,
+                size: 20, color: Color(0xFF64748B)),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// ── Ambulance card (top-5 list) ─────────────────────────────────────
+class _AmbulanceCard extends StatelessWidget {
+  const _AmbulanceCard({required this.amb, required this.onTap});
+  final SelectableAmbulance amb;
+  final VoidCallback onTap;
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
         padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
           color: AppColors.white,
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(
-            color: selected ? _indigo : const Color(0xFFEDEFF2),
-            width: selected ? 1.6 : 1.2,
-          ),
+          border: Border.all(color: const Color(0xFFEDEFF2)),
         ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+        child: Row(
           children: [
-            Row(
-              children: [
-                Container(
-                  width: 38,
-                  height: 38,
-                  decoration: BoxDecoration(
-                    color: _indigo.withValues(alpha: 0.12),
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: const Icon(Icons.airport_shuttle_rounded,
-                      color: _indigo, size: 20),
-                ),
-                const Spacer(),
-                if (type.available != null)
-                  Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFDCFCE7),
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        const Icon(Icons.circle,
-                            size: 6, color: Color(0xFF16A34A)),
-                        const SizedBox(width: 4),
-                        Text('${type.available}',
-                            style: const TextStyle(
-                                fontSize: 11,
-                                fontWeight: FontWeight.w700,
-                                color: Color(0xFF15803D))),
-                      ],
-                    ),
-                  ),
-              ],
+            Container(
+              width: 46,
+              height: 46,
+              decoration: BoxDecoration(
+                  color: amb.color.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(12)),
+              child: Icon(Icons.airport_shuttle_rounded,
+                  color: amb.color, size: 24),
             ),
-            const Spacer(),
-            Text(type.name,
-                style: const TextStyle(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w800,
-                    color: Color(0xFF0F172A))),
-            const SizedBox(height: 2),
-            Text(type.subtitle,
-                style:
-                    const TextStyle(fontSize: 12, color: Color(0xFF94A3B8))),
-            const SizedBox(height: 8),
-            Row(
-              children: [
-                Text('৳${type.price}',
-                    style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w800,
-                        color: Color(0xFF0F172A))),
-                const Spacer(),
-                if (type.eta != null)
-                  Text(type.eta!,
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(amb.name,
+                      style: const TextStyle(
+                          fontSize: 14.5,
+                          fontWeight: FontWeight.w800,
+                          color: Color(0xFF0F172A))),
+                  const SizedBox(height: 2),
+                  Text('৳${amb.base} base · ৳${amb.perKm}/km · ${amb.eta}',
                       style: const TextStyle(
                           fontSize: 12, color: Color(0xFF94A3B8))),
-              ],
+                ],
+              ),
             ),
+            const SizedBox(width: 8),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
+              decoration: BoxDecoration(
+                  color: const Color(0xFFDCFCE7),
+                  borderRadius: BorderRadius.circular(20)),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(Icons.circle, size: 6, color: Color(0xFF16A34A)),
+                  const SizedBox(width: 4),
+                  Text('${amb.avail}',
+                      style: const TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w700,
+                          color: Color(0xFF15803D))),
+                ],
+              ),
+            ),
+            const SizedBox(width: 6),
+            const Icon(Icons.chevron_right_rounded, color: Color(0xFF94A3B8)),
           ],
         ),
       ),
     );
   }
-}
-
-// ── Nearby map card ─────────────────────────────────────────────────
-class _MapCard extends StatelessWidget {
-  const _MapCard({required this.area});
-  final String area;
-
-  @override
-  Widget build(BuildContext context) {
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(18),
-      child: SizedBox(
-        height: 180,
-        child: Stack(
-          children: [
-            Positioned.fill(child: CustomPaint(painter: _AmbMapPainter())),
-            Positioned(
-              left: 12,
-              top: 12,
-              child: Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                decoration: BoxDecoration(
-                  color: AppColors.white,
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: Text(area,
-                    style: const TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w700,
-                        color: Color(0xFF0F172A))),
-              ),
-            ),
-            Positioned(
-              left: 12,
-              bottom: 12,
-              child: Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                decoration: BoxDecoration(
-                  color: AppColors.white,
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: const [
-                    Icon(Icons.circle, size: 8, color: Color(0xFF1E2A4A)),
-                    SizedBox(width: 6),
-                    Text('You',
-                        style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w700,
-                            color: Color(0xFF0F172A))),
-                  ],
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _AmbMapPainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    canvas.drawRect(
-        Offset.zero & size, Paint()..color = const Color(0xFFE9EEF3));
-
-    final road = Paint()
-      ..color = Colors.white
-      ..strokeWidth = 14;
-    canvas.drawLine(Offset(0, size.height * 0.55),
-        Offset(size.width, size.height * 0.42), road);
-    canvas.drawLine(Offset(size.width * 0.4, 0),
-        Offset(size.width * 0.5, size.height), road);
-
-    final block = Paint()..color = const Color(0xFFDDE5EC);
-    void b(double x, double y, double w, double h) => canvas.drawRRect(
-        RRect.fromRectAndRadius(
-            Rect.fromLTWH(x, y, w, h), const Radius.circular(6)),
-        block);
-    b(size.width * 0.06, size.height * 0.12, 60, 40);
-    b(size.width * 0.55, size.height * 0.10, 70, 40);
-    b(size.width * 0.08, size.height * 0.62, 60, 40);
-    b(size.width * 0.58, size.height * 0.62, 70, 40);
-
-    // route (dashed)
-    final route = Paint()
-      ..color = const Color(0xFFE23744)
-      ..strokeWidth = 3
-      ..strokeCap = StrokeCap.round;
-    final start = Offset(size.width * 0.14, size.height * 0.82);
-    final end = Offset(size.width * 0.86, size.height * 0.22);
-    for (int i = 0; i < 24; i += 2) {
-      canvas.drawLine(
-        Offset.lerp(start, end, i / 24)!,
-        Offset.lerp(start, end, (i + 1) / 24)!,
-        route,
-      );
-    }
-
-    // markers (ambulance crosses)
-    void marker(Offset o, double r) {
-      canvas.drawCircle(o, r, Paint()..color = const Color(0x33E23744));
-      canvas.drawCircle(o, r * 0.55, Paint()..color = const Color(0xFFE23744));
-    }
-
-    marker(Offset(size.width * 0.34, size.height * 0.62), 18);
-    marker(Offset(size.width * 0.7, size.height * 0.28), 14);
-    marker(Offset(size.width * 0.6, size.height * 0.68), 11);
-
-    // You dot
-    canvas.drawCircle(start, 7, Paint()..color = const Color(0xFF1E2A4A));
-    canvas.drawCircle(start, 3, Paint()..color = Colors.white);
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
 
 // ── Booking card ────────────────────────────────────────────────────
 class _BookingCard extends StatelessWidget {
   const _BookingCard({required this.booking});
   final AmbulanceBooking booking;
-
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -582,14 +514,18 @@ class _BookingCard extends StatelessWidget {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
             decoration: BoxDecoration(
-              color: const Color(0xFFDCFCE7),
+              color: booking.ongoing
+                  ? const Color(0xFFFEF3C7)
+                  : const Color(0xFFDCFCE7),
               borderRadius: BorderRadius.circular(20),
             ),
-            child: const Text('Completed',
+            child: Text(booking.ongoing ? 'On the way' : 'Completed',
                 style: TextStyle(
                     fontSize: 11,
                     fontWeight: FontWeight.w700,
-                    color: Color(0xFF15803D))),
+                    color: booking.ongoing
+                        ? const Color(0xFFB45309)
+                        : const Color(0xFF15803D))),
           ),
         ],
       ),

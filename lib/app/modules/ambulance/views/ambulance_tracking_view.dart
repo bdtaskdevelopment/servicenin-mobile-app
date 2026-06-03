@@ -2,9 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../../core/values/app_colors.dart';
+import '../../../global_widget/sn_map.dart';
+import '../controllers/ambulance_controller.dart';
 import '../controllers/emergency_controller.dart';
 
 const _red = Color(0xFFE23744);
+const _navy = Color(0xFF1E2A4A);
 
 class AmbulanceTrackingView extends GetView<EmergencyController> {
   const AmbulanceTrackingView({super.key});
@@ -12,11 +15,43 @@ class AmbulanceTrackingView extends GetView<EmergencyController> {
   @override
   Widget build(BuildContext context) {
     final con = controller;
+    final amb = Get.find<AmbulanceController>();
+    final destPoint = amb.destPoint;
     return Scaffold(
       backgroundColor: AppColors.white,
       body: Stack(
         children: [
-          const Positioned.fill(child: CustomPaint(painter: _TrackMapPainter())),
+          Positioned.fill(
+            child: GetBuilder<AmbulanceController>(
+              builder: (a) {
+                final ambPoint = a.liveAmbulancePoint;
+                return SnMap(
+                  center: ambPoint,
+                  zoom: 13,
+                  route: [ambPoint, destPoint],
+                  markers: [
+                    SnMapMarker(ambPoint, _red, Icons.airport_shuttle_rounded),
+                    SnMapMarker(destPoint, _navy, Icons.location_on_rounded),
+                  ],
+                );
+              },
+            ),
+          ),
+          // Refresh ambulance location
+          Positioned(
+            right: 14,
+            bottom: Get.height * 0.64 + 12,
+            child: _round(Icons.refresh_rounded, () {
+              amb.refreshAmbulance();
+              Get.snackbar(
+                'Location updated',
+                'Ambulance position refreshed',
+                snackPosition: SnackPosition.TOP,
+                margin: const EdgeInsets.all(12),
+                duration: const Duration(seconds: 1),
+              );
+            }),
+          ),
           // Top bar
           SafeArea(
             child: Padding(
@@ -357,46 +392,3 @@ class _ActionBtn extends StatelessWidget {
   }
 }
 
-class _TrackMapPainter extends CustomPainter {
-  const _TrackMapPainter();
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    canvas.drawRect(
-        Offset.zero & size, Paint()..color = const Color(0xFFDDE6EE));
-
-    final block = Paint()..color = const Color(0xFFE9EEF3);
-    void b(double x, double y, double w, double h) => canvas.drawRRect(
-        RRect.fromRectAndRadius(
-            Rect.fromLTWH(x, y, w, h), const Radius.circular(8)),
-        block);
-    b(size.width * 0.30, size.height * 0.28, size.width * 0.28, 70);
-    b(size.width * 0.64, size.height * 0.30, size.width * 0.30, 70);
-    b(size.width * 0.30, size.height * 0.50, size.width * 0.28, 60);
-
-    // Vertical dashed yellow road
-    final yellow = Paint()
-      ..color = const Color(0xFFF59E0B)
-      ..strokeWidth = 6
-      ..strokeCap = StrokeCap.round;
-    for (double y = 20; y < size.height * 0.6; y += 26) {
-      canvas.drawLine(Offset(size.width * 0.18, y),
-          Offset(size.width * 0.18, y + 12), yellow);
-    }
-
-    // Diagonal dashed route (navy/orange)
-    final route = Paint()
-      ..color = const Color(0xFF1E2A4A)
-      ..strokeWidth = 5
-      ..strokeCap = StrokeCap.round;
-    final start = Offset(size.width * 0.18, size.height * 0.6);
-    final end = Offset(size.width * 1.02, size.height * 0.32);
-    for (int i = 0; i < 20; i += 2) {
-      canvas.drawLine(Offset.lerp(start, end, i / 20)!,
-          Offset.lerp(start, end, (i + 1) / 20)!, route);
-    }
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
-}

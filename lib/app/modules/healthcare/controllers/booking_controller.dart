@@ -98,14 +98,32 @@ class BookingController extends GetxController {
   String get whenSummary => '${dates[selectedDate].$1} · $selectedTime PM';
 
   // ── Patient ──────────────────────────────────────────────────────
-  final List<BookingPatient> patients = const [
-    BookingPatient('TA', 'Tanzil Ahmed', 'Self', '32 yrs · M · B+'),
-    BookingPatient('AU', 'Md. Ahsan Ullah', 'Father', '68 yrs · M · B+ · Diabetic'),
-    BookingPatient('RB', 'Rokeya Begum', 'Mother', '61 yrs · F · A+'),
+  final List<BookingPatient> patients = [
+    const BookingPatient('TA', 'Tanzil Ahmed', 'Self', '32 yrs · M · B+'),
+    const BookingPatient(
+        'AU', 'Md. Ahsan Ullah', 'Father', '68 yrs · M · B+ · Diabetic'),
+    const BookingPatient('RB', 'Rokeya Begum', 'Mother', '61 yrs · F · A+'),
   ];
   int selectedPatient = 0;
   void selectPatient(int i) {
     selectedPatient = i;
+    update();
+  }
+
+  /// Add a new family member and select them immediately.
+  void addPatient({
+    required String name,
+    required String relation,
+    required String info,
+  }) {
+    final parts = name.trim().split(' ');
+    final initials = (parts.length >= 2 &&
+            parts[0].isNotEmpty &&
+            parts[1].isNotEmpty)
+        ? '${parts[0][0]}${parts[1][0]}'.toUpperCase()
+        : (name.isNotEmpty ? name[0].toUpperCase() : '?');
+    patients.add(BookingPatient(initials, name, relation, info));
+    selectedPatient = patients.length - 1;
     update();
   }
 
@@ -130,7 +148,7 @@ class BookingController extends GetxController {
   // ── Appointment detail ───────────────────────────────────────────
   final String apptId = 'APT-7741';
   final String token = '14';
-  final String nowServing = 'Token 9 · ~25 min';
+  final String nowServing = 'Serial 9 · ~25 min';
   final int aheadOfYou = 5;
   final String venueAddress = 'House 9, Road 7 · Level 4, Chamber 12 · 3.1 km';
 

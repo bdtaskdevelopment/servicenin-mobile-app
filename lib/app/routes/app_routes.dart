@@ -61,6 +61,7 @@ abstract class Routes {
   static const HEALTHCARE_APPOINTMENTS = _Paths.HEALTHCARE_APPOINTMENTS;
   static const HEALTHCARE_CHAT = _Paths.HEALTHCARE_CHAT;
   static const HEALTHCARE_PRESCRIPTION = _Paths.HEALTHCARE_PRESCRIPTION;
+  static const HEALTHCARE_FAMILY = _Paths.HEALTHCARE_FAMILY;
   static const HC_DOCTORS = _Paths.HC_DOCTORS;
   static const HC_DOCTOR_PROFILE = _Paths.HC_DOCTOR_PROFILE;
   static const HC_SLOT = _Paths.HC_SLOT;
@@ -68,6 +69,7 @@ abstract class Routes {
   static const HC_REVIEW = _Paths.HC_REVIEW;
   static const HC_CONFIRMED = _Paths.HC_CONFIRMED;
   static const HC_APPOINTMENT = _Paths.HC_APPOINTMENT;
+  static const HC_QUEUE = _Paths.HC_QUEUE;
   static const AMBULANCE_NOTIFICATIONS = _Paths.AMBULANCE_NOTIFICATIONS;
   static const AMBULANCE_SELECT = _Paths.AMBULANCE_SELECT;
   static const AMBULANCE_SCHEDULE = _Paths.AMBULANCE_SCHEDULE;
@@ -75,6 +77,7 @@ abstract class Routes {
   static const AMBULANCE_BOOKING = _Paths.AMBULANCE_BOOKING;
   static const AMBULANCE_DISPATCHING = _Paths.AMBULANCE_DISPATCHING;
   static const AMBULANCE_TRACKING = _Paths.AMBULANCE_TRACKING;
+  static const AMBULANCE_BOOKINGS = _Paths.AMBULANCE_BOOKINGS;
   static const EMERGENCY_CONTACTS = _Paths.EMERGENCY_CONTACTS;
   static const BLOOD_REQUESTS = _Paths.BLOOD_REQUESTS;
   static const BLOOD_REQUEST_DETAIL = _Paths.BLOOD_REQUEST_DETAIL;
@@ -174,6 +177,7 @@ abstract class _Paths {
   static const HEALTHCARE_APPOINTMENTS = '/healthcare-appointments';
   static const HEALTHCARE_CHAT = '/healthcare-chat';
   static const HEALTHCARE_PRESCRIPTION = '/healthcare-prescription';
+  static const HEALTHCARE_FAMILY = '/healthcare-family';
   static const HC_DOCTORS = '/hc-doctors';
   static const HC_DOCTOR_PROFILE = '/hc-doctor-profile';
   static const HC_SLOT = '/hc-slot';
@@ -181,6 +185,7 @@ abstract class _Paths {
   static const HC_REVIEW = '/hc-review';
   static const HC_CONFIRMED = '/hc-confirmed';
   static const HC_APPOINTMENT = '/hc-appointment';
+  static const HC_QUEUE = '/hc-queue';
   static const AMBULANCE_NOTIFICATIONS = '/ambulance-notifications';
   static const AMBULANCE_SELECT = '/ambulance-select';
   static const AMBULANCE_SCHEDULE = '/ambulance-schedule';
@@ -188,6 +193,7 @@ abstract class _Paths {
   static const AMBULANCE_BOOKING = '/ambulance-booking';
   static const AMBULANCE_DISPATCHING = '/ambulance-dispatching';
   static const AMBULANCE_TRACKING = '/ambulance-tracking';
+  static const AMBULANCE_BOOKINGS = '/ambulance-bookings';
   static const EMERGENCY_CONTACTS = '/emergency-contacts';
   static const BLOOD_REQUESTS = '/blood-requests';
   static const BLOOD_REQUEST_DETAIL = '/blood-request-detail';

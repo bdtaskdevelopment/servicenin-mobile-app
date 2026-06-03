@@ -89,7 +89,7 @@ class AppointmentConfirmedView extends GetView<BookingController> {
                             ),
                             Column(
                               children: [
-                                const Text('TOKEN',
+                                const Text('SERIAL',
                                     style: TextStyle(
                                         fontSize: 9,
                                         fontWeight: FontWeight.w700,
@@ -116,19 +116,6 @@ class AppointmentConfirmedView extends GetView<BookingController> {
                             con.patient.name),
                       ],
                     ),
-                  ),
-                  const SizedBox(height: 14),
-                  Row(
-                    children: [
-                      Expanded(
-                          child: _OutlineBtn(
-                              icon: Icons.calendar_today_outlined,
-                              label: 'Add to calendar')),
-                      const SizedBox(width: 12),
-                      Expanded(
-                          child: _OutlineBtn(
-                              icon: Icons.share_outlined, label: 'Share')),
-                    ],
                   ),
                 ],
               ),
@@ -194,29 +181,3 @@ class AppointmentConfirmedView extends GetView<BookingController> {
       );
 }
 
-class _OutlineBtn extends StatelessWidget {
-  const _OutlineBtn({required this.icon, required this.label});
-  final IconData icon;
-  final String label;
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      height: 50,
-      child: OutlinedButton.icon(
-        onPressed: () {},
-        icon: Icon(icon, size: 18, color: const Color(0xFF0F172A)),
-        label: Text(label,
-            style: const TextStyle(
-                fontSize: 13.5,
-                fontWeight: FontWeight.w700,
-                color: Color(0xFF0F172A))),
-        style: OutlinedButton.styleFrom(
-          backgroundColor: AppColors.white,
-          side: const BorderSide(color: Color(0xFFE2E8F0)),
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        ),
-      ),
-    );
-  }
-}

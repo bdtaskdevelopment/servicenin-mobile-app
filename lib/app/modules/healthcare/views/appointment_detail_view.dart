@@ -81,7 +81,7 @@ class AppointmentDetailView extends GetView<BookingController> {
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.end,
                         children: [
-                          Text('YOUR TOKEN',
+                          Text('YOUR SERIAL',
                               style: TextStyle(
                                   color: Colors.white.withValues(alpha: 0.8),
                                   fontSize: 10,

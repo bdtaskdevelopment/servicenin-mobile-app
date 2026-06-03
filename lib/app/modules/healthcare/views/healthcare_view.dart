@@ -66,7 +66,11 @@ class HealthcareView extends GetView<HealthcareController> {
                       const SizedBox(height: 14),
                       const _QuickGrid(),
                       const SizedBox(height: 14),
-                      const _UpcomingCard(),
+                      GestureDetector(
+                        onTap: () =>
+                            Get.toNamed(Routes.HEALTHCARE_APPOINTMENTS),
+                        child: const _UpcomingCard(),
+                      ),
                       const SizedBox(height: 22),
                       GestureDetector(
                         onTap: () => Get.toNamed(Routes.HC_DOCTORS),
@@ -80,7 +84,7 @@ class HealthcareView extends GetView<HealthcareController> {
                         physics: const NeverScrollableScrollPhysics(),
                         mainAxisSpacing: 12,
                         crossAxisSpacing: 12,
-                        childAspectRatio: 0.92,
+                        childAspectRatio: 0.86,
                         children: con.departments
                             .map((d) => GestureDetector(
                                   onTap: () => Get.toNamed(Routes.HC_DOCTORS),
@@ -237,9 +241,9 @@ class _QuickGrid extends StatelessWidget {
 
   static const _items = [
     (Icons.medical_services_outlined, 'Doctors', false),
-    (Icons.calendar_today_outlined, 'Bookings', false),
+    (Icons.calendar_today_outlined, 'Appointment', false),
     (Icons.bookmark_border_rounded, 'Rx', true),
-    (Icons.chat_bubble_outline_rounded, 'Chat', true),
+    (Icons.groups_outlined, 'Family', false),
   ];
 
   @override
@@ -301,14 +305,14 @@ class _QuickGrid extends StatelessWidget {
       case 'Doctors':
         Get.toNamed(Routes.HC_DOCTORS);
         break;
-      case 'Bookings':
+      case 'Appointment':
         Get.toNamed(Routes.HEALTHCARE_APPOINTMENTS);
         break;
       case 'Rx':
         Get.toNamed(Routes.HEALTHCARE_PRESCRIPTION);
         break;
-      case 'Chat':
-        Get.toNamed(Routes.HEALTHCARE_CHAT);
+      case 'Family':
+        Get.toNamed(Routes.HEALTHCARE_FAMILY);
         break;
     }
   }
@@ -361,7 +365,7 @@ class _UpcomingCard extends StatelessWidget {
                         fontWeight: FontWeight.w700,
                         color: Color(0xFF0F172A))),
                 SizedBox(height: 2),
-                Text('Popular Diagnostic, Gulshan-2 · Token #14',
+                Text('Popular Diagnostic, Gulshan-2 · Serial #14',
                     style: TextStyle(fontSize: 12, color: Color(0xFF94A3B8))),
               ],
             ),
@@ -416,7 +420,7 @@ class _SectionHeader extends StatelessWidget {
   }
 }
 
-// ── Department tile ─────────────────────────────────────────────────
+// ── Department tile (matches home "All Services" tile) ──────────────
 class _DeptTile extends StatelessWidget {
   const _DeptTile({required this.dept});
   final HcDepartment dept;
@@ -424,19 +428,31 @@ class _DeptTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: _tile,
-        borderRadius: BorderRadius.circular(14),
+        color: AppColors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: const Color(0xFFEDEFF2)),
       ),
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(dept.icon, color: dept.color, size: 24),
+          Icon(dept.icon, color: dept.color, size: 28),
           const SizedBox(height: 8),
-          Text(dept.name,
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 4),
+            child: Text(
+              dept.name,
+              textAlign: TextAlign.center,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
               style: const TextStyle(
-                  fontSize: 11.5,
-                  fontWeight: FontWeight.w700,
-                  color: Color(0xFF334155))),
+                fontSize: 12,
+                fontWeight: FontWeight.w700,
+                color: Color(0xFF1E293B),
+                height: 1.15,
+              ),
+            ),
+          ),
         ],
       ),
     );

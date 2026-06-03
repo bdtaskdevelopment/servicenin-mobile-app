@@ -75,7 +75,10 @@ class _List extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
       children: items.map((a) => Padding(
             padding: const EdgeInsets.only(bottom: 12),
-            child: _ApptCard(appt: a),
+            child: GestureDetector(
+              onTap: () => Get.find<AppointmentsController>().openAppointment(a),
+              child: _ApptCard(appt: a),
+            ),
           )).toList(),
     );
   }
@@ -154,7 +157,7 @@ class _ApptCard extends StatelessWidget {
               if (appt.token != null)
                 Row(
                   children: [
-                    const Text('Token ',
+                    const Text('Serial ',
                         style: TextStyle(
                             fontSize: 12.5, color: Color(0xFF94A3B8))),
                     Text(appt.token!,

@@ -67,6 +67,7 @@ import '../modules/information/views/guide_detail_view.dart';
 import '../modules/healthcare/views/appointments_view.dart';
 import '../modules/healthcare/views/chat_view.dart';
 import '../modules/healthcare/views/prescription_view.dart';
+import '../modules/healthcare/views/family_view.dart';
 import '../modules/healthcare/views/find_doctor_view.dart';
 import '../modules/healthcare/views/doctor_profile_view.dart';
 import '../modules/healthcare/views/choose_slot_view.dart';
@@ -74,6 +75,7 @@ import '../modules/healthcare/views/patient_details_view.dart';
 import '../modules/healthcare/views/review_confirm_view.dart';
 import '../modules/healthcare/views/appointment_confirmed_view.dart';
 import '../modules/healthcare/views/appointment_detail_view.dart';
+import '../modules/healthcare/views/appointment_queue_view.dart';
 import '../modules/ambulance/views/ambulance_notifications_view.dart';
 import '../modules/ambulance/views/select_ambulance_view.dart';
 import '../modules/ambulance/views/schedule_ambulance_view.dart';
@@ -81,6 +83,7 @@ import '../modules/ambulance/views/fare_estimate_view.dart';
 import '../modules/ambulance/views/emergency_booking_view.dart';
 import '../modules/ambulance/views/dispatching_view.dart';
 import '../modules/ambulance/views/ambulance_tracking_view.dart';
+import '../modules/ambulance/views/ambulance_bookings_view.dart';
 import '../modules/ambulance/views/emergency_contacts_view.dart';
 import '../modules/blood/bindings/blood_binding.dart';
 import '../modules/blood/views/blood_view.dart';
@@ -414,6 +417,11 @@ class AppPages {
       binding: HealthcareBinding(),
     ),
     GetPage(
+      name: _Paths.HEALTHCARE_FAMILY,
+      page: () => const FamilyView(),
+      binding: HealthcareBinding(),
+    ),
+    GetPage(
       name: _Paths.HC_DOCTORS,
       page: () => const FindDoctorView(),
       binding: HealthcareBinding(),
@@ -449,6 +457,11 @@ class AppPages {
       binding: HealthcareBinding(),
     ),
     GetPage(
+      name: _Paths.HC_QUEUE,
+      page: () => const AppointmentQueueView(),
+      binding: HealthcareBinding(),
+    ),
+    GetPage(
       name: _Paths.AMBULANCE_NOTIFICATIONS,
       page: () => const AmbulanceNotificationsView(),
       binding: AmbulanceBinding(),
@@ -481,6 +494,11 @@ class AppPages {
     GetPage(
       name: _Paths.AMBULANCE_TRACKING,
       page: () => const AmbulanceTrackingView(),
+      binding: AmbulanceBinding(),
+    ),
+    GetPage(
+      name: _Paths.AMBULANCE_BOOKINGS,
+      page: () => const AmbulanceBookingsView(),
       binding: AmbulanceBinding(),
     ),
     GetPage(
