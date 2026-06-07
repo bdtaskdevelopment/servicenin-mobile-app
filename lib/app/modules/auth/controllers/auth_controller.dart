@@ -1,13 +1,21 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:servicenin/app/core/helpers/app_helper.dart';
 
+import '../../../core/helpers/snack_helper.dart';
 import '../../../core/values/storage.dart';
+import '../../../data/repositories/auth.repo.dart';
 import '../../../data/services/storage.service.dart';
 import '../../../routes/app_pages.dart';
 
 class AuthController extends GetxController {
+  AuthRepository get _repo => Get.find<AuthRepository>();
+
+  bool busy = false;
+
   // ── Phone entry ──────────────────────────────────────────────────
   final TextEditingController phoneController = TextEditingController();
 
@@ -20,6 +28,10 @@ class AuthController extends GetxController {
   void onPhoneChanged(String _) => update();
 
   String get fullPhone => '$countryCode${phoneController.text.trim()}';
+
+  /// The exact phone an OTP was requested for — carried to verify/resend so it
+  /// always matches what /login used (even if the field later changes).
+  String otpPhone = '';
 
   /// Pretty masked phone used on the OTP screen subtitle, e.g.
   /// "+880 1744 86 5867".
@@ -66,14 +78,45 @@ class AuthController extends GetxController {
 
   // ── Actions ──────────────────────────────────────────────────────
 
-  /// "লগইন করুন" — send OTP then go to the OTP screen.
-  void login() {
-    if (!isPhoneValid) return;
-    proceedToOtp();
+  /// Run an async task with a blocking loading dialog + error snackbar.
+  Future<T?> _run<T>(Future<T> Function() task) async {
+    if (busy) return null;
+    busy = true;
+    update();
+    Get.dialog(
+      const Center(child: CircularProgressIndicator()),
+      barrierDismissible: false,
+    );
+    try {
+      final result = await task();
+      if (Get.isDialogOpen ?? false) Get.back();
+      busy = false;
+      update();
+      return result;
+    } catch (e) {
+      if (Get.isDialogOpen ?? false) Get.back();
+      busy = false;
+      update();
+      SnackHelper.error(e.toString().replaceFirst('Exception: ', ''));
+      return null;
+    }
   }
 
-  /// Send an OTP and open the OTP screen. Shared by login and the end of the
-  /// registration flow.
+  /// "লগইন করুন" — request an OTP from the API, then open the OTP screen.
+  Future<void> login() async {
+    if (!isPhoneValid) return;
+    otpPhone = fullPhone; // capture the exact phone used for this OTP request
+    final res = await _run(() => _repo.requestOtp(otpPhone));
+    if (res == null) return;
+    if (res.success) {
+      proceedToOtp();
+      SnackHelper.success(res.message);
+    } else {
+      SnackHelper.error(res.message);
+    }
+  }
+
+  /// Open the OTP screen (OTP already requested).
   void proceedToOtp() {
     _otp = '';
     _startTimer();
@@ -83,27 +126,52 @@ class AuthController extends GetxController {
   /// "অ্যাকাউন্ট তৈরি করুন" — start the registration flow.
   void goToRegister() => Get.toNamed(Routes.REGISTRATION);
 
-  void resendOtp() {
+  Future<void> resendOtp() async {
     if (!canResend) return;
+    final phone = otpPhone.isNotEmpty ? otpPhone : fullPhone;
+    final res = await _run(() => _repo.resendOtp(phone));
+    if (res == null) return;
     _otp = '';
     _startTimer();
-    Get.snackbar('OTP', 'নতুন কোড পাঠানো হয়েছে',
-        snackPosition: SnackPosition.BOTTOM);
+    SnackHelper.success(res.message.isEmpty ? 'নতুন কোড পাঠানো হয়েছে' : res.message);
   }
 
-  /// "যাচাই করুন" — verify OTP, persist a session token and go home.
-  void verifyOtp() {
+  /// "যাচাই করুন" — verify the OTP. On success save token + user and go home;
+  /// if the user does not exist, show the API message (e.g. please register).
+  Future<void> verifyOtp() async {
     if (!isOtpComplete) return;
-    StorageService.save(StorageConstants.accessToken, 'session_$fullPhone');
-    StorageService.save(StorageConstants.phoneNumber, phoneController.text.trim());
-    _timer?.cancel();
-    Get.offAllNamed(Routes.HOME);
+    final phone = otpPhone.isNotEmpty ? otpPhone : fullPhone;
+    final res = await _run(() => _repo.verifyOtp(phone, _otp));
+    if (res == null) return;
+
+    if (res.success && res.userExist && (res.token ?? '').isNotEmpty) {
+      printWrapped('OTP verification successful. Saving token and user info. ${res.token}');
+      await StorageService.save(StorageConstants.accessToken, res.token);
+      if ((res.refreshToken ?? '').isNotEmpty) {
+        await StorageService.save(StorageConstants.refreshToken, res.refreshToken);
+      }
+      if (res.user != null) {
+        await StorageService.save(
+            StorageConstants.userInfo, jsonEncode(res.user!.toMap()));
+      }
+      await StorageService.save(
+          StorageConstants.phoneNumber, phoneController.text.trim());
+      _timer?.cancel();
+      SnackHelper.success(res.message);
+      Get.offAllNamed(Routes.HOME);
+    } else {
+      // user_exist == false or verification failed.
+      SnackHelper.error(res.message);
+    }
   }
 
   @override
   void onClose() {
     _timer?.cancel();
-    phoneController.dispose();
+    // NOTE: phoneController is intentionally NOT disposed here. This controller
+    // is a fenix singleton; disposing the TextEditingController can leave a
+    // disposed controller bound to the rebuilt login field after
+    // offAllNamed(AUTH) (e.g. right after registration).
     super.onClose();
   }
 }

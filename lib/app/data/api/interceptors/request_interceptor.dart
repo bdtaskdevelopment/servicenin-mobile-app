@@ -13,8 +13,19 @@ FutureOr<Request> requestInterceptor(request) async {
   if (await checkInternetConnection()) {
     final token = StorageService.read(StorageConstants.accessToken);
 
-    final existingCt = request.headers['Content-Type'] ?? '';
-    if (!existingCt.contains('multipart')) {
+    // GetConnect sets the body content-type with a LOWERCASE key
+    // (e.g. `content-type: multipart/form-data; boundary=...`). A
+    // case-sensitive `['Content-Type']` lookup would miss it and add a second
+    // `Content-Type: application/json` header, which makes the server ignore
+    // the multipart body. Match the header case-insensitively so multipart
+    // (and any pre-set content type) is preserved.
+    final existingCt = request.headers.entries
+        .firstWhere(
+          (e) => e.key.toLowerCase() == 'content-type',
+          orElse: () => const MapEntry('', ''),
+        )
+        .value;
+    if (!existingCt.toLowerCase().contains('multipart')) {
       request.headers['Content-Type'] = 'application/json';
     }
     request.headers['Accept'] = 'application/json';
@@ -40,5 +51,9 @@ FutureOr<Request> requestInterceptor(request) async {
 }
 
 void requestLogger(Request request) {
+  print('URL => ${request.url}');
+print('METHOD => ${request.method}');
+print('HEADERS => ${request.headers}');
+
   debugPrint('Url====: ${request.method} ${request.url}\n');
 }

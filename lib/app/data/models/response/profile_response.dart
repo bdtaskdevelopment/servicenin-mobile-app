@@ -1,94 +1,116 @@
 import 'dart:convert';
 
-ProfileResponse profileResponseFromMap(dynamic src) =>
-    ProfileResponse.fromMap(src is String ? jsonDecode(src) : src as Map<String, dynamic>);
+Map<String, dynamic> _asMap(dynamic src) =>
+    src is String ? jsonDecode(src) as Map<String, dynamic> : src as Map<String, dynamic>;
 
-class ProfileResponse {
-  final bool status;
-  final String message;
-  final ProfileData data;
+/// Parsed `/api/v1/users/me` response. The account/profile screens read every
+/// field from here so the UI always reflects the server.
+class UserProfile {
+  UserProfile({
+    required this.id,
+    required this.phone,
+    required this.email,
+    required this.role,
+    required this.isVerified,
+    required this.isActive,
+    required this.fullName,
+    this.gender,
+    this.bloodGroup,
+    this.address,
+    this.photoUrl,
+    this.maskedPhone,
+  });
 
-  ProfileResponse({required this.status, required this.message, required this.data});
+  final String id;
+  final String phone;
+  final String email;
+  final String role;
+  final bool isVerified;
+  final bool isActive;
+  final String fullName;
 
-  factory ProfileResponse.fromMap(Map<String, dynamic> json) => ProfileResponse(
-        status: json['status'] == true,
-        message: json['message'] ?? '',
-        data: ProfileData.fromMap(json['data'] ?? {}),
+  /// Server-side masked phone, e.g. "+8801744***67".
+  final String? maskedPhone;
+
+  /// Optional profile fields — only present once the user fills them in.
+  final String? gender;
+  final String? bloodGroup;
+  final String? address;
+  final String? photoUrl;
+
+  /// Builds from the full `{ success, message, data: { ..., profile } }`
+  /// envelope or from a bare user `data` map.
+  factory UserProfile.fromMap(dynamic src) {
+    final json = _asMap(src);
+    // Unwrap the envelope when present.
+    final user = json['data'] is Map ? json['data'] as Map<String, dynamic> : json;
+    final profile =
+        user['profile'] is Map ? user['profile'] as Map<String, dynamic> : const {};
+
+    String? str(dynamic v) {
+      final s = v?.toString().trim();
+      return (s == null || s.isEmpty) ? null : s;
+    }
+
+    return UserProfile(
+      id: user['id']?.toString() ?? '',
+      phone: user['phone']?.toString() ?? '',
+      email: user['email']?.toString() ?? '',
+      role: user['role']?.toString() ?? '',
+      isVerified: user['is_verified'] == true,
+      isActive: user['is_active'] == true,
+      fullName: (profile['full_name'] ?? user['full_name'] ?? '').toString(),
+      gender: str(profile['gender']),
+      bloodGroup: str(profile['blood_group']),
+      address: str(profile['address']),
+      photoUrl: str(profile['photo_url'] ?? user['photo_url']),
+      maskedPhone: str(user['masked_phone']),
+    );
+  }
+
+  UserProfile copyWith({
+    String? email,
+    String? fullName,
+    String? gender,
+    String? bloodGroup,
+    String? address,
+    String? photoUrl,
+  }) =>
+      UserProfile(
+        id: id,
+        phone: phone,
+        email: email ?? this.email,
+        role: role,
+        isVerified: isVerified,
+        isActive: isActive,
+        fullName: fullName ?? this.fullName,
+        gender: gender ?? this.gender,
+        bloodGroup: bloodGroup ?? this.bloodGroup,
+        address: address ?? this.address,
+        photoUrl: photoUrl ?? this.photoUrl,
+        maskedPhone: maskedPhone,
       );
 }
 
-class ProfileData {
-  final int id;
-  final String name;
-  final String firstName;
-  final String empId;
-  final String title;
-  final String? department;
-  final String? joined;
-  final String? reportingTo;
-  final String? reportingTitle;
-  final String? phone;
-  final String email;
-  final String? address;
-  final String? dob;
-  final String? bloodGroup;
-  final String? maritalStatus;
-  final String? avatar;
-  final int rating;
-
-  ProfileData({
-    required this.id,
-    required this.name,
-    required this.firstName,
-    required this.empId,
-    required this.title,
-    this.department,
-    this.joined,
-    this.reportingTo,
-    this.reportingTitle,
-    this.phone,
-    required this.email,
-    this.address,
-    this.dob,
-    this.bloodGroup,
-    this.maritalStatus,
-    this.avatar,
-    required this.rating,
+/// `/api/v1/users/me/photo` response — carries the new avatar URL.
+class PhotoUploadResponse {
+  PhotoUploadResponse({
+    required this.success,
+    required this.message,
+    this.photoUrl,
   });
 
-  factory ProfileData.fromMap(Map<String, dynamic> json) => ProfileData(
-        id: json['id'] ?? 0,
-        name: json['name'] ?? '',
-        firstName: json['first_name'] ?? '',
-        empId: json['emp_id']?.toString() ?? '',
-        title: json['title'] ?? '',
-        department: json['department'],
-        joined: json['joined'],
-        reportingTo: json['reporting_to'],
-        reportingTitle: json['reporting_title'],
-        phone: json['phone'],
-        email: json['email'] ?? '',
-        address: json['address'],
-        dob: json['dob'],
-        bloodGroup: json['blood_group'],
-        maritalStatus: json['marital_status'] is Map
-            ? json['marital_status']['name']
-            : json['marital_status'],
-        avatar: json['avatar'],
-        rating: json['rating'] ?? 0,
-      );
+  final bool success;
+  final String message;
+  final String? photoUrl;
 
-  String get initials {
-    final parts = name.trim().split(' ').where((p) => p.isNotEmpty).toList();
-    if (parts.isEmpty) return '';
-    if (parts.length == 1) return parts[0][0].toUpperCase();
-    return '${parts[0][0]}${parts[1][0]}'.toUpperCase();
-  }
-
-  String initialsOf(String? fullName) {
-    if (fullName == null || fullName.trim().isEmpty) return '?';
-    final parts = fullName.trim().split(' ').where((p) => p.isNotEmpty).toList();
-    if (parts.length == 1) return parts[0][0].toUpperCase();
-    return '${parts[0][0]}${parts[1][0]}'.toUpperCase();
+  factory PhotoUploadResponse.fromMap(dynamic src) {
+    final json = _asMap(src);
+    final data = json['data'] is Map ? json['data'] as Map<String, dynamic> : null;
+    return PhotoUploadResponse(
+      success: json['success'] == true,
+      message: json['message']?.toString() ?? '',
+      photoUrl: data?['photo_url']?.toString(),
+    );
   }
 }

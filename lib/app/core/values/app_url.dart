@@ -6,7 +6,31 @@ class ApiURL {
   static final String logout = '/logout';
   static final String forgotPassword = '/forgot-password';
 
-  //===== profile
+  //===== ServiceNin auth (phone + OTP). No leading slash so it appends
+  // cleanly to a base URL that ends with "/".
+  static final String authLogin = 'api/v1/auth/login';
+  static final String authVerifyOtp = 'api/v1/auth/verify-otp';
+  static final String authRegister = 'api/v1/auth/register';
+  static final String authResendOtp = 'api/v1/auth/resend-otp';
+
+  //===== Blood
+  static final String bloodRequests = 'api/v1/blood/requests';
+  static final String bloodDonorAvailability =
+      'api/v1/blood/donors/me/availability';
+  static final String bloodDonorRegister = 'api/v1/blood/donors/register';
+  static final String bloodDonorVerifyOtp = 'api/v1/blood/donors/verify-otp';
+
+  //===== Information / hotlines (ServiceNin)
+  static final String info = 'api/v1/info';
+  static String infoById(String id) => 'api/v1/info/$id';
+
+  //===== profile (ServiceNin — no leading slash, appends to base ending "/")
+  static final String usersMe = 'api/v1/users/me';
+  static final String usersMeProfile = 'api/v1/users/me/profile';
+  static final String usersMePhoto = 'api/v1/users/me/photo';
+  static String usersMeActivity({int days = 7}) =>
+      'api/v1/users/me/activity?days=$days';
+
   static final String profile = '/profile';
   static final String profileAvatar = '/profile/avatar';
   static final String dashboard = '/dashboard';

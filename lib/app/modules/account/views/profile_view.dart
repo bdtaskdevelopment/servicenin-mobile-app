@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 
 import '../../../core/values/app_colors.dart';
 import '../controllers/account_controller.dart';
+import '../widgets/profile_avatar.dart';
 
 const _navy = Color(0xFF1E2A4A);
 const _iconTile = Color(0xFFEEF0FB);
@@ -13,10 +14,10 @@ class ProfileView extends GetView<AccountController> {
 
   @override
   Widget build(BuildContext context) {
-    final con = controller;
     return Scaffold(
       backgroundColor: const Color(0xFFF1F3F6),
-      body: Column(
+      body: GetBuilder<AccountController>(
+        builder: (con) => Column(
         children: [
           // Navy header
           Container(
@@ -47,26 +48,33 @@ class ProfileView extends GetView<AccountController> {
                                 fontSize: 19,
                                 fontWeight: FontWeight.w800,
                                 color: Colors.white)),
-                        const Spacer(),
-                        Icon(Icons.photo_camera_outlined,
-                            color: Colors.white.withValues(alpha: 0.9),
-                            size: 22),
                       ],
                     ),
                     const SizedBox(height: 6),
-                    Container(
-                      width: 84,
-                      height: 84,
-                      decoration: BoxDecoration(
-                        color: Colors.white.withValues(alpha: 0.18),
-                        borderRadius: BorderRadius.circular(24),
+                    GestureDetector(
+                      onTap: con.pickAndUploadPhoto,
+                      child: Stack(
+                        alignment: Alignment.bottomRight,
+                        children: [
+                          ProfileAvatar(
+                            photoUrl: con.photoUrl,
+                            initial: con.initial,
+                            size: 84,
+                            radius: 24,
+                          ),
+                          if (con.uploadingPhoto)
+                            const Positioned.fill(
+                              child: Center(
+                                child: SizedBox(
+                                  width: 22,
+                                  height: 22,
+                                  child: CircularProgressIndicator(
+                                      strokeWidth: 2.5, color: Colors.white),
+                                ),
+                              ),
+                            ),
+                        ],
                       ),
-                      alignment: Alignment.center,
-                      child: Text(con.initial,
-                          style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 32,
-                              fontWeight: FontWeight.w800)),
                     ),
                     const SizedBox(height: 12),
                     Text(con.fullName,
@@ -74,45 +82,6 @@ class ProfileView extends GetView<AccountController> {
                             color: Colors.white,
                             fontSize: 20,
                             fontWeight: FontWeight.w800)),
-                    const SizedBox(height: 10),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 10, vertical: 5),
-                          decoration: BoxDecoration(
-                              color: const Color(0xFF16804E),
-                              borderRadius: BorderRadius.circular(20)),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: const [
-                              Icon(Icons.circle,
-                                  size: 7, color: Color(0xFF4ADE80)),
-                              SizedBox(width: 5),
-                              Text('NID verified',
-                                  style: TextStyle(
-                                      fontSize: 11,
-                                      fontWeight: FontWeight.w700,
-                                      color: Colors.white)),
-                            ],
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 10, vertical: 5),
-                          decoration: BoxDecoration(
-                              color: Colors.white.withValues(alpha: 0.16),
-                              borderRadius: BorderRadius.circular(20)),
-                          child: const Text('Member since 2024',
-                              style: TextStyle(
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.w700,
-                                  color: Colors.white)),
-                        ),
-                      ],
-                    ),
                   ],
                 ),
               ),
@@ -193,6 +162,7 @@ class ProfileView extends GetView<AccountController> {
             ),
           ),
         ],
+        ),
       ),
     );
   }

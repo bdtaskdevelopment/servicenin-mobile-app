@@ -6,7 +6,7 @@ import '../controllers/account_controller.dart';
 
 const _navy = Color(0xFF1E2A4A);
 const _tileSel = Color(0xFFE3E7F5);
-const _green = Color(0xFF16A34A);
+// const _green = Color(0xFF16A34A); // used by the commented-out _ToggleCard
 
 class SettingsView extends GetView<AccountController> {
   const SettingsView({super.key});
@@ -65,6 +65,8 @@ class SettingsView extends GetView<AccountController> {
                         ),
                       ],
                     ),
+                    // ── Notifications section hidden for now ──────────────
+                    /*
                     const SizedBox(height: 18),
                     const _Label('NOTIFICATIONS'),
                     const SizedBox(height: 10),
@@ -81,6 +83,7 @@ class SettingsView extends GetView<AccountController> {
                       value: con.smsAlerts,
                       onChanged: con.toggleSms,
                     ),
+                    */
                     const SizedBox(height: 18),
                     const _Label('ABOUT'),
                     const SizedBox(height: 10),
@@ -236,6 +239,8 @@ class _LangCard extends StatelessWidget {
   }
 }
 
+// ── Unused while the notifications section above is commented out ──
+/*
 class _ToggleCard extends StatelessWidget {
   const _ToggleCard({
     required this.title,
@@ -282,6 +287,7 @@ class _ToggleCard extends StatelessWidget {
     );
   }
 }
+*/
 
 class _AboutRow extends StatelessWidget {
   const _AboutRow({required this.label, required this.trailing, this.onTap});

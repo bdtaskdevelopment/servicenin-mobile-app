@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:servicenin/app/core/helpers/app_helper.dart';
 
+import '../../../core/helpers/snack_helper.dart';
+import '../../../data/repositories/blood.repo.dart';
 import '../../../routes/app_pages.dart';
 
 enum BloodSeverity { critical, urgent, routine }
@@ -57,8 +60,40 @@ class BloodController extends GetxController {
   final int donations = 12;
   final int livesSaved = 36;
   final int rank = 4;
-  final bool available = true;
   final String area = 'Gulshan area';
+
+  // Whether the donor is currently available to donate (front-page switch).
+  bool isAvailable = true;
+
+  Future<void> toggleAvailable(bool value) async {
+    
+    final prev = isAvailable;
+    isAvailable = value; // optimistic
+
+
+   
+    update();
+
+    try {
+      final res = await Get.find<BloodRepository>().updateAvailability(value);
+      
+      if (res.success) {
+        SnackHelper.success(res.message.isEmpty
+            ? (value
+                ? 'You are now available to donate'
+                : 'You are now marked unavailable')
+            : res.message);
+      } else {
+        isAvailable = prev; // revert
+        SnackHelper.error(res.message);
+      }
+    } catch (e) {
+      isAvailable = prev; // revert
+      SnackHelper.error(e.toString().replaceFirst('Exception: ', ''));
+    } finally {
+      update();
+    }
+  }
 
   // "Show compatible groups only" toggle on the Requests view.
   bool compatibleOnly = true;

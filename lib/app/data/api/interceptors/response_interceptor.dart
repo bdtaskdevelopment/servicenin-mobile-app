@@ -16,8 +16,8 @@ bool _isHandling401 = false;
 
 FutureOr<dynamic> responseInterceptor(
     Request request, Response response) async {
-  printLog('Response received for 44 ${request.url.path}: ${response.statusCode} ::');
-  printLog('Response received for ${ApiURL.login}: ${response.statusCode} ::');
+  printLog('Response received for  ${request.url.path}: ${response.statusCode} ::');
+  // printLog('Response received for ${ApiURL.login}: ${response.statusCode} ::');
   EasyLoading.dismiss();
   responseLogger(response);
   if (await checkInternetConnection()) {
@@ -33,9 +33,10 @@ FutureOr<dynamic> responseInterceptor(
         }
         throw Exception("Session expired. Please log in again.");
       }
-      printWrapped( "Non-success status code ${response.statusCode} received. Handling error status.");
-      // Silently ignore wallet/balance errors (e.g. new users without a wallet yet)
-      handleErrorStatus(response);
+      printWrapped(
+          "Non-success status code ${response.statusCode} received. The repository/controller will surface the API message.");
+      // Don't toast a generic error here — repositories parse the body and the
+      // controllers show the exact API `message` via styled snackbars.
       return response;
     }
     return response;

@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:latlong2/latlong.dart';
 
 import '../../../core/values/app_colors.dart';
+import '../../../global_widget/sn_map.dart';
 import '../controllers/blood_controller.dart';
 import '../controllers/need_blood_controller.dart';
 
@@ -44,6 +46,23 @@ class NeedBloodView extends GetView<NeedBloodController> {
                         value: con.neededDate,
                         onTap: () => _pickDate(context, con),
                       ),
+                      const SizedBox(height: 22),
+                      const _SectionLabel('HOSPITAL'),
+                      const SizedBox(height: 12),
+                      _LabeledInput(
+                        label: 'HOSPITAL NAME',
+                        controller: con.hospitalName,
+                        hint: 'e.g. Dhaka Medical College Hospital',
+                      ),
+                      const SizedBox(height: 12),
+                      _LabeledInput(
+                        label: 'HOSPITAL ADDRESS',
+                        controller: con.hospitalAddress,
+                        hint: 'Area, city, postcode',
+                        maxLines: 2,
+                      ),
+                      const SizedBox(height: 12),
+                      _LocationCard(con: con),
                       const SizedBox(height: 22),
                       const _SectionLabel('CONTACT DETAILS'),
                       const SizedBox(height: 12),
@@ -319,11 +338,6 @@ class _UrgencyRow extends StatelessWidget {
 }
 
 // ── Date picker ─────────────────────────────────────────────────────
-const _months = [
-  'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-  'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
-];
-
 Future<void> _pickDate(BuildContext context, NeedBloodController con) async {
   final now = DateTime.now();
   final picked = await showDatePicker(
@@ -339,7 +353,68 @@ Future<void> _pickDate(BuildContext context, NeedBloodController con) async {
     ),
   );
   if (picked != null) {
-    con.setNeededDate('${picked.day} ${_months[picked.month - 1]} ${picked.year}');
+    con.setNeeded(picked);
+  }
+}
+
+// ── Hospital location (map + GPS coordinates) ───────────────────────
+class _LocationCard extends StatelessWidget {
+  const _LocationCard({required this.con});
+  final NeedBloodController con;
+
+  @override
+  Widget build(BuildContext context) {
+    final point = LatLng(con.lat, con.lng);
+    return Container(
+      padding: const EdgeInsets.all(6),
+      decoration: BoxDecoration(
+        color: AppColors.white,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: const Color(0xFFEDEFF2)),
+      ),
+      child: Column(
+        children: [
+          ClipRRect(
+            borderRadius: BorderRadius.circular(10),
+            child: SizedBox(
+              height: 130,
+              child: SnMap(
+                center: point,
+                zoom: 14,
+                interactive: false,
+                markers: [
+                  SnMapMarker(point, _red, Icons.local_hospital_rounded),
+                ],
+              ),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(8, 8, 8, 4),
+            child: Row(
+              children: [
+                const Icon(Icons.my_location_rounded,
+                    size: 16, color: Color(0xFF16A34A)),
+                const SizedBox(width: 6),
+                Expanded(
+                  child: Text(
+                    'GPS · ${con.lat.toStringAsFixed(4)}, ${con.lng.toStringAsFixed(4)}',
+                    style: const TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                        color: Color(0xFF64748B)),
+                  ),
+                ),
+                const Text('Auto-detected',
+                    style: TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w700,
+                        color: Color(0xFF16A34A))),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }
 

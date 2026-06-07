@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import '../../../core/helpers/snack_helper.dart';
 import '../../../core/values/storage.dart';
+import '../../../data/repositories/auth.repo.dart';
 import '../../../data/services/storage.service.dart';
 import '../../../routes/app_pages.dart';
 import 'auth_controller.dart';
@@ -11,8 +13,72 @@ class RegistrationController extends GetxController {
   int currentStep = 0;
   static const int totalSteps = 3;
 
-  // ── Step 1: About you ────────────────────────────────────────────
+  bool busy = false;
+
+  // ── Sign-up info (single step: name · phone · email) ──────────────
   final TextEditingController nameController = TextEditingController();
+  final TextEditingController phoneController = TextEditingController();
+  final TextEditingController emailController = TextEditingController();
+
+  @override
+  void onInit() {
+    super.onInit();
+    // Pre-fill the phone captured during OTP/login if available.
+    if (Get.isRegistered<AuthController>()) {
+      final p = Get.find<AuthController>().phoneController.text.trim();
+      if (p.isNotEmpty) phoneController.text = p;
+    }
+  }
+
+  void onInfoChanged(String _) => update();
+
+  bool _emailOk(String e) {
+    final r = RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$');
+    return r.hasMatch(e);
+  }
+
+  bool get isInfoValid =>
+      nameController.text.trim().isNotEmpty &&
+      phoneController.text.trim().isNotEmpty &&
+      _emailOk(emailController.text.trim());
+
+  /// Register the account (name · phone · email) then go to the login page,
+  /// where the user signs in with phone + OTP. No OTP step here.
+  Future<void> register() async {
+    if (!isInfoValid || busy) return;
+    busy = true;
+    update();
+    Get.dialog(
+      const Center(child: CircularProgressIndicator()),
+      barrierDismissible: false,
+    );
+    try {
+      final res = await Get.find<AuthRepository>().register(
+        name: nameController.text.trim(),
+        phone: phoneController.text.trim(),
+        email: emailController.text.trim(),
+      );
+      if (Get.isDialogOpen ?? false) Get.back();
+      busy = false;
+      update();
+      if (res.success) {
+        // Remember the phone so the login screen can pre-fill it.
+        StorageService.save(
+            StorageConstants.phoneNumber, phoneController.text.trim());
+        Get.offAllNamed(Routes.AUTH);
+        SnackHelper.success(res.message.isEmpty ? 'এখন লগইন করুন' : res.message);
+      } else {
+        SnackHelper.error(res.message);
+      }
+    } catch (e) {
+      if (Get.isDialogOpen ?? false) Get.back();
+      busy = false;
+      update();
+      SnackHelper.error(e.toString().replaceFirst('Exception: ', ''));
+    }
+  }
+
+  // ── Step 1: About you ────────────────────────────────────────────
   DateTime? dob;
   String? gender; // পুরুষ / মহিলা / অন্যান্য
 
@@ -170,12 +236,8 @@ class RegistrationController extends GetxController {
     Get.offAllNamed(Routes.HOME);
   }
 
-  @override
-  void onClose() {
-    pageController.dispose();
-    nameController.dispose();
-    addressController.dispose();
-    postcodeController.dispose();
-    super.onClose();
-  }
+  // NOTE: text/page controllers are intentionally NOT disposed here. This is a
+  // fenix singleton; disposing them can leave disposed controllers bound to
+  // rebuilt fields after offAllNamed (e.g. when bouncing between register and
+  // login). They are released when the controller instance is garbage-collected.
 }

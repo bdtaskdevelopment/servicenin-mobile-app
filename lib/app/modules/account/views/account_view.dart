@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import '../../../core/values/app_colors.dart';
 import '../../../routes/app_pages.dart';
 import '../controllers/account_controller.dart';
+import '../widgets/profile_avatar.dart';
 
 const _navy = Color(0xFF1E2A4A);
 const _iconTile = Color(0xFFEEF0FB);
@@ -128,22 +129,12 @@ class _ProfileHeader extends StatelessWidget {
             children: [
               Row(
                 children: [
-                  Container(
-                    width: 56,
-                    height: 56,
-                    decoration: BoxDecoration(
-                      color: Colors.white.withValues(alpha: 0.18),
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                    alignment: Alignment.center,
-                    child: Text(
-                      con.initial,
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 22,
-                        fontWeight: FontWeight.w800,
-                      ),
-                    ),
+                  ProfileAvatar(
+                    photoUrl: con.photoUrl,
+                    initial: con.initial,
+                    size: 56,
+                    radius: 16,
+                    fontSize: 22,
                   ),
                   const SizedBox(width: 14),
                   Expanded(
@@ -167,13 +158,7 @@ class _ProfileHeader extends StatelessWidget {
                           ),
                         ),
                         const SizedBox(height: 10),
-                        Row(
-                          children: const [
-                            _NidPill(),
-                            SizedBox(width: 8),
-                            _BloodPill(group: 'B+'),
-                          ],
-                        ),
+                        _BloodPill(group: con.bloodGroup),
                       ],
                     ),
                   ),
@@ -206,32 +191,6 @@ class _ProfileHeader extends StatelessWidget {
             ],
           ),
         ),
-      ),
-    );
-  }
-}
-
-class _NidPill extends StatelessWidget {
-  const _NidPill();
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-      decoration: BoxDecoration(
-        color: const Color(0xFF16804E),
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: const [
-          Icon(Icons.circle, size: 7, color: Color(0xFF4ADE80)),
-          SizedBox(width: 5),
-          Text('NID verified',
-              style: TextStyle(
-                  fontSize: 11,
-                  fontWeight: FontWeight.w700,
-                  color: Colors.white)),
-        ],
       ),
     );
   }

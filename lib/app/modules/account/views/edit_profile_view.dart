@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 
 import '../../../core/values/app_colors.dart';
 import '../controllers/account_controller.dart';
+import '../widgets/profile_avatar.dart';
 
 const _navy = Color(0xFF1E2A4A);
 const _tileSel = Color(0xFFE3E7F5);
@@ -43,38 +44,43 @@ class EditProfileView extends GetView<AccountController> {
                   children: [
                     // Avatar with camera badge
                     Center(
-                      child: Stack(
-                        children: [
-                          Container(
-                            width: 84,
-                            height: 84,
-                            decoration: BoxDecoration(
-                                color: const Color(0xFFE3E7F5),
-                                borderRadius: BorderRadius.circular(24)),
-                            alignment: Alignment.center,
-                            child: Text(con.initial,
-                                style: const TextStyle(
-                                    color: _navy,
-                                    fontSize: 32,
-                                    fontWeight: FontWeight.w800)),
-                          ),
-                          Positioned(
-                            right: 0,
-                            bottom: 0,
-                            child: Container(
-                              width: 28,
-                              height: 28,
-                              decoration: BoxDecoration(
-                                  color: _navy,
-                                  shape: BoxShape.circle,
-                                  border: Border.all(
-                                      color: const Color(0xFFF1F3F6),
-                                      width: 2.5)),
-                              child: const Icon(Icons.photo_camera_outlined,
-                                  color: Colors.white, size: 14),
+                      child: GestureDetector(
+                        onTap: con.pickAndUploadPhoto,
+                        child: Stack(
+                          children: [
+                            ProfileAvatar(
+                              photoUrl: con.photoUrl,
+                              initial: con.initial,
+                              size: 84,
+                              radius: 24,
+                              background: const Color(0xFFE3E7F5),
+                              foreground: _navy,
                             ),
-                          ),
-                        ],
+                            Positioned(
+                              right: 0,
+                              bottom: 0,
+                              child: Container(
+                                width: 28,
+                                height: 28,
+                                decoration: BoxDecoration(
+                                    color: _navy,
+                                    shape: BoxShape.circle,
+                                    border: Border.all(
+                                        color: const Color(0xFFF1F3F6),
+                                        width: 2.5)),
+                                child: con.uploadingPhoto
+                                    ? const Padding(
+                                        padding: EdgeInsets.all(6),
+                                        child: CircularProgressIndicator(
+                                            strokeWidth: 2,
+                                            color: Colors.white),
+                                      )
+                                    : const Icon(Icons.photo_camera_outlined,
+                                        color: Colors.white, size: 14),
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                     const SizedBox(height: 20),
@@ -132,9 +138,12 @@ class EditProfileView extends GetView<AccountController> {
                       ),
                     ),
                     const SizedBox(height: 14),
-                    _InputCard(label: 'FULL NAME', initial: con.fullName),
+                    _InputCard(label: 'FULL NAME', controller: con.nameCtrl),
                     const SizedBox(height: 14),
-                    _InputCard(label: 'EMAIL', initial: con.email),
+                    _InputCard(
+                        label: 'EMAIL',
+                        controller: con.emailCtrl,
+                        keyboardType: TextInputType.emailAddress),
                     const SizedBox(height: 16),
                     const _Label('GENDER'),
                     const SizedBox(height: 10),
@@ -212,7 +221,10 @@ class EditProfileView extends GetView<AccountController> {
                     const SizedBox(height: 16),
                     const _Label('ADDRESS'),
                     const SizedBox(height: 10),
-                    _InputCard(label: null, initial: con.address, maxLines: 2),
+                    _InputCard(
+                        label: null,
+                        controller: con.addressCtrl,
+                        maxLines: 2),
                   ],
                 ),
               ),
@@ -223,17 +235,25 @@ class EditProfileView extends GetView<AccountController> {
                   width: double.infinity,
                   height: 54,
                   child: ElevatedButton(
-                    onPressed: con.saveProfile,
+                    onPressed: con.saving ? null : con.saveProfile,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: _navy,
                       foregroundColor: Colors.white,
+                      disabledBackgroundColor: _navy.withValues(alpha: 0.6),
                       elevation: 0,
                       shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(14)),
                     ),
-                    child: const Text('Save changes',
-                        style: TextStyle(
-                            fontSize: 16, fontWeight: FontWeight.w800)),
+                    child: con.saving
+                        ? const SizedBox(
+                            width: 22,
+                            height: 22,
+                            child: CircularProgressIndicator(
+                                strokeWidth: 2.5, color: Colors.white),
+                          )
+                        : const Text('Save changes',
+                            style: TextStyle(
+                                fontSize: 16, fontWeight: FontWeight.w800)),
                   ),
                 ),
               ),
@@ -258,10 +278,16 @@ class _Label extends StatelessWidget {
 }
 
 class _InputCard extends StatelessWidget {
-  const _InputCard({required this.label, required this.initial, this.maxLines = 1});
+  const _InputCard({
+    required this.label,
+    required this.controller,
+    this.maxLines = 1,
+    this.keyboardType,
+  });
   final String? label;
-  final String initial;
+  final TextEditingController controller;
   final int maxLines;
+  final TextInputType? keyboardType;
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -281,7 +307,8 @@ class _InputCard extends StatelessWidget {
           ],
           TextField(
             maxLines: maxLines,
-            controller: TextEditingController(text: initial),
+            controller: controller,
+            keyboardType: keyboardType,
             style: const TextStyle(
                 fontSize: 15.5,
                 fontWeight: FontWeight.w700,

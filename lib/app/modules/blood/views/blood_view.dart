@@ -49,7 +49,17 @@ class BloodView extends GetView<BloodController> {
                     ),
                   ),
                   const SizedBox(height: 14),
-                  _DonorCard(con: controller),
+                  // Registered-donor card — commented out for now.
+                  // _DonorCard(con: controller),
+                  // const SizedBox(height: 12),
+                  GestureDetector(
+                    onTap: () => Get.toNamed(Routes.BLOOD_DONOR_REGISTER),
+                    child: const _RegisterDonorCard(),
+                  ),
+                  const SizedBox(height: 12),
+                  GetBuilder<BloodController>(
+                    builder: (con) => _AvailabilityCard(con: con),
+                  ),
                   const SizedBox(height: 12),
                   GestureDetector(
                     onTap: controller.openMyDonors,
@@ -186,7 +196,70 @@ class _ActionCard extends StatelessWidget {
   }
 }
 
+// ── Available-for-donation switch card ──────────────────────────────
+class _AvailabilityCard extends StatelessWidget {
+  const _AvailabilityCard({required this.con});
+  final BloodController con;
+
+  @override
+  Widget build(BuildContext context) {
+    final on = con.isAvailable;
+    return Container(
+      padding: const EdgeInsets.fromLTRB(14, 12, 8, 12),
+      decoration: BoxDecoration(
+        color: AppColors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: const Color(0xFFEDEFF2)),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 44,
+            height: 44,
+            decoration: BoxDecoration(
+              color: on ? const Color(0xFFDCFCE7) : const Color(0xFFF1F5F9),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Icon(
+              on ? Icons.volunteer_activism_rounded : Icons.pause_circle_outline,
+              color: on ? const Color(0xFF16A34A) : const Color(0xFF94A3B8),
+              size: 22,
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text('Available for donation',
+                    style: TextStyle(
+                        fontSize: 14.5,
+                        fontWeight: FontWeight.w800,
+                        color: Color(0xFF0F172A))),
+                const SizedBox(height: 2),
+                Text(
+                  on
+                      ? 'You\'ll receive nearby blood requests'
+                      : 'You\'re paused — no requests for now',
+                  style: const TextStyle(fontSize: 12, color: Color(0xFF94A3B8)),
+                ),
+              ],
+            ),
+          ),
+          Switch(
+            value: on,
+            onChanged: con.toggleAvailable,
+            activeThumbColor: Colors.white,
+            activeTrackColor: const Color(0xFF16A34A),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 // ── Registered donor card ───────────────────────────────────────────
+// ignore: unused_element
 class _DonorCard extends StatelessWidget {
   const _DonorCard({required this.con});
   final BloodController con;
@@ -242,6 +315,55 @@ class _DonorCard extends StatelessWidget {
               ],
             ),
           ),
+        ],
+      ),
+    );
+  }
+}
+
+// ── Register-as-donor card ──────────────────────────────────────────
+class _RegisterDonorCard extends StatelessWidget {
+  const _RegisterDonorCard();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: AppColors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: const Color(0xFFEDEFF2)),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 44,
+            height: 44,
+            decoration: BoxDecoration(
+              color: const Color(0xFFFDE4E4),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: const Icon(Icons.volunteer_activism_rounded,
+                size: 22, color: Color(0xFFE11D48)),
+          ),
+          const SizedBox(width: 12),
+          const Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('Become a donor',
+                    style: TextStyle(
+                        fontSize: 14.5,
+                        fontWeight: FontWeight.w800,
+                        color: Color(0xFF0F172A))),
+                SizedBox(height: 2),
+                Text('Register & verify · get nearby requests',
+                    style: TextStyle(fontSize: 12, color: Color(0xFF94A3B8))),
+              ],
+            ),
+          ),
+          const SizedBox(width: 8),
+          const Icon(Icons.chevron_right_rounded, color: Color(0xFF94A3B8)),
         ],
       ),
     );

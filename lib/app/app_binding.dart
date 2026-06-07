@@ -7,10 +7,14 @@ import 'app_service.dart';
 import 'core/values/app_config.dart';
 import 'data/providers/app.provider.dart';
 import 'data/providers/auth.provider.dart';
-import 'data/providers/home.provider.dart';
+import 'data/providers/blood.provider.dart';
+import 'data/providers/info.provider.dart';
+import 'data/providers/profile.provider.dart';
 import 'data/repositories/app.repo.dart';
 import 'data/repositories/auth.repo.dart';
-import 'data/repositories/home.repo.dart';
+import 'data/repositories/blood.repo.dart';
+import 'data/repositories/info.repo.dart';
+import 'data/repositories/profile.repo.dart';
 import 'data/services/storage.service.dart';
 
 class AppBinding extends Bindings {
@@ -35,12 +39,23 @@ class AppDependencyInjection {
     );
     Get.lazyPut<AppController>(() => AppController(), fenix: true);
 
-    Get.lazyPut<HomeProvider>(() => HomeProvider(), fenix: true);
-    Get.lazyPut<HomeRepository>(
-      () => HomeRepository(homeProvider: Get.find()),
+    Get.lazyPut<BloodProvider>(() => BloodProvider(), fenix: true);
+    Get.lazyPut<BloodRepository>(
+      () => BloodRepository(provider: Get.find()),
       fenix: true,
     );
-    
+
+    Get.lazyPut<ProfileProvider>(() => ProfileProvider(), fenix: true);
+    Get.lazyPut<ProfileRepository>(
+      () => ProfileRepository(provider: Get.find()),
+      fenix: true,
+    );
+
+    Get.lazyPut<InfoProvider>(() => InfoProvider(), fenix: true);
+    Get.lazyPut<InfoRepository>(
+      () => InfoRepository(provider: Get.find()),
+      fenix: true,
+    );
 
     Get.lazyPut<AppService>(() => AppService());
 

@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:url_launcher/url_launcher.dart';
 
+import '../../../core/helpers/snack_helper.dart';
+import '../../../data/models/response/info_response.dart';
+import '../../../data/repositories/info.repo.dart';
 import '../../../routes/app_pages.dart';
 
 class Guide {
@@ -47,6 +51,72 @@ class PopularGuide {
 }
 
 class InformationController extends GetxController {
+  InfoRepository get _infoRepo => Get.find<InfoRepository>();
+
+  // ── Live info / hotline entries from /api/v1/info ─────────────────
+  List<InfoEntry> infoEntries = [];
+  bool loadingInfo = false;
+  bool detailLoading = false;
+
+  /// The hero "National Emergency" entry (subtype == national_emergency).
+  InfoEntry? get nationalEmergency {
+    for (final e in infoEntries) {
+      if (e.isNationalEmergency) return e;
+    }
+    return null;
+  }
+
+  /// Everything except the hero card — rendered under it.
+  List<InfoEntry> get infoCards =>
+      infoEntries.where((e) => !e.isNationalEmergency).toList();
+
+  @override
+  void onInit() {
+    super.onInit();
+    fetchInfo();
+  }
+
+  /// GET /api/v1/info — load all entries.
+  Future<void> fetchInfo() async {
+    loadingInfo = true;
+    update();
+    try {
+      infoEntries = await _infoRepo.fetchAll();
+    } catch (e) {
+      SnackHelper.error(e.toString().replaceFirst('Exception: ', ''));
+    } finally {
+      loadingInfo = false;
+      update();
+    }
+  }
+
+  /// GET /api/v1/info/{id} — fetch a single entry's full details.
+  Future<InfoEntry?> fetchInfoById(String id) async {
+    detailLoading = true;
+    update();
+    try {
+      return await _infoRepo.fetchById(id);
+    } catch (e) {
+      SnackHelper.error(e.toString().replaceFirst('Exception: ', ''));
+      return null;
+    } finally {
+      detailLoading = false;
+      update();
+    }
+  }
+
+  /// Open the phone dialer for a hotline number.
+  Future<void> callHotline(String number) async {
+    final digits = number.trim();
+    if (digits.isEmpty) return;
+    final uri = Uri.parse('tel:$digits');
+    try {
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
+    } catch (_) {
+      SnackHelper.error('ডায়াল করা যায়নি');
+    }
+  }
+
   final List<Hotline> hotlines = const [
     Hotline('16263', 'Health (Shastho)', Icons.medical_services_outlined),
     Hotline('109', 'Women & Children', Icons.female_rounded),

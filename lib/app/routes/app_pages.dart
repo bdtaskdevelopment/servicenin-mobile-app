@@ -96,6 +96,8 @@ import '../modules/blood/views/donation_confirmed_view.dart';
 import '../modules/blood/views/leaderboard_view.dart';
 import '../modules/blood/views/connected_donors_view.dart';
 import '../modules/blood/views/donor_chat_view.dart';
+import '../modules/blood/views/donor_register_view.dart';
+import '../modules/blood/views/donor_verify_otp_view.dart';
 import '../modules/dashboard/bindings/dashboard_binding.dart';
 import '../modules/dashboard/views/dashboard_view.dart';
 import '../modules/notifications/bindings/notifications_binding.dart';
@@ -549,6 +551,16 @@ class AppPages {
     GetPage(
       name: _Paths.BLOOD_DONOR_CHAT,
       page: () => const DonorChatView(),
+      binding: BloodBinding(),
+    ),
+    GetPage(
+      name: _Paths.BLOOD_DONOR_REGISTER,
+      page: () => const DonorRegisterView(),
+      binding: BloodBinding(),
+    ),
+    GetPage(
+      name: _Paths.BLOOD_DONOR_VERIFY_OTP,
+      page: () => const DonorVerifyOtpView(),
       binding: BloodBinding(),
     ),
   ];
