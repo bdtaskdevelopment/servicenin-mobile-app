@@ -12,11 +12,11 @@ class PrescriptionView extends GetView<PrescriptionController> {
 
   @override
   Widget build(BuildContext context) {
-    final con = controller;
     return Scaffold(
       backgroundColor: const Color(0xFFF7F8FA),
       body: SafeArea(
-        child: Column(
+        child: GetBuilder<PrescriptionController>(
+          builder: (con) => Column(
           children: [
             // Header
             Padding(
@@ -46,30 +46,6 @@ class PrescriptionView extends GetView<PrescriptionController> {
                   const Spacer(),
                   const Icon(Icons.share_outlined,
                       color: Color(0xFF1A1A1A), size: 22),
-                ],
-              ),
-            ),
-            // v2 banner
-            Container(
-              width: double.infinity,
-              color: const Color(0xFFFFF7E6),
-              padding: const EdgeInsets.fromLTRB(16, 10, 16, 10),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: const [
-                  Text('● v2',
-                      style: TextStyle(
-                          fontSize: 11,
-                          fontWeight: FontWeight.w700,
-                          color: Color(0xFFB45309))),
-                  SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      "Digital prescriptions aren't in the current API — planned for v2.",
-                      style: TextStyle(
-                          fontSize: 12, color: Color(0xFFB45309), height: 1.4),
-                    ),
-                  ),
                 ],
               ),
             ),
@@ -275,9 +251,9 @@ class PrescriptionView extends GetView<PrescriptionController> {
                 width: double.infinity,
                 height: 54,
                 child: ElevatedButton.icon(
-                  onPressed: () {},
+                  onPressed: con.downloading ? null : con.download,
                   icon: const Icon(Icons.download_rounded, size: 20),
-                  label: const Text('Download PDF',
+                  label: Text(con.downloading ? 'Downloading…' : 'Download PDF',
                       style:
                           TextStyle(fontSize: 16, fontWeight: FontWeight.w800)),
                   style: ElevatedButton.styleFrom(
@@ -291,6 +267,7 @@ class PrescriptionView extends GetView<PrescriptionController> {
               ),
             ),
           ],
+          ),
         ),
       ),
     );

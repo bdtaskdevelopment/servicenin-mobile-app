@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../../core/values/app_colors.dart';
+import '../../../data/models/response/healthcare_response.dart';
 import '../controllers/booking_controller.dart';
 
 const _green = Color(0xFF0F7A52);
@@ -41,7 +42,8 @@ class DoctorProfileView extends GetView<BookingController> {
               ),
             ),
             Expanded(
-              child: ListView(
+              child: GetBuilder<BookingController>(
+                builder: (_) => ListView(
                 padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
                 children: [
                   // Doctor head
@@ -137,23 +139,36 @@ class DoctorProfileView extends GetView<BookingController> {
                   const SizedBox(height: 12),
                   ...con.venues.map((v) => Padding(
                         padding: const EdgeInsets.only(bottom: 12),
-                        child: _VenueCard(name: v.name, schedule: v.schedule),
+                        child:
+                            _VenueCard(name: v.venueName, schedule: v.scheduleLabel),
                       )),
                   const SizedBox(height: 8),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: const [
-                      _Head('Patient reviews'),
-                      Text('See all →',
-                          style: TextStyle(
-                              fontSize: 13,
-                              fontWeight: FontWeight.w700,
-                              color: AppColors.brandOrange)),
+                    children: [
+                      const _Head('Patient reviews'),
+                      GestureDetector(
+                        onTap: () => _showReviewDialog(context, con),
+                        child: const Text('Write a review →',
+                            style: TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w700,
+                                color: AppColors.brandOrange)),
+                      ),
                     ],
                   ),
                   const SizedBox(height: 12),
-                  ...con.docReviews.map((r) => _ReviewCard(review: r)),
+                  if (con.docReviews.isEmpty)
+                    const Padding(
+                      padding: EdgeInsets.only(bottom: 8),
+                      child: Text('No reviews yet — be the first to review.',
+                          style:
+                              TextStyle(fontSize: 13, color: Color(0xFF94A3B8))),
+                    )
+                  else
+                    ...con.docReviews.map((r) => _ReviewCard(review: r)),
                 ],
+              ),
               ),
             ),
             // Bottom CTA
@@ -242,6 +257,70 @@ class DoctorProfileView extends GetView<BookingController> {
       );
 }
 
+void _showReviewDialog(BuildContext context, BookingController con) {
+  int rating = 5;
+  final commentCtrl = TextEditingController();
+  showDialog(
+    context: context,
+    builder: (_) => StatefulBuilder(
+      builder: (ctx, setState) => AlertDialog(
+        backgroundColor: Colors.white,
+        shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(18)),
+        title: const Text('Write a review',
+            style: TextStyle(fontWeight: FontWeight.w800)),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: List.generate(5, (i) {
+                final filled = i < rating;
+                return GestureDetector(
+                  onTap: () => setState(() => rating = i + 1),
+                  child: Icon(
+                      filled ? Icons.star_rounded : Icons.star_border_rounded,
+                      size: 32,
+                      color: const Color(0xFFF59E0B)),
+                );
+              }),
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: commentCtrl,
+              maxLines: 3,
+              decoration: InputDecoration(
+                hintText: 'Share your experience…',
+                filled: true,
+                fillColor: const Color(0xFFF7F8FA),
+                border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide.none),
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Get.back(),
+            child: const Text('Cancel',
+                style: TextStyle(color: Color(0xFF64748B))),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Get.back();
+              con.submitReview(rating, commentCtrl.text.trim());
+            },
+            style: ElevatedButton.styleFrom(
+                backgroundColor: _green, foregroundColor: Colors.white),
+            child: const Text('Submit'),
+          ),
+        ],
+      ),
+    ),
+  );
+}
+
 class _Head extends StatelessWidget {
   const _Head(this.text);
   final String text;
@@ -300,7 +379,7 @@ class _VenueCard extends StatelessWidget {
 
 class _ReviewCard extends StatelessWidget {
   const _ReviewCard({required this.review});
-  final DocReview review;
+  final DoctorReview review;
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -320,14 +399,14 @@ class _ReviewCard extends StatelessWidget {
                 decoration: BoxDecoration(
                     color: _tile, borderRadius: BorderRadius.circular(10)),
                 alignment: Alignment.center,
-                child: Text(review.initials,
+                child: Text(review.patientInitials,
                     style: const TextStyle(
                         color: _green,
                         fontSize: 12,
                         fontWeight: FontWeight.w800)),
               ),
               const SizedBox(width: 10),
-              Text(review.name,
+              Text(review.patientName,
                   style: const TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.w700,
@@ -337,7 +416,7 @@ class _ReviewCard extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 8),
-          Text(review.text,
+          Text(review.comment,
               style: const TextStyle(
                   fontSize: 12.5, color: Color(0xFF475569), height: 1.4)),
         ],

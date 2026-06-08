@@ -31,27 +31,22 @@ class _ConfirmOtpSheetState extends State<ConfirmOtpSheet> {
   @override
   Widget build(BuildContext context) {
     final con = Get.find<DonationFlowController>();
-    // Lift the whole sheet above the keyboard. Putting the keyboard inset on
-    // the OUTSIDE (not inside the container's padding) keeps the sheet flush
-    // on top of the keyboard with no gap.
-    return AnimatedPadding(
-      duration: const Duration(milliseconds: 150),
-      curve: Curves.easeOut,
-      padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
-      child: Container(
-        decoration: const BoxDecoration(
-          color: AppColors.white,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-        ),
-        padding: EdgeInsets.fromLTRB(
-          20,
-          10,
-          20,
-          20 + MediaQuery.of(context).padding.bottom,
-        ),
-        child: SingleChildScrollView(
-          child: Column(
-          mainAxisSize: MainAxisSize.min,
+    // GetX's bottom sheet already pads for the keyboard (viewInsets), so the
+    // sheet only needs the safe-area bottom inset here.
+    return Container(
+      decoration: const BoxDecoration(
+        color: AppColors.white,
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      padding: EdgeInsets.fromLTRB(
+        20,
+        10,
+        20,
+        20 + MediaQuery.of(context).padding.bottom,
+      ),
+      child: SingleChildScrollView(
+        child: Column(
+        mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
           Center(
@@ -110,7 +105,6 @@ class _ConfirmOtpSheetState extends State<ConfirmOtpSheet> {
           ],
           ),
         ),
-      ),
     );
   }
 }

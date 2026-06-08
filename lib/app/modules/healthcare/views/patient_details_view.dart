@@ -155,9 +155,10 @@ class PatientDetailsView extends GetView<BookingController> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const TextField(
+                            TextField(
+                              controller: con.reasonCtrl,
                               maxLines: 2,
-                              decoration: InputDecoration(
+                              decoration: const InputDecoration(
                                 hintText: 'Describe symptoms (optional)…',
                                 hintStyle: TextStyle(color: Color(0xFF94A3B8)),
                                 border: InputBorder.none,
@@ -169,18 +170,21 @@ class PatientDetailsView extends GetView<BookingController> {
                               spacing: 8,
                               runSpacing: 8,
                               children: con.reasonChips
-                                  .map((c) => Container(
-                                        padding: const EdgeInsets.symmetric(
-                                            horizontal: 12, vertical: 7),
-                                        decoration: BoxDecoration(
-                                            color: const Color(0xFFF1F5F9),
-                                            borderRadius:
-                                                BorderRadius.circular(20)),
-                                        child: Text(c,
-                                            style: const TextStyle(
-                                                fontSize: 12.5,
-                                                fontWeight: FontWeight.w600,
-                                                color: Color(0xFF334155))),
+                                  .map((c) => GestureDetector(
+                                        onTap: () => con.setReason(c),
+                                        child: Container(
+                                          padding: const EdgeInsets.symmetric(
+                                              horizontal: 12, vertical: 7),
+                                          decoration: BoxDecoration(
+                                              color: const Color(0xFFF1F5F9),
+                                              borderRadius:
+                                                  BorderRadius.circular(20)),
+                                          child: Text(c,
+                                              style: const TextStyle(
+                                                  fontSize: 12.5,
+                                                  fontWeight: FontWeight.w600,
+                                                  color: Color(0xFF334155))),
+                                        ),
                                       ))
                                   .toList(),
                             ),
@@ -188,45 +192,69 @@ class PatientDetailsView extends GetView<BookingController> {
                         ),
                       ),
                       const SizedBox(height: 14),
-                      Container(
-                        padding: const EdgeInsets.all(14),
-                        decoration: BoxDecoration(
-                          color: AppColors.white,
-                          borderRadius: BorderRadius.circular(14),
-                          border: Border.all(color: const Color(0xFFE2E8F0)),
-                        ),
-                        child: Row(
-                          children: [
-                            Container(
-                              width: 40,
-                              height: 40,
-                              decoration: BoxDecoration(
-                                  color: const Color(0xFFF1F5F9),
-                                  borderRadius: BorderRadius.circular(10)),
-                              child: const Icon(Icons.photo_camera_outlined,
-                                  color: Color(0xFF64748B), size: 20),
-                            ),
-                            const SizedBox(width: 12),
-                            const Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text('Attach reports',
-                                      style: TextStyle(
-                                          fontSize: 14,
-                                          fontWeight: FontWeight.w700,
-                                          color: Color(0xFF0F172A))),
-                                  SizedBox(height: 2),
-                                  Text('Prescriptions, lab tests (optional)',
-                                      style: TextStyle(
-                                          fontSize: 12,
-                                          color: Color(0xFF94A3B8))),
-                                ],
+                      GestureDetector(
+                        onTap: con.uploadingAttachment
+                            ? null
+                            : con.pickAttachment,
+                        child: Container(
+                          padding: const EdgeInsets.all(14),
+                          decoration: BoxDecoration(
+                            color: AppColors.white,
+                            borderRadius: BorderRadius.circular(14),
+                            border: Border.all(color: const Color(0xFFE2E8F0)),
+                          ),
+                          child: Row(
+                            children: [
+                              Container(
+                                width: 40,
+                                height: 40,
+                                decoration: BoxDecoration(
+                                    color: const Color(0xFFF1F5F9),
+                                    borderRadius: BorderRadius.circular(10)),
+                                child: const Icon(Icons.photo_camera_outlined,
+                                    color: Color(0xFF64748B), size: 20),
                               ),
-                            ),
-                            const Icon(Icons.chevron_right_rounded,
-                                color: Color(0xFF94A3B8)),
-                          ],
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    const Text('Attach reports',
+                                        style: TextStyle(
+                                            fontSize: 14,
+                                            fontWeight: FontWeight.w700,
+                                            color: Color(0xFF0F172A))),
+                                    const SizedBox(height: 2),
+                                    Text(
+                                        con.attachmentName.isNotEmpty
+                                            ? con.attachmentName
+                                            : 'Prescriptions, lab tests (optional)',
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: TextStyle(
+                                            fontSize: 12,
+                                            color: con.attachmentName.isNotEmpty
+                                                ? _green
+                                                : const Color(0xFF94A3B8))),
+                                  ],
+                                ),
+                              ),
+                              con.uploadingAttachment
+                                  ? const SizedBox(
+                                      width: 18,
+                                      height: 18,
+                                      child: CircularProgressIndicator(
+                                          strokeWidth: 2.2, color: _green),
+                                    )
+                                  : Icon(
+                                      con.attachmentName.isNotEmpty
+                                          ? Icons.check_circle
+                                          : Icons.chevron_right_rounded,
+                                      color: con.attachmentName.isNotEmpty
+                                          ? _green
+                                          : const Color(0xFF94A3B8)),
+                            ],
+                          ),
                         ),
                       ),
                     ],
@@ -299,16 +327,12 @@ class _AddPatientSheetState extends State<_AddPatientSheet> {
 
   void _save() {
     if (!_valid) return;
-    final age = _age.text.trim();
-    final info = [
-      if (age.isNotEmpty) '$age yrs',
-      _gender,
-      _blood,
-    ].join(' · ');
-    widget.con.addPatient(
+    widget.con.addFamilyPatient(
       name: _name.text.trim(),
       relation: _relation.text.trim().isEmpty ? 'Family' : _relation.text.trim(),
-      info: info,
+      age: _age.text.trim(),
+      gender: _gender == 'M' ? 'male' : 'female',
+      bloodGroup: _blood,
     );
     Get.back();
   }
@@ -321,7 +345,7 @@ class _AddPatientSheetState extends State<_AddPatientSheet> {
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
       padding: EdgeInsets.fromLTRB(
-          20, 12, 20, 20 + MediaQuery.of(context).viewInsets.bottom),
+          20, 12, 20, 20 + MediaQuery.of(context).padding.bottom),
       child: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -439,8 +463,8 @@ class _AddPatientSheetState extends State<_AddPatientSheet> {
               ),
             ),
           ],
+          ),
         ),
-      ),
     );
   }
 

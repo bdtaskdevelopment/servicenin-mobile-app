@@ -6,8 +6,8 @@ import '../widgets/ambulance_widgets.dart';
 
 const _red = Color(0xFFE23744);
 
-class AmbulanceBookingsView extends GetView<AmbulanceController> {
-  const AmbulanceBookingsView({super.key});
+class AllAmbulancesView extends GetView<AmbulanceController> {
+  const AllAmbulancesView({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -30,13 +30,13 @@ class AmbulanceBookingsView extends GetView<AmbulanceController> {
                   const Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('My bookings',
+                      Text('Available ambulances',
                           style: TextStyle(
                               fontSize: 19,
                               fontWeight: FontWeight.w800,
                               color: Color(0xFF0F172A))),
                       SizedBox(height: 1),
-                      Text('Tap a trip to see its details',
+                      Text('Tap one to estimate the fare',
                           style: TextStyle(
                               fontSize: 12, color: Color(0xFF94A3B8))),
                     ],
@@ -47,21 +47,21 @@ class AmbulanceBookingsView extends GetView<AmbulanceController> {
             Expanded(
               child: RefreshIndicator(
                 color: _red,
-                onRefresh: controller.fetchBookings,
+                onRefresh: controller.fetchAvailable,
                 child: GetBuilder<AmbulanceController>(
                   builder: (con) {
-                    if (con.loadingBookings && con.bookings.isEmpty) {
+                    if (con.loadingAvailable && con.available.isEmpty) {
                       return const Center(
                         child: CircularProgressIndicator(
                             strokeWidth: 2.6, color: _red),
                       );
                     }
-                    if (con.bookings.isEmpty) {
+                    if (con.available.isEmpty) {
                       return ListView(
                         children: const [
                           SizedBox(height: 120),
                           Center(
-                            child: Text('No bookings yet.',
+                            child: Text('No ambulances available right now.',
                                 style: TextStyle(color: Color(0xFF94A3B8))),
                           ),
                         ],
@@ -69,12 +69,11 @@ class AmbulanceBookingsView extends GetView<AmbulanceController> {
                     }
                     return ListView(
                       padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
-                      children: con.bookings
-                          .map((b) => Padding(
+                      children: con.available
+                          .map((a) => Padding(
                                 padding: const EdgeInsets.only(bottom: 12),
-                                child: BookingCard(
-                                    booking: b,
-                                    onTap: () => con.trackBooking(b)),
+                                child: AmbulanceCard(
+                                    amb: a, onTap: () => con.openFareFor(a)),
                               ))
                           .toList(),
                     );

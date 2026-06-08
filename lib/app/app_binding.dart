@@ -5,11 +5,15 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'app_controller.dart';
 import 'app_service.dart';
 import 'core/values/app_config.dart';
+import 'data/providers/ambulance.provider.dart';
+import 'data/providers/healthcare.provider.dart';
 import 'data/providers/app.provider.dart';
 import 'data/providers/auth.provider.dart';
 import 'data/providers/blood.provider.dart';
 import 'data/providers/info.provider.dart';
 import 'data/providers/profile.provider.dart';
+import 'data/repositories/ambulance.repo.dart';
+import 'data/repositories/healthcare.repo.dart';
 import 'data/repositories/app.repo.dart';
 import 'data/repositories/auth.repo.dart';
 import 'data/repositories/blood.repo.dart';
@@ -42,6 +46,18 @@ class AppDependencyInjection {
     Get.lazyPut<BloodProvider>(() => BloodProvider(), fenix: true);
     Get.lazyPut<BloodRepository>(
       () => BloodRepository(provider: Get.find()),
+      fenix: true,
+    );
+
+    Get.lazyPut<AmbulanceProvider>(() => AmbulanceProvider(), fenix: true);
+    Get.lazyPut<AmbulanceRepository>(
+      () => AmbulanceRepository(provider: Get.find()),
+      fenix: true,
+    );
+
+    Get.lazyPut<HealthcareProvider>(() => HealthcareProvider(), fenix: true);
+    Get.lazyPut<HealthcareRepository>(
+      () => HealthcareRepository(provider: Get.find()),
       fenix: true,
     );
 

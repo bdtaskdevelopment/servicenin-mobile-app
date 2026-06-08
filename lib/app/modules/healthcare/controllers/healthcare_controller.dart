@@ -1,37 +1,59 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import '../../../core/helpers/snack_helper.dart';
+import '../../../data/models/response/healthcare_response.dart';
+import '../../../data/repositories/healthcare.repo.dart';
 import '../../../routes/app_pages.dart';
+import 'doctors_controller.dart';
+
+/// Icon + accent colour for a department, chosen from its specialization name.
+(IconData, Color) hcDeptStyle(String spec) {
+  switch (spec.toLowerCase()) {
+    case 'cardiology':
+      return (Icons.favorite, const Color(0xFFE11D48));
+    case 'gynecology':
+    case 'gynaecology':
+      return (Icons.female_rounded, const Color(0xFFEC4899));
+    case 'pediatrics':
+    case 'paediatrics':
+      return (Icons.child_care_rounded, const Color(0xFF14B8A6));
+    case 'orthopedics':
+    case 'orthopaedics':
+      return (Icons.accessibility_new_rounded, const Color(0xFF0F766E));
+    case 'dermatology':
+      return (Icons.spa_rounded, const Color(0xFFF59E0B));
+    case 'ent':
+    case 'otolaryngology':
+      return (Icons.hearing_rounded, const Color(0xFF6366F1));
+    case 'neurology':
+      return (Icons.psychology_rounded, const Color(0xFF7C3AED));
+    case 'medicine':
+    case 'general medicine':
+      return (Icons.medical_services_rounded, const Color(0xFF0F172A));
+    case 'psychiatry':
+      return (Icons.self_improvement_rounded, const Color(0xFF0EA5E9));
+    case 'dentistry':
+    case 'dental':
+      return (Icons.health_and_safety_rounded, const Color(0xFF16A34A));
+    default:
+      return (Icons.medical_services_outlined, const Color(0xFF16A34A));
+  }
+}
 
 class HcDepartment {
-  const HcDepartment(this.name, this.icon, this.color);
+  const HcDepartment(this.name, this.icon, this.color,
+      {this.specialization = '', this.doctorCount = 0});
   final String name;
   final IconData icon;
   final Color color;
-}
+  final String specialization;
+  final int doctorCount;
 
-class FamilyMember {
-  const FamilyMember({
-    required this.name,
-    required this.relation,
-    required this.age,
-    required this.gender,
-    required this.bloodGroup,
-    required this.color,
-  });
-  final String name;
-  final String relation;
-  final String age;
-  final String gender;
-  final String bloodGroup;
-  final Color color;
-
-  String get initials {
-    final parts = name.trim().split(' ');
-    if (parts.length >= 2 && parts[0].isNotEmpty && parts[1].isNotEmpty) {
-      return '${parts[0][0]}${parts[1][0]}'.toUpperCase();
-    }
-    return name.isNotEmpty ? name[0].toUpperCase() : '?';
+  factory HcDepartment.fromApi(Department d) {
+    final style = hcDeptStyle(d.name);
+    return HcDepartment(d.name, style.$1, style.$2,
+        specialization: d.name, doctorCount: d.doctorCount);
   }
 }
 
@@ -47,6 +69,7 @@ class HcDoctor {
     required this.slot,
     required this.color,
     this.video = false,
+    this.id = '',
   });
 
   final String initials;
@@ -59,115 +82,129 @@ class HcDoctor {
   final String slot;
   final Color color;
   final bool video;
+  final String id;
+
+  factory HcDoctor.fromApi(Doctor d) => HcDoctor(
+        id: d.id,
+        initials: d.initials,
+        name: d.displayName,
+        specialty: d.specialization,
+        degree: d.qualifications,
+        rating: d.ratingLabel,
+        reviews: d.totalReviews,
+        fee: d.feeLabel,
+        slot: d.isAvailable ? 'Available today' : 'By schedule',
+        color: const Color(0xFF16A34A),
+      );
 }
 
 class HealthcareController extends GetxController {
-  // In-person (0) / Video consult (1)
+  HealthcareRepository get _repo => Get.find<HealthcareRepository>();
+
+  // In-person (0) / Video consult (1) — kept for the (hidden) mode toggle.
   int mode = 0;
   void setMode(int m) {
     mode = m;
     update();
   }
 
-  // ── Family members ──────────────────────────────────────────────────
-  final List<FamilyMember> family = [
-    const FamilyMember(
-        name: 'Tanzil Ahmed',
-        relation: 'Self',
-        age: '31',
-        gender: 'M',
-        bloodGroup: 'B+',
-        color: Color(0xFF16A34A)),
-    const FamilyMember(
-        name: 'Ayesha Ahmed',
-        relation: 'Spouse',
-        age: '29',
-        gender: 'F',
-        bloodGroup: 'O+',
-        color: Color(0xFFEC4899)),
-    const FamilyMember(
-        name: 'Rafi Ahmed',
-        relation: 'Son',
-        age: '6',
-        gender: 'M',
-        bloodGroup: 'B+',
-        color: Color(0xFF14B8A6)),
-  ];
+  // ── Departments ─────────────────────────────────────────────────────
+  List<HcDepartment> departments = [];
+  bool loadingDepartments = false;
 
-  static const List<Color> _familyColors = [
-    Color(0xFF0F7A52),
-    Color(0xFFF59E0B),
-    Color(0xFF6366F1),
-    Color(0xFFE11D48),
-    Color(0xFF14B8A6),
-  ];
+  // ── Available-today doctors ─────────────────────────────────────────
+  List<HcDoctor> doctors = [];
+  bool loadingDoctors = false;
 
-  void addFamilyMember({
+  // ── Family ──────────────────────────────────────────────────────────
+  List<HcFamilyMember> family = [];
+  bool loadingFamily = false;
+  bool addingFamily = false;
+
+  @override
+  void onInit() {
+    super.onInit();
+    fetchDepartments();
+    fetchAvailableToday();
+    fetchFamily();
+  }
+
+  Future<void> fetchDepartments() async {
+    loadingDepartments = true;
+    update();
+    try {
+      final list = await _repo.fetchDepartments();
+      departments = list.map(HcDepartment.fromApi).toList();
+    } catch (e) {
+      SnackHelper.error(e.toString().replaceFirst('Exception: ', ''));
+    } finally {
+      loadingDepartments = false;
+      update();
+    }
+  }
+
+  Future<void> fetchAvailableToday() async {
+    loadingDoctors = true;
+    update();
+    try {
+      final list = await _repo.fetchAvailableToday();
+      doctors = list.map(HcDoctor.fromApi).toList();
+    } catch (e) {
+      SnackHelper.error(e.toString().replaceFirst('Exception: ', ''));
+    } finally {
+      loadingDoctors = false;
+      update();
+    }
+  }
+
+  Future<void> fetchFamily() async {
+    loadingFamily = true;
+    update();
+    try {
+      family = await _repo.fetchFamily();
+    } catch (e) {
+      SnackHelper.error(e.toString().replaceFirst('Exception: ', ''));
+    } finally {
+      loadingFamily = false;
+      update();
+    }
+  }
+
+  Future<bool> addFamilyMember({
     required String name,
     required String relation,
     required String age,
     required String gender,
     required String bloodGroup,
-  }) {
-    family.add(FamilyMember(
-      name: name,
-      relation: relation,
-      age: age,
-      gender: gender,
-      bloodGroup: bloodGroup,
-      color: _familyColors[family.length % _familyColors.length],
-    ));
+  }) async {
+    if (addingFamily) return false;
+    addingFamily = true;
     update();
+    try {
+      final created = await _repo.addFamilyMember({
+        'name': name,
+        'relation': relation,
+        'gender': gender,
+        'age': int.tryParse(age.trim()) ?? 0,
+        'blood_group': bloodGroup,
+      });
+      family.add(created);
+      SnackHelper.success('Family member added');
+      return true;
+    } catch (e) {
+      SnackHelper.error(e.toString().replaceFirst('Exception: ', ''));
+      return false;
+    } finally {
+      addingFamily = false;
+      update();
+    }
   }
 
+  // ── Navigation ──────────────────────────────────────────────────────
   void openFamily() => Get.toNamed(Routes.HEALTHCARE_FAMILY);
 
-  final List<HcDepartment> departments = const [
-    HcDepartment('কার্ডিও', Icons.favorite, Color(0xFF0F172A)),
-    HcDepartment('গাইনি', Icons.female_rounded, Color(0xFF16A34A)),
-    HcDepartment('শিশু', Icons.person_outline_rounded, Color(0xFF14B8A6)),
-    HcDepartment('অর্থো', Icons.directions_run_rounded, Color(0xFF16A34A)),
-    HcDepartment('চর্ম', Icons.shield_outlined, Color(0xFF16A34A)),
-    HcDepartment('নাক-কান', Icons.hearing_rounded, Color(0xFF14B8A6)),
-    HcDepartment('ডায়াবেটিস', Icons.water_drop_rounded, Color(0xFF0F172A)),
-    HcDepartment('মানসিক', Icons.favorite_border_rounded, Color(0xFF0F172A)),
-  ];
-
-  final List<HcDoctor> doctors = const [
-    HcDoctor(
-      initials: 'SA',
-      name: 'Dr. Salma Akter',
-      specialty: 'Cardiology',
-      degree: 'MBBS',
-      rating: '4.9',
-      reviews: 312,
-      fee: '৳700',
-      slot: 'Today 3–5 PM',
-      color: Color(0xFF16A34A),
-      video: true,
-    ),
-    HcDoctor(
-      initials: 'RK',
-      name: 'Dr. Rahim Khan',
-      specialty: 'Pediatrics',
-      degree: 'MBBS',
-      rating: '4.7',
-      reviews: 198,
-      fee: '৳500',
-      slot: 'Today 5–7 PM',
-      color: Color(0xFF16A34A),
-    ),
-    HcDoctor(
-      initials: 'TH',
-      name: 'Dr. Tanvir Hasan',
-      specialty: 'Dermatology',
-      degree: 'MBBS',
-      rating: '4.8',
-      reviews: 254,
-      fee: '৳600',
-      slot: 'Tomorrow 10 AM',
-      color: Color(0xFF16A34A),
-      video: true,
-    ),
-  ];
+  /// Open the doctors list filtered to a department's specialization.
+  void openDepartment(HcDepartment d) {
+    Get.find<DoctorsController>().openForSpecialization(d.specialization);
+  }
 }

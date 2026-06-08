@@ -1,155 +1,153 @@
+import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 import 'package:latlong2/latlong.dart';
 
+import '../../../core/helpers/snack_helper.dart';
+import '../../../core/values/bd_geo.dart';
+import '../../../data/models/response/ambulance_booking_response.dart';
+import '../../../data/models/response/ambulance_response.dart';
+import '../../../data/repositories/ambulance.repo.dart';
 import '../../../routes/app_pages.dart';
-
-class Zilla {
-  const Zilla(this.name, this.lat, this.lng);
-  final String name;
-  final double lat;
-  final double lng;
-  LatLng get point => LatLng(lat, lng);
-}
-
-class AmbulanceBooking {
-  const AmbulanceBooking({
-    required this.id,
-    required this.title,
-    required this.route,
-    required this.dateAmount,
-    required this.ongoing,
-    required this.lat,
-    required this.lng,
-  });
-
-  final String id;
-  final String title;
-  final String route;
-  final String dateAmount;
-  final bool ongoing; // true = on the way, false = completed
-  final double lat;
-  final double lng;
-  LatLng get point => LatLng(lat, lng);
-}
+import 'fare_controller.dart';
 
 class AmbulanceController extends GetxController {
-  // ── Division → Zilla data (with coordinates for the map) ────────────
-  final Map<String, List<Zilla>> _data = const {
-    'Dhaka': [
-      Zilla('Dhaka', 23.8103, 90.4125),
-      Zilla('Gazipur', 23.9999, 90.4203),
-      Zilla('Narayanganj', 23.6238, 90.4990),
-    ],
-    'Chattogram': [
-      Zilla('Chattogram', 22.3569, 91.7832),
-      Zilla("Cox's Bazar", 21.4395, 92.0050),
-      Zilla('Cumilla', 23.4607, 91.1809),
-    ],
-    'Khulna': [
-      Zilla('Khulna', 22.8456, 89.5403),
-      Zilla('Jashore', 23.1667, 89.2167),
-    ],
-    'Rajshahi': [
-      Zilla('Rajshahi', 24.3636, 88.6241),
-      Zilla('Bogura', 24.8466, 89.3776),
-    ],
-    'Sylhet': [
-      Zilla('Sylhet', 24.8949, 91.8687),
-      Zilla('Moulvibazar', 24.4829, 91.7774),
-    ],
-    'Barishal': [
-      Zilla('Barishal', 22.7010, 90.3535),
-      Zilla('Bhola', 22.6859, 90.6482),
-    ],
-    'Rangpur': [
-      Zilla('Rangpur', 25.7439, 89.2752),
-      Zilla('Dinajpur', 25.6217, 88.6354),
-    ],
-    'Mymensingh': [
-      Zilla('Mymensingh', 24.7471, 90.4203),
-      Zilla('Jamalpur', 24.9375, 89.9372),
-    ],
-  };
+  AmbulanceRepository get _repo => Get.find<AmbulanceRepository>();
 
-  List<String> get divisions => _data.keys.toList();
-  List<Zilla> zillasOf(int divIndex) => _data[divisions[divIndex]]!;
+  // ── Available ambulances (GET /api/v1/ambulance/available) ──────────
+  List<Ambulance> available = [];
+  bool loadingAvailable = false;
 
-  // Pickup selection
-  int pickupDiv = 0;
-  int pickupZilla = 0;
-  // Destination selection
-  int destDiv = 0;
-  int destZilla = 1;
+  // ── Bookings (GET /api/v1/ambulance/bookings) ───────────────────────
+  List<AmbulanceBookingEntry> bookings = [];
+  bool loadingBookings = false;
 
-  String get pickupDivision => divisions[pickupDiv];
-  String get pickupZillaName => zillasOf(pickupDiv)[pickupZilla].name;
-  String get destDivision => divisions[destDiv];
-  String get destZillaName => zillasOf(destDiv)[destZilla].name;
+  // ── Locations (GET /api/v1/locations/…) ─────────────────────────────
+  List<String> divisions = [];
+  List<String> pickupDistricts = [];
+  List<String> dropDistricts = [];
+  String pickupDivision = '';
+  String pickupZilla = '';
+  String dropDivision = '';
+  String dropZilla = '';
+  bool loadingLocations = false;
 
-  LatLng get pickupPoint => zillasOf(pickupDiv)[pickupZilla].point;
-  LatLng get destPoint => zillasOf(destDiv)[destZilla].point;
+  /// The ambulance tapped from a list — carried into the fare screen.
+  Ambulance? selectedAmbulance;
 
-  void setPickupDiv(int i) {
-    pickupDiv = i;
-    pickupZilla = 0;
-    update();
+  /// The most recently confirmed booking — shown on the confirmed screen.
+  AmbulanceBookingEntry? lastBooking;
+
+  /// Called when pickup/destination change, so the fare screen can re-estimate.
+  VoidCallback? onTripChanged;
+
+  @override
+  void onInit() {
+    super.onInit();
+    fetchAvailable();
+    fetchBookings();
+    loadLocations();
   }
 
-  void setPickupZilla(int i) {
-    pickupZilla = i;
+  // ── Map points (derived from the selected division/zilla names) ──────
+  LatLng get pickupPoint => BdGeo.point(pickupZilla, pickupDivision);
+  LatLng get destPoint => BdGeo.point(dropZilla, dropDivision);
+
+  Future<void> fetchAvailable() async {
+    loadingAvailable = true;
     update();
+    try {
+      available = await _repo.fetchAvailable();
+    } catch (e) {
+      SnackHelper.error(e.toString().replaceFirst('Exception: ', ''));
+    } finally {
+      loadingAvailable = false;
+      update();
+    }
   }
 
-  void setDestDiv(int i) {
-    destDiv = i;
-    destZilla = 0;
+  Future<void> fetchBookings() async {
+    loadingBookings = true;
     update();
+    try {
+      bookings = await _repo.fetchBookings();
+    } catch (e) {
+      SnackHelper.error(e.toString().replaceFirst('Exception: ', ''));
+    } finally {
+      loadingBookings = false;
+      update();
+    }
   }
 
-  void setDestZilla(int i) {
-    destZilla = i;
+  Future<void> loadLocations() async {
+    if (divisions.isNotEmpty) return; // already loaded
+    loadingLocations = true;
     update();
+    try {
+      divisions = await _repo.fetchDivisions();
+      if (divisions.isNotEmpty) {
+        pickupDivision = divisions.first;
+        dropDivision = divisions.first;
+        pickupDistricts = await _repo.fetchDistricts(pickupDivision);
+        dropDistricts = List<String>.from(pickupDistricts);
+        if (pickupDistricts.isNotEmpty) pickupZilla = pickupDistricts.first;
+        // default the destination to a different district when possible
+        if (dropDistricts.length > 1) {
+          dropZilla = dropDistricts[1];
+        } else if (dropDistricts.isNotEmpty) {
+          dropZilla = dropDistricts.first;
+        }
+      }
+    } catch (e) {
+      SnackHelper.error(e.toString().replaceFirst('Exception: ', ''));
+    } finally {
+      loadingLocations = false;
+      update();
+      onTripChanged?.call(); // estimate once a default trip is known
+    }
   }
 
-  // ── Bookings ────────────────────────────────────────────────────────
-  final List<AmbulanceBooking> bookings = const [
-    AmbulanceBooking(
-      id: 'AMB-2891',
-      title: 'ICU · United Hospital',
-      route: 'Gulshan-2 → United Hospital',
-      dateAmount: 'On the way · ৳2,840',
-      ongoing: true,
-      lat: 23.7980,
-      lng: 90.4150,
-    ),
-    AmbulanceBooking(
-      id: 'AMB-2710',
-      title: 'Basic · Square Hospital',
-      route: 'Dhanmondi → Square Hospital',
-      dateAmount: '4 May · ৳1,250',
-      ongoing: false,
-      lat: 23.7530,
-      lng: 90.3780,
-    ),
-    AmbulanceBooking(
-      id: 'AMB-2588',
-      title: 'ALS · Evercare Hospital',
-      route: 'Bashundhara → Evercare',
-      dateAmount: '26 Apr · ৳1,920',
-      ongoing: false,
-      lat: 23.8150,
-      lng: 90.4260,
-    ),
-  ];
+  Future<void> setPickupDivision(String div) async {
+    if (div == pickupDivision) return;
+    pickupDivision = div;
+    pickupZilla = '';
+    update();
+    try {
+      pickupDistricts = await _repo.fetchDistricts(div);
+      if (pickupDistricts.isNotEmpty) pickupZilla = pickupDistricts.first;
+    } catch (_) {}
+    update();
+    onTripChanged?.call();
+  }
 
-  AmbulanceBooking? selectedBooking;
+  void setPickupZilla(String z) {
+    pickupZilla = z;
+    update();
+    onTripChanged?.call();
+  }
 
-  // Live ambulance position (moves toward destination on refresh).
+  Future<void> setDropDivision(String div) async {
+    if (div == dropDivision) return;
+    dropDivision = div;
+    dropZilla = '';
+    update();
+    try {
+      dropDistricts = await _repo.fetchDistricts(div);
+      if (dropDistricts.isNotEmpty) dropZilla = dropDistricts.first;
+    } catch (_) {}
+    update();
+    onTripChanged?.call();
+  }
+
+  void setDropZilla(String z) {
+    dropZilla = z;
+    update();
+    onTripChanged?.call();
+  }
+
+  // ── Live position (used by the emergency tracking screen) ───────────
   LatLng? _livePos;
-  LatLng get liveAmbulancePoint =>
-      _livePos ?? selectedBooking?.point ?? const LatLng(23.78, 90.41);
+  LatLng get liveAmbulancePoint => _livePos ?? pickupPoint;
 
-  /// Simulate a location update — step the ambulance toward the destination.
   void refreshAmbulance() {
     final from = liveAmbulancePoint;
     final to = destPoint;
@@ -160,17 +158,27 @@ class AmbulanceController extends GetxController {
     update();
   }
 
-  /// Re-render the location preview map (re-centres on current selection).
-  void refreshMap() => update();
-
   // ── Navigation ──────────────────────────────────────────────────────
-  void openSeeAll() => Get.toNamed(Routes.AMBULANCE_SELECT);
+  void openSeeAll() => Get.toNamed(Routes.AMBULANCE_ALL);
   void openBookings() => Get.toNamed(Routes.AMBULANCE_BOOKINGS);
 
-  void trackBooking(AmbulanceBooking b) {
-    selectedBooking = b;
-    _livePos = b.point; // reset live position to the booking's start
+  /// Tap an available ambulance → fare estimate (pre-selecting its type).
+  void openFareFor(Ambulance amb) {
+    selectedAmbulance = amb;
     update();
-    Get.toNamed(Routes.AMBULANCE_TRACKING);
+    Get.find<FareController>().initFor(amb);
+    Get.toNamed(Routes.AMBULANCE_FARE);
+  }
+
+  /// Open a past booking's summary/map.
+  void trackBooking(AmbulanceBookingEntry b) {
+    lastBooking = b;
+    pickupDivision = b.pickupDivision;
+    pickupZilla = b.pickupZilla;
+    dropDivision = b.dropDivision;
+    dropZilla = b.dropZilla;
+    _livePos = null;
+    update();
+    Get.toNamed(Routes.AMBULANCE_CONFIRMED);
   }
 }

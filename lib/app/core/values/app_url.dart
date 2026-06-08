@@ -28,6 +28,54 @@ class ApiURL {
   static final String bloodDonorRegister = 'api/v1/blood/donors/register';
   static final String bloodDonorVerifyOtp = 'api/v1/blood/donors/verify-otp';
 
+  //===== Ambulance
+  static final String ambulanceAvailable = 'api/v1/ambulance/available';
+  static final String ambulanceBookings = 'api/v1/ambulance/bookings';
+  static final String ambulanceTypes = 'api/v1/ambulance/types';
+  static final String ambulanceFareEstimate = 'api/v1/ambulance/fare/estimate';
+  static final String ambulancePaymentMethods =
+      'api/v1/ambulance/payment-methods';
+
+  //===== Locations
+  static final String locationDivisions = 'api/v1/locations/divisions';
+  static String locationDistricts(String division) =>
+      'api/v1/locations/districts?division=$division';
+
+  //===== Healthcare
+  static final String hcDepartments = 'api/v1/healthcare/departments';
+  static final String hcDoctors = 'api/v1/healthcare/doctors';
+  static String hcDoctorsBySpecialization(String spec) =>
+      'api/v1/healthcare/doctors?specialization=$spec';
+  static final String hcDoctorsAvailableToday =
+      'api/v1/healthcare/doctors/available-today';
+  static String hcDoctorProfile(String id) =>
+      'api/v1/healthcare/doctors/$id/profile';
+  static String hcDoctorReviews(String id) =>
+      'api/v1/healthcare/doctors/$id/reviews';
+  static String hcDoctorVenues(String id) =>
+      'api/v1/healthcare/doctors/$id/venues';
+  static String hcScheduleDates(String id, String venueId) =>
+      'api/v1/healthcare/doctors/$id/schedule-dates?venue_id=$venueId';
+  static String hcTimeSlots(String id, String venueId, String date) =>
+      'api/v1/healthcare/doctors/$id/time-slots?venue_id=$venueId&date=$date';
+  static final String hcFamily = 'api/v1/healthcare/family';
+  static final String hcDocumentsUpload =
+      'api/v1/healthcare/documents/upload';
+  static final String hcAppointments = 'api/v1/healthcare/appointments';
+  static final String hcAppointmentsMy = 'api/v1/healthcare/appointments/my';
+  static String hcAppointmentById(String id) =>
+      'api/v1/healthcare/appointments/$id';
+  static String hcAppointmentQueue(String id) =>
+      'api/v1/healthcare/appointments/$id/queue';
+  static String hcAppointmentReschedule(String id) =>
+      'api/v1/healthcare/appointments/$id/reschedule';
+  static final String hcPrescriptionLatest =
+      'api/v1/healthcare/prescriptions/latest';
+  static String hcPrescriptionsByDoctor(String doctorId) =>
+      'api/v1/healthcare/prescriptions/by-doctor/$doctorId';
+  static String hcPrescriptionDownload(String id) =>
+      'api/v1/healthcare/prescriptions/$id/download';
+
   //===== Information / hotlines (ServiceNin)
   static final String info = 'api/v1/info';
   static String infoById(String id) => 'api/v1/info/$id';

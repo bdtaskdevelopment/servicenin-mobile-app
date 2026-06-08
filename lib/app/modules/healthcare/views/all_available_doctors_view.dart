@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-import '../controllers/ambulance_controller.dart';
-import '../widgets/ambulance_widgets.dart';
+import '../../../routes/app_pages.dart';
+import '../controllers/booking_controller.dart';
+import '../controllers/healthcare_controller.dart';
+import '../widgets/hc_doctor_card.dart';
 
-const _red = Color(0xFFE23744);
+const _green = Color(0xFF15803D);
 
-class AmbulanceBookingsView extends GetView<AmbulanceController> {
-  const AmbulanceBookingsView({super.key});
+class AllAvailableDoctorsView extends GetView<HealthcareController> {
+  const AllAvailableDoctorsView({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -30,13 +32,13 @@ class AmbulanceBookingsView extends GetView<AmbulanceController> {
                   const Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('My bookings',
+                      Text('Available today',
                           style: TextStyle(
                               fontSize: 19,
                               fontWeight: FontWeight.w800,
                               color: Color(0xFF0F172A))),
                       SizedBox(height: 1),
-                      Text('Tap a trip to see its details',
+                      Text('Doctors taking patients today',
                           style: TextStyle(
                               fontSize: 12, color: Color(0xFF94A3B8))),
                     ],
@@ -46,22 +48,22 @@ class AmbulanceBookingsView extends GetView<AmbulanceController> {
             ),
             Expanded(
               child: RefreshIndicator(
-                color: _red,
-                onRefresh: controller.fetchBookings,
-                child: GetBuilder<AmbulanceController>(
+                color: _green,
+                onRefresh: controller.fetchAvailableToday,
+                child: GetBuilder<HealthcareController>(
                   builder: (con) {
-                    if (con.loadingBookings && con.bookings.isEmpty) {
+                    if (con.loadingDoctors && con.doctors.isEmpty) {
                       return const Center(
                         child: CircularProgressIndicator(
-                            strokeWidth: 2.6, color: _red),
+                            strokeWidth: 2.6, color: _green),
                       );
                     }
-                    if (con.bookings.isEmpty) {
+                    if (con.doctors.isEmpty) {
                       return ListView(
                         children: const [
-                          SizedBox(height: 120),
+                          SizedBox(height: 140),
                           Center(
-                            child: Text('No bookings yet.',
+                            child: Text('No doctors available today.',
                                 style: TextStyle(color: Color(0xFF94A3B8))),
                           ),
                         ],
@@ -69,12 +71,16 @@ class AmbulanceBookingsView extends GetView<AmbulanceController> {
                     }
                     return ListView(
                       padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
-                      children: con.bookings
-                          .map((b) => Padding(
+                      children: con.doctors
+                          .map((d) => Padding(
                                 padding: const EdgeInsets.only(bottom: 12),
-                                child: BookingCard(
-                                    booking: b,
-                                    onTap: () => con.trackBooking(b)),
+                                child: GestureDetector(
+                                  onTap: () {
+                                    Get.find<BookingController>().setDoctor(d);
+                                    Get.toNamed(Routes.HC_DOCTOR_PROFILE);
+                                  },
+                                  child: HcDoctorCard(doctor: d),
+                                ),
                               ))
                           .toList(),
                     );

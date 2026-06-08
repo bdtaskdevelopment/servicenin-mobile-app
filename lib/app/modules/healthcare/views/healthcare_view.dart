@@ -1,10 +1,11 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../../core/values/app_colors.dart';
 import '../../../routes/app_pages.dart';
 import '../controllers/booking_controller.dart';
 import '../controllers/healthcare_controller.dart';
+import '../widgets/hc_doctor_card.dart';
 
 const _green = Color(0xFF16A34A);
 const _darkGreen = Color(0xFF0F7A52);
@@ -62,16 +63,18 @@ class HealthcareView extends GetView<HealthcareController> {
                     children: [
                       _Hero(),
                       const SizedBox(height: 14),
-                      _ModeToggle(con: con),
-                      const SizedBox(height: 14),
+                      // In-person / Video consult toggle hidden for now.
+                      // _ModeToggle(con: con),
+                      // const SizedBox(height: 14),
                       const _QuickGrid(),
                       const SizedBox(height: 14),
-                      GestureDetector(
-                        onTap: () =>
-                            Get.toNamed(Routes.HEALTHCARE_APPOINTMENTS),
-                        child: const _UpcomingCard(),
-                      ),
-                      const SizedBox(height: 22),
+                      // Upcoming-appointment card hidden for now.
+                      // GestureDetector(
+                      //   onTap: () =>
+                      //       Get.toNamed(Routes.HEALTHCARE_APPOINTMENTS),
+                      //   child: const _UpcomingCard(),
+                      // ),
+                      // const SizedBox(height: 22),
                       GestureDetector(
                         onTap: () => Get.toNamed(Routes.HC_DOCTORS),
                         child: _SectionHeader(
@@ -87,29 +90,45 @@ class HealthcareView extends GetView<HealthcareController> {
                         childAspectRatio: 0.86,
                         children: con.departments
                             .map((d) => GestureDetector(
-                                  onTap: () => Get.toNamed(Routes.HC_DOCTORS),
+                                  onTap: () => con.openDepartment(d),
                                   child: _DeptTile(dept: d),
                                 ))
                             .toList(),
                       ),
                       const SizedBox(height: 22),
-                      _SectionHeader(title: 'Available today', action: 'All →'),
-                      const Padding(
-                        padding: EdgeInsets.only(top: 2, bottom: 12),
-                        child: Text('In-person · near Gulshan',
-                            style: TextStyle(
-                                fontSize: 12.5, color: Color(0xFF94A3B8))),
+                      GestureDetector(
+                        onTap: () =>
+                            Get.toNamed(Routes.HC_AVAILABLE_TODAY),
+                        child: _SectionHeader(
+                            title: 'Available today', action: 'All →'),
                       ),
-                      ...con.doctors.map((d) => Padding(
-                            padding: const EdgeInsets.only(bottom: 12),
-                            child: GestureDetector(
-                              onTap: () {
-                                Get.find<BookingController>().setDoctor(d);
-                                Get.toNamed(Routes.HC_DOCTOR_PROFILE);
-                              },
-                              child: _DoctorCard(doctor: d),
-                            ),
-                          )),
+                      const SizedBox(height: 12),
+                      if (con.loadingDoctors && con.doctors.isEmpty)
+                        const Padding(
+                          padding: EdgeInsets.symmetric(vertical: 20),
+                          child: Center(
+                            child: CircularProgressIndicator(
+                                strokeWidth: 2.4, color: _green),
+                          ),
+                        )
+                      else if (con.doctors.isEmpty)
+                        const Padding(
+                          padding: EdgeInsets.symmetric(vertical: 8),
+                          child: Text('No doctors available today.',
+                              style: TextStyle(
+                                  fontSize: 13, color: Color(0xFF94A3B8))),
+                        )
+                      else
+                        ...con.doctors.take(4).map((d) => Padding(
+                              padding: const EdgeInsets.only(bottom: 12),
+                              child: GestureDetector(
+                                onTap: () {
+                                  Get.find<BookingController>().setDoctor(d);
+                                  Get.toNamed(Routes.HC_DOCTOR_PROFILE);
+                                },
+                                child: HcDoctorCard(doctor: d),
+                              ),
+                            )),
                     ],
                   );
                 },
@@ -186,7 +205,8 @@ class _Hero extends StatelessWidget {
   }
 }
 
-// ── Mode toggle ─────────────────────────────────────────────────────
+// ── Mode toggle (hidden for now) ────────────────────────────────────
+// ignore: unused_element
 class _ModeToggle extends StatelessWidget {
   const _ModeToggle({required this.con});
   final HealthcareController con;
@@ -318,7 +338,8 @@ class _QuickGrid extends StatelessWidget {
   }
 }
 
-// ── Upcoming card ───────────────────────────────────────────────────
+// ── Upcoming card (hidden for now) ──────────────────────────────────
+// ignore: unused_element
 class _UpcomingCard extends StatelessWidget {
   const _UpcomingCard();
 
@@ -452,126 +473,6 @@ class _DeptTile extends StatelessWidget {
                 height: 1.15,
               ),
             ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-// ── Doctor card ─────────────────────────────────────────────────────
-class _DoctorCard extends StatelessWidget {
-  const _DoctorCard({required this.doctor});
-  final HcDoctor doctor;
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: AppColors.white,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFFEDEFF2)),
-      ),
-      child: Row(
-        children: [
-          Stack(
-            clipBehavior: Clip.none,
-            children: [
-              Container(
-                width: 56,
-                height: 56,
-                decoration: BoxDecoration(
-                    color: _tile, borderRadius: BorderRadius.circular(14)),
-                alignment: Alignment.center,
-                child: Text(doctor.initials,
-                    style: TextStyle(
-                        color: doctor.color,
-                        fontSize: 16,
-                        fontWeight: FontWeight.w800)),
-              ),
-              const Positioned(
-                right: -2,
-                bottom: -2,
-                child: CircleAvatar(
-                  radius: 9,
-                  backgroundColor: Colors.white,
-                  child: Icon(Icons.check_circle,
-                      size: 16, color: Color(0xFF16A34A)),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(doctor.name,
-                    style: const TextStyle(
-                        fontSize: 14.5,
-                        fontWeight: FontWeight.w700,
-                        color: Color(0xFF0F172A))),
-                const SizedBox(height: 2),
-                Text('${doctor.specialty} · ${doctor.degree}',
-                    style: const TextStyle(
-                        fontSize: 12, color: Color(0xFF94A3B8))),
-                const SizedBox(height: 6),
-                Row(
-                  children: [
-                    const Icon(Icons.star_rounded,
-                        size: 15, color: Color(0xFFF59E0B)),
-                    const SizedBox(width: 2),
-                    Text(doctor.rating,
-                        style: const TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w700,
-                            color: Color(0xFF334155))),
-                    Text(' (${doctor.reviews})',
-                        style: const TextStyle(
-                            fontSize: 12, color: Color(0xFF94A3B8))),
-                    if (doctor.video) ...[
-                      const SizedBox(width: 8),
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 8, vertical: 3),
-                        decoration: BoxDecoration(
-                            color: const Color(0xFFEDE9FE),
-                            borderRadius: BorderRadius.circular(6)),
-                        child: const Text('Video',
-                            style: TextStyle(
-                                fontSize: 10.5,
-                                fontWeight: FontWeight.w700,
-                                color: Color(0xFF7C3AED))),
-                      ),
-                    ],
-                  ],
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(width: 8),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              Text(doctor.fee,
-                  style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w800,
-                      color: Color(0xFF15803D))),
-              const SizedBox(height: 6),
-              Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
-                decoration: BoxDecoration(
-                    color: const Color(0xFFDCFCE7),
-                    borderRadius: BorderRadius.circular(20)),
-                child: Text(doctor.slot,
-                    style: const TextStyle(
-                        fontSize: 10.5,
-                        fontWeight: FontWeight.w700,
-                        color: Color(0xFF15803D))),
-              ),
-            ],
           ),
         ],
       ),

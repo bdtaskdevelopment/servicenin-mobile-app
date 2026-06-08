@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../../core/values/app_colors.dart';
-import '../../../routes/app_pages.dart';
+import '../../../data/models/response/healthcare_response.dart';
 import '../controllers/appointments_controller.dart';
 
 const _green = Color(0xFF15803D);
@@ -38,8 +38,7 @@ class AppointmentsView extends GetView<AppointmentsController> {
             indicatorWeight: 2.5,
             labelColor: _green,
             unselectedLabelColor: Color(0xFF94A3B8),
-            labelStyle:
-                TextStyle(fontSize: 14.5, fontWeight: FontWeight.w700),
+            labelStyle: TextStyle(fontSize: 14.5, fontWeight: FontWeight.w700),
             unselectedLabelStyle:
                 TextStyle(fontSize: 14.5, fontWeight: FontWeight.w600),
             tabs: [
@@ -48,11 +47,21 @@ class AppointmentsView extends GetView<AppointmentsController> {
             ],
           ),
         ),
-        body: TabBarView(
-          children: [
-            _List(items: controller.upcoming),
-            _List(items: controller.completed),
-          ],
+        body: GetBuilder<AppointmentsController>(
+          builder: (con) {
+            if (con.loading && con.all.isEmpty) {
+              return const Center(
+                child: CircularProgressIndicator(
+                    strokeWidth: 2.6, color: _green),
+              );
+            }
+            return TabBarView(
+              children: [
+                _List(items: con.upcoming),
+                _List(items: con.completed),
+              ],
+            );
+          },
         ),
       ),
     );
@@ -61,36 +70,55 @@ class AppointmentsView extends GetView<AppointmentsController> {
 
 class _List extends StatelessWidget {
   const _List({required this.items});
-  final List<Appointment> items;
+  final List<HcAppointment> items;
 
   @override
   Widget build(BuildContext context) {
     if (items.isEmpty) {
-      return const Center(
-        child: Text('No appointments',
-            style: TextStyle(color: Color(0xFF94A3B8))),
+      return RefreshIndicator(
+        color: _green,
+        onRefresh: Get.find<AppointmentsController>().fetchMine,
+        child: ListView(
+          children: const [
+            SizedBox(height: 140),
+            Center(
+              child: Text('No appointments',
+                  style: TextStyle(color: Color(0xFF94A3B8))),
+            ),
+          ],
+        ),
       );
     }
-    return ListView(
-      padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
-      children: items.map((a) => Padding(
-            padding: const EdgeInsets.only(bottom: 12),
-            child: GestureDetector(
-              onTap: () => Get.find<AppointmentsController>().openAppointment(a),
-              child: _ApptCard(appt: a),
-            ),
-          )).toList(),
+    return RefreshIndicator(
+      color: _green,
+      onRefresh: Get.find<AppointmentsController>().fetchMine,
+      child: ListView(
+        padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
+        children: items
+            .map((a) => Padding(
+                  padding: const EdgeInsets.only(bottom: 12),
+                  child: GestureDetector(
+                    onTap: () => Get.find<AppointmentsController>()
+                        .openAppointment(a),
+                    child: _ApptCard(appt: a),
+                  ),
+                ))
+            .toList(),
+      ),
     );
   }
 }
 
 class _ApptCard extends StatelessWidget {
   const _ApptCard({required this.appt});
-  final Appointment appt;
+  final HcAppointment appt;
 
   @override
   Widget build(BuildContext context) {
-    final isUpcoming = appt.status == ApptStatus.upcoming;
+    final isUpcoming = appt.upcoming;
+    final line = [appt.whenLabel, appt.venueName]
+        .where((s) => s.isNotEmpty)
+        .join(' · ');
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
@@ -113,7 +141,7 @@ class _ApptCard extends StatelessWidget {
                 decoration: BoxDecoration(
                     color: _tile, borderRadius: BorderRadius.circular(12)),
                 alignment: Alignment.center,
-                child: Text(appt.initials,
+                child: Text(appt.doctorInitials,
                     style: const TextStyle(
                         color: _green,
                         fontSize: 15,
@@ -124,13 +152,13 @@ class _ApptCard extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(appt.name,
+                    Text(appt.doctorName,
                         style: const TextStyle(
                             fontSize: 15,
                             fontWeight: FontWeight.w800,
                             color: Color(0xFF0F172A))),
                     const SizedBox(height: 2),
-                    Text('${appt.specialty} · ${appt.relation}',
+                    Text('${appt.specialty} · ${appt.typeLabel}',
                         style: const TextStyle(
                             fontSize: 12.5, color: Color(0xFF94A3B8))),
                   ],
@@ -146,42 +174,31 @@ class _ApptCard extends StatelessWidget {
           ),
           Row(
             children: [
-              Icon(appt.icon, size: 16, color: const Color(0xFF94A3B8)),
+              Icon(
+                  appt.isVideo
+                      ? Icons.videocam_outlined
+                      : Icons.location_on_outlined,
+                  size: 16,
+                  color: const Color(0xFF94A3B8)),
               const SizedBox(width: 6),
               Expanded(
-                child: Text(appt.line,
+                child: Text(line,
                     style: const TextStyle(
                         fontSize: 12.5, color: Color(0xFF64748B))),
               ),
               const SizedBox(width: 8),
-              if (appt.token != null)
+              if (appt.serialNo > 0)
                 Row(
                   children: [
                     const Text('Serial ',
                         style: TextStyle(
                             fontSize: 12.5, color: Color(0xFF94A3B8))),
-                    Text(appt.token!,
+                    Text('${appt.serialNo}',
                         style: const TextStyle(
                             fontSize: 13,
                             fontWeight: FontWeight.w800,
                             color: Color(0xFF0F172A))),
                   ],
-                )
-              else if (appt.rx)
-                GestureDetector(
-                  onTap: () => Get.toNamed(Routes.HEALTHCARE_PRESCRIPTION),
-                  child: Row(
-                    children: const [
-                      Icon(Icons.bookmark_border_rounded,
-                          size: 16, color: _green),
-                      SizedBox(width: 4),
-                      Text('Rx',
-                          style: TextStyle(
-                              fontSize: 13,
-                              fontWeight: FontWeight.w800,
-                              color: _green)),
-                    ],
-                  ),
                 ),
             ],
           ),
@@ -210,9 +227,7 @@ class _StatusPill extends StatelessWidget {
             SizedBox(width: 4),
             Text('Upcoming',
                 style: TextStyle(
-                    fontSize: 11,
-                    fontWeight: FontWeight.w700,
-                    color: _green)),
+                    fontSize: 11, fontWeight: FontWeight.w700, color: _green)),
           ],
         ),
       );

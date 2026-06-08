@@ -92,13 +92,13 @@ class ChooseSlotView extends GetView<BookingController> {
                                       crossAxisAlignment:
                                           CrossAxisAlignment.start,
                                       children: [
-                                        Text(v.name,
+                                        Text(v.venueName,
                                             style: const TextStyle(
                                                 fontSize: 14,
                                                 fontWeight: FontWeight.w700,
                                                 color: Color(0xFF0F172A))),
                                         const SizedBox(height: 2),
-                                        Text(v.schedule,
+                                        Text(v.scheduleLabel,
                                             style: const TextStyle(
                                                 fontSize: 12,
                                                 color: Color(0xFF94A3B8))),
@@ -225,7 +225,7 @@ class ChooseSlotView extends GetView<BookingController> {
                   ),
                 ),
                 _BottomBar(
-                  left: '${con.dates[con.selectedDate].$1} · ${con.selectedTime} PM',
+                  left: con.slotSummary,
                   price: con.doctorFee,
                   label: 'Continue →',
                   onTap: con.slotContinue,

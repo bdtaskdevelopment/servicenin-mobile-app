@@ -63,6 +63,7 @@ abstract class Routes {
   static const HEALTHCARE_PRESCRIPTION = _Paths.HEALTHCARE_PRESCRIPTION;
   static const HEALTHCARE_FAMILY = _Paths.HEALTHCARE_FAMILY;
   static const HC_DOCTORS = _Paths.HC_DOCTORS;
+  static const HC_AVAILABLE_TODAY = _Paths.HC_AVAILABLE_TODAY;
   static const HC_DOCTOR_PROFILE = _Paths.HC_DOCTOR_PROFILE;
   static const HC_SLOT = _Paths.HC_SLOT;
   static const HC_PATIENT = _Paths.HC_PATIENT;
@@ -78,6 +79,8 @@ abstract class Routes {
   static const AMBULANCE_DISPATCHING = _Paths.AMBULANCE_DISPATCHING;
   static const AMBULANCE_TRACKING = _Paths.AMBULANCE_TRACKING;
   static const AMBULANCE_BOOKINGS = _Paths.AMBULANCE_BOOKINGS;
+  static const AMBULANCE_ALL = _Paths.AMBULANCE_ALL;
+  static const AMBULANCE_CONFIRMED = _Paths.AMBULANCE_CONFIRMED;
   static const EMERGENCY_CONTACTS = _Paths.EMERGENCY_CONTACTS;
   static const BLOOD_REQUESTS = _Paths.BLOOD_REQUESTS;
   static const BLOOD_REQUEST_DETAIL = _Paths.BLOOD_REQUEST_DETAIL;
@@ -185,6 +188,7 @@ abstract class _Paths {
   static const HEALTHCARE_PRESCRIPTION = '/healthcare-prescription';
   static const HEALTHCARE_FAMILY = '/healthcare-family';
   static const HC_DOCTORS = '/hc-doctors';
+  static const HC_AVAILABLE_TODAY = '/hc-available-today';
   static const HC_DOCTOR_PROFILE = '/hc-doctor-profile';
   static const HC_SLOT = '/hc-slot';
   static const HC_PATIENT = '/hc-patient';
@@ -200,6 +204,8 @@ abstract class _Paths {
   static const AMBULANCE_DISPATCHING = '/ambulance-dispatching';
   static const AMBULANCE_TRACKING = '/ambulance-tracking';
   static const AMBULANCE_BOOKINGS = '/ambulance-bookings';
+  static const AMBULANCE_ALL = '/ambulance-all';
+  static const AMBULANCE_CONFIRMED = '/ambulance-confirmed';
   static const EMERGENCY_CONTACTS = '/emergency-contacts';
   static const BLOOD_REQUESTS = '/blood-requests';
   static const BLOOD_REQUEST_DETAIL = '/blood-request-detail';

@@ -16,7 +16,7 @@ class DonationConfirmedView extends GetView<DonationFlowController> {
       backgroundColor: const Color(0xFFFDECEC),
       body: SafeArea(
         child: Column(
-          children: [
+          children: [ 
             Expanded(
               child: Center(
                 child: Padding(

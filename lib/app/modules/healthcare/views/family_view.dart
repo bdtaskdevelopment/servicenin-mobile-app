@@ -2,10 +2,19 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../../core/values/app_colors.dart';
+import '../../../data/models/response/healthcare_response.dart';
 import '../controllers/healthcare_controller.dart';
 
 const _green = Color(0xFF16A34A);
 const _darkGreen = Color(0xFF0F7A52);
+
+const List<Color> _memberPalette = [
+  Color(0xFF16A34A),
+  Color(0xFFEC4899),
+  Color(0xFF6366F1),
+  Color(0xFF14B8A6),
+  Color(0xFFF59E0B),
+];
 
 class FamilyView extends GetView<HealthcareController> {
   const FamilyView({super.key});
@@ -96,9 +105,16 @@ class FamilyView extends GetView<HealthcareController> {
 
 class _MemberCard extends StatelessWidget {
   const _MemberCard({required this.member});
-  final FamilyMember member;
+  final HcFamilyMember member;
   @override
   Widget build(BuildContext context) {
+    final color =
+        _memberPalette[member.name.hashCode.abs() % _memberPalette.length];
+    final meta = [
+      if (member.relation.isNotEmpty) member.relation,
+      if (member.age > 0) '${member.age} yrs',
+      if (member.gender.isNotEmpty) member.gender,
+    ].join(' · ');
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
@@ -112,12 +128,12 @@ class _MemberCard extends StatelessWidget {
             width: 50,
             height: 50,
             decoration: BoxDecoration(
-                color: member.color.withValues(alpha: 0.12),
+                color: color.withValues(alpha: 0.12),
                 borderRadius: BorderRadius.circular(14)),
             alignment: Alignment.center,
             child: Text(member.initials,
                 style: TextStyle(
-                    color: member.color,
+                    color: color,
                     fontSize: 16,
                     fontWeight: FontWeight.w800)),
           ),
@@ -132,24 +148,26 @@ class _MemberCard extends StatelessWidget {
                         fontWeight: FontWeight.w800,
                         color: Color(0xFF0F172A))),
                 const SizedBox(height: 2),
-                Text('${member.relation} · ${member.age} yrs · ${member.gender}',
+                Text(meta,
                     style: const TextStyle(
                         fontSize: 12.5, color: Color(0xFF94A3B8))),
               ],
             ),
           ),
-          const SizedBox(width: 8),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-            decoration: BoxDecoration(
-                color: const Color(0xFFFDE4E4),
-                borderRadius: BorderRadius.circular(20)),
-            child: Text(member.bloodGroup,
-                style: const TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w800,
-                    color: Color(0xFFE11D48))),
-          ),
+          if (member.bloodGroup.isNotEmpty) ...[
+            const SizedBox(width: 8),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+              decoration: BoxDecoration(
+                  color: const Color(0xFFFDE4E4),
+                  borderRadius: BorderRadius.circular(20)),
+              child: Text(member.bloodGroup,
+                  style: const TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w800,
+                      color: Color(0xFFE11D48))),
+            ),
+          ],
         ],
       ),
     );
@@ -222,8 +240,8 @@ class _AddFamilySheetState extends State<_AddFamilySheet> {
       relation: _relation.text.trim().isEmpty
           ? 'Family'
           : _relation.text.trim(),
-      age: _age.text.trim().isEmpty ? '—' : _age.text.trim(),
-      gender: _gender,
+      age: _age.text.trim(),
+      gender: _gender == 'M' ? 'male' : 'female',
       bloodGroup: _blood,
     );
     Get.back();
@@ -260,7 +278,7 @@ class _AddFamilySheetState extends State<_AddFamilySheet> {
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
       padding: EdgeInsets.fromLTRB(
-          20, 12, 20, 20 + MediaQuery.of(context).viewInsets.bottom),
+          20, 12, 20, 20 + MediaQuery.of(context).padding.bottom),
       child: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -374,8 +392,8 @@ class _AddFamilySheetState extends State<_AddFamilySheet> {
               ),
             ),
           ],
+          ),
         ),
-      ),
     );
   }
 }
