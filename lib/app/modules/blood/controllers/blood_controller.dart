@@ -1,10 +1,19 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:servicenin/app/core/helpers/app_helper.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../../core/helpers/snack_helper.dart';
+import '../../../core/values/storage.dart';
+import '../../../data/models/response/blood_request_response.dart';
+import '../../../data/models/response/blood_response_response.dart';
+import '../../../data/models/response/donor_response.dart';
 import '../../../data/repositories/blood.repo.dart';
+import '../../../data/services/storage.service.dart';
 import '../../../routes/app_pages.dart';
+import '../widgets/respond_otp_sheet.dart';
+import 'blood_chat_controller.dart';
 
 enum BloodSeverity { critical, urgent, routine }
 
@@ -55,12 +64,256 @@ class BloodRequest {
 }
 
 class BloodController extends GetxController {
+  BloodRepository get _repo => Get.find<BloodRepository>();
+
+  // ── Donors near you (GET /api/v1/blood/donors[/nearest]) ────────────
+  List<DonorEntry> nearestDonors = [];
+  List<DonorEntry> allDonors = [];
+  bool loadingNearest = false;
+  bool loadingAllDonors = false;
+
+  @override
+  void onInit() {
+    super.onInit();
+    fetchNearestDonors();
+    fetchMyResponses();
+    fetchMyRank();
+  }
+
+  /// GET /api/v1/blood/donors/nearest — for the "Requests near you" section.
+  Future<void> fetchNearestDonors() async {
+    loadingNearest = true;
+    update();
+    try {
+      nearestDonors = await _repo.fetchNearestDonors();
+    } catch (e) {
+      SnackHelper.error(e.toString().replaceFirst('Exception: ', ''));
+    } finally {
+      loadingNearest = false;
+      update();
+    }
+  }
+
+  /// GET /api/v1/blood/donors — the full list shown on the "See all" screen.
+  Future<void> fetchAllDonors() async {
+    loadingAllDonors = true;
+    update();
+    try {
+      allDonors = await _repo.fetchDonors();
+    } catch (e) {
+      SnackHelper.error(e.toString().replaceFirst('Exception: ', ''));
+    } finally {
+      loadingAllDonors = false;
+      update();
+    }
+  }
+
+  void openAllDonors() {
+    fetchAllDonors();
+    Get.toNamed(Routes.BLOOD_DONORS);
+  }
+
+  /// The donor tapped to view in detail.
+  DonorEntry? viewingDonor;
+  void viewDonor(DonorEntry donor) {
+    viewingDonor = donor;
+    update();
+    Get.toNamed(Routes.BLOOD_DONOR_DETAIL);
+  }
+
+  // ── Blood requests (GET /api/v1/blood/requests) — the Donate section ──
+  List<BloodRequestEntry> requestList = [];
+  bool loadingRequests = false;
+
+  /// Requests filtered by the "compatible groups only" toggle.
+  List<BloodRequestEntry> get visibleRequestEntries => compatibleOnly
+      ? requestList
+          .where((r) => _compatibleGroups.contains(r.bloodGroup))
+          .toList()
+      : requestList;
+
+  Future<void> fetchRequests() async {
+    loadingRequests = true;
+    update();
+    try {
+      requestList = await _repo.fetchRequests();
+    } catch (e) {
+      SnackHelper.error(e.toString().replaceFirst('Exception: ', ''));
+    } finally {
+      loadingRequests = false;
+      update();
+    }
+  }
+
+  /// Open the Donate screen (list of requests) and load it.
+  void openDonate() {
+    fetchRequests();
+    Get.toNamed(Routes.BLOOD_REQUESTS);
+  }
+
+  /// The request tapped to view in detail.
+  BloodRequestEntry? viewingRequest;
+  void viewRequest(BloodRequestEntry request) {
+    viewingRequest = request;
+    update();
+    Get.toNamed(Routes.BLOOD_REQUEST_DETAIL);
+  }
+
+  // ── My responses (respond + GET /api/v1/blood/responses/my) ─────────
+  List<BloodResponseEntry> myResponses = [];
+  bool loadingResponses = false;
+  bool responding = false;
+  bool verifyingOtp = false;
+
+  /// POST /api/v1/blood/requests/:id/respond — offer to donate. On success an
+  /// OTP is sent, so we open the verify sheet.
+  Future<void> respondToRequest(String requestId) async {
+    if (responding) return;
+    responding = true;
+    update();
+    try {
+      final res = await _repo.respondToRequest(requestId);
+      responding = false;
+      update();
+      if (res.success) {
+        SnackHelper.success(res.message);
+        RespondOtpSheet.show();
+      } else {
+        SnackHelper.error(res.message);
+      }
+    } catch (e) {
+      responding = false;
+      update();
+      SnackHelper.error(e.toString().replaceFirst('Exception: ', ''));
+    }
+  }
+
+  /// POST /api/v1/blood/donors/verify-otp — verify the OTP from the sheet, then
+  /// land on the donation-confirmed screen (replacing the request detail).
+  Future<void> verifyRespondOtp(String otp) async {
+    if (verifyingOtp) return;
+    verifyingOtp = true;
+    update();
+    try {
+      final res = await _repo.verifyDonorOtp(otp);
+      verifyingOtp = false;
+      update();
+      if (res.success) {
+        SnackHelper.success(res.message);
+        fetchMyResponses();
+        if (Get.isBottomSheetOpen ?? false) Get.back(); // close the sheet
+        Get.offNamed(Routes.BLOOD_CONFIRMED); // replace the request detail
+      } else {
+        SnackHelper.error(res.message);
+      }
+    } catch (e) {
+      verifyingOtp = false;
+      update();
+      SnackHelper.error(e.toString().replaceFirst('Exception: ', ''));
+    }
+  }
+
+  /// GET /api/v1/blood/responses/my — requests I've responded to.
+  Future<void> fetchMyResponses() async {
+    loadingResponses = true;
+    update();
+    try {
+      myResponses = await _repo.fetchMyResponses();
+    } catch (e) {
+      SnackHelper.error(e.toString().replaceFirst('Exception: ', ''));
+    } finally {
+      loadingResponses = false;
+      update();
+    }
+  }
+
+  void openMyResponses() {
+    fetchMyResponses();
+    Get.toNamed(Routes.BLOOD_MY_RESPONSES);
+  }
+
+  // ── Chat partner (shared by the donor-chat screen) ──────────────────
+  String chatTitle = 'Donor';
+  String chatInitials = 'D';
+  String chatSubtitle = 'connected donor';
+  String chatPhone = '';
+
+  /// Open the live chat for a response. The chat endpoint is keyed by the
+  /// request id (`/fulfillments/:requestId/chat`).
+  void openResponseChat(BloodResponseEntry r) {
+    if (r.requestId.isEmpty) {
+      SnackHelper.error('চ্যাট খোলা যাচ্ছে না — অনুরোধ আইডি পাওয়া যায়নি');
+      return;
+    }
+    Get.find<BloodChatController>().configure(
+      chatId: r.requestId,
+      partnerName: r.requesterName,
+      partnerPhone: r.phone,
+    );
+    Get.toNamed(Routes.BLOOD_CHAT);
+  }
+
+  /// Dial a donor's phone number.
+  Future<void> callPhone(String phone) async {
+    final digits = phone.trim();
+    if (digits.isEmpty) {
+      SnackHelper.error('ফোন নম্বর নেই');
+      return;
+    }
+    try {
+      await launchUrl(Uri.parse('tel:$digits'),
+          mode: LaunchMode.externalApplication);
+    } catch (_) {
+      SnackHelper.error('ডায়াল করা যায়নি');
+    }
+  }
+
   // Donor profile
   final String donorGroup = 'B+';
   final int donations = 12;
   final int livesSaved = 36;
-  final int rank = 4;
   final String area = 'Gulshan area';
+
+  // ── My leaderboard rank (GET /api/v1/blood/donors/leaderboard) ──────
+  /// My 1-based position on the leaderboard; 0 means unranked/not a donor yet.
+  int rank = 0;
+  int totalRanked = 0;
+  bool loadingRank = false;
+
+  /// True once we know where the user stands (ranked or confirmed unranked).
+  bool get hasRank => rank > 0;
+
+  Future<void> fetchMyRank() async {
+    loadingRank = true;
+    update();
+    try {
+      final list = await _repo.fetchLeaderboard();
+      list.sort((a, b) => b.totalDonations.compareTo(a.totalDonations));
+      totalRanked = list.length;
+      final myId = _currentUserId();
+      final idx = (myId == null || myId.isEmpty)
+          ? -1
+          : list.indexWhere((d) => d.userId == myId);
+      rank = idx >= 0 ? idx + 1 : 0;
+    } catch (_) {
+      // Leave rank untouched; the card falls back to a neutral label.
+    } finally {
+      loadingRank = false;
+      update();
+    }
+  }
+
+  /// The logged-in user's id, read from stored auth info.
+  String? _currentUserId() {
+    final raw = StorageService.read(StorageConstants.userInfo);
+    if (raw is String && raw.trim().isNotEmpty) {
+      try {
+        final map = jsonDecode(raw);
+        if (map is Map) return map['id']?.toString();
+      } catch (_) {}
+    }
+    return null;
+  }
 
   // Whether the donor is currently available to donate (front-page switch).
   bool isAvailable = true;
@@ -189,6 +442,10 @@ class BloodController extends GetxController {
 
   void openDonorChat(ConnectedDonor donor) {
     selectedDonor = donor;
+    chatTitle = donor.name;
+    chatInitials = donor.initials;
+    chatSubtitle = '${donor.group} · connected donor';
+    chatPhone = donor.phone;
     update();
     Get.toNamed(Routes.BLOOD_DONOR_CHAT);
   }

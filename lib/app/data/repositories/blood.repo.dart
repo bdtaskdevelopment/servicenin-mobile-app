@@ -1,5 +1,9 @@
 import '../../core/values/app_url.dart';
 import '../models/response/auth_response.dart';
+import '../models/response/blood_request_response.dart';
+import '../models/response/blood_response_response.dart';
+import '../models/response/chat_message_response.dart';
+import '../models/response/donor_response.dart';
 import '../providers/blood.provider.dart';
 
 class BloodRepository {
@@ -41,5 +45,54 @@ class BloodRepository {
     final payload = {'is_available': isAvailable};
     final res = await provider.putData(ApiURL.bloodDonorAvailability, payload);
     return AuthSimpleResponse.fromMap(_payload(res));
+  }
+
+  /// GET /api/v1/blood/donors/nearest — donors closest to the user.
+  Future<List<DonorEntry>> fetchNearestDonors() async {
+    final res = await provider.getData(ApiURL.bloodDonorsNearest);
+    return DonorEntry.listFromResponse(_payload(res));
+  }
+
+  /// GET /api/v1/blood/donors — all donors.
+  Future<List<DonorEntry>> fetchDonors() async {
+    final res = await provider.getData(ApiURL.bloodDonors);
+    return DonorEntry.listFromResponse(_payload(res));
+  }
+
+  /// GET /api/v1/blood/donors/leaderboard — top donors.
+  Future<List<DonorEntry>> fetchLeaderboard() async {
+    final res = await provider.getData(ApiURL.bloodDonorsLeaderboard);
+    return DonorEntry.listFromResponse(_payload(res));
+  }
+
+  /// GET /api/v1/blood/requests — open blood requests.
+  Future<List<BloodRequestEntry>> fetchRequests() async {
+    final res = await provider.getData(ApiURL.bloodRequests);
+    return BloodRequestEntry.listFromResponse(_payload(res));
+  }
+
+  /// POST /api/v1/blood/requests/:id/respond — offer to donate.
+  Future<AuthSimpleResponse> respondToRequest(String requestId) async {
+    final res = await provider.postData(ApiURL.bloodRequestRespond(requestId), {});
+    return AuthSimpleResponse.fromMap(_payload(res));
+  }
+
+  /// GET /api/v1/blood/responses/my — the requests I've responded to.
+  Future<List<BloodResponseEntry>> fetchMyResponses() async {
+    final res = await provider.getData(ApiURL.bloodResponsesMy);
+    return BloodResponseEntry.listFromResponse(_payload(res));
+  }
+
+  /// GET /api/v1/blood/fulfillments/:id/chat — fetch the chat thread.
+  Future<List<ChatMessage>> fetchChat(String id) async {
+    final res = await provider.getData(ApiURL.bloodFulfillmentChat(id));
+    return ChatMessage.listFromResponse(_payload(res));
+  }
+
+  /// POST /api/v1/blood/fulfillments/:id/chat — send a message.
+  Future<ChatMessage> sendChat(String id, String message) async {
+    final res = await provider.postData(
+        ApiURL.bloodFulfillmentChat(id), {'message': message});
+    return ChatMessage.fromResponse(_payload(res));
   }
 }

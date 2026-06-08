@@ -38,7 +38,7 @@ class BloodView extends GetView<BloodController> {
                         const SizedBox(width: 12),
                         Expanded(
                           child: _ActionCard(
-                            onTap: () => Get.toNamed(Routes.BLOOD_REQUESTS),
+                            onTap: controller.openDonate,
                             isPrimary: false,
                             icon: Icons.favorite_rounded,
                             title: 'Donate',
@@ -61,28 +61,27 @@ class BloodView extends GetView<BloodController> {
                     builder: (con) => _AvailabilityCard(con: con),
                   ),
                   const SizedBox(height: 12),
-                  GestureDetector(
-                    onTap: controller.openMyDonors,
-                    child: _MyDonorsCard(count: controller.connectedDonors.length),
+                  GetBuilder<BloodController>(
+                    builder: (con) => GestureDetector(
+                      onTap: con.openMyResponses,
+                      child: _MyResponsesCard(count: con.myResponses.length),
+                    ),
                   ),
                   const SizedBox(height: 22),
-                  _RequestsHeader(
-                      onSeeAll: () => Get.toNamed(Routes.BLOOD_REQUESTS)),
+                  _RequestsHeader(onSeeAll: controller.openAllDonors),
                   const SizedBox(height: 12),
-                  ...controller.requests.map((r) => Padding(
-                        padding: const EdgeInsets.only(bottom: 12),
-                        child: BloodRequestCard(
-                          req: r,
-                          onView: () {
-                            controller.selectRequest(r);
-                            Get.toNamed(Routes.BLOOD_REQUEST_DETAIL);
-                          },
-                        ),
-                      )),
+                  GetBuilder<BloodController>(
+                    builder: (con) => _NearestDonors(con: con),
+                  ),
                   const SizedBox(height: 6),
-                  GestureDetector(
-                    onTap: () => Get.toNamed(Routes.BLOOD_LEADERBOARD),
-                    child: _LeaderboardCard(rank: controller.rank),
+                  GetBuilder<BloodController>(
+                    builder: (con) => GestureDetector(
+                      onTap: () => Get.toNamed(Routes.BLOOD_LEADERBOARD),
+                      child: _LeaderboardCard(
+                        rank: con.rank,
+                        loading: con.loadingRank,
+                      ),
+                    ),
                   ),
                 ],
               ),
@@ -370,7 +369,8 @@ class _RegisterDonorCard extends StatelessWidget {
   }
 }
 
-// ── My connected donors card ────────────────────────────────────────
+// ── My connected donors card (hidden for now) ───────────────────────
+/*
 class _MyDonorsCard extends StatelessWidget {
   const _MyDonorsCard({required this.count});
   final int count;
@@ -432,6 +432,71 @@ class _MyDonorsCard extends StatelessWidget {
     );
   }
 }
+*/
+
+// ── My responses card (GET /api/v1/blood/responses/my) ──────────────
+class _MyResponsesCard extends StatelessWidget {
+  const _MyResponsesCard({required this.count});
+  final int count;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: AppColors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: const Color(0xFFEDEFF2)),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 44,
+            height: 44,
+            decoration: BoxDecoration(
+              color: const Color(0xFFFDE4E4),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: const Icon(Icons.favorite_rounded,
+                size: 22, color: Color(0xFFE11D48)),
+          ),
+          const SizedBox(width: 12),
+          const Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('My responses',
+                    style: TextStyle(
+                        fontSize: 14.5,
+                        fontWeight: FontWeight.w800,
+                        color: Color(0xFF0F172A))),
+                SizedBox(height: 2),
+                Text('Requests you responded to · chat or call',
+                    style: TextStyle(fontSize: 12, color: Color(0xFF94A3B8))),
+              ],
+            ),
+          ),
+          const SizedBox(width: 8),
+          if (count > 0)
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+              decoration: BoxDecoration(
+                color: const Color(0xFFFDE4E4),
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: Text('$count',
+                  style: const TextStyle(
+                      fontSize: 12.5,
+                      fontWeight: FontWeight.w800,
+                      color: Color(0xFFE11D48))),
+            ),
+          const SizedBox(width: 6),
+          const Icon(Icons.chevron_right_rounded, color: Color(0xFF94A3B8)),
+        ],
+      ),
+    );
+  }
+}
 
 // ── Requests header ─────────────────────────────────────────────────
 class _RequestsHeader extends StatelessWidget {
@@ -473,10 +538,68 @@ class _RequestsHeader extends StatelessWidget {
   }
 }
 
+// ── Nearest donors (GET /api/v1/blood/donors/nearest) ───────────────
+class _NearestDonors extends StatelessWidget {
+  const _NearestDonors({required this.con});
+  final BloodController con;
+
+  @override
+  Widget build(BuildContext context) {
+    if (con.loadingNearest && con.nearestDonors.isEmpty) {
+      return const Padding(
+        padding: EdgeInsets.symmetric(vertical: 24),
+        child: Center(
+          child: SizedBox(
+            width: 24,
+            height: 24,
+            child: CircularProgressIndicator(
+                strokeWidth: 2.4, color: Color(0xFFE11D48)),
+          ),
+        ),
+      );
+    }
+
+    if (con.nearestDonors.isEmpty) {
+      return Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: AppColors.white,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: const Color(0xFFEDEFF2)),
+        ),
+        child: const Text('No donors near you right now.',
+            style: TextStyle(fontSize: 13, color: Color(0xFF94A3B8))),
+      );
+    }
+
+    // Show the closest few here; the rest live on the "See all" screen.
+    final shown = con.nearestDonors.take(3).toList();
+    return Column(
+      children: [
+        ...shown.map((d) => Padding(
+              padding: const EdgeInsets.only(bottom: 12),
+              child: DonorCard(
+                donor: d,
+                onView: () => con.viewDonor(d),
+                onCall: () => con.callPhone(d.phone),
+              ),
+            )),
+      ],
+    );
+  }
+}
+
 // ── Leaderboard ─────────────────────────────────────────────────────
 class _LeaderboardCard extends StatelessWidget {
-  const _LeaderboardCard({required this.rank});
+  const _LeaderboardCard({required this.rank, this.loading = false});
   final int rank;
+  final bool loading;
+
+  String get _subtitle {
+    if (loading && rank == 0) return 'Finding your position…';
+    if (rank > 0) return "You're #$rank this season · keep going!";
+    return 'Donate to join the leaderboard';
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -505,13 +628,28 @@ class _LeaderboardCard extends StatelessWidget {
                         fontSize: 15,
                         fontWeight: FontWeight.w800)),
                 const SizedBox(height: 2),
-                Text("You're #$rank this season · keep going!",
+                Text(_subtitle,
                     style: TextStyle(
                         color: Colors.white.withValues(alpha: 0.75),
                         fontSize: 12.5)),
               ],
             ),
           ),
+          if (rank > 0)
+            Container(
+              margin: const EdgeInsets.only(right: 8),
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              decoration: BoxDecoration(
+                color: const Color(0xFFFBBF24).withValues(alpha: 0.18),
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: Text('#$rank',
+                  style: const TextStyle(
+                      color: Color(0xFFFBBF24),
+                      fontSize: 14,
+                      fontWeight: FontWeight.w800)),
+            ),
           const Icon(Icons.chevron_right_rounded, color: Colors.white),
         ],
       ),

@@ -48,10 +48,10 @@ class _DonorChatViewState extends State<DonorChatView> {
 
   @override
   Widget build(BuildContext context) {
-    final donor = Get.find<BloodController>().selectedDonor;
-    final name = donor?.name ?? 'Donor';
-    final initials = donor?.initials ?? 'D';
-    final group = donor?.group ?? 'O+';
+    final con = Get.find<BloodController>();
+    final name = con.chatTitle;
+    final initials = con.chatInitials;
+    final subtitle = con.chatSubtitle;
     return Scaffold(
       backgroundColor: const Color(0xFFF1F4F6),
       body: Column(
@@ -92,14 +92,18 @@ class _DonorChatViewState extends State<DonorChatView> {
                                   fontSize: 16,
                                   fontWeight: FontWeight.w800,
                                   color: Color(0xFF0F172A))),
-                          Text('$group · connected donor',
+                          Text(subtitle,
                               style: const TextStyle(
                                   fontSize: 12, color: Color(0xFF94A3B8))),
                         ],
                       ),
                     ),
-                    const Icon(Icons.call_rounded,
-                        color: _red, size: 22),
+                    IconButton(
+                      splashRadius: 22,
+                      onPressed: () => con.callPhone(con.chatPhone),
+                      icon: const Icon(Icons.call_rounded,
+                          color: _red, size: 22),
+                    ),
                   ],
                 ),
               ),

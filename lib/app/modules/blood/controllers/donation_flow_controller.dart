@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import '../../../core/helpers/snack_helper.dart';
+import '../../../data/models/response/donor_response.dart';
+import '../../../data/repositories/blood.repo.dart';
 import '../../../routes/app_pages.dart';
 import 'blood_controller.dart';
 
@@ -130,6 +133,25 @@ class DonationFlowController extends GetxController {
         points: 11,
         color: Color(0xFFF59E0B)),
   ];
+
+  // ── Leaderboard (GET /api/v1/blood/donors/leaderboard) ──────────────
+  List<DonorEntry> leaderboard = [];
+  bool loadingLeaderboard = false;
+
+  Future<void> fetchLeaderboard() async {
+    loadingLeaderboard = true;
+    update();
+    try {
+      final list = await Get.find<BloodRepository>().fetchLeaderboard();
+      list.sort((a, b) => b.totalDonations.compareTo(a.totalDonations));
+      leaderboard = list;
+    } catch (e) {
+      SnackHelper.error(e.toString().replaceFirst('Exception: ', ''));
+    } finally {
+      loadingLeaderboard = false;
+      update();
+    }
+  }
 
   // ── Navigation actions ───────────────────────────────────────────
   void accept(Donor donor) {

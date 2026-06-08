@@ -2,96 +2,156 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../../core/values/app_colors.dart';
+import '../../../data/models/response/donor_response.dart';
 import '../controllers/donation_flow_controller.dart';
 
 const _red = Color(0xFFE11D48);
 const _navy = Color(0xFF1E2A4A);
+
+const List<Color> _palette = [
+  Color(0xFFE11D48),
+  Color(0xFFF59E0B),
+  Color(0xFF6366F1),
+  Color(0xFF14B8A6),
+  Color(0xFFEC4899),
+  Color(0xFF0EA5E9),
+];
+
+String _displayName(DonorEntry d) =>
+    d.fullName.isNotEmpty ? d.fullName : 'Donor';
 
 class LeaderboardView extends GetView<DonationFlowController> {
   const LeaderboardView({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final con = controller;
-    final first = con.podium.firstWhere((e) => e.rank == 1);
-    final second = con.podium.firstWhere((e) => e.rank == 2);
-    final third = con.podium.firstWhere((e) => e.rank == 3);
-
     return Scaffold(
       backgroundColor: const Color(0xFFF7F8FA),
-      body: Column(
-        children: [
-          // Red header
-          Container(
-            color: _red,
-            child: SafeArea(
-              bottom: false,
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(8, 6, 16, 14),
-                child: Row(
-                  children: [
-                    IconButton(
-                      splashRadius: 22,
-                      onPressed: () => Get.back(),
-                      icon: const Icon(Icons.arrow_back_ios_new_rounded,
-                          size: 20, color: Colors.white),
-                    ),
-                    const Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+      body: GetBuilder<DonationFlowController>(
+        initState: (_) =>
+            Get.find<DonationFlowController>().fetchLeaderboard(),
+        builder: (con) {
+          final list = con.leaderboard;
+          return Column(
+            children: [
+              // Red header
+              Container(
+                color: _red,
+                child: SafeArea(
+                  bottom: false,
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(8, 6, 16, 14),
+                    child: Row(
                       children: [
-                        Text('Donor leaderboard',
-                            style: TextStyle(
-                                fontSize: 19,
-                                fontWeight: FontWeight.w800,
-                                color: Colors.white)),
-                        SizedBox(height: 1),
-                        Text('This season · Dhaka',
-                            style: TextStyle(
-                                fontSize: 12, color: Color(0xFFFFD9DC))),
+                        IconButton(
+                          splashRadius: 22,
+                          onPressed: () => Get.back(),
+                          icon: const Icon(Icons.arrow_back_ios_new_rounded,
+                              size: 20, color: Colors.white),
+                        ),
+                        const Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text('Donor leaderboard',
+                                style: TextStyle(
+                                    fontSize: 19,
+                                    fontWeight: FontWeight.w800,
+                                    color: Colors.white)),
+                            SizedBox(height: 1),
+                            Text('Top donors · ServiceNin',
+                                style: TextStyle(
+                                    fontSize: 12, color: Color(0xFFFFD9DC))),
+                          ],
+                        ),
+                        const Spacer(),
+                        if (con.loadingLeaderboard && list.isNotEmpty)
+                          const SizedBox(
+                            width: 18,
+                            height: 18,
+                            child: CircularProgressIndicator(
+                                strokeWidth: 2.2, color: Colors.white),
+                          ),
                       ],
                     ),
-                  ],
+                  ),
                 ),
               ),
-            ),
-          ),
-          // Navy podium
-          Container(
-            width: double.infinity,
-            color: _navy,
-            padding: const EdgeInsets.fromLTRB(20, 16, 20, 22),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                Expanded(child: _Podium(entry: second, height: 44)),
-                const SizedBox(width: 10),
-                Expanded(child: _Podium(entry: first, height: 64, crowned: true)),
-                const SizedBox(width: 10),
-                Expanded(child: _Podium(entry: third, height: 36)),
+              if (con.loadingLeaderboard && list.isEmpty)
+                const Expanded(
+                  child: Center(
+                    child: CircularProgressIndicator(
+                        strokeWidth: 2.6, color: _red),
+                  ),
+                )
+              else if (list.isEmpty)
+                const Expanded(
+                  child: Center(
+                    child: Text('No donors on the leaderboard yet',
+                        style: TextStyle(color: Color(0xFF94A3B8))),
+                  ),
+                )
+              else ...[
+                // Navy podium (top 3)
+                Container(
+                  width: double.infinity,
+                  color: _navy,
+                  padding: const EdgeInsets.fromLTRB(20, 16, 20, 22),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      Expanded(
+                        child: list.length > 1
+                            ? _Podium(donor: list[1], rank: 2, height: 44)
+                            : const SizedBox.shrink(),
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: _Podium(
+                            donor: list[0], rank: 1, height: 64, crowned: true),
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: list.length > 2
+                            ? _Podium(donor: list[2], rank: 3, height: 36)
+                            : const SizedBox.shrink(),
+                      ),
+                    ],
+                  ),
+                ),
+                // Ranking list (rank 4+)
+                Expanded(
+                  child: RefreshIndicator(
+                    onRefresh: con.fetchLeaderboard,
+                    color: _red,
+                    child: ListView(
+                      padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
+                      children: [
+                        for (var i = 3; i < list.length; i++)
+                          Padding(
+                            padding: const EdgeInsets.only(bottom: 12),
+                            child: _RankRow(donor: list[i], rank: i + 1),
+                          ),
+                      ],
+                    ),
+                  ),
+                ),
               ],
-            ),
-          ),
-          // Ranking list
-          Expanded(
-            child: ListView(
-              padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
-              children: con.ranking
-                  .map((e) => Padding(
-                        padding: const EdgeInsets.only(bottom: 12),
-                        child: _RankRow(entry: e),
-                      ))
-                  .toList(),
-            ),
-          ),
-        ],
+            ],
+          );
+        },
       ),
     );
   }
 }
 
 class _Podium extends StatelessWidget {
-  const _Podium({required this.entry, required this.height, this.crowned = false});
-  final LeaderboardEntry entry;
+  const _Podium(
+      {required this.donor,
+      required this.rank,
+      required this.height,
+      this.crowned = false});
+  final DonorEntry donor;
+  final int rank;
   final double height;
   final bool crowned;
 
@@ -111,19 +171,21 @@ class _Podium extends StatelessWidget {
             ),
           ),
           alignment: Alignment.center,
-          child: Text(entry.initials,
+          child: Text(donor.initials,
               style: TextStyle(
                   color: Colors.white,
                   fontSize: crowned ? 18 : 15,
                   fontWeight: FontWeight.w800)),
         ),
         const SizedBox(height: 6),
-        Text(entry.name,
+        Text(_displayName(donor),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
             style: const TextStyle(
                 color: Colors.white,
                 fontSize: 13,
                 fontWeight: FontWeight.w700)),
-        Text('${entry.points}',
+        Text('${donor.totalDonations}',
             style: const TextStyle(
                 color: Color(0xFFF59E0B),
                 fontSize: 13,
@@ -137,7 +199,7 @@ class _Podium extends StatelessWidget {
                 const BorderRadius.vertical(top: Radius.circular(8)),
           ),
           alignment: Alignment.center,
-          child: Text('${entry.rank}',
+          child: Text('$rank',
               style: const TextStyle(
                   color: Colors.white,
                   fontSize: 18,
@@ -149,26 +211,28 @@ class _Podium extends StatelessWidget {
 }
 
 class _RankRow extends StatelessWidget {
-  const _RankRow({required this.entry});
-  final LeaderboardEntry entry;
+  const _RankRow({required this.donor, required this.rank});
+  final DonorEntry donor;
+  final int rank;
 
   @override
   Widget build(BuildContext context) {
+    final color = _palette[rank % _palette.length];
+    final subtitle = donor.bloodGroup.isNotEmpty
+        ? '${donor.bloodGroup} donor'
+        : 'Donor';
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
       decoration: BoxDecoration(
-        color: entry.isYou ? const Color(0xFFFDECEC) : AppColors.white,
+        color: AppColors.white,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-            color: entry.isYou
-                ? const Color(0xFFFAD1D1)
-                : const Color(0xFFEDEFF2)),
+        border: Border.all(color: const Color(0xFFEDEFF2)),
       ),
       child: Row(
         children: [
           SizedBox(
             width: 22,
-            child: Text('${entry.rank}',
+            child: Text('$rank',
                 style: const TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w700,
@@ -179,12 +243,11 @@ class _RankRow extends StatelessWidget {
             width: 40,
             height: 40,
             decoration: BoxDecoration(
-                color: entry.color.withValues(alpha: 0.14),
-                shape: BoxShape.circle),
+                color: color.withValues(alpha: 0.14), shape: BoxShape.circle),
             alignment: Alignment.center,
-            child: Text(entry.initials,
+            child: Text(donor.initials,
                 style: TextStyle(
-                    color: entry.color,
+                    color: color,
                     fontSize: 13,
                     fontWeight: FontWeight.w800)),
           ),
@@ -193,19 +256,21 @@ class _RankRow extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(entry.name,
+                Text(_displayName(donor),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                     style: const TextStyle(
                         fontSize: 14.5,
                         fontWeight: FontWeight.w700,
                         color: Color(0xFF0F172A))),
                 const SizedBox(height: 2),
-                Text(entry.subtitle,
+                Text(subtitle,
                     style: const TextStyle(
                         fontSize: 12, color: Color(0xFF94A3B8))),
               ],
             ),
           ),
-          Text('${entry.points}',
+          Text('${donor.totalDonations}',
               style: const TextStyle(
                   fontSize: 16, fontWeight: FontWeight.w800, color: _red)),
         ],

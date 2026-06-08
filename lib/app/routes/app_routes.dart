@@ -87,7 +87,11 @@ abstract class Routes {
   static const BLOOD_CONFIRMED = _Paths.BLOOD_CONFIRMED;
   static const BLOOD_LEADERBOARD = _Paths.BLOOD_LEADERBOARD;
   static const BLOOD_MY_DONORS = _Paths.BLOOD_MY_DONORS;
+  static const BLOOD_MY_RESPONSES = _Paths.BLOOD_MY_RESPONSES;
+  static const BLOOD_DONORS = _Paths.BLOOD_DONORS;
+  static const BLOOD_DONOR_DETAIL = _Paths.BLOOD_DONOR_DETAIL;
   static const BLOOD_DONOR_CHAT = _Paths.BLOOD_DONOR_CHAT;
+  static const BLOOD_CHAT = _Paths.BLOOD_CHAT;
   static const BLOOD_DONOR_REGISTER = _Paths.BLOOD_DONOR_REGISTER;
   static const BLOOD_DONOR_VERIFY_OTP = _Paths.BLOOD_DONOR_VERIFY_OTP;
   static const FORGOT_PASSWORD = _Paths.FORGOT_PASSWORD;
@@ -205,7 +209,11 @@ abstract class _Paths {
   static const BLOOD_CONFIRMED = '/blood-confirmed';
   static const BLOOD_LEADERBOARD = '/blood-leaderboard';
   static const BLOOD_MY_DONORS = '/blood-my-donors';
+  static const BLOOD_MY_RESPONSES = '/blood-my-responses';
+  static const BLOOD_DONORS = '/blood-donors';
+  static const BLOOD_DONOR_DETAIL = '/blood-donor-detail';
   static const BLOOD_DONOR_CHAT = '/blood-donor-chat';
+  static const BLOOD_CHAT = '/blood-chat';
   static const BLOOD_DONOR_REGISTER = '/blood-donor-register';
   static const BLOOD_DONOR_VERIFY_OTP = '/blood-donor-verify-otp';
   static const FORGOT_PASSWORD = '/forgot-password';

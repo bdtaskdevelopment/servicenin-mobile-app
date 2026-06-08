@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../../core/values/app_colors.dart';
-import '../../../routes/app_pages.dart';
 import '../controllers/blood_controller.dart';
 import '../widgets/blood_widgets.dart';
 
@@ -14,44 +13,42 @@ class BloodRequestDetailView extends GetView<BloodController> {
 
   @override
   Widget build(BuildContext context) {
-    final req = controller.selectedRequest ?? controller.requests.first;
+    final req = controller.viewingRequest;
+    if (req == null) {
+      return Scaffold(
+        backgroundColor: const Color(0xFFF7F8FA),
+        body: SafeArea(
+          child: Column(
+            children: [
+              _DetailHeader(subtitle: ''),
+              const Expanded(
+                child: Center(
+                  child: Text('Request not found',
+                      style: TextStyle(color: Color(0xFF94A3B8))),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    final hospital = [req.hospitalName, req.hospitalAddress]
+        .where((s) => s.isNotEmpty)
+        .join(' · ');
+    final contact = [req.contactDisplay, req.phone]
+        .where((s) => s.isNotEmpty)
+        .join(' · ');
+
     return Scaffold(
       backgroundColor: const Color(0xFFF7F8FA),
       body: SafeArea(
         child: Column(
           children: [
-            // Header
-            Container(
-              color: AppColors.white,
-              padding: const EdgeInsets.fromLTRB(8, 6, 16, 10),
-              child: Row(
-                children: [
-                  IconButton(
-                    splashRadius: 22,
-                    onPressed: () => Get.back(),
-                    icon: const Icon(Icons.arrow_back_ios_new_rounded,
-                        size: 20, color: Color(0xFF1A1A1A)),
-                  ),
-                  const Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text('Blood request',
-                          style: TextStyle(
-                              fontSize: 19,
-                              fontWeight: FontWeight.w800,
-                              color: Color(0xFF0F172A))),
-                      SizedBox(height: 1),
-                      Text('BR-3391',
-                          style: TextStyle(
-                              fontSize: 12, color: Color(0xFF94A3B8))),
-                    ],
-                  ),
-                  const Spacer(),
-                  const Icon(Icons.share_outlined,
-                      color: Color(0xFF1A1A1A), size: 22),
-                ],
-              ),
-            ),
+            _DetailHeader(
+                subtitle: req.id.isNotEmpty
+                    ? 'BR-${req.id.substring(0, req.id.length < 6 ? req.id.length : 6).toUpperCase()}'
+                    : ''),
             Expanded(
               child: ListView(
                 padding: const EdgeInsets.fromLTRB(16, 16, 16, 20),
@@ -68,18 +65,21 @@ class BloodRequestDetailView extends GetView<BloodController> {
                       children: [
                         Row(
                           children: [
-                            BloodGroupBadge(group: req.group, size: 52),
+                            BloodGroupBadge(group: req.bloodGroup, size: 52),
                             const SizedBox(width: 14),
                             Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text('${req.units} units · ${req.group}',
+                                Text(
+                                    '${req.unitsNeeded} unit${req.unitsNeeded > 1 ? 's' : ''} · ${req.bloodGroup}',
                                     style: const TextStyle(
                                         fontSize: 19,
                                         fontWeight: FontWeight.w800,
                                         color: Color(0xFF0F172A))),
                                 const SizedBox(height: 6),
-                                BloodSeverityPill(severity: req.severity),
+                                BloodSeverityPill(
+                                    severity:
+                                        severityFromUrgency(req.urgency)),
                               ],
                             ),
                           ],
@@ -91,27 +91,23 @@ class BloodRequestDetailView extends GetView<BloodController> {
                         _InfoRow(
                           icon: Icons.local_hospital_outlined,
                           label: 'Hospital',
-                          value: '${req.hospital} · ${req.area}',
-                        ),
-                        const SizedBox(height: 16),
-                        _InfoRow(
-                          icon: Icons.location_on_outlined,
-                          label: 'Distance',
-                          value: '${req.distance} km from you',
+                          value: hospital.isNotEmpty ? hospital : 'Not set',
                         ),
                         const SizedBox(height: 16),
                         _InfoRow(
                           icon: Icons.person_outline_rounded,
                           label: 'Contact',
-                          value: req.contact,
+                          value: contact.isNotEmpty ? contact : 'Not provided',
                         ),
-                        const SizedBox(height: 16),
-                        _InfoRow(
-                          icon: Icons.access_time_rounded,
-                          label: 'Posted',
-                          value: req.timeAgo,
-                        ),
-                        if (req.note.isNotEmpty) ...[
+                        if (req.timeAgo.isNotEmpty) ...[
+                          const SizedBox(height: 16),
+                          _InfoRow(
+                            icon: Icons.access_time_rounded,
+                            label: 'Posted',
+                            value: req.timeAgo,
+                          ),
+                        ],
+                        if (req.notes.isNotEmpty) ...[
                           const SizedBox(height: 16),
                           Container(
                             width: double.infinity,
@@ -120,7 +116,7 @@ class BloodRequestDetailView extends GetView<BloodController> {
                               color: const Color(0xFFF1F5F9),
                               borderRadius: BorderRadius.circular(12),
                             ),
-                            child: Text(req.note,
+                            child: Text(req.notes,
                                 style: const TextStyle(
                                     fontSize: 13.5,
                                     color: Color(0xFF475569),
@@ -146,7 +142,7 @@ class BloodRequestDetailView extends GetView<BloodController> {
                         SizedBox(width: 10),
                         Expanded(
                           child: Text(
-                            "You're eligible — last donation 4 months ago. Your B+ can help.",
+                            'If you are eligible and your group is compatible, reach out to the contact above.',
                             style: TextStyle(
                                 fontSize: 13,
                                 fontWeight: FontWeight.w600,
@@ -185,18 +181,32 @@ class BloodRequestDetailView extends GetView<BloodController> {
                   Expanded(
                     child: SizedBox(
                       height: 54,
-                      child: ElevatedButton(
-                        onPressed: () => Get.toNamed(Routes.BLOOD_TRACKING),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: _red,
-                          foregroundColor: Colors.white,
-                          elevation: 0,
-                          shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(14)),
+                      child: GetBuilder<BloodController>(
+                        builder: (con) => ElevatedButton(
+                          onPressed: con.responding
+                              ? null
+                              : () => con.respondToRequest(req.id),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: _red,
+                            foregroundColor: Colors.white,
+                            disabledBackgroundColor:
+                                _red.withValues(alpha: 0.6),
+                            elevation: 0,
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(14)),
+                          ),
+                          child: con.responding
+                              ? const SizedBox(
+                                  width: 22,
+                                  height: 22,
+                                  child: CircularProgressIndicator(
+                                      strokeWidth: 2.5, color: Colors.white),
+                                )
+                              : const Text('Respond — I can donate',
+                                  style: TextStyle(
+                                      fontSize: 15.5,
+                                      fontWeight: FontWeight.w700)),
                         ),
-                        child: const Text('Respond — I can donate',
-                            style: TextStyle(
-                                fontSize: 15.5, fontWeight: FontWeight.w700)),
                       ),
                     ),
                   ),
@@ -205,6 +215,44 @@ class BloodRequestDetailView extends GetView<BloodController> {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class _DetailHeader extends StatelessWidget {
+  const _DetailHeader({required this.subtitle});
+  final String subtitle;
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      color: AppColors.white,
+      padding: const EdgeInsets.fromLTRB(8, 6, 16, 10),
+      child: Row(
+        children: [
+          IconButton(
+            splashRadius: 22,
+            onPressed: () => Get.back(),
+            icon: const Icon(Icons.arrow_back_ios_new_rounded,
+                size: 20, color: Color(0xFF1A1A1A)),
+          ),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text('Blood request',
+                  style: TextStyle(
+                      fontSize: 19,
+                      fontWeight: FontWeight.w800,
+                      color: Color(0xFF0F172A))),
+              if (subtitle.isNotEmpty) ...[
+                const SizedBox(height: 1),
+                Text(subtitle,
+                    style: const TextStyle(
+                        fontSize: 12, color: Color(0xFF94A3B8))),
+              ],
+            ],
+          ),
+        ],
       ),
     );
   }

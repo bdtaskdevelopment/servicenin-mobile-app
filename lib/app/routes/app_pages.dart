@@ -95,6 +95,10 @@ import '../modules/blood/views/donor_tracking_view.dart';
 import '../modules/blood/views/donation_confirmed_view.dart';
 import '../modules/blood/views/leaderboard_view.dart';
 import '../modules/blood/views/connected_donors_view.dart';
+import '../modules/blood/views/all_donors_view.dart';
+import '../modules/blood/views/donor_detail_view.dart';
+import '../modules/blood/views/my_responses_view.dart';
+import '../modules/blood/views/blood_chat_view.dart';
 import '../modules/blood/views/donor_chat_view.dart';
 import '../modules/blood/views/donor_register_view.dart';
 import '../modules/blood/views/donor_verify_otp_view.dart';
@@ -549,8 +553,28 @@ class AppPages {
       binding: BloodBinding(),
     ),
     GetPage(
+      name: _Paths.BLOOD_MY_RESPONSES,
+      page: () => const MyResponsesView(),
+      binding: BloodBinding(),
+    ),
+    GetPage(
+      name: _Paths.BLOOD_DONORS,
+      page: () => const AllDonorsView(),
+      binding: BloodBinding(),
+    ),
+    GetPage(
+      name: _Paths.BLOOD_DONOR_DETAIL,
+      page: () => const DonorDetailView(),
+      binding: BloodBinding(),
+    ),
+    GetPage(
       name: _Paths.BLOOD_DONOR_CHAT,
       page: () => const DonorChatView(),
+      binding: BloodBinding(),
+    ),
+    GetPage(
+      name: _Paths.BLOOD_CHAT,
+      page: () => const BloodChatView(),
       binding: BloodBinding(),
     ),
     GetPage(

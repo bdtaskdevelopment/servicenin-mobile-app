@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-import '../../../core/values/app_colors.dart';
+// import '../../../core/values/app_colors.dart'; // used by the hidden white card
 import '../controllers/donation_flow_controller.dart';
 
 const _red = Color(0xFFE11D48);
@@ -18,10 +18,12 @@ class DonationConfirmedView extends GetView<DonationFlowController> {
         child: Column(
           children: [
             Expanded(
-              child: ListView(
-                padding: const EdgeInsets.fromLTRB(20, 24, 20, 16),
-                children: [
-                  const SizedBox(height: 12),
+              child: Center(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
                   Center(
                     child: Container(
                       width: 72,
@@ -47,7 +49,9 @@ class DonationConfirmedView extends GetView<DonationFlowController> {
                             TextStyle(fontSize: 13.5, color: Color(0xFF64748B))),
                   ),
                   const SizedBox(height: 24),
-                  // Stats + badge card
+                  // Stats + badge white card and "Next eligible" text —
+                  // hidden for now.
+                  /*
                   Container(
                     padding: const EdgeInsets.all(18),
                     decoration: BoxDecoration(
@@ -109,7 +113,10 @@ class DonationConfirmedView extends GetView<DonationFlowController> {
                         style: const TextStyle(
                             fontSize: 12.5, color: Color(0xFF94A3B8))),
                   ),
-                ],
+                  */
+                    ],
+                  ),
+                ),
               ),
             ),
             // Actions
@@ -152,6 +159,8 @@ class DonationConfirmedView extends GetView<DonationFlowController> {
     );
   }
 
+  // Used by the hidden stats card above.
+  /*
   Widget _stat(String value, String label) {
     return Column(
       children: [
@@ -164,4 +173,5 @@ class DonationConfirmedView extends GetView<DonationFlowController> {
       ],
     );
   }
+  */
 }
