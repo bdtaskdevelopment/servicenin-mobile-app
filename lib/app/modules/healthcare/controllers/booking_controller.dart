@@ -23,6 +23,9 @@ class BookingController extends GetxController {
   String get doctorSpecialty => _doctor?.specialty ?? '';
   String get doctorFee => profile?.doctor.feeLabel ?? _doctor?.fee ?? '৳0';
 
+  /// Whether this doctor charges a fee. Paid → payment step; free → book now.
+  bool get isPaid => profile?.doctor.isPaid ?? _doctor?.isPaid ?? true;
+
   void setDoctor(HcDoctor d) {
     _doctor = d;
     profile = null;

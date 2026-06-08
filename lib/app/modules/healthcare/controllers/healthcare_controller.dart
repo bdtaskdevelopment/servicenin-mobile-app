@@ -70,6 +70,7 @@ class HcDoctor {
     required this.color,
     this.video = false,
     this.id = '',
+    this.isPaid = true,
   });
 
   final String initials;
@@ -83,6 +84,7 @@ class HcDoctor {
   final Color color;
   final bool video;
   final String id;
+  final bool isPaid;
 
   factory HcDoctor.fromApi(Doctor d) => HcDoctor(
         id: d.id,
@@ -95,6 +97,7 @@ class HcDoctor {
         fee: d.feeLabel,
         slot: d.isAvailable ? 'Available today' : 'By schedule',
         color: const Color(0xFF16A34A),
+        isPaid: d.isPaid,
       );
 }
 

@@ -267,7 +267,11 @@ class PatientDetailsView extends GetView<BookingController> {
                     width: double.infinity,
                     height: 54,
                     child: ElevatedButton(
-                      onPressed: con.patientContinue,
+                      onPressed: con.booking
+                          ? null
+                          : (con.isPaid
+                              ? con.patientContinue
+                              : con.confirmBooking),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: _green,
                         foregroundColor: Colors.white,
@@ -275,9 +279,19 @@ class PatientDetailsView extends GetView<BookingController> {
                         shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(14)),
                       ),
-                      child: const Text('Continue to payment →',
-                          style: TextStyle(
-                              fontSize: 16, fontWeight: FontWeight.w800)),
+                      child: con.booking
+                          ? const SizedBox(
+                              width: 22,
+                              height: 22,
+                              child: CircularProgressIndicator(
+                                  strokeWidth: 2.4, color: Colors.white),
+                            )
+                          : Text(
+                              con.isPaid
+                                  ? 'Continue to payment →'
+                                  : 'Continue booking',
+                              style: const TextStyle(
+                                  fontSize: 16, fontWeight: FontWeight.w800)),
                     ),
                   ),
                 ),

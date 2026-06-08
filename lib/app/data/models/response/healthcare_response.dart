@@ -56,6 +56,7 @@ class Doctor {
     required this.qualifications,
     required this.designation,
     required this.currentHospital,
+    required this.isPaid,
     required this.fullName,
     required this.fullNameBn,
     required this.gender,
@@ -76,6 +77,7 @@ class Doctor {
   final String qualifications;
   final String designation;
   final String currentHospital;
+  final bool isPaid;
   final String fullName;
   final String fullNameBn;
   final String gender;
@@ -113,6 +115,7 @@ class Doctor {
       qualifications: _str(j['qualifications']),
       designation: _str(j['designation']),
       currentHospital: _str(j['current_hospital']),
+      isPaid: j['is_paid'] == true,
       fullName: _str(profile['full_name']),
       fullNameBn: _str(profile['full_name_bn']),
       gender: _str(profile['gender']),
