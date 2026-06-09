@@ -71,7 +71,7 @@ class ConfirmBookingView extends GetView<HomeServiceController> {
                       const _Label('SERVICE ADDRESS'),
                       const SizedBox(height: 8),
                       Container(
-                        padding: const EdgeInsets.all(14),
+                        padding: const EdgeInsets.symmetric(horizontal: 14),
                         decoration: BoxDecoration(
                             color: AppColors.white,
                             borderRadius: BorderRadius.circular(14)),
@@ -88,48 +88,58 @@ class ConfirmBookingView extends GetView<HomeServiceController> {
                             ),
                             const SizedBox(width: 12),
                             Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(con.address,
-                                      style: const TextStyle(
-                                          fontSize: 14,
-                                          fontWeight: FontWeight.w700,
-                                          color: Color(0xFF0F172A))),
-                                  const SizedBox(height: 2),
-                                  const Text('From your profile · GPS pinned',
-                                      style: TextStyle(
-                                          fontSize: 12,
-                                          color: Color(0xFF94A3B8))),
-                                ],
+                              child: TextField(
+                                controller: con.addressCtrl,
+                                minLines: 1,
+                                maxLines: 2,
+                                decoration: const InputDecoration(
+                                  hintText: 'Enter your service address',
+                                  hintStyle:
+                                      TextStyle(color: Color(0xFF94A3B8)),
+                                  border: InputBorder.none,
+                                  isCollapsed: true,
+                                  contentPadding:
+                                      EdgeInsets.symmetric(vertical: 14),
+                                ),
+                                style: const TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w700,
+                                    color: Color(0xFF0F172A)),
                               ),
                             ),
-                            const Text('Change',
-                                style: TextStyle(
-                                    fontSize: 13,
-                                    fontWeight: FontWeight.w700,
-                                    color: AppColors.brandOrange)),
                           ],
                         ),
                       ),
                       const SizedBox(height: 18),
                       const _Label('WHEN?'),
                       const SizedBox(height: 10),
-                      Row(
-                        children: List.generate(con.bookingDates.length, (i) {
-                          final sel = con.selectedBookingDate == i;
-                          final d = con.bookingDates[i];
-                          return Expanded(
-                            child: Padding(
-                              padding: EdgeInsets.only(
-                                  right: i == con.bookingDates.length - 1
-                                      ? 0
-                                      : 10),
-                              child: GestureDetector(
-                                onTap: () => con.selectBookingDate(i),
+                      if (con.loadingDates && con.scheduleDates.isEmpty)
+                        const Padding(
+                          padding: EdgeInsets.symmetric(vertical: 12),
+                          child: Center(
+                              child: CircularProgressIndicator(
+                                  strokeWidth: 2.4, color: _darkTeal)),
+                        )
+                      else
+                        SizedBox(
+                          height: 64,
+                          child: ListView.separated(
+                            scrollDirection: Axis.horizontal,
+                            itemCount: con.scheduleDates.length,
+                            separatorBuilder: (_, __) =>
+                                const SizedBox(width: 10),
+                            itemBuilder: (_, i) {
+                              final sel = con.selectedBookingDate == i;
+                              final d = con.scheduleDates[i];
+                              return GestureDetector(
+                                onTap: () {
+                                  con.selectBookingDate(i);
+                                  con.loadSlotsForSelectedDate();
+                                },
                                 child: Container(
+                                  width: 78,
                                   padding:
-                                      const EdgeInsets.symmetric(vertical: 12),
+                                      const EdgeInsets.symmetric(vertical: 10),
                                   decoration: BoxDecoration(
                                     color: sel ? _darkTeal : AppColors.white,
                                     borderRadius: BorderRadius.circular(12),
@@ -139,8 +149,10 @@ class ConfirmBookingView extends GetView<HomeServiceController> {
                                             : const Color(0xFFE2E8F0)),
                                   ),
                                   child: Column(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.center,
                                     children: [
-                                      Text(d.$1,
+                                      Text(d.label,
                                           style: TextStyle(
                                               fontSize: 12,
                                               fontWeight: FontWeight.w600,
@@ -148,7 +160,7 @@ class ConfirmBookingView extends GetView<HomeServiceController> {
                                                   ? Colors.white
                                                   : const Color(0xFF64748B))),
                                       const SizedBox(height: 2),
-                                      Text(d.$2,
+                                      Text(d.day,
                                           style: TextStyle(
                                               fontSize: 13.5,
                                               fontWeight: FontWeight.w800,
@@ -158,90 +170,154 @@ class ConfirmBookingView extends GetView<HomeServiceController> {
                                     ],
                                   ),
                                 ),
+                              );
+                            },
+                          ),
+                        ),
+                      const SizedBox(height: 14),
+                      const _Label('TIME SLOT'),
+                      const SizedBox(height: 10),
+                      if (con.loadingSlots && con.slots.isEmpty)
+                        const Padding(
+                          padding: EdgeInsets.symmetric(vertical: 12),
+                          child: Center(
+                              child: CircularProgressIndicator(
+                                  strokeWidth: 2.4, color: _darkTeal)),
+                        )
+                      else
+                        Column(
+                          children: con.slots.map((s) {
+                            final sel = con.selectedSlotKey == s.key;
+                            final disabled = !s.available;
+                            return Padding(
+                              padding: const EdgeInsets.only(bottom: 10),
+                              child: GestureDetector(
+                                onTap: disabled
+                                    ? null
+                                    : () => con.selectSlot(s.key),
+                                child: Opacity(
+                                  opacity: disabled ? 0.5 : 1,
+                                  child: Container(
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 14, vertical: 14),
+                                    decoration: BoxDecoration(
+                                      color: sel ? _darkTeal : AppColors.white,
+                                      borderRadius: BorderRadius.circular(12),
+                                      border: Border.all(
+                                          color: sel
+                                              ? _darkTeal
+                                              : const Color(0xFFE2E8F0)),
+                                    ),
+                                    child: Row(
+                                      children: [
+                                        Icon(
+                                            sel
+                                                ? Icons.radio_button_checked
+                                                : Icons.radio_button_off,
+                                            size: 20,
+                                            color: sel
+                                                ? Colors.white
+                                                : const Color(0xFFCBD5E1)),
+                                        const SizedBox(width: 10),
+                                        Expanded(
+                                          child: Text(s.label,
+                                              style: TextStyle(
+                                                  fontSize: 13.5,
+                                                  fontWeight: FontWeight.w700,
+                                                  color: sel
+                                                      ? Colors.white
+                                                      : const Color(
+                                                          0xFF0F172A))),
+                                        ),
+                                        if (disabled)
+                                          const Text('Full',
+                                              style: TextStyle(
+                                                  fontSize: 11.5,
+                                                  fontWeight: FontWeight.w700,
+                                                  color: Color(0xFF94A3B8))),
+                                      ],
+                                    ),
+                                  ),
+                                ),
                               ),
-                            ),
-                          );
-                        }),
-                      ),
-                      const SizedBox(height: 12),
-                      GridView.count(
-                        crossAxisCount: 3,
-                        shrinkWrap: true,
-                        physics: const NeverScrollableScrollPhysics(),
-                        mainAxisSpacing: 12,
-                        crossAxisSpacing: 12,
-                        childAspectRatio: 2.4,
-                        children: con.bookingTimes.map((t) {
-                          final sel = con.selectedBookingTime == t;
-                          return GestureDetector(
-                            onTap: () => con.selectBookingTime(t),
-                            child: Container(
-                              alignment: Alignment.center,
-                              decoration: BoxDecoration(
-                                color: sel ? _darkTeal : AppColors.white,
-                                borderRadius: BorderRadius.circular(12),
-                                border: Border.all(
-                                    color: sel
-                                        ? _darkTeal
-                                        : const Color(0xFFE2E8F0)),
-                              ),
-                              child: Text(t,
-                                  style: TextStyle(
-                                      fontSize: 13.5,
-                                      fontWeight: FontWeight.w700,
-                                      color: sel
-                                          ? Colors.white
-                                          : const Color(0xFF0F172A))),
-                            ),
-                          );
-                        }).toList(),
-                      ),
+                            );
+                          }).toList(),
+                        ),
                       const SizedBox(height: 18),
                       const _Label('PAYMENT'),
                       const SizedBox(height: 10),
-                      GridView.count(
-                        crossAxisCount: 2,
-                        shrinkWrap: true,
-                        physics: const NeverScrollableScrollPhysics(),
-                        mainAxisSpacing: 12,
-                        crossAxisSpacing: 12,
-                        childAspectRatio: 3.0,
-                        children: List.generate(con.payments.length, (i) {
-                          final p = con.payments[i];
-                          final sel = con.selectedPayment == i;
-                          return GestureDetector(
-                            onTap: () => con.selectPayment(i),
-                            child: Container(
-                              padding:
-                                  const EdgeInsets.symmetric(horizontal: 12),
-                              decoration: BoxDecoration(
-                                color: AppColors.white,
-                                borderRadius: BorderRadius.circular(14),
-                                border: Border.all(
-                                    color: sel
-                                        ? _teal
-                                        : const Color(0xFFE2E8F0),
-                                    width: sel ? 1.6 : 1.2),
-                              ),
-                              child: Row(
-                                children: [
-                                  Icon(p.$2, color: p.$3, size: 20),
-                                  const SizedBox(width: 8),
-                                  Expanded(
-                                    child: Text(p.$1,
-                                        style: const TextStyle(
-                                            fontSize: 13,
-                                            fontWeight: FontWeight.w700,
-                                            color: Color(0xFF0F172A))),
+                      Column(
+                        children: con.methods.map((m) {
+                          final sel = con.selectedMethodKey == m.key;
+                          final disabled = !m.enabled;
+                          return Padding(
+                            padding: const EdgeInsets.only(bottom: 10),
+                            child: GestureDetector(
+                              onTap:
+                                  disabled ? null : () => con.selectMethod(m.key),
+                              child: Opacity(
+                                opacity: disabled ? 0.5 : 1,
+                                child: Container(
+                                  padding: const EdgeInsets.all(14),
+                                  decoration: BoxDecoration(
+                                    color: AppColors.white,
+                                    borderRadius: BorderRadius.circular(14),
+                                    border: Border.all(
+                                        color: sel
+                                            ? _teal
+                                            : const Color(0xFFE2E8F0),
+                                        width: sel ? 1.6 : 1.2),
                                   ),
-                                  if (sel)
-                                    const Icon(Icons.check_circle,
-                                        size: 16, color: _teal),
-                                ],
+                                  child: Row(
+                                    children: [
+                                      Icon(
+                                          sel
+                                              ? Icons.radio_button_checked
+                                              : Icons.radio_button_off,
+                                          size: 20,
+                                          color: sel
+                                              ? _teal
+                                              : const Color(0xFFCBD5E1)),
+                                      const SizedBox(width: 10),
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Text(m.label,
+                                                style: const TextStyle(
+                                                    fontSize: 14,
+                                                    fontWeight: FontWeight.w800,
+                                                    color: Color(0xFF0F172A))),
+                                            const SizedBox(height: 2),
+                                            Text(m.description,
+                                                style: const TextStyle(
+                                                    fontSize: 12,
+                                                    color: Color(0xFF94A3B8))),
+                                          ],
+                                        ),
+                                      ),
+                                      if (disabled)
+                                        Container(
+                                          padding: const EdgeInsets.symmetric(
+                                              horizontal: 8, vertical: 4),
+                                          decoration: BoxDecoration(
+                                              color: const Color(0xFFF1F5F9),
+                                              borderRadius:
+                                                  BorderRadius.circular(20)),
+                                          child: const Text('Soon',
+                                              style: TextStyle(
+                                                  fontSize: 10.5,
+                                                  fontWeight: FontWeight.w700,
+                                                  color: Color(0xFF94A3B8))),
+                                        ),
+                                    ],
+                                  ),
+                                ),
                               ),
                             ),
                           );
-                        }),
+                        }).toList(),
                       ),
                     ],
                   ),
@@ -271,7 +347,7 @@ class ConfirmBookingView extends GetView<HomeServiceController> {
                         child: SizedBox(
                           height: 54,
                           child: ElevatedButton(
-                            onPressed: con.placeBooking,
+                            onPressed: con.placing ? null : con.placeBooking,
                             style: ElevatedButton.styleFrom(
                               backgroundColor: _darkTeal,
                               foregroundColor: Colors.white,
@@ -279,10 +355,17 @@ class ConfirmBookingView extends GetView<HomeServiceController> {
                               shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(14)),
                             ),
-                            child: const Text('Place booking',
-                                style: TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w800)),
+                            child: con.placing
+                                ? const SizedBox(
+                                    width: 22,
+                                    height: 22,
+                                    child: CircularProgressIndicator(
+                                        strokeWidth: 2.4, color: Colors.white),
+                                  )
+                                : const Text('Place booking',
+                                    style: TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w800)),
                           ),
                         ),
                       ),

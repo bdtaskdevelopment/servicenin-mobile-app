@@ -7,6 +7,10 @@ import 'app_service.dart';
 import 'core/values/app_config.dart';
 import 'data/providers/ambulance.provider.dart';
 import 'data/providers/healthcare.provider.dart';
+import 'data/providers/service.provider.dart';
+import 'data/providers/physio.provider.dart';
+import 'data/providers/matchmaking.provider.dart';
+import 'data/providers/jobs.provider.dart';
 import 'data/providers/app.provider.dart';
 import 'data/providers/auth.provider.dart';
 import 'data/providers/blood.provider.dart';
@@ -14,6 +18,10 @@ import 'data/providers/info.provider.dart';
 import 'data/providers/profile.provider.dart';
 import 'data/repositories/ambulance.repo.dart';
 import 'data/repositories/healthcare.repo.dart';
+import 'data/repositories/service.repo.dart';
+import 'data/repositories/physio.repo.dart';
+import 'data/repositories/matchmaking.repo.dart';
+import 'data/repositories/jobs.repo.dart';
 import 'data/repositories/app.repo.dart';
 import 'data/repositories/auth.repo.dart';
 import 'data/repositories/blood.repo.dart';
@@ -58,6 +66,31 @@ class AppDependencyInjection {
     Get.lazyPut<HealthcareProvider>(() => HealthcareProvider(), fenix: true);
     Get.lazyPut<HealthcareRepository>(
       () => HealthcareRepository(provider: Get.find()),
+      fenix: true,
+    );
+
+    Get.lazyPut<ServiceProvider>(() => ServiceProvider(), fenix: true);
+    Get.lazyPut<ServiceRepository>(
+      () => ServiceRepository(provider: Get.find()),
+      fenix: true,
+    );
+
+    Get.lazyPut<PhysioProvider>(() => PhysioProvider(), fenix: true);
+    Get.lazyPut<PhysioRepository>(
+      () => PhysioRepository(provider: Get.find()),
+      fenix: true,
+    );
+
+    Get.lazyPut<MatchmakingProvider>(() => MatchmakingProvider(),
+        fenix: true);
+    Get.lazyPut<MatchmakingRepository>(
+      () => MatchmakingRepository(provider: Get.find()),
+      fenix: true,
+    );
+
+    Get.lazyPut<JobsProvider>(() => JobsProvider(), fenix: true);
+    Get.lazyPut<JobsRepository>(
+      () => JobsRepository(provider: Get.find()),
       fenix: true,
     );
 

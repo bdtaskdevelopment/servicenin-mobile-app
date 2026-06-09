@@ -18,6 +18,13 @@ class RateServiceView extends StatefulWidget {
 class _RateServiceViewState extends State<RateServiceView> {
   int rating = 5;
   final Set<String> selectedTags = {'On time', 'Professional'};
+  final TextEditingController _comment = TextEditingController();
+
+  @override
+  void dispose() {
+    _comment.dispose();
+    super.dispose();
+  }
 
   static const _ratingLabels = {
     1: 'Poor',
@@ -205,9 +212,10 @@ class _RateServiceViewState extends State<RateServiceView> {
                         color: AppColors.white,
                         borderRadius: BorderRadius.circular(14),
                         border: Border.all(color: const Color(0xFFE2E8F0))),
-                    child: const TextField(
+                    child: TextField(
+                      controller: _comment,
                       maxLines: 3,
-                      decoration: InputDecoration(
+                      decoration: const InputDecoration(
                         hintText: 'Tell others about your experience…',
                         hintStyle: TextStyle(color: Color(0xFF94A3B8)),
                         border: InputBorder.none,
@@ -225,10 +233,14 @@ class _RateServiceViewState extends State<RateServiceView> {
                 width: double.infinity,
                 height: 54,
                 child: ElevatedButton(
-                  onPressed: () {
-                    con.backToHomeService();
-                    Get.snackbar('Thank you', 'Your rating was submitted',
-                        snackPosition: SnackPosition.BOTTOM);
+                  onPressed: () async {
+                    final tagNote = selectedTags.join(', ');
+                    final comment = [
+                      _comment.text.trim(),
+                      if (tagNote.isNotEmpty) '($tagNote)',
+                    ].where((s) => s.isNotEmpty).join(' ');
+                    final ok = await con.submitRating(rating, comment);
+                    if (ok) con.backToHomeService();
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: _darkTeal,

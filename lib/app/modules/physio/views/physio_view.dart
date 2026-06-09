@@ -54,7 +54,8 @@ class PhysioView extends GetView<PhysioController> {
               ),
             ),
             Expanded(
-              child: ListView(
+              child: GetBuilder<PhysioController>(
+                builder: (_) => ListView(
                 padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
                 children: [
                   // Banner
@@ -111,7 +112,7 @@ class PhysioView extends GetView<PhysioController> {
                       itemBuilder: (_, i) {
                         final c = con.concerns[i];
                         return GestureDetector(
-                          onTap: () => con.openCenter(con.centers[1]),
+                          onTap: () => con.selectConcern(c),
                           child: _ConcernTile(concern: c),
                         );
                       },
@@ -124,17 +125,36 @@ class PhysioView extends GetView<PhysioController> {
                           fontWeight: FontWeight.w800,
                           color: Color(0xFF0F172A))),
                   const SizedBox(height: 2),
-                  const Text('3 near Gulshan',
-                      style: TextStyle(fontSize: 12.5, color: _orange)),
+                  Text(
+                      con.selectedConcernLabel.isNotEmpty
+                          ? '${con.centers.length} centers for ${con.selectedConcernLabel}'
+                          : '${con.centers.length} centers near you',
+                      style: const TextStyle(fontSize: 12.5, color: _orange)),
                   const SizedBox(height: 14),
-                  ...con.centers.map((c) => Padding(
-                        padding: const EdgeInsets.only(bottom: 12),
-                        child: GestureDetector(
-                          onTap: () => con.openCenter(c),
-                          child: _CenterCard(center: c),
-                        ),
-                      )),
+                  if (con.loadingCenters && con.centers.isEmpty)
+                    const Padding(
+                      padding: EdgeInsets.symmetric(vertical: 24),
+                      child: Center(
+                          child: CircularProgressIndicator(
+                              strokeWidth: 2.4, color: _brown)),
+                    )
+                  else if (con.centers.isEmpty)
+                    const Padding(
+                      padding: EdgeInsets.symmetric(vertical: 8),
+                      child: Text('No centers found.',
+                          style:
+                              TextStyle(fontSize: 13, color: Color(0xFF94A3B8))),
+                    )
+                  else
+                    ...con.centers.map((c) => Padding(
+                          padding: const EdgeInsets.only(bottom: 12),
+                          child: GestureDetector(
+                            onTap: () => con.openCenter(c),
+                            child: _CenterCard(center: c),
+                          ),
+                        )),
                 ],
+              ),
               ),
             ),
           ],
@@ -218,28 +238,29 @@ class _CenterCard extends StatelessWidget {
                     const SizedBox(height: 3),
                     Row(
                       children: [
-                        const Icon(Icons.star_rounded,
-                            size: 15, color: Color(0xFFF59E0B)),
+                        const Icon(Icons.location_on_outlined,
+                            size: 14, color: Color(0xFF94A3B8)),
                         const SizedBox(width: 3),
-                        Text('${center.rating} ',
-                            style: const TextStyle(
-                                fontSize: 12.5,
-                                fontWeight: FontWeight.w700,
-                                color: Color(0xFF0F172A))),
-                        Text('( ${center.reviews} ) · ${center.area}',
-                            style: const TextStyle(
-                                fontSize: 12.5, color: Color(0xFF94A3B8))),
+                        Expanded(
+                          child: Text(center.area,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(
+                                  fontSize: 12.5, color: Color(0xFF94A3B8))),
+                        ),
                       ],
                     ),
                   ],
                 ),
               ),
-              const SizedBox(width: 8),
-              Text(center.distance,
-                  style: const TextStyle(
-                      fontSize: 12.5,
-                      fontWeight: FontWeight.w800,
-                      color: Color(0xFF16A34A))),
+              if (center.distance.isNotEmpty) ...[
+                const SizedBox(width: 8),
+                Text(center.distance,
+                    style: const TextStyle(
+                        fontSize: 12.5,
+                        fontWeight: FontWeight.w800,
+                        color: Color(0xFF16A34A))),
+              ],
             ],
           ),
           const SizedBox(height: 12),

@@ -12,9 +12,8 @@ class InterestsView extends GetView<MatchmakingController> {
 
   @override
   Widget build(BuildContext context) {
-    final con = controller;
     return DefaultTabController(
-      length: 2,
+      length: 3,
       child: Scaffold(
         backgroundColor: const Color(0xFFF7F8FA),
         appBar: AppBar(
@@ -33,26 +32,29 @@ class InterestsView extends GetView<MatchmakingController> {
                   fontSize: 19,
                   fontWeight: FontWeight.w800,
                   color: Color(0xFF0F172A))),
-          bottom: TabBar(
+          bottom: const TabBar(
             indicatorColor: _maroon,
             indicatorWeight: 2.5,
             labelColor: _maroon,
-            unselectedLabelColor: const Color(0xFF94A3B8),
-            labelStyle: const TextStyle(
-                fontSize: 14.5, fontWeight: FontWeight.w800),
-            unselectedLabelStyle: const TextStyle(
-                fontSize: 14.5, fontWeight: FontWeight.w600),
+            unselectedLabelColor: Color(0xFF94A3B8),
+            labelStyle: TextStyle(fontSize: 13.5, fontWeight: FontWeight.w800),
+            unselectedLabelStyle:
+                TextStyle(fontSize: 13.5, fontWeight: FontWeight.w600),
             tabs: [
-              Tab(text: 'Received (${con.received.length})'),
-              Tab(text: 'Sent (${con.sent.length})'),
+              Tab(text: 'Received'),
+              Tab(text: 'Sent'),
+              Tab(text: 'Matches'),
             ],
           ),
         ),
-        body: TabBarView(
-          children: [
-            _ReceivedList(items: con.received),
-            _SentList(items: con.sent),
-          ],
+        body: GetBuilder<MatchmakingController>(
+          builder: (con) => TabBarView(
+            children: [
+              _ReceivedTab(con: con),
+              _SentTab(con: con),
+              _MatchesTab(con: con),
+            ],
+          ),
         ),
       ),
     );
@@ -60,8 +62,8 @@ class InterestsView extends GetView<MatchmakingController> {
 }
 
 class _Avatar extends StatelessWidget {
-  const _Avatar(this.score);
-  final String score;
+  const _Avatar(this.letter);
+  final String letter;
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -70,206 +72,317 @@ class _Avatar extends StatelessWidget {
       decoration: BoxDecoration(
           color: _pink, borderRadius: BorderRadius.circular(12)),
       alignment: Alignment.center,
-      child: Text(score,
+      child: Text(letter,
           style: const TextStyle(
               color: _maroon, fontSize: 17, fontWeight: FontWeight.w800)),
     );
   }
 }
 
-class _ReceivedList extends StatelessWidget {
-  const _ReceivedList({required this.items});
-  final List<MmInterest> items;
+class _Card extends StatelessWidget {
+  const _Card({required this.child});
+  final Widget child;
+  @override
+  Widget build(BuildContext context) => Container(
+        padding: const EdgeInsets.all(14),
+        decoration: BoxDecoration(
+          color: AppColors.white,
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+                color: Colors.black.withValues(alpha: 0.03),
+                blurRadius: 10,
+                offset: const Offset(0, 3)),
+          ],
+        ),
+        child: child,
+      );
+}
+
+Widget _loaderOrEmpty(bool loading, bool empty, String emptyText) {
+  if (loading) {
+    return const Center(
+        child: CircularProgressIndicator(strokeWidth: 2.6, color: _maroon));
+  }
+  return ListView(
+    children: [
+      const SizedBox(height: 140),
+      Center(
+          child: Text(emptyText,
+              style: const TextStyle(color: Color(0xFF94A3B8)))),
+    ],
+  );
+}
+
+class _ReceivedTab extends StatelessWidget {
+  const _ReceivedTab({required this.con});
+  final MatchmakingController con;
   @override
   Widget build(BuildContext context) {
-    return ListView(
-      padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
-      children: items
-          .map((it) => Padding(
-                padding: const EdgeInsets.only(bottom: 12),
-                child: Container(
-                  padding: const EdgeInsets.all(14),
-                  decoration: BoxDecoration(
-                    color: AppColors.white,
-                    borderRadius: BorderRadius.circular(16),
-                    boxShadow: [
-                      BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.03),
-                          blurRadius: 10,
-                          offset: const Offset(0, 3)),
-                    ],
-                  ),
-                  child: Column(
+    if (con.received.isEmpty) {
+      return _loaderOrEmpty(
+          con.loadingReceived, true, 'No interests received.');
+    }
+    return RefreshIndicator(
+      color: _maroon,
+      onRefresh: con.fetchReceived,
+      child: ListView(
+        padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
+        children: con.received.map((it) {
+          final s = it.sender;
+          return Padding(
+            padding: const EdgeInsets.only(bottom: 12),
+            child: _Card(
+              child: Column(
+                children: [
+                  Row(
                     children: [
-                      Row(
-                        children: [
-                          _Avatar(it.score),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(it.code,
-                                    style: const TextStyle(
-                                        fontSize: 12.5,
-                                        fontWeight: FontWeight.w700,
-                                        color: Color(0xFFB45309))),
-                                const SizedBox(height: 3),
-                                Text(it.summary,
-                                    style: const TextStyle(
-                                        fontSize: 14.5,
-                                        fontWeight: FontWeight.w700,
-                                        color: Color(0xFF0F172A))),
-                                const SizedBox(height: 2),
-                                Text(it.ago,
-                                    style: const TextStyle(
-                                        fontSize: 12,
-                                        color: Color(0xFF94A3B8))),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 14),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: SizedBox(
-                              height: 44,
-                              child: OutlinedButton(
-                                onPressed: () {},
-                                style: OutlinedButton.styleFrom(
-                                  side: const BorderSide(
-                                      color: Color(0xFFE2E8F0)),
-                                  shape: RoundedRectangleBorder(
-                                      borderRadius:
-                                          BorderRadius.circular(12)),
-                                ),
-                                child: const Text('Decline',
-                                    style: TextStyle(
-                                        fontSize: 14,
-                                        fontWeight: FontWeight.w700,
-                                        color: Color(0xFF334155))),
-                              ),
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: SizedBox(
-                              height: 44,
-                              child: ElevatedButton(
-                                onPressed: () {},
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: _maroon,
-                                  foregroundColor: Colors.white,
-                                  elevation: 0,
-                                  shape: RoundedRectangleBorder(
-                                      borderRadius:
-                                          BorderRadius.circular(12)),
-                                ),
-                                child: const Text('Accept & share',
-                                    style: TextStyle(
-                                        fontSize: 14,
-                                        fontWeight: FontWeight.w800)),
-                              ),
-                            ),
-                          ),
-                        ],
+                      _Avatar(s?.letter ?? '?'),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(s?.code ?? '',
+                                style: const TextStyle(
+                                    fontSize: 12.5,
+                                    fontWeight: FontWeight.w700,
+                                    color: Color(0xFFB45309))),
+                            const SizedBox(height: 3),
+                            Text(s?.summary ?? '',
+                                style: const TextStyle(
+                                    fontSize: 14.5,
+                                    fontWeight: FontWeight.w700,
+                                    color: Color(0xFF0F172A))),
+                            if (it.message.isNotEmpty) ...[
+                              const SizedBox(height: 2),
+                              Text(it.message,
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: const TextStyle(
+                                      fontSize: 12,
+                                      color: Color(0xFF94A3B8))),
+                            ],
+                          ],
+                        ),
                       ),
                     ],
                   ),
-                ),
-              ))
-          .toList(),
+                  if (it.pending) ...[
+                    const SizedBox(height: 14),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: SizedBox(
+                            height: 44,
+                            child: OutlinedButton(
+                              onPressed: con.responding
+                                  ? null
+                                  : () => con.respond(it, false),
+                              style: OutlinedButton.styleFrom(
+                                side: const BorderSide(
+                                    color: Color(0xFFE2E8F0)),
+                                shape: RoundedRectangleBorder(
+                                    borderRadius:
+                                        BorderRadius.circular(12)),
+                              ),
+                              child: const Text('Decline',
+                                  style: TextStyle(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w700,
+                                      color: Color(0xFF334155))),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: SizedBox(
+                            height: 44,
+                            child: ElevatedButton(
+                              onPressed: con.responding
+                                  ? null
+                                  : () => con.respond(it, true),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: _maroon,
+                                foregroundColor: Colors.white,
+                                elevation: 0,
+                                shape: RoundedRectangleBorder(
+                                    borderRadius:
+                                        BorderRadius.circular(12)),
+                              ),
+                              child: const Text('Accept & share',
+                                  style: TextStyle(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w800)),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ] else ...[
+                    const SizedBox(height: 10),
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: _StatusChip(status: it.status),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+          );
+        }).toList(),
+      ),
     );
   }
 }
 
-class _SentList extends StatelessWidget {
-  const _SentList({required this.items});
-  final List<MmInterest> items;
+class _SentTab extends StatelessWidget {
+  const _SentTab({required this.con});
+  final MatchmakingController con;
   @override
   Widget build(BuildContext context) {
-    return ListView(
-      padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
-      children: items
-          .map((it) => Padding(
-                padding: const EdgeInsets.only(bottom: 12),
-                child: Container(
-                  padding: const EdgeInsets.all(14),
-                  decoration: BoxDecoration(
-                    color: AppColors.white,
-                    borderRadius: BorderRadius.circular(16),
-                    boxShadow: [
-                      BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.03),
-                          blurRadius: 10,
-                          offset: const Offset(0, 3)),
-                    ],
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+    if (con.sent.isEmpty) {
+      return _loaderOrEmpty(con.loadingSent, true, 'No interests sent.');
+    }
+    return RefreshIndicator(
+      color: _maroon,
+      onRefresh: con.fetchSent,
+      child: ListView(
+        padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
+        children: con.sent.map((it) {
+          final r = it.receiver;
+          return Padding(
+            padding: const EdgeInsets.only(bottom: 12),
+            child: _Card(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
                     children: [
-                      Row(
-                        children: [
-                          _Avatar(it.score),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(it.code,
-                                    style: const TextStyle(
-                                        fontSize: 12.5,
-                                        fontWeight: FontWeight.w700,
-                                        color: Color(0xFFB45309))),
-                                const SizedBox(height: 3),
-                                Text(it.summary,
-                                    style: const TextStyle(
-                                        fontSize: 14.5,
-                                        fontWeight: FontWeight.w700,
-                                        color: Color(0xFF0F172A))),
-                                const SizedBox(height: 2),
-                                Text(it.ago,
-                                    style: const TextStyle(
-                                        fontSize: 12,
-                                        color: Color(0xFF94A3B8))),
-                              ],
-                            ),
-                          ),
-                        ],
+                      _Avatar(r?.letter ?? '?'),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(r?.code ?? '',
+                                style: const TextStyle(
+                                    fontSize: 12.5,
+                                    fontWeight: FontWeight.w700,
+                                    color: Color(0xFFB45309))),
+                            const SizedBox(height: 3),
+                            Text(r?.summary ?? '',
+                                style: const TextStyle(
+                                    fontSize: 14.5,
+                                    fontWeight: FontWeight.w700,
+                                    color: Color(0xFF0F172A))),
+                          ],
+                        ),
                       ),
-                      if (it.awaiting) ...[
-                        const Padding(
-                          padding: EdgeInsets.symmetric(vertical: 12),
-                          child: Divider(height: 1, color: Color(0xFFF1F5F9)),
-                        ),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 10, vertical: 6),
-                          decoration: BoxDecoration(
-                              color: const Color(0xFFFEF3C7),
-                              borderRadius: BorderRadius.circular(20)),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: const [
-                              Icon(Icons.circle,
-                                  size: 7, color: Color(0xFFD97706)),
-                              SizedBox(width: 5),
-                              Text('Awaiting response',
-                                  style: TextStyle(
-                                      fontSize: 11.5,
-                                      fontWeight: FontWeight.w700,
-                                      color: Color(0xFFB45309))),
-                            ],
-                          ),
-                        ),
-                      ],
+                      _StatusChip(status: it.status),
                     ],
                   ),
-                ),
-              ))
-          .toList(),
+                ],
+              ),
+            ),
+          );
+        }).toList(),
+      ),
+    );
+  }
+}
+
+class _MatchesTab extends StatelessWidget {
+  const _MatchesTab({required this.con});
+  final MatchmakingController con;
+  @override
+  Widget build(BuildContext context) {
+    if (con.matches.isEmpty) {
+      return _loaderOrEmpty(con.loadingMatches, true, 'No matches yet.');
+    }
+    return RefreshIndicator(
+      color: _maroon,
+      onRefresh: con.fetchMatches,
+      child: ListView(
+        padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
+        children: con.matches.map((m) {
+          final p = m.match;
+          return Padding(
+            padding: const EdgeInsets.only(bottom: 12),
+            child: _Card(
+              child: Row(
+                children: [
+                  _Avatar(p.letter),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(p.code,
+                            style: const TextStyle(
+                                fontSize: 12.5,
+                                fontWeight: FontWeight.w700,
+                                color: Color(0xFFB45309))),
+                        const SizedBox(height: 3),
+                        Text(p.summary,
+                            style: const TextStyle(
+                                fontSize: 14.5,
+                                fontWeight: FontWeight.w700,
+                                color: Color(0xFF0F172A))),
+                      ],
+                    ),
+                  ),
+                  ElevatedButton.icon(
+                    onPressed: () =>
+                        con.openChat(m.interest.id, p.code),
+                    icon: const Icon(Icons.chat_bubble_outline_rounded,
+                        size: 16),
+                    label: const Text('Chat',
+                        style: TextStyle(
+                            fontSize: 13, fontWeight: FontWeight.w800)),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: _maroon,
+                      foregroundColor: Colors.white,
+                      elevation: 0,
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10)),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        }).toList(),
+      ),
+    );
+  }
+}
+
+class _StatusChip extends StatelessWidget {
+  const _StatusChip({required this.status});
+  final String status;
+  @override
+  Widget build(BuildContext context) {
+    final s = status.toLowerCase();
+    final accepted = s == 'accepted';
+    final declined = s == 'declined' || s == 'rejected';
+    final bg = declined
+        ? const Color(0xFFFEE2E2)
+        : accepted
+            ? const Color(0xFFDCFCE7)
+            : const Color(0xFFFEF3C7);
+    final fg = declined
+        ? const Color(0xFFDC2626)
+        : accepted
+            ? const Color(0xFF15803D)
+            : const Color(0xFFB45309);
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      decoration:
+          BoxDecoration(color: bg, borderRadius: BorderRadius.circular(20)),
+      child: Text(status.isEmpty ? 'Pending' : mmHumanize(status),
+          style: TextStyle(
+              fontSize: 11, fontWeight: FontWeight.w800, color: fg)),
     );
   }
 }

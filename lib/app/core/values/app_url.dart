@@ -76,6 +76,94 @@ class ApiURL {
   static String hcPrescriptionDownload(String id) =>
       'api/v1/healthcare/prescriptions/$id/download';
 
+  //===== Home services
+  static final String servicesCategories = 'api/v1/services/categories';
+  static String servicesPopular({int days = 7, int limit = 10}) =>
+      'api/v1/services/popular?days=$days&limit=$limit';
+  static String servicesSearch(String q) => 'api/v1/services/search?q=$q';
+  static String servicesSubServices(String categoryId) =>
+      'api/v1/services/categories/$categoryId/sub-services';
+  static final String servicesScheduleDates =
+      'api/v1/services/schedule-dates';
+  static String servicesTimeSlots(String date) =>
+      'api/v1/services/time-slots?date=$date';
+  static final String servicesPaymentMethods =
+      'api/v1/services/payment-methods';
+  static final String servicesBook = 'api/v1/services/book';
+  static final String servicesBookingsMy = 'api/v1/services/bookings/my';
+  static String serviceBooking(String id) => 'api/v1/services/bookings/$id';
+  static String serviceBookingTimeline(String id) =>
+      'api/v1/services/bookings/$id/timeline';
+  static String serviceBookingRating(String id) =>
+      'api/v1/services/bookings/$id/rating';
+  static String serviceBookingDispute(String id) =>
+      'api/v1/services/bookings/$id/dispute';
+  static String serviceBookingChat(String id) =>
+      'api/v1/services/bookings/$id/chat';
+
+  //===== Physiotherapy
+  static final String physioConcerns = 'api/v1/physio/concerns';
+  static String physioConcernCenters(String key) =>
+      'api/v1/physio/concerns/$key/centers';
+  static final String physioCenters = 'api/v1/physio/centers';
+  static String physioCenter(String id) => 'api/v1/physio/centers/$id';
+  static String physioCenterStaff(String id) =>
+      'api/v1/physio/centers/$id/staff';
+  static final String physioVisitTypes = 'api/v1/physio/visit-types';
+  static final String physioScheduleDates = 'api/v1/physio/schedule-dates';
+  static String physioTimeSlots(String staffId, String date) =>
+      'api/v1/physio/time-slots?staff_id=$staffId&date=$date';
+  static final String physioPaymentMethods =
+      'api/v1/physio/payment-methods';
+  static final String physioAppointments = 'api/v1/physio/appointments';
+  static String physioAppointmentsMy({int page = 1, int limit = 20}) =>
+      'api/v1/physio/appointments/my?page=$page&limit=$limit';
+
+  //===== Matchmaking (Marriage)
+  static final String mmCategories = 'api/v1/matchmaking/categories';
+  static final String mmBiodataFields = 'api/v1/matchmaking/biodata-fields';
+  static final String mmProfiles = 'api/v1/matchmaking/profiles';
+  static final String mmProfileMe = 'api/v1/matchmaking/profiles/me';
+  static String mmProfile(String id) => 'api/v1/matchmaking/profiles/$id';
+  static final String mmSuggestions = 'api/v1/matchmaking/suggestions';
+  static String mmInterest(String profileId) =>
+      'api/v1/matchmaking/profiles/$profileId/interest';
+  static final String mmInterestsReceived =
+      'api/v1/matchmaking/interests/received';
+  static final String mmInterestsSent = 'api/v1/matchmaking/interests/sent';
+  static String mmInterestRespond(String id) =>
+      'api/v1/matchmaking/interests/$id/respond';
+  static final String mmMatches = 'api/v1/matchmaking/matches';
+  static String mmInterestChat(String id) =>
+      'api/v1/matchmaking/interests/$id/chat';
+
+  //===== Jobs
+  static final String jobsCategories = 'api/v1/jobs/categories';
+  static final String jobs = 'api/v1/jobs';
+  static String jobsList({
+    String category = '',
+    String jobType = '',
+    String search = '',
+    int page = 1,
+    int limit = 20,
+  }) {
+    final params = <String>['page=$page', 'limit=$limit'];
+    if (category.isNotEmpty && category != 'All') {
+      params.add('category=$category');
+    }
+    if (jobType.isNotEmpty) params.add('job_type=$jobType');
+    if (search.isNotEmpty) params.add('search=$search');
+    return 'api/v1/jobs?${params.join('&')}';
+  }
+
+  static String jobById(String id) => 'api/v1/jobs/$id';
+  static final String jobsSeekerProfile = 'api/v1/jobs/seekers/profile';
+  static final String jobsResumeUpload = 'api/v1/jobs/resume/upload';
+  static String jobApply(String id) => 'api/v1/jobs/$id/apply';
+  static final String jobsApplicationsMy = 'api/v1/jobs/applications/my';
+  static final String jobsEmployerRegister =
+      'api/v1/jobs/employers/register';
+
   //===== Information / hotlines (ServiceNin)
   static final String info = 'api/v1/info';
   static String infoById(String id) => 'api/v1/info/$id';

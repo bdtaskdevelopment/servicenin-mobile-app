@@ -21,6 +21,7 @@ abstract class Routes {
   static const HS_SUBSCRIPTIONS = _Paths.HS_SUBSCRIPTIONS;
   static const HS_PROVIDER = _Paths.HS_PROVIDER;
   static const HS_CHAT = _Paths.HS_CHAT;
+  static const HS_MY_BOOKINGS = _Paths.HS_MY_BOOKINGS;
   static const HS_EARNINGS = _Paths.HS_EARNINGS;
   static const PHYSIO = _Paths.PHYSIO;
   static const PHYSIO_SESSIONS = _Paths.PHYSIO_SESSIONS;
@@ -31,11 +32,15 @@ abstract class Routes {
   static const MATCHMAKING_BIODATA = _Paths.MATCHMAKING_BIODATA;
   static const MATCHMAKING_PROFILE = _Paths.MATCHMAKING_PROFILE;
   static const MATCHMAKING_INTERESTS = _Paths.MATCHMAKING_INTERESTS;
+  static const MATCHMAKING_MATCHES = _Paths.MATCHMAKING_MATCHES;
+  static const MATCHMAKING_CHAT = _Paths.MATCHMAKING_CHAT;
   static const JOBS = _Paths.JOBS;
   static const JOBS_APPLICATIONS = _Paths.JOBS_APPLICATIONS;
   static const JOBS_DETAIL = _Paths.JOBS_DETAIL;
   static const JOBS_APPLY = _Paths.JOBS_APPLY;
   static const JOBS_POST = _Paths.JOBS_POST;
+  static const JOBS_EMPLOYER = _Paths.JOBS_EMPLOYER;
+  static const JOBS_SEEKER_PROFILE = _Paths.JOBS_SEEKER_PROFILE;
   static const FUNERAL = _Paths.FUNERAL;
   static const FUNERAL_REQUEST = _Paths.FUNERAL_REQUEST;
   static const FUNERAL_DONE = _Paths.FUNERAL_DONE;
@@ -146,6 +151,7 @@ abstract class _Paths {
   static const HS_SUBSCRIPTIONS = '/hs-subscriptions';
   static const HS_PROVIDER = '/hs-provider';
   static const HS_CHAT = '/hs-chat';
+  static const HS_MY_BOOKINGS = '/hs-my-bookings';
   static const HS_EARNINGS = '/hs-earnings';
   static const PHYSIO = '/physio';
   static const PHYSIO_SESSIONS = '/physio-sessions';
@@ -156,11 +162,15 @@ abstract class _Paths {
   static const MATCHMAKING_BIODATA = '/matchmaking-biodata';
   static const MATCHMAKING_PROFILE = '/matchmaking-profile';
   static const MATCHMAKING_INTERESTS = '/matchmaking-interests';
+  static const MATCHMAKING_MATCHES = '/matchmaking-matches';
+  static const MATCHMAKING_CHAT = '/matchmaking-chat';
   static const JOBS = '/jobs';
   static const JOBS_APPLICATIONS = '/jobs-applications';
   static const JOBS_DETAIL = '/jobs-detail';
   static const JOBS_APPLY = '/jobs-apply';
   static const JOBS_POST = '/jobs-post';
+  static const JOBS_EMPLOYER = '/jobs-employer';
+  static const JOBS_SEEKER_PROFILE = '/jobs-seeker-profile';
   static const FUNERAL = '/funeral';
   static const FUNERAL_REQUEST = '/funeral-request';
   static const FUNERAL_DONE = '/funeral-done';

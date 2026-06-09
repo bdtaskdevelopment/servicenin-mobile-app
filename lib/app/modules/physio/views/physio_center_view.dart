@@ -46,91 +46,112 @@ class PhysioCenterView extends GetView<PhysioController> {
               ),
             ),
             Expanded(
-              child: ListView(
-                padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
-                children: [
-                  // Center identity
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+              child: GetBuilder<PhysioController>(
+                builder: (con) {
+                  final center = con.center;
+                  if (center == null) return const SizedBox.shrink();
+                  return ListView(
+                    padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
                     children: [
-                      Container(
-                        width: 64,
-                        height: 64,
-                        decoration: BoxDecoration(
-                            color: _tile,
-                            borderRadius: BorderRadius.circular(16)),
-                        child: const Icon(Icons.directions_run_rounded,
-                            color: _orange, size: 32),
-                      ),
-                      const SizedBox(width: 14),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(center.name,
-                                style: const TextStyle(
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.w800,
-                                    color: Color(0xFF0F172A))),
-                            const SizedBox(height: 3),
-                            Text('${center.area} · ${center.distance}',
-                                style: const TextStyle(
-                                    fontSize: 12.5, color: Color(0xFF94A3B8))),
-                            const SizedBox(height: 5),
-                            Row(
+                      // Center identity
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Container(
+                            width: 64,
+                            height: 64,
+                            decoration: BoxDecoration(
+                                color: _tile,
+                                borderRadius: BorderRadius.circular(16)),
+                            child: const Icon(Icons.directions_run_rounded,
+                                color: _orange, size: 32),
+                          ),
+                          const SizedBox(width: 14),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                const Icon(Icons.star_rounded,
-                                    size: 16, color: Color(0xFF0F172A)),
-                                const SizedBox(width: 3),
-                                Text(center.rating,
+                                Text(center.name,
                                     style: const TextStyle(
-                                        fontSize: 13,
+                                        fontSize: 18,
                                         fontWeight: FontWeight.w800,
                                         color: Color(0xFF0F172A))),
-                                Text(' (${center.reviews}) · ${center.hours}',
+                                const SizedBox(height: 4),
+                                Text(center.area,
                                     style: const TextStyle(
                                         fontSize: 12.5,
                                         color: Color(0xFF94A3B8))),
+                                if (center.contact.isNotEmpty) ...[
+                                  const SizedBox(height: 4),
+                                  Row(
+                                    children: [
+                                      const Icon(Icons.call_outlined,
+                                          size: 14, color: _orange),
+                                      const SizedBox(width: 4),
+                                      Text(center.contact,
+                                          style: const TextStyle(
+                                              fontSize: 12.5,
+                                              fontWeight: FontWeight.w700,
+                                              color: _orange)),
+                                    ],
+                                  ),
+                                ],
                               ],
                             ),
-                          ],
-                        ),
+                          ),
+                        ],
                       ),
+                      if (center.tags.isNotEmpty) ...[
+                        const SizedBox(height: 12),
+                        Wrap(
+                          spacing: 8,
+                          runSpacing: 8,
+                          children: center.tags.map((t) => _Tag(t)).toList(),
+                        ),
+                      ],
+                      const SizedBox(height: 22),
+                      const Text('Therapists',
+                          style: TextStyle(
+                              fontSize: 17,
+                              fontWeight: FontWeight.w800,
+                              color: Color(0xFF0F172A))),
+                      const SizedBox(height: 2),
+                      const Text('Pick one to book a session',
+                          style: TextStyle(fontSize: 12.5, color: _orange)),
+                      const SizedBox(height: 14),
+                      if (con.loadingCenter && center.therapists.isEmpty)
+                        const Padding(
+                          padding: EdgeInsets.symmetric(vertical: 16),
+                          child: Center(
+                              child: CircularProgressIndicator(
+                                  strokeWidth: 2.4, color: _brown)),
+                        )
+                      else if (center.therapists.isEmpty)
+                        const Text('No therapists available.',
+                            style: TextStyle(
+                                fontSize: 13, color: Color(0xFF94A3B8)))
+                      else
+                        ...center.therapists.map((t) => Padding(
+                              padding: const EdgeInsets.only(bottom: 12),
+                              child: _TherapistCard(therapist: t, con: con),
+                            )),
+                      if (center.about.isNotEmpty) ...[
+                        const SizedBox(height: 14),
+                        const Text('About',
+                            style: TextStyle(
+                                fontSize: 17,
+                                fontWeight: FontWeight.w800,
+                                color: Color(0xFF0F172A))),
+                        const SizedBox(height: 10),
+                        Text(center.about,
+                            style: const TextStyle(
+                                fontSize: 13.5,
+                                height: 1.5,
+                                color: Color(0xFF475569))),
+                      ],
                     ],
-                  ),
-                  const SizedBox(height: 12),
-                  Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
-                    children: center.tags.map((t) => _Tag(t)).toList(),
-                  ),
-                  const SizedBox(height: 22),
-                  const Text('Therapists',
-                      style: TextStyle(
-                          fontSize: 17,
-                          fontWeight: FontWeight.w800,
-                          color: Color(0xFF0F172A))),
-                  const SizedBox(height: 2),
-                  const Text('Pick one to book a session',
-                      style: TextStyle(fontSize: 12.5, color: _orange)),
-                  const SizedBox(height: 14),
-                  ...center.therapists.map((t) => Padding(
-                        padding: const EdgeInsets.only(bottom: 12),
-                        child: _TherapistCard(therapist: t, con: con),
-                      )),
-                  const SizedBox(height: 14),
-                  const Text('About',
-                      style: TextStyle(
-                          fontSize: 17,
-                          fontWeight: FontWeight.w800,
-                          color: Color(0xFF0F172A))),
-                  const SizedBox(height: 10),
-                  Text(center.about,
-                      style: const TextStyle(
-                          fontSize: 13.5,
-                          height: 1.5,
-                          color: Color(0xFF475569))),
-                ],
+                  );
+                },
               ),
             ),
           ],

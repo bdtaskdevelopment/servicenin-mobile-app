@@ -55,16 +55,25 @@ class PhysioBookedView extends GetView<PhysioController> {
                         borderRadius: BorderRadius.circular(18)),
                     child: Column(
                       children: [
-                        _row(Icons.person_outline_rounded, t?.name ?? ''),
+                        _row(Icons.person_outline_rounded,
+                            con.lastAppointment?.staffName.isNotEmpty == true
+                                ? con.lastAppointment!.staffName
+                                : (t?.name ?? '')),
                         const SizedBox(height: 14),
                         _row(Icons.meeting_room_outlined,
                             center?.name ?? ''),
                         const SizedBox(height: 14),
-                        _row(Icons.calendar_today_outlined,
-                            'Tomorrow · ${con.selectedTime}'),
+                        _row(
+                            Icons.calendar_today_outlined,
+                            con.lastAppointment?.whenLabel.isNotEmpty == true
+                                ? con.lastAppointment!.whenLabel
+                                : '${con.selectedDateLabel} · ${con.selectedTime}'),
                         const SizedBox(height: 14),
-                        _row(Icons.bolt_rounded,
-                            '${con.sessionType == 0 ? 'Cash at center' : 'Cash on visit'} · ${t?.fee ?? ''}'),
+                        _row(
+                            Icons.bolt_rounded,
+                            con.sessionType == 1
+                                ? 'Home visit · ${con.selectedPaymentKey}'
+                                : 'At center · ${con.selectedPaymentKey}'),
                       ],
                     ),
                   ),

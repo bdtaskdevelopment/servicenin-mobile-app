@@ -89,11 +89,19 @@ class HsServiceListView extends GetView<HomeServiceController> {
                     ),
                   ),
                 Expanded(
-                  child: services.isEmpty
+                  child: (con.loadingSub || con.searching) && services.isEmpty
                       ? const Center(
-                          child: Text('No services found',
-                              style: TextStyle(color: Color(0xFF94A3B8))))
-                      : ListView(
+                          child: CircularProgressIndicator(
+                              strokeWidth: 2.6, color: _darkTeal))
+                      : services.isEmpty
+                          ? Center(
+                              child: Text(
+                                  isSearch
+                                      ? 'Search for a service'
+                                      : 'No services found',
+                                  style: const TextStyle(
+                                      color: Color(0xFF94A3B8))))
+                          : ListView(
                           padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
                           children: services
                               .map((s) => Padding(

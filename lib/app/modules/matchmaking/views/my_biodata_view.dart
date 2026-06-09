@@ -11,121 +11,144 @@ class MyBiodataView extends GetView<MatchmakingController> {
 
   @override
   Widget build(BuildContext context) {
-    final con = controller;
     return Scaffold(
       backgroundColor: const Color(0xFFF7F8FA),
       body: SafeArea(
-        child: Column(
-          children: [
-            // Header
-            Padding(
-              padding: const EdgeInsets.fromLTRB(8, 6, 16, 4),
-              child: Row(
-                children: [
-                  IconButton(
-                    splashRadius: 22,
-                    onPressed: () => Get.back(),
-                    icon: const Icon(Icons.arrow_back_ios_new_rounded,
-                        size: 20, color: Color(0xFF1A1A1A)),
-                  ),
-                  const Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text('My biodata',
-                          style: TextStyle(
-                              fontSize: 19,
-                              fontWeight: FontWeight.w800,
-                              color: Color(0xFF0F172A))),
-                      SizedBox(height: 1),
-                      Text('70% complete',
-                          style: TextStyle(
-                              fontSize: 12, color: Color(0xFF94A3B8))),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-            // Progress bar
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 6, 16, 8),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(10),
-                child: LinearProgressIndicator(
-                  value: 0.7,
-                  minHeight: 6,
-                  backgroundColor: const Color(0xFFE9ECF1),
-                  valueColor:
-                      const AlwaysStoppedAnimation<Color>(_maroon),
-                ),
-              ),
-            ),
-            Expanded(
-              child: ListView(
-                padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
-                children: [
-                  ...List.generate(con.biodata.length, (i) => Padding(
-                        padding: const EdgeInsets.only(bottom: 12),
-                        child: _Field(
-                            field: con.biodata[i],
-                            controller: con.bioControllers[i]),
-                      )),
-                  const SizedBox(height: 4),
-                  RichText(
-                    text: const TextSpan(
-                      style: TextStyle(
-                          fontSize: 12.5, height: 1.45, color: _maroon),
+        child: GetBuilder<MatchmakingController>(
+          builder: (con) => Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.fromLTRB(8, 6, 16, 4),
+                child: Row(
+                  children: [
+                    IconButton(
+                      splashRadius: 22,
+                      onPressed: () => Get.back(),
+                      icon: const Icon(Icons.arrow_back_ios_new_rounded,
+                          size: 20, color: Color(0xFF1A1A1A)),
+                    ),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        TextSpan(
-                            text: 'Privacy: ',
-                            style: TextStyle(fontWeight: FontWeight.w800)),
-                        TextSpan(
-                            text:
-                                'Your name & photos stay hidden behind a code until you accept someone\'s interest.'),
+                        const Text('My biodata',
+                            style: TextStyle(
+                                fontSize: 19,
+                                fontWeight: FontWeight.w800,
+                                color: Color(0xFF0F172A))),
+                        Text(
+                            con.hasProfile
+                                ? '${con.completion}% complete'
+                                : 'Create your profile',
+                            style: const TextStyle(
+                                fontSize: 12, color: Color(0xFF94A3B8))),
                       ],
                     ),
-                  ),
-                ],
-              ),
-            ),
-            // Save button
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
-              child: SizedBox(
-                width: double.infinity,
-                height: 54,
-                child: ElevatedButton(
-                  onPressed: con.saveBiodata,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: _maroon,
-                    foregroundColor: Colors.white,
-                    elevation: 0,
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(14)),
-                  ),
-                  child: const Text('Save biodata',
-                      style:
-                          TextStyle(fontSize: 16, fontWeight: FontWeight.w800)),
+                  ],
                 ),
               ),
-            ),
-          ],
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 6, 16, 8),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(10),
+                  child: LinearProgressIndicator(
+                    value: con.hasProfile ? con.completion / 100 : 0.0,
+                    minHeight: 6,
+                    backgroundColor: const Color(0xFFE9ECF1),
+                    valueColor:
+                        const AlwaysStoppedAnimation<Color>(_maroon),
+                  ),
+                ),
+              ),
+              Expanded(
+                child: ListView(
+                  padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+                  children: [
+                    ...con.bioFields.map((f) => Padding(
+                          padding: const EdgeInsets.only(bottom: 12),
+                          child: f.type == MmFieldType.dropdown
+                              ? _Dropdown(con: con, field: f)
+                              : _TextField(con: con, field: f),
+                        )),
+                    const SizedBox(height: 4),
+                    RichText(
+                      text: const TextSpan(
+                        style: TextStyle(
+                            fontSize: 12.5, height: 1.45, color: _maroon),
+                        children: [
+                          TextSpan(
+                              text: 'Privacy: ',
+                              style: TextStyle(fontWeight: FontWeight.w800)),
+                          TextSpan(
+                              text:
+                                  'Your name & photos stay hidden until you accept someone\'s interest.'),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+                child: SizedBox(
+                  width: double.infinity,
+                  height: 54,
+                  child: ElevatedButton(
+                    onPressed: con.savingBiodata ? null : con.saveBiodata,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: _maroon,
+                      foregroundColor: Colors.white,
+                      elevation: 0,
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(14)),
+                    ),
+                    child: con.savingBiodata
+                        ? const SizedBox(
+                            width: 22,
+                            height: 22,
+                            child: CircularProgressIndicator(
+                                strokeWidth: 2.4, color: Colors.white),
+                          )
+                        : Text(con.hasProfile ? 'Update biodata' : 'Save biodata',
+                            style: const TextStyle(
+                                fontSize: 16, fontWeight: FontWeight.w800)),
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
   }
 }
 
-class _Field extends StatelessWidget {
-  const _Field({required this.field, required this.controller});
-  final MmBioField field;
-  final TextEditingController controller;
+class _Label extends StatelessWidget {
+  const _Label(this.text, {this.required = false});
+  final String text;
+  final bool required;
+  @override
+  Widget build(BuildContext context) => Row(
+        children: [
+          Text(text.toUpperCase(),
+              style: const TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w700,
+                  color: Color(0xFF94A3B8),
+                  letterSpacing: 0.6)),
+          if (required)
+            const Text(' *',
+                style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w800,
+                    color: _maroon)),
+        ],
+      );
+}
 
-  TextInputType get _keyboard {
-    if (field.label == 'GUARDIAN CONTACT') return TextInputType.phone;
-    if (field.label == 'HEIGHT (CM)') return TextInputType.number;
-    return TextInputType.text;
-  }
-
+class _TextField extends StatelessWidget {
+  const _TextField({required this.con, required this.field});
+  final MatchmakingController con;
+  final MmField field;
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -137,40 +160,15 @@ class _Field extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              Text(field.label,
-                  style: const TextStyle(
-                      fontSize: 11,
-                      fontWeight: FontWeight.w700,
-                      color: Color(0xFF94A3B8),
-                      letterSpacing: 0.6)),
-              const Spacer(),
-              if (field.fromProfile)
-                Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                  decoration: BoxDecoration(
-                      color: const Color(0xFFDCFCE7),
-                      borderRadius: BorderRadius.circular(20)),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: const [
-                      Icon(Icons.circle, size: 6, color: Color(0xFF16A34A)),
-                      SizedBox(width: 4),
-                      Text('From profile',
-                          style: TextStyle(
-                              fontSize: 10.5,
-                              fontWeight: FontWeight.w700,
-                              color: Color(0xFF15803D))),
-                    ],
-                  ),
-                ),
-            ],
-          ),
+          _Label(field.label, required: field.required),
           TextField(
-            controller: controller,
-            keyboardType: _keyboard,
+            controller: con.textCtrl(field.key),
+            keyboardType: field.type == MmFieldType.number
+                ? TextInputType.number
+                : (field.type == MmFieldType.multiline
+                    ? TextInputType.multiline
+                    : TextInputType.text),
+            maxLines: field.type == MmFieldType.multiline ? 3 : 1,
             style: const TextStyle(
                 fontSize: 15.5,
                 fontWeight: FontWeight.w700,
@@ -179,11 +177,59 @@ class _Field extends StatelessWidget {
               isDense: true,
               contentPadding: const EdgeInsets.symmetric(vertical: 8),
               border: InputBorder.none,
-              hintText: field.hint ? field.value : null,
+              hintText: 'Enter ${field.label.toLowerCase()}',
               hintStyle: const TextStyle(
                   fontSize: 15.5,
                   fontWeight: FontWeight.w500,
                   color: Color(0xFFB8C0CC)),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _Dropdown extends StatelessWidget {
+  const _Dropdown({required this.con, required this.field});
+  final MatchmakingController con;
+  final MmField field;
+  @override
+  Widget build(BuildContext context) {
+    final options = con.optionsFor(field.optionsKey);
+    final value = con.choice[field.key];
+    return Container(
+      padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
+      decoration: BoxDecoration(
+          color: AppColors.white,
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(color: const Color(0xFFEDEFF2))),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _Label(field.label, required: field.required),
+          DropdownButtonHideUnderline(
+            child: DropdownButton<String>(
+              isExpanded: true,
+              value: (value != null && options.contains(value)) ? value : null,
+              hint: Text('Select ${field.label.toLowerCase()}',
+                  style: const TextStyle(
+                      fontSize: 15.5,
+                      fontWeight: FontWeight.w500,
+                      color: Color(0xFFB8C0CC))),
+              items: options
+                  .map((o) => DropdownMenuItem(
+                        value: o,
+                        child: Text(mmHumanize(o),
+                            style: const TextStyle(
+                                fontSize: 15.5,
+                                fontWeight: FontWeight.w700,
+                                color: Color(0xFF0F172A))),
+                      ))
+                  .toList(),
+              onChanged: (v) {
+                if (v != null) con.setChoice(field.key, v);
+              },
             ),
           ),
         ],

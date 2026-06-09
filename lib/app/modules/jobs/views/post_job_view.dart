@@ -7,6 +7,11 @@ import '../controllers/jobs_controller.dart';
 const _orange = Color(0xFFC2410C);
 const _darkOrange = Color(0xFF9A3412);
 
+String _humanize(String v) {
+  final s = v.replaceAll('_', ' ');
+  return s.isEmpty ? '' : s[0].toUpperCase() + s.substring(1);
+}
+
 class PostJobView extends GetView<JobsController> {
   const PostJobView({super.key});
 
@@ -18,7 +23,6 @@ class PostJobView extends GetView<JobsController> {
         child: GetBuilder<JobsController>(
           builder: (con) => Column(
             children: [
-              // Header
               Padding(
                 padding: const EdgeInsets.fromLTRB(8, 6, 16, 4),
                 child: Row(
@@ -38,7 +42,7 @@ class PostJobView extends GetView<JobsController> {
                                 fontWeight: FontWeight.w800,
                                 color: Color(0xFF0F172A))),
                         SizedBox(height: 1),
-                        Text('Reach thousands of candidates',
+                        Text('Register as employer first',
                             style: TextStyle(
                                 fontSize: 12, color: Color(0xFF94A3B8))),
                       ],
@@ -50,118 +54,169 @@ class PostJobView extends GetView<JobsController> {
                 child: ListView(
                   padding: const EdgeInsets.fromLTRB(16, 10, 16, 16),
                   children: [
-                    // Banner
-                    Container(
-                      padding: const EdgeInsets.all(18),
-                      decoration: BoxDecoration(
-                        gradient: const LinearGradient(
-                            colors: [_darkOrange, _orange],
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight),
-                        borderRadius: BorderRadius.circular(18),
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Container(
-                            width: 40,
-                            height: 40,
-                            decoration: BoxDecoration(
-                                color: Colors.white.withValues(alpha: 0.15),
-                                borderRadius: BorderRadius.circular(12)),
-                            child: const Icon(Icons.business_center_outlined,
-                                color: Colors.white, size: 22),
-                          ),
-                          const SizedBox(height: 14),
-                          const Text('Hire faster on ServiceNin',
-                              style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.w800)),
-                          const SizedBox(height: 4),
-                          Text('Free for first 3 posts · verified candidates',
-                              style: TextStyle(
-                                  color: Colors.white.withValues(alpha: 0.9),
-                                  fontSize: 12.5)),
-                        ],
+                    GestureDetector(
+                      onTap: con.openEmployerRegister,
+                      child: Container(
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          gradient: const LinearGradient(
+                              colors: [_darkOrange, _orange],
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight),
+                          borderRadius: BorderRadius.circular(18),
+                        ),
+                        child: Row(
+                          children: [
+                            const Icon(Icons.apartment_rounded,
+                                color: Colors.white, size: 26),
+                            const SizedBox(width: 12),
+                            const Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text('Employer registration',
+                                      style: TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 15,
+                                          fontWeight: FontWeight.w800)),
+                                  SizedBox(height: 2),
+                                  Text('Tap to register your company',
+                                      style: TextStyle(
+                                          color: Color(0xFFFFE3D5),
+                                          fontSize: 12)),
+                                ],
+                              ),
+                            ),
+                            const Icon(Icons.chevron_right_rounded,
+                                color: Colors.white),
+                          ],
+                        ),
                       ),
                     ),
                     const SizedBox(height: 18),
                     const _FieldLabel('JOB TITLE'),
-                    const _InputField(hint: 'e.g. Frontend Engineer'),
+                    _Input(con.postTitle, 'e.g. Senior Go Engineer'),
                     const SizedBox(height: 14),
-                    _FieldLabel('CATEGORY'),
-                    _DropdownField(
-                      value: con.postCategories[con.postCategoryIndex],
-                      onTap: () => _pick(
-                        title: 'Category',
-                        options: con.postCategories,
-                        selected: con.postCategoryIndex,
-                        onSelect: con.setPostCategory,
-                      ),
+                    const _FieldLabel('CATEGORY'),
+                    _Dropdown(
+                      value: con.postCategory,
+                      options: con.categories.where((c) => c != 'All').toList(),
+                      onSelect: con.setPostCategory,
                     ),
                     const SizedBox(height: 14),
-                    _FieldLabel('JOB TYPE'),
-                    _DropdownField(
-                      value: con.postTypes[con.postTypeIndex],
-                      onTap: () => _pick(
-                        title: 'Job type',
-                        options: con.postTypes,
-                        selected: con.postTypeIndex,
-                        onSelect: con.setPostType,
-                      ),
+                    const _FieldLabel('JOB TYPE'),
+                    _Dropdown(
+                      value: con.postJobType,
+                      options: con.jobTypes,
+                      onSelect: con.setPostJobType,
                     ),
                     const SizedBox(height: 14),
-                    _FieldLabel('EXPERIENCE'),
-                    _DropdownField(
-                      value: con.postExperiences[con.postExperienceIndex],
-                      onTap: () => _pick(
-                        title: 'Experience',
-                        options: con.postExperiences,
-                        selected: con.postExperienceIndex,
-                        onSelect: con.setPostExperience,
-                      ),
+                    const _FieldLabel('WORKPLACE'),
+                    _Dropdown(
+                      value: con.postWorkplace,
+                      options: con.workplaceTypes,
+                      onSelect: con.setPostWorkplace,
                     ),
                     const SizedBox(height: 14),
-                    const _FieldLabel('LOCATION'),
-                    const _InputField(hint: 'e.g. Gulshan, Dhaka'),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const _FieldLabel('LOCATION'),
+                              _Input(con.postLocation, 'Dhaka'),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const _FieldLabel('DISTRICT'),
+                              _Input(con.postDistrict, 'Dhaka'),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
                     const SizedBox(height: 14),
-                    const _FieldLabel('SALARY RANGE (৳)'),
-                    const _InputField(hint: '60,000 – 100,000'),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const _FieldLabel('SALARY MIN'),
+                              _Input(con.postSalaryMin, '80000',
+                                  kb: TextInputType.number),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const _FieldLabel('SALARY MAX'),
+                              _Input(con.postSalaryMax, '150000',
+                                  kb: TextInputType.number),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
                     const SizedBox(height: 14),
-                    const _FieldLabel('DEADLINE'),
-                    const _InputField(
-                        hint: 'dd/mm/yyyy',
-                        trailing: Icons.calendar_today_outlined),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const _FieldLabel('VACANCIES'),
+                              _Input(con.postVacancy, '1',
+                                  kb: TextInputType.number),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const _FieldLabel('DEADLINE'),
+                              _Input(con.postDeadline, '2026-07-15'),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 14),
+                    const _FieldLabel('EXPERIENCE REQUIRED'),
+                    _Input(con.postExperience, 'e.g. 3+ years'),
+                    const SizedBox(height: 14),
+                    const _FieldLabel('EDUCATION'),
+                    _Input(con.postEducation, 'e.g. BSc in CSE'),
                     const SizedBox(height: 14),
                     const _FieldLabel('DESCRIPTION'),
-                    const _InputField(
-                        hint: 'Short overview of the role…', maxLines: 3),
+                    _Input(con.postDescription, 'Short overview of the role…',
+                        maxLines: 3),
                     const SizedBox(height: 14),
-                    const _FieldLabel('SKILLS'),
-                    const _InputField(
-                        hint: 'e.g. React, TypeScript, REST APIs', maxLines: 2),
-                    const SizedBox(height: 14),
-                    const _FieldLabel('RESPONSIBILITIES'),
-                    const _InputField(
-                        hint: 'Key responsibilities for the role…',
-                        maxLines: 4),
-                    const SizedBox(height: 14),
-                    const _FieldLabel('COMPANY BENEFITS'),
-                    const _InputField(
-                        hint: 'e.g. Festival bonus, health coverage, lunch…',
+                    const _FieldLabel('REQUIREMENTS'),
+                    _Input(con.postRequirements,
+                        'e.g. 3+ years Go, PostgreSQL',
                         maxLines: 3),
                   ],
                 ),
               ),
-              // Publish
               Padding(
                 padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
                 child: SizedBox(
                   width: double.infinity,
                   height: 54,
                   child: ElevatedButton(
-                    onPressed: con.publishJob,
+                    onPressed: con.postingJob ? null : con.publishJob,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: _orange,
                       foregroundColor: Colors.white,
@@ -169,72 +224,21 @@ class PostJobView extends GetView<JobsController> {
                       shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(14)),
                     ),
-                    child: const Text('Publish job',
-                        style: TextStyle(
-                            fontSize: 16, fontWeight: FontWeight.w800)),
+                    child: con.postingJob
+                        ? const SizedBox(
+                            width: 22,
+                            height: 22,
+                            child: CircularProgressIndicator(
+                                strokeWidth: 2.4, color: Colors.white),
+                          )
+                        : const Text('Publish job',
+                            style: TextStyle(
+                                fontSize: 16, fontWeight: FontWeight.w800)),
                   ),
                 ),
               ),
             ],
           ),
-        ),
-      ),
-    );
-  }
-
-  void _pick({
-    required String title,
-    required List<String> options,
-    required int selected,
-    required void Function(int) onSelect,
-  }) {
-    Get.bottomSheet(
-      Container(
-        decoration: const BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
-        padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Center(
-              child: Container(
-                width: 40,
-                height: 4,
-                decoration: BoxDecoration(
-                    color: const Color(0xFFE2E8F0),
-                    borderRadius: BorderRadius.circular(2)),
-              ),
-            ),
-            const SizedBox(height: 14),
-            Text(title,
-                style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w800,
-                    color: Color(0xFF0F172A))),
-            const SizedBox(height: 8),
-            ...List.generate(options.length, (i) {
-              final sel = i == selected;
-              return ListTile(
-                contentPadding: EdgeInsets.zero,
-                onTap: () {
-                  onSelect(i);
-                  Get.back();
-                },
-                title: Text(options[i],
-                    style: TextStyle(
-                        fontSize: 15,
-                        fontWeight: sel ? FontWeight.w800 : FontWeight.w500,
-                        color: sel
-                            ? _orange
-                            : const Color(0xFF334155))),
-                trailing: sel
-                    ? const Icon(Icons.check_rounded, color: _orange)
-                    : null,
-              );
-            }),
-          ],
         ),
       ),
     );
@@ -256,12 +260,13 @@ class _FieldLabel extends StatelessWidget {
       );
 }
 
-class _InputField extends StatelessWidget {
-  const _InputField(
-      {required this.hint, this.maxLines = 1, this.trailing});
+class _Input extends StatelessWidget {
+  const _Input(this.controller, this.hint,
+      {this.maxLines = 1, this.kb = TextInputType.text});
+  final TextEditingController controller;
   final String hint;
   final int maxLines;
-  final IconData? trailing;
+  final TextInputType kb;
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -270,43 +275,39 @@ class _InputField extends StatelessWidget {
           color: AppColors.white,
           borderRadius: BorderRadius.circular(14),
           border: Border.all(color: const Color(0xFFEDEFF2))),
-      child: Row(
-        children: [
-          Expanded(
-            child: TextField(
-              maxLines: maxLines,
-              style: const TextStyle(
-                  fontSize: 14.5,
-                  fontWeight: FontWeight.w600,
-                  color: Color(0xFF0F172A)),
-              decoration: InputDecoration(
-                isDense: true,
-                hintText: hint,
-                hintStyle: const TextStyle(
-                    fontSize: 14.5,
-                    fontWeight: FontWeight.w500,
-                    color: Color(0xFFB8C0CC)),
-                border: InputBorder.none,
-                contentPadding: const EdgeInsets.symmetric(vertical: 12),
-              ),
-            ),
-          ),
-          if (trailing != null)
-            Icon(trailing, size: 19, color: const Color(0xFF94A3B8)),
-        ],
+      child: TextField(
+        controller: controller,
+        maxLines: maxLines,
+        keyboardType: kb,
+        style: const TextStyle(
+            fontSize: 14.5,
+            fontWeight: FontWeight.w600,
+            color: Color(0xFF0F172A)),
+        decoration: InputDecoration(
+          isDense: true,
+          hintText: hint,
+          hintStyle: const TextStyle(
+              fontSize: 14.5,
+              fontWeight: FontWeight.w500,
+              color: Color(0xFFB8C0CC)),
+          border: InputBorder.none,
+          contentPadding: const EdgeInsets.symmetric(vertical: 12),
+        ),
       ),
     );
   }
 }
 
-class _DropdownField extends StatelessWidget {
-  const _DropdownField({required this.value, required this.onTap});
+class _Dropdown extends StatelessWidget {
+  const _Dropdown(
+      {required this.value, required this.options, required this.onSelect});
   final String value;
-  final VoidCallback onTap;
+  final List<String> options;
+  final void Function(String) onSelect;
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: onTap,
+      onTap: () => _pick(context),
       child: Container(
         height: 52,
         padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -317,7 +318,7 @@ class _DropdownField extends StatelessWidget {
         child: Row(
           children: [
             Expanded(
-              child: Text(value,
+              child: Text(value.isEmpty ? 'Select' : _humanize(value),
                   style: const TextStyle(
                       fontSize: 14.5,
                       fontWeight: FontWeight.w700,
@@ -325,6 +326,52 @@ class _DropdownField extends StatelessWidget {
             ),
             const Icon(Icons.keyboard_arrow_down_rounded,
                 color: Color(0xFF64748B)),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _pick(BuildContext context) {
+    if (options.isEmpty) return;
+    Get.bottomSheet(
+      Container(
+        decoration: const BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
+        padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Center(
+              child: Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                    color: const Color(0xFFE2E8F0),
+                    borderRadius: BorderRadius.circular(2)),
+              ),
+            ),
+            const SizedBox(height: 12),
+            ...options.map((o) {
+              final sel = o == value;
+              return ListTile(
+                contentPadding: EdgeInsets.zero,
+                onTap: () {
+                  onSelect(o);
+                  Get.back();
+                },
+                title: Text(_humanize(o),
+                    style: TextStyle(
+                        fontSize: 15,
+                        fontWeight: sel ? FontWeight.w800 : FontWeight.w500,
+                        color: sel ? _orange : const Color(0xFF334155))),
+                trailing: sel
+                    ? const Icon(Icons.check_rounded, color: _orange)
+                    : null,
+              );
+            }),
           ],
         ),
       ),

@@ -13,7 +13,7 @@ class SnCatalog {
     SnService(name: 'Ambulance', icon: Icons.airport_shuttle_rounded, color: Color(0xFF3B82F6)),
     SnService(name: 'Healthcare', icon: Icons.medical_services_rounded, color: Color(0xFF14B8A6)),
     SnService(name: 'Information', icon: Icons.call_rounded, color: Color(0xFF8B5CF6)),
-    SnService(name: 'Home Service', icon: Icons.home_repair_service_rounded, color: Color(0xFFF15A24), badge: 2),
+    SnService(name: 'Home Service', icon: Icons.home_repair_service_rounded, color: Color(0xFFF15A24)),
     SnService(name: 'Physio', icon: Icons.directions_run_rounded, color: Color(0xFFF97316)),
     SnService(name: 'Marriage', icon: Icons.favorite_rounded, color: Color(0xFFEC4899)),
     SnService(name: 'Jobs', icon: Icons.business_center_rounded, color: Color(0xFFF59E0B)),

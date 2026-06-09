@@ -12,7 +12,6 @@ class PhysioSessionsView extends GetView<PhysioController> {
 
   @override
   Widget build(BuildContext context) {
-    final con = controller;
     return Scaffold(
       backgroundColor: const Color(0xFFF7F8FA),
       appBar: AppBar(
@@ -32,14 +31,39 @@ class PhysioSessionsView extends GetView<PhysioController> {
                 fontWeight: FontWeight.w800,
                 color: Color(0xFF0F172A))),
       ),
-      body: ListView(
-        padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
-        children: con.sessions
-            .map((s) => Padding(
-                  padding: const EdgeInsets.only(bottom: 12),
-                  child: _SessionCard(session: s),
-                ))
-            .toList(),
+      body: RefreshIndicator(
+        color: _orange,
+        onRefresh: controller.fetchMySessions,
+        child: GetBuilder<PhysioController>(
+          builder: (con) {
+            if (con.loadingSessions && con.sessions.isEmpty) {
+              return const Center(
+                child: CircularProgressIndicator(
+                    strokeWidth: 2.6, color: _orange),
+              );
+            }
+            if (con.sessions.isEmpty) {
+              return ListView(
+                children: const [
+                  SizedBox(height: 140),
+                  Center(
+                    child: Text('No sessions yet.',
+                        style: TextStyle(color: Color(0xFF94A3B8))),
+                  ),
+                ],
+              );
+            }
+            return ListView(
+              padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
+              children: con.sessions
+                  .map((s) => Padding(
+                        padding: const EdgeInsets.only(bottom: 12),
+                        child: _SessionCard(session: s),
+                      ))
+                  .toList(),
+            );
+          },
+        ),
       ),
     );
   }

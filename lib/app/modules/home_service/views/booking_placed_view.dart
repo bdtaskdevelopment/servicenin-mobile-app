@@ -57,7 +57,7 @@ class BookingPlacedView extends GetView<HomeServiceController> {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Text('SB-5544',
+                            Text(con.bookingId,
                                 style: const TextStyle(
                                     fontSize: 11.5,
                                     fontWeight: FontWeight.w600,
@@ -99,7 +99,7 @@ class BookingPlacedView extends GetView<HomeServiceController> {
                         _row(Icons.location_on_outlined, con.address),
                         const SizedBox(height: 10),
                         _row(Icons.bolt_rounded,
-                            'Cash after service · ৳${con.totalPrice}'),
+                            'Pay after service · ৳${con.totalPaid}'),
                       ],
                     ),
                   ),

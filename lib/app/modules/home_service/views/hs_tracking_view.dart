@@ -1,205 +1,187 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:latlong2/latlong.dart';
 
 import '../../../core/values/app_colors.dart';
+import '../../../data/models/response/service_response.dart';
+import '../../../global_widget/sn_map.dart';
 import '../controllers/home_service_controller.dart';
 
 const _teal = Color(0xFF0E9F8E);
 const _darkTeal = Color(0xFF0E7C6B);
-const _tile = Color(0xFFCDEDE6);
 
 class HsTrackingView extends GetView<HomeServiceController> {
   const HsTrackingView({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final con = controller;
     return Scaffold(
       backgroundColor: AppColors.white,
-      body: Stack(
-        children: [
-          const Positioned.fill(child: CustomPaint(painter: _MapPainter())),
-          SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-              child: Row(
-                children: [
-                  _round(Icons.arrow_back_ios_new_rounded, () => Get.back()),
-                  const Spacer(),
-                  Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                    decoration: BoxDecoration(
-                        color: AppColors.white,
-                        borderRadius: BorderRadius.circular(20),
-                        boxShadow: [
-                          BoxShadow(
-                              color: Colors.black.withValues(alpha: 0.08),
-                              blurRadius: 8)
-                        ]),
-                    child: const Text('Your home · Gulshan-2',
-                        style: TextStyle(
-                            fontSize: 12.5,
-                            fontWeight: FontWeight.w700,
-                            color: Color(0xFF0F172A))),
-                  ),
-                ],
+      body: GetBuilder<HomeServiceController>(
+        builder: (con) {
+          // Latest provider location from the timeline (if shared).
+          LatLng center = const LatLng(23.78, 90.40);
+          bool hasLoc = false;
+          for (final t in con.timeline) {
+            if (t.lat != null && t.lng != null) {
+              center = LatLng(t.lat!, t.lng!);
+              hasLoc = true;
+            }
+          }
+          return Stack(
+            children: [
+              Positioned.fill(
+                child: SnMap(
+                  center: center,
+                  zoom: hasLoc ? 14 : 11,
+                  interactive: false,
+                  markers: [
+                    if (hasLoc)
+                      SnMapMarker(center, _darkTeal,
+                          Icons.engineering_rounded),
+                  ],
+                ),
               ),
-            ),
-          ),
-          Align(
-            alignment: Alignment.bottomCenter,
-            child: Container(
-              constraints: BoxConstraints(maxHeight: Get.height * 0.6),
-              decoration: const BoxDecoration(
-                color: AppColors.white,
-                borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-                boxShadow: [BoxShadow(color: Colors.black26, blurRadius: 20)],
-              ),
-              child: SafeArea(
-                top: false,
-                child: SingleChildScrollView(
-                  padding: const EdgeInsets.fromLTRB(16, 10, 16, 12),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+              SafeArea(
+                child: Padding(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                  child: Row(
                     children: [
-                      Center(
-                        child: Container(
-                            width: 42,
-                            height: 4,
-                            decoration: BoxDecoration(
-                                color: const Color(0xFFE2E8F0),
-                                borderRadius: BorderRadius.circular(4))),
-                      ),
-                      const SizedBox(height: 14),
-                      Row(
-                        children: [
-                          Container(
-                              width: 8,
-                              height: 8,
-                              decoration: const BoxDecoration(
-                                  color: Color(0xFF22C55E),
-                                  shape: BoxShape.circle)),
-                          const SizedBox(width: 6),
-                          const Text('Technician on the way',
-                              style: TextStyle(
-                                  fontSize: 12.5,
-                                  fontWeight: FontWeight.w700,
-                                  color: Color(0xFF16A34A))),
-                          const Spacer(),
-                          const Text('ETA 12 min',
-                              style: TextStyle(
-                                  fontSize: 13,
-                                  fontWeight: FontWeight.w800,
-                                  color: _darkTeal)),
-                        ],
-                      ),
-                      const SizedBox(height: 14),
-                      Row(
-                        children: [
-                          Container(
-                            width: 46,
-                            height: 46,
-                            decoration: BoxDecoration(
-                                color: _tile, shape: BoxShape.circle),
-                            alignment: Alignment.center,
-                            child: Text(con.techInitials,
-                                style: const TextStyle(
-                                    color: _darkTeal,
-                                    fontWeight: FontWeight.w800)),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(con.techName,
-                                    style: const TextStyle(
-                                        fontSize: 15,
-                                        fontWeight: FontWeight.w800,
-                                        color: Color(0xFF0F172A))),
-                                const SizedBox(height: 2),
-                                Text(
-                                    '★ ${con.techRating} · AC specialist · ${con.techJobs}',
-                                    style: const TextStyle(
-                                        fontSize: 12,
-                                        color: Color(0xFF94A3B8))),
-                              ],
-                            ),
-                          ),
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 9, vertical: 5),
-                            decoration: BoxDecoration(
-                                color: const Color(0xFFDCFCE7),
-                                borderRadius: BorderRadius.circular(20)),
-                            child: const Text('Verified',
-                                style: TextStyle(
-                                    fontSize: 11,
-                                    fontWeight: FontWeight.w700,
-                                    color: Color(0xFF15803D))),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 14),
-                      Row(
-                        children: const [
-                          Expanded(
-                              child: _ActionBtn(
-                                  icon: Icons.chat_bubble_outline_rounded,
-                                  label: 'Chat')),
-                          SizedBox(width: 10),
-                          Expanded(
-                              child: _ActionBtn(
-                                  icon: Icons.call_outlined, label: 'Call')),
-                          SizedBox(width: 10),
-                          Expanded(
-                              child: _ActionBtn(
-                                  icon: Icons.bookmark_border_rounded,
-                                  label: 'Details')),
-                        ],
-                      ),
-                      const SizedBox(height: 14),
+                      _round(Icons.arrow_back_ios_new_rounded, () => Get.back()),
+                      const Spacer(),
                       Container(
-                        padding: const EdgeInsets.all(14),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 12, vertical: 8),
                         decoration: BoxDecoration(
-                            color: const Color(0xFFF7F8FA),
-                            borderRadius: BorderRadius.circular(14)),
-                        child: Column(
-                          children: [
-                            _step('Booking confirmed', done: true),
-                            _step('Technician assigned · Jamal', done: true),
-                            _step('On the way to your home', active: true),
-                            _step('Service in progress'),
-                            _step('Completed & paid', last: true),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(height: 14),
-                      SizedBox(
-                        width: double.infinity,
-                        height: 52,
-                        child: OutlinedButton(
-                          onPressed: con.viewBookingDetails,
-                          style: OutlinedButton.styleFrom(
-                            side: const BorderSide(color: Color(0xFFE2E8F0)),
-                            shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(14)),
-                          ),
-                          child: const Text('View booking details',
-                              style: TextStyle(
-                                  fontSize: 15,
-                                  fontWeight: FontWeight.w700,
-                                  color: Color(0xFF0F172A))),
-                        ),
+                            color: AppColors.white,
+                            borderRadius: BorderRadius.circular(20),
+                            boxShadow: [
+                              BoxShadow(
+                                  color: Colors.black.withValues(alpha: 0.08),
+                                  blurRadius: 8)
+                            ]),
+                        child: Text(
+                            hasLoc
+                                ? 'Provider location · live'
+                                : 'Waiting for provider location',
+                            style: const TextStyle(
+                                fontSize: 12.5,
+                                fontWeight: FontWeight.w700,
+                                color: Color(0xFF0F172A))),
                       ),
                     ],
                   ),
                 ),
               ),
-            ),
-          ),
-        ],
+              Align(
+                alignment: Alignment.bottomCenter,
+                child: Container(
+                  constraints: BoxConstraints(maxHeight: Get.height * 0.6),
+                  decoration: const BoxDecoration(
+                    color: AppColors.white,
+                    borderRadius:
+                        BorderRadius.vertical(top: Radius.circular(24)),
+                    boxShadow: [
+                      BoxShadow(color: Colors.black26, blurRadius: 20)
+                    ],
+                  ),
+                  child: SafeArea(
+                    top: false,
+                    child: SingleChildScrollView(
+                      padding: const EdgeInsets.fromLTRB(16, 10, 16, 12),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Center(
+                            child: Container(
+                                width: 42,
+                                height: 4,
+                                decoration: BoxDecoration(
+                                    color: const Color(0xFFE2E8F0),
+                                    borderRadius: BorderRadius.circular(4))),
+                          ),
+                          const SizedBox(height: 14),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: Text(con.bookingSummary,
+                                    style: const TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w800,
+                                        color: Color(0xFF0F172A))),
+                              ),
+                              _StatusChip(
+                                  status: con.trackedBooking?.status ??
+                                      'pending'),
+                            ],
+                          ),
+                          const SizedBox(height: 4),
+                          Text(con.whenSummary,
+                              style: const TextStyle(
+                                  fontSize: 12.5, color: Color(0xFF94A3B8))),
+                          const SizedBox(height: 14),
+                          Row(
+                            children: [
+                              Expanded(
+                                  child: _ActionBtn(
+                                      icon: Icons.chat_bubble_outline_rounded,
+                                      label: 'Chat',
+                                      onTap: con.openChat)),
+                              const SizedBox(width: 10),
+                              Expanded(
+                                  child: _ActionBtn(
+                                      icon: Icons.bookmark_border_rounded,
+                                      label: 'Details',
+                                      onTap: con.viewBookingDetails)),
+                            ],
+                          ),
+                          const SizedBox(height: 16),
+                          const Text('STATUS TIMELINE',
+                              style: TextStyle(
+                                  fontSize: 11.5,
+                                  fontWeight: FontWeight.w700,
+                                  color: Color(0xFF94A3B8),
+                                  letterSpacing: 0.6)),
+                          const SizedBox(height: 12),
+                          if (con.loadingTrack && con.timeline.isEmpty)
+                            const Center(
+                              child: Padding(
+                                padding: EdgeInsets.all(8),
+                                child: CircularProgressIndicator(
+                                    strokeWidth: 2.4, color: _darkTeal),
+                              ),
+                            )
+                          else
+                            _Timeline(entries: con.timeline),
+                          const SizedBox(height: 14),
+                          SizedBox(
+                            width: double.infinity,
+                            height: 52,
+                            child: OutlinedButton(
+                              onPressed: con.viewBookingDetails,
+                              style: OutlinedButton.styleFrom(
+                                side: const BorderSide(
+                                    color: Color(0xFFE2E8F0)),
+                                shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(14)),
+                              ),
+                              child: const Text('View booking details',
+                                  style: TextStyle(
+                                      fontSize: 15,
+                                      fontWeight: FontWeight.w700,
+                                      color: Color(0xFF0F172A))),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          );
+        },
       ),
     );
   }
@@ -220,100 +202,132 @@ class HsTrackingView extends GetView<HomeServiceController> {
           child: Icon(icon, size: 18, color: const Color(0xFF1A1A1A)),
         ),
       );
+}
 
-  Widget _step(String label,
-      {bool done = false, bool active = false, bool last = false}) {
-    final color = done
-        ? const Color(0xFF22C55E)
-        : active
-            ? _darkTeal
-            : const Color(0xFFCBD5E1);
-    return Padding(
-      padding: EdgeInsets.only(bottom: last ? 0 : 14),
-      child: Row(
-        children: [
-          Icon(
-              done
-                  ? Icons.check_circle
-                  : active
-                      ? Icons.radio_button_checked
-                      : Icons.circle_outlined,
-              size: 20,
-              color: color),
-          const SizedBox(width: 10),
-          Text(label,
-              style: TextStyle(
-                  fontSize: 13.5,
-                  fontWeight:
-                      (done || active) ? FontWeight.w700 : FontWeight.w500,
-                  color: (done || active)
-                      ? const Color(0xFF0F172A)
-                      : const Color(0xFF94A3B8))),
-        ],
+class _Timeline extends StatelessWidget {
+  const _Timeline({required this.entries});
+  final List<ServiceTimelineEntry> entries;
+  @override
+  Widget build(BuildContext context) {
+    if (entries.isEmpty) {
+      return const Text('No updates yet.',
+          style: TextStyle(fontSize: 13, color: Color(0xFF94A3B8)));
+    }
+    return Container(
+      padding: const EdgeInsets.fromLTRB(14, 14, 14, 2),
+      decoration: BoxDecoration(
+          color: const Color(0xFFF7F8FA),
+          borderRadius: BorderRadius.circular(14)),
+      child: Column(
+        children: List.generate(entries.length, (i) {
+          final e = entries[i];
+          final last = i == entries.length - 1;
+          return IntrinsicHeight(
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Column(
+                  children: [
+                    const Icon(Icons.check_circle, size: 20, color: _darkTeal),
+                    if (!last)
+                      Expanded(
+                        child: Container(
+                            width: 2, color: const Color(0xFFB6E0D7)),
+                      ),
+                  ],
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Padding(
+                    padding: EdgeInsets.only(bottom: last ? 8 : 16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(e.statusLabel,
+                            style: const TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w700,
+                                color: Color(0xFF0F172A))),
+                        const SizedBox(height: 1),
+                        if (e.note.isNotEmpty)
+                          Text(e.note,
+                              style: const TextStyle(
+                                  fontSize: 12, color: Color(0xFF64748B))),
+                        Text(e.timeLabel,
+                            style: const TextStyle(
+                                fontSize: 11.5, color: Color(0xFFE07A1F))),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          );
+        }),
       ),
+    );
+  }
+}
+
+class _StatusChip extends StatelessWidget {
+  const _StatusChip({required this.status});
+  final String status;
+  @override
+  Widget build(BuildContext context) {
+    final s = status.toLowerCase();
+    final done = s == 'completed';
+    final bad = s == 'cancelled' || s == 'canceled';
+    final bg = bad
+        ? const Color(0xFFFEE2E2)
+        : done
+            ? const Color(0xFFDCFCE7)
+            : const Color(0xFFFEF3C7);
+    final fg = bad
+        ? const Color(0xFFDC2626)
+        : done
+            ? const Color(0xFF15803D)
+            : const Color(0xFFB45309);
+    final label =
+        status.isEmpty ? 'Pending' : status[0].toUpperCase() + status.substring(1).replaceAll('_', ' ');
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      decoration:
+          BoxDecoration(color: bg, borderRadius: BorderRadius.circular(20)),
+      child: Text(label,
+          style: TextStyle(
+              fontSize: 11, fontWeight: FontWeight.w800, color: fg)),
     );
   }
 }
 
 class _ActionBtn extends StatelessWidget {
-  const _ActionBtn({required this.icon, required this.label});
+  const _ActionBtn(
+      {required this.icon, required this.label, required this.onTap});
   final IconData icon;
   final String label;
+  final VoidCallback onTap;
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(vertical: 12),
-      decoration: BoxDecoration(
-          color: AppColors.white,
-          borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: const Color(0xFFEDEFF2))),
-      child: Column(
-        children: [
-          Icon(icon, color: _teal, size: 22),
-          const SizedBox(height: 6),
-          Text(label,
-              style: const TextStyle(
-                  fontSize: 11.5,
-                  fontWeight: FontWeight.w600,
-                  color: Color(0xFF334155))),
-        ],
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 12),
+        decoration: BoxDecoration(
+            color: AppColors.white,
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(color: const Color(0xFFEDEFF2))),
+        child: Column(
+          children: [
+            Icon(icon, color: _teal, size: 22),
+            const SizedBox(height: 6),
+            Text(label,
+                style: const TextStyle(
+                    fontSize: 11.5,
+                    fontWeight: FontWeight.w600,
+                    color: Color(0xFF334155))),
+          ],
+        ),
       ),
     );
   }
-}
-
-class _MapPainter extends CustomPainter {
-  const _MapPainter();
-  @override
-  void paint(Canvas canvas, Size size) {
-    canvas.drawRect(
-        Offset.zero & size, Paint()..color = const Color(0xFFDDE6EE));
-    final block = Paint()..color = const Color(0xFFE9EEF3);
-    void b(double x, double y, double w, double h) => canvas.drawRRect(
-        RRect.fromRectAndRadius(
-            Rect.fromLTWH(x, y, w, h), const Radius.circular(8)),
-        block);
-    b(size.width * 0.05, size.height * 0.10, 70, 50);
-    b(size.width * 0.62, size.height * 0.12, 80, 48);
-    b(size.width * 0.10, size.height * 0.30, 70, 46);
-    b(size.width * 0.66, size.height * 0.34, 70, 50);
-
-    final route = Paint()
-      ..color = _darkTeal
-      ..strokeWidth = 5
-      ..strokeCap = StrokeCap.round;
-    final start = Offset(size.width * 0.12, size.height * 0.5);
-    final end = Offset(size.width * 0.82, size.height * 0.16);
-    for (int i = 0; i < 20; i += 2) {
-      canvas.drawLine(Offset.lerp(start, end, i / 20)!,
-          Offset.lerp(start, end, (i + 1) / 20)!, route);
-    }
-    final mid = Offset.lerp(start, end, 0.5)!;
-    canvas.drawCircle(mid, 18, Paint()..color = _darkTeal);
-    canvas.drawCircle(end, 16, Paint()..color = const Color(0x330E7C6B));
-    canvas.drawCircle(end, 8, Paint()..color = _darkTeal);
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }

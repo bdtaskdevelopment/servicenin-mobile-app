@@ -1,135 +1,231 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import '../../../core/helpers/snack_helper.dart';
+import '../../../data/models/response/service_response.dart';
+import '../../../data/repositories/service.repo.dart';
 import '../../../routes/app_pages.dart';
 
+/// Icon for a service category, chosen from its (English) name.
+IconData hsCatIcon(String name) {
+  final n = name.toLowerCase();
+  if (n.contains('ac')) return Icons.ac_unit_rounded;
+  if (n.contains('clean')) return Icons.cleaning_services_rounded;
+  if (n.contains('plumb')) return Icons.water_drop_rounded;
+  if (n.contains('electric')) return Icons.lightbulb_outline_rounded;
+  if (n.contains('appliance') || n.contains('repair')) return Icons.bolt_rounded;
+  if (n.contains('pest')) return Icons.shield_outlined;
+  if (n.contains('paint')) return Icons.format_paint_rounded;
+  if (n.contains('shift') || n.contains('move')) {
+    return Icons.local_shipping_outlined;
+  }
+  return Icons.home_repair_service_outlined;
+}
+
 class HsCategory {
-  const HsCategory(this.name, this.en, this.icon);
-  final String name; // Bangla label
-  final String en; // English title (used on the service list)
+  const HsCategory(this.name, this.en, this.icon, {this.id = ''});
+  final String name; // display label (Bangla if available)
+  final String en; // English name (list title)
   final IconData icon;
+  final String id;
+
+  factory HsCategory.fromApi(ServiceCategory c) => HsCategory(
+        c.nameBn.isNotEmpty ? c.nameBn : c.name,
+        c.name,
+        hsCatIcon(c.name),
+        id: c.id,
+      );
 }
 
 class HsService {
-  const HsService(this.name, this.desc, this.price, this.icon);
+  const HsService(this.name, this.desc, this.price, this.icon,
+      {this.id = ''});
   final String name;
   final String desc;
   final String price;
   final IconData icon;
+  final String id; // category id (popular items are categories)
+
+  factory HsService.fromApi(ServiceCategory c) => HsService(
+        c.name,
+        c.description.isNotEmpty
+            ? c.description
+            : '${c.bookingCount} booked this week',
+        c.priceLabel,
+        hsCatIcon(c.name),
+        id: c.id,
+      );
 }
 
 class HsServiceItem {
   const HsServiceItem({
+    required this.id,
+    required this.categoryId,
     required this.name,
     required this.bnName,
     required this.duration,
     required this.desc,
     required this.price,
     required this.category,
-    this.icon = Icons.ac_unit_rounded,
+    this.icon = Icons.home_repair_service_outlined,
   });
 
+  final String id;
+  final String categoryId;
   final String name;
   final String bnName;
   final String duration;
   final String desc;
   final int price;
-  final String category; // matches HsCategory.en
+  final String category;
   final IconData icon;
+
+  factory HsServiceItem.fromApi(SubService s, {String categoryName = ''}) =>
+      HsServiceItem(
+        id: s.id,
+        categoryId: s.categoryId,
+        name: s.name,
+        bnName: s.nameBn,
+        duration: s.durationLabel,
+        desc: s.description,
+        price: s.price,
+        category: categoryName,
+      );
 }
 
 enum HsListMode { category, all, search }
 
 class HomeServiceController extends GetxController {
-  final List<HsCategory> categories = const [
-    HsCategory('এসি সার্ভিস', 'AC Service', Icons.ac_unit_rounded),
-    HsCategory('পরিষ্কার', 'Cleaning', Icons.cleaning_services_rounded),
-    HsCategory('প্লাম্বিং', 'Plumbing', Icons.water_drop_rounded),
-    HsCategory('ইলেকট্রিক', 'Electric', Icons.lightbulb_outline_rounded),
-    HsCategory('যন্ত্র মেরামত', 'Appliance Repair', Icons.bolt_rounded),
-    HsCategory('পোকা দমন', 'Pest Control', Icons.shield_outlined),
-    HsCategory('রং', 'Painting', Icons.format_paint_rounded),
-    HsCategory('বাসা বদল', 'Home Shifting', Icons.work_outline_rounded),
-  ];
+  ServiceRepository get _repo => Get.find<ServiceRepository>();
 
-  final List<HsService> popular = const [
-    HsService('AC General Service',
-        '60 min · Filter clean, gas check, performance test', '৳599',
-        Icons.ac_unit_rounded),
-    HsService('AC Master Service',
-        '90 min · Deep jet wash, coil + drain clean', '৳1099',
-        Icons.ac_unit_rounded),
-  ];
+  // ── Catalog ─────────────────────────────────────────────────────────
+  List<HsCategory> categories = [];
+  List<HsService> popular = [];
+  bool loadingCategories = false;
+  bool loadingPopular = false;
 
-  // ── Service catalog ──────────────────────────────────────────────
-  final List<HsServiceItem> catalog = const [
-    HsServiceItem(name: 'AC General Service', bnName: 'সাধারণ সার্ভিস', duration: '60 min', desc: 'Filter clean, gas check, performance test', price: 599, category: 'AC Service', icon: Icons.ac_unit_rounded),
-    HsServiceItem(name: 'AC Master Service', bnName: 'মাস্টার সার্ভিস', duration: '90 min', desc: 'Deep jet wash, coil + drain clean', price: 1099, category: 'AC Service', icon: Icons.ac_unit_rounded),
-    HsServiceItem(name: 'Gas Refill (per ton)', bnName: 'গ্যাস রিফিল', duration: '75 min', desc: 'R22 / R410A refill with leak test', price: 1500, category: 'AC Service', icon: Icons.ac_unit_rounded),
-    HsServiceItem(name: 'Installation', bnName: 'ইন্সটলেশন', duration: '120 min', desc: 'Mount + piping up to 5ft', price: 800, category: 'AC Service', icon: Icons.ac_unit_rounded),
-    HsServiceItem(name: 'Uninstallation', bnName: 'খোলা', duration: '60 min', desc: 'Safe dismount + packing', price: 600, category: 'AC Service', icon: Icons.ac_unit_rounded),
-    HsServiceItem(name: 'Home Deep Clean', bnName: 'ঘর গভীর পরিষ্কার', duration: '180 min', desc: 'Full home, kitchen + bath', price: 2500, category: 'Cleaning', icon: Icons.cleaning_services_rounded),
-    HsServiceItem(name: 'Sofa Cleaning', bnName: 'সোফা পরিষ্কার', duration: '60 min', desc: 'Shampoo + vacuum', price: 1200, category: 'Cleaning', icon: Icons.cleaning_services_rounded),
-    HsServiceItem(name: 'Pipe Leak Repair', bnName: 'পাইপ লিক', duration: '45 min', desc: 'Detect + fix leak', price: 450, category: 'Plumbing', icon: Icons.water_drop_rounded),
-    HsServiceItem(name: 'Tap / Basin Fix', bnName: 'কল মেরামত', duration: '40 min', desc: 'Replace washer or tap', price: 350, category: 'Plumbing', icon: Icons.water_drop_rounded),
-    HsServiceItem(name: 'Wiring Check', bnName: 'ওয়্যারিং চেক', duration: '60 min', desc: 'Full safety inspection', price: 500, category: 'Electric', icon: Icons.lightbulb_outline_rounded),
-    HsServiceItem(name: 'Fan / Light Install', bnName: 'ফ্যান-লাইট', duration: '45 min', desc: 'Mount + connect', price: 300, category: 'Electric', icon: Icons.lightbulb_outline_rounded),
-    HsServiceItem(name: 'Fridge Repair', bnName: 'ফ্রিজ মেরামত', duration: '90 min', desc: 'Diagnose + fix', price: 700, category: 'Appliance Repair', icon: Icons.bolt_rounded),
-    HsServiceItem(name: 'Washing Machine', bnName: 'ওয়াশিং মেশিন', duration: '90 min', desc: 'Service + repair', price: 800, category: 'Appliance Repair', icon: Icons.bolt_rounded),
-    HsServiceItem(name: 'Cockroach Control', bnName: 'তেলাপোকা', duration: '60 min', desc: 'Gel + spray treatment', price: 900, category: 'Pest Control', icon: Icons.shield_outlined),
-    HsServiceItem(name: 'Room Painting', bnName: 'রুম পেইন্ট', duration: 'per room', desc: 'Putty + 2 coats', price: 3500, category: 'Painting', icon: Icons.format_paint_rounded),
-    HsServiceItem(name: 'Mini Truck Move', bnName: 'মিনি ট্রাক', duration: '3 hr', desc: 'Loading + transport', price: 2500, category: 'Home Shifting', icon: Icons.work_outline_rounded),
-  ];
+  @override
+  void onInit() {
+    super.onInit();
+    addressCtrl.text = address;
+    fetchCategories();
+    fetchPopular();
+  }
 
-  // ── List mode ────────────────────────────────────────────────────
+  Future<void> fetchCategories() async {
+    loadingCategories = true;
+    update();
+    try {
+      final list = await _repo.fetchCategories();
+      categories = list.map(HsCategory.fromApi).toList();
+    } catch (e) {
+      SnackHelper.error(e.toString().replaceFirst('Exception: ', ''));
+    } finally {
+      loadingCategories = false;
+      update();
+    }
+  }
+
+  Future<void> fetchPopular() async {
+    loadingPopular = true;
+    update();
+    try {
+      final list = await _repo.fetchPopular();
+      popular = list.map(HsService.fromApi).toList();
+    } catch (e) {
+      SnackHelper.error(e.toString().replaceFirst('Exception: ', ''));
+    } finally {
+      loadingPopular = false;
+      update();
+    }
+  }
+
+  // ── Service list (category / search) ────────────────────────────────
   HsListMode mode = HsListMode.category;
-  String selectedCategory = 'AC Service';
+  HsCategory? selectedCat;
+  String selectedCategory = '';
+  List<HsServiceItem> subServices = [];
+  bool loadingSub = false;
+
   String query = '';
+  List<HsServiceItem> searchItems = [];
+  bool searching = false;
+
+  String get listTitle => switch (mode) {
+        HsListMode.search => 'Search services',
+        HsListMode.all => 'All services',
+        HsListMode.category => selectedCategory.isEmpty
+            ? 'Services'
+            : selectedCategory,
+      };
+
+  List<HsServiceItem> get visibleServices =>
+      mode == HsListMode.search ? searchItems : subServices;
+
+  Future<void> _loadSubServices(HsCategory c) async {
+    loadingSub = true;
+    subServices = [];
+    update();
+    try {
+      final list = await _repo.fetchSubServices(c.id);
+      subServices =
+          list.map((s) => HsServiceItem.fromApi(s, categoryName: c.en)).toList();
+    } catch (e) {
+      SnackHelper.error(e.toString().replaceFirst('Exception: ', ''));
+    } finally {
+      loadingSub = false;
+      update();
+    }
+  }
 
   void onQueryChanged(String v) {
     query = v;
     update();
+    _search();
   }
 
-  String get listTitle => switch (mode) {
-        HsListMode.category => selectedCategory,
-        HsListMode.all => 'All services',
-        HsListMode.search => 'Search services',
-      };
-
-  List<HsServiceItem> get visibleServices {
-    switch (mode) {
-      case HsListMode.category:
-        return catalog.where((s) => s.category == selectedCategory).toList();
-      case HsListMode.all:
-        return catalog;
-      case HsListMode.search:
-        if (query.trim().isEmpty) return catalog;
-        final q = query.toLowerCase();
-        return catalog
-            .where((s) =>
-                s.name.toLowerCase().contains(q) ||
-                s.category.toLowerCase().contains(q) ||
-                s.desc.toLowerCase().contains(q))
-            .toList();
+  Future<void> _search() async {
+    final q = query.trim();
+    if (q.isEmpty) {
+      searchItems = [];
+      update();
+      return;
+    }
+    searching = true;
+    update();
+    try {
+      final res = await _repo.search(q);
+      // Map category names so the sub-service rows show a category label.
+      final catName = {for (final c in res.categories) c.id: c.name};
+      searchItems = res.subServices
+          .map((s) =>
+              HsServiceItem.fromApi(s, categoryName: catName[s.categoryId] ?? ''))
+          .toList();
+    } catch (_) {
+    } finally {
+      searching = false;
+      update();
     }
   }
 
-  // ── Cart ─────────────────────────────────────────────────────────
+  // ── Cart (keyed by sub_service id) ──────────────────────────────────
   final Map<String, int> _cart = {};
-  int qtyOf(HsServiceItem s) => _cart[s.name] ?? 0;
+  final Map<String, HsServiceItem> _byId = {};
+
+  int qtyOf(HsServiceItem s) => _cart[s.id] ?? 0;
 
   void add(HsServiceItem s) {
-    _cart[s.name] = (_cart[s.name] ?? 0) + 1;
+    _byId[s.id] = s;
+    _cart[s.id] = (_cart[s.id] ?? 0) + 1;
     update();
   }
 
   void dec(HsServiceItem s) {
-    final q = (_cart[s.name] ?? 0) - 1;
+    final q = (_cart[s.id] ?? 0) - 1;
     if (q <= 0) {
-      _cart.remove(s.name);
+      _cart.remove(s.id);
     } else {
-      _cart[s.name] = q;
+      _cart[s.id] = q;
     }
     update();
   }
@@ -138,103 +234,316 @@ class HomeServiceController extends GetxController {
 
   int get totalPrice {
     var total = 0;
-    for (final s in catalog) {
-      total += (_cart[s.name] ?? 0) * s.price;
-    }
+    _cart.forEach((id, qty) {
+      total += (_byId[id]?.price ?? 0) * qty;
+    });
     return total;
   }
 
-  // ── Navigation ───────────────────────────────────────────────────
-  void openCategory(HsCategory c) {
-    mode = HsListMode.category;
-    selectedCategory = c.en;
-    update();
-    Get.toNamed(Routes.HOME_SERVICE_LIST);
-  }
+  List<HsServiceItem> get cartItems =>
+      _cart.keys.map((id) => _byId[id]).whereType<HsServiceItem>().toList();
 
-  void openAll() {
-    mode = HsListMode.all;
-    update();
-    Get.toNamed(Routes.HOME_SERVICE_LIST);
-  }
+  // ── Address / schedule / slots / payment ────────────────────────────
+  final TextEditingController addressCtrl = TextEditingController();
+  String address = 'House 32, Road 11, Gulshan-2';
 
-  void openSearch() {
-    mode = HsListMode.search;
-    query = '';
-    update();
-    Get.toNamed(Routes.HOME_SERVICE_LIST);
-  }
-
-  // ── Confirm-booking schedule / payment ──────────────────────────
-  final String address = 'House 32, Road 11, Gulshan-2';
-
-  final List<(String, String)> bookingDates = const [
-    ('Today', '29 May'),
-    ('Tomorrow', '30 May'),
-    ('Sat', '31 May'),
-  ];
+  List<ServiceScheduleDate> _dates = [];
   int selectedBookingDate = 0;
+  bool loadingDates = false;
+  List<ServiceScheduleDate> get scheduleDates => _dates;
+  ServiceScheduleDate? get _selectedDate =>
+      selectedBookingDate < _dates.length ? _dates[selectedBookingDate] : null;
+
   void selectBookingDate(int i) {
     selectedBookingDate = i;
     update();
   }
 
-  final List<String> bookingTimes = const [
-    '9:00 AM', '11:00 AM', '1:00 PM', '3:00 PM', '5:00 PM', '7:00 PM',
-  ];
-  String selectedBookingTime = '3:00 PM';
-  void selectBookingTime(String t) {
-    selectedBookingTime = t;
+  List<ServiceTimeSlot> slots = [];
+  String selectedSlotKey = '';
+  bool loadingSlots = false;
+
+  void selectSlot(String key) {
+    selectedSlotKey = key;
     update();
   }
 
-  final List<(String, IconData, Color)> payments = const [
-    ('Cash after service', Icons.bolt_rounded, Color(0xFF0E7C6B)),
-    ('bKash', Icons.water_drop_rounded, Color(0xFFE2136E)),
-    ('Nagad', Icons.account_balance_wallet_outlined, Color(0xFFF15A24)),
-    ('Card', Icons.credit_card_rounded, Color(0xFF334155)),
-  ];
-  int selectedPayment = 0;
-  void selectPayment(int i) {
-    selectedPayment = i;
+  List<ServicePaymentMethod> methods = [];
+  String selectedMethodKey = '';
+  bool loadingMethods = false;
+
+  void selectMethod(String key) {
+    selectedMethodKey = key;
     update();
   }
 
-  // ── Booking summary / invoice ────────────────────────────────────
-  List<HsServiceItem> get cartItems =>
-      catalog.where((s) => (_cart[s.name] ?? 0) > 0).toList();
-
+  // ── Booking summary getters (used by placed / details) ──────────────
   String get bookingSummary {
-    if (cartItems.isEmpty) return 'AC General Service ×1';
-    final first = cartItems.first;
-    return '${first.name} ×$totalItems';
+    final b = lastBooking;
+    if (b != null) return '${b.title} ×${b.items.fold(0, (a, i) => a + i.quantity)}';
+    if (cartItems.isEmpty) return 'Service';
+    return '${cartItems.first.name} ×$totalItems';
   }
 
-  String get whenSummary =>
-      '${bookingDates[selectedBookingDate].$1} · $selectedBookingTime';
+  String get whenSummary {
+    final b = lastBooking;
+    if (b != null && b.whenLabel.isNotEmpty) return b.whenLabel;
+    final d = _selectedDate;
+    final slot = slots.firstWhereOrNull((s) => s.key == selectedSlotKey);
+    return [d?.label ?? '', slot?.label ?? '']
+        .where((s) => s.isNotEmpty)
+        .join(' · ');
+  }
 
-  int get vat => (totalPrice * 0.05).round();
-  int get totalPaid => totalPrice + vat;
+  int get subtotalAmount => lastBooking?.subtotal ?? totalPrice;
+  int get vat => lastBooking?.vatAmount ?? (totalPrice * 0.05).round();
+  int get totalPaid => lastBooking?.amount ?? (totalPrice + vat);
+  String get bookingId => lastBooking?.invoiceNo ?? '—';
 
-  // Booking / technician detail (demo)
-  final String bookingId = 'SB-5521';
-  final String techName = 'Jamal Uddin';
-  final String techInitials = 'JU';
-  final String techRating = '4.8';
-  final String techJobs = '312 jobs';
+  // Provider details are not in these endpoints yet (coming later).
+  String get techName => 'Service provider';
+  String get techInitials => 'SP';
+  String get techRating => '—';
+  String get techJobs => '';
 
-  // ── Booking-flow navigation ──────────────────────────────────────
-  void reviewBooking() {
+  // ── Booking ─────────────────────────────────────────────────────────
+  ServiceBooking? lastBooking;
+  bool placing = false;
+
+  // ── Track (booking detail + timeline) ───────────────────────────────
+  ServiceBooking? trackedBooking;
+  List<ServiceTimelineEntry> timeline = [];
+  bool loadingTrack = false;
+
+  // ── My bookings ─────────────────────────────────────────────────────
+  List<ServiceBooking> myBookings = [];
+  bool loadingMyBookings = false;
+
+  // ── Navigation ──────────────────────────────────────────────────────
+  void openCategory(HsCategory c) {
+    mode = HsListMode.category;
+    selectedCat = c;
+    selectedCategory = c.en;
+    update();
+    _loadSubServices(c);
+    Get.toNamed(Routes.HOME_SERVICE_LIST);
+  }
+
+  /// Open a category by id (used from "popular" cards / search categories).
+  void openCategoryById(String id, String enName) {
+    openCategory(HsCategory(enName, enName, hsCatIcon(enName), id: id));
+  }
+
+  void openAll() => openSearch();
+
+  void openSearch() {
+    mode = HsListMode.search;
+    query = '';
+    searchItems = [];
+    update();
+    Get.toNamed(Routes.HOME_SERVICE_LIST);
+  }
+
+  Future<void> reviewBooking() async {
     if (totalItems == 0) return;
     Get.toNamed(Routes.HS_CONFIRM);
+    // Load schedule + payment options for the confirm screen.
+    if (_dates.isEmpty) await _loadDates();
+    if (methods.isEmpty) await _loadMethods();
   }
 
-  void placeBooking() => Get.toNamed(Routes.HS_PLACED);
-  void trackBooking() => Get.toNamed(Routes.HS_TRACKING);
+  Future<void> _loadDates() async {
+    loadingDates = true;
+    update();
+    try {
+      _dates = await _repo.fetchScheduleDates();
+      selectedBookingDate = 0;
+      if (_dates.isNotEmpty) await _loadSlots(_dates.first.date);
+    } catch (e) {
+      SnackHelper.error(e.toString().replaceFirst('Exception: ', ''));
+    } finally {
+      loadingDates = false;
+      update();
+    }
+  }
+
+  Future<void> loadSlotsForSelectedDate() async {
+    final d = _selectedDate;
+    if (d != null) await _loadSlots(d.date);
+  }
+
+  Future<void> _loadSlots(String date) async {
+    loadingSlots = true;
+    update();
+    try {
+      slots = await _repo.fetchTimeSlots(date);
+      final firstFree = slots.firstWhereOrNull((s) => s.available);
+      selectedSlotKey = firstFree?.key ?? '';
+    } catch (_) {
+    } finally {
+      loadingSlots = false;
+      update();
+    }
+  }
+
+  Future<void> _loadMethods() async {
+    loadingMethods = true;
+    update();
+    try {
+      methods = await _repo.fetchPaymentMethods();
+      final def = await _repo.fetchDefaultPaymentMethod();
+      selectedMethodKey = def.isNotEmpty
+          ? def
+          : (methods.firstWhereOrNull((m) => m.enabled)?.key ?? '');
+    } catch (_) {
+    } finally {
+      loadingMethods = false;
+      update();
+    }
+  }
+
+  Future<void> placeBooking() async {
+    if (placing) return;
+    if (cartItems.isEmpty) {
+      SnackHelper.error('No services selected');
+      return;
+    }
+    final d = _selectedDate;
+    if (d == null || selectedSlotKey.isEmpty) {
+      SnackHelper.error('Select a date & time slot');
+      return;
+    }
+    if (addressCtrl.text.trim().isEmpty) {
+      SnackHelper.error('Enter a service address');
+      return;
+    }
+    placing = true;
+    update();
+    try {
+      address = addressCtrl.text.trim();
+      final categoryId = cartItems.first.categoryId;
+      final payload = {
+        'category_id': categoryId,
+        'address': address,
+        'scheduled_at': '${d.date}T00:00:00+06:00',
+        'time_slot': selectedSlotKey,
+        'payment_method':
+            selectedMethodKey.isNotEmpty ? selectedMethodKey : 'cash',
+        'items': cartItems
+            .map((s) => {'sub_service_id': s.id, 'quantity': qtyOf(s)})
+            .toList(),
+      };
+      lastBooking = await _repo.book(payload);
+      _cart.clear();
+      Get.toNamed(Routes.HS_PLACED);
+    } catch (e) {
+      SnackHelper.error(e.toString().replaceFirst('Exception: ', ''));
+    } finally {
+      placing = false;
+      update();
+    }
+  }
+
+  Future<void> trackBooking() async {
+    final id = lastBooking?.id ?? trackedBooking?.id;
+    if (id == null || id.isEmpty) return;
+    Get.toNamed(Routes.HS_TRACKING);
+    await _loadTrack(id);
+  }
+
+  Future<void> openBooking(ServiceBooking b) async {
+    trackedBooking = b;
+    lastBooking = b;
+    update();
+    Get.toNamed(Routes.HS_TRACKING);
+    await _loadTrack(b.id);
+  }
+
+  Future<void> _loadTrack(String id) async {
+    loadingTrack = true;
+    update();
+    try {
+      trackedBooking = await _repo.fetchBooking(id);
+      lastBooking = trackedBooking;
+      timeline = await _repo.fetchTimeline(id);
+    } catch (e) {
+      SnackHelper.error(e.toString().replaceFirst('Exception: ', ''));
+    } finally {
+      loadingTrack = false;
+      update();
+    }
+  }
+
+  Future<void> fetchMyBookings() async {
+    loadingMyBookings = true;
+    update();
+    try {
+      myBookings = await _repo.fetchMyBookings();
+    } catch (e) {
+      SnackHelper.error(e.toString().replaceFirst('Exception: ', ''));
+    } finally {
+      loadingMyBookings = false;
+      update();
+    }
+  }
+
+  void openMyBookings() {
+    fetchMyBookings();
+    Get.toNamed(Routes.HS_MY_BOOKINGS);
+  }
+
+  // ── Rating / dispute ────────────────────────────────────────────────
+  Future<bool> submitRating(int stars, String comment) async {
+    final id = trackedBooking?.id ?? lastBooking?.id;
+    if (id == null) return false;
+    try {
+      final res = await _repo.rate(id, stars, comment);
+      if (res.success) {
+        SnackHelper.success(res.message.isNotEmpty ? res.message : 'Thank you');
+        return true;
+      }
+      SnackHelper.error(res.message);
+      return false;
+    } catch (e) {
+      SnackHelper.error(e.toString().replaceFirst('Exception: ', ''));
+      return false;
+    }
+  }
+
+  Future<bool> submitDispute(String reason, String description) async {
+    final id = trackedBooking?.id ?? lastBooking?.id;
+    if (id == null) return false;
+    try {
+      final res = await _repo.dispute(id, reason, description);
+      if (res.success) {
+        SnackHelper.success(res.message.isNotEmpty ? res.message : 'Dispute opened');
+        return true;
+      }
+      SnackHelper.error(res.message);
+      return false;
+    } catch (e) {
+      SnackHelper.error(e.toString().replaceFirst('Exception: ', ''));
+      return false;
+    }
+  }
+
+  // ── Navigation (misc) ───────────────────────────────────────────────
   void viewBookingDetails() => Get.toNamed(Routes.HS_DETAILS);
   void rateService() => Get.toNamed(Routes.HS_RATE);
+  void openChat() {
+    final id = trackedBooking?.id ?? lastBooking?.id;
+    if (id == null || id.isEmpty) return;
+    Get.toNamed(Routes.HS_CHAT, arguments: id);
+  }
+
   void openSubscriptions() => Get.toNamed(Routes.HS_SUBSCRIPTIONS);
 
   void backToHomeService() =>
       Get.until((route) => route.settings.name == Routes.HOME_SERVICE);
+
+  @override
+  void onClose() {
+    addressCtrl.dispose();
+    super.onClose();
+  }
 }

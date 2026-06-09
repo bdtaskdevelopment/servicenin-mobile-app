@@ -18,6 +18,7 @@ import '../modules/home_service/views/rate_service_view.dart';
 import '../modules/home_service/views/subscriptions_view.dart';
 import '../modules/home_service/views/provider_dashboard_view.dart';
 import '../modules/home_service/views/hs_chat_view.dart';
+import '../modules/home_service/views/hs_my_bookings_view.dart';
 import '../modules/home_service/views/earnings_view.dart';
 import '../modules/physio/bindings/physio_binding.dart';
 import '../modules/physio/views/physio_view.dart';
@@ -30,12 +31,15 @@ import '../modules/matchmaking/views/matchmaking_view.dart';
 import '../modules/matchmaking/views/my_biodata_view.dart';
 import '../modules/matchmaking/views/biodata_detail_view.dart';
 import '../modules/matchmaking/views/interests_view.dart';
+import '../modules/matchmaking/views/mm_chat_view.dart';
 import '../modules/jobs/bindings/jobs_binding.dart';
 import '../modules/jobs/views/jobs_view.dart';
 import '../modules/jobs/views/my_applications_view.dart';
 import '../modules/jobs/views/job_detail_view.dart';
 import '../modules/jobs/views/job_apply_view.dart';
 import '../modules/jobs/views/post_job_view.dart';
+import '../modules/jobs/views/employer_register_view.dart';
+import '../modules/jobs/views/job_seeker_profile_view.dart';
 import '../modules/funeral/bindings/funeral_binding.dart';
 import '../modules/funeral/views/funeral_view.dart';
 import '../modules/funeral/views/funeral_request_view.dart';
@@ -225,6 +229,11 @@ class AppPages {
       binding: HomeServiceBinding(),
     ),
     GetPage(
+      name: _Paths.HS_MY_BOOKINGS,
+      page: () => const HsMyBookingsView(),
+      binding: HomeServiceBinding(),
+    ),
+    GetPage(
       name: _Paths.HS_EARNINGS,
       page: () => const EarningsView(),
       binding: HomeServiceBinding(),
@@ -275,6 +284,11 @@ class AppPages {
       binding: MatchmakingBinding(),
     ),
     GetPage(
+      name: _Paths.MATCHMAKING_CHAT,
+      page: () => const MmChatView(),
+      binding: MatchmakingBinding(),
+    ),
+    GetPage(
       name: _Paths.JOBS,
       page: () => const JobsView(),
       binding: JobsBinding(),
@@ -297,6 +311,16 @@ class AppPages {
     GetPage(
       name: _Paths.JOBS_POST,
       page: () => const PostJobView(),
+      binding: JobsBinding(),
+    ),
+    GetPage(
+      name: _Paths.JOBS_EMPLOYER,
+      page: () => const EmployerRegisterView(),
+      binding: JobsBinding(),
+    ),
+    GetPage(
+      name: _Paths.JOBS_SEEKER_PROFILE,
+      page: () => const JobSeekerProfileView(),
       binding: JobsBinding(),
     ),
     GetPage(

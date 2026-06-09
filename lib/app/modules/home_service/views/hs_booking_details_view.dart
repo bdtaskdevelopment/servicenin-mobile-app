@@ -11,13 +11,6 @@ const _tile = Color(0xFFE0F2EF);
 class HsBookingDetailsView extends GetView<HomeServiceController> {
   const HsBookingDetailsView({super.key});
 
-  static const _timeline = [
-    ('Placed', '9:40 AM'),
-    ('Assigned to Jamal Uddin', '9:52 AM'),
-    ('Arrived', '2:58 PM'),
-    ('Service completed', '4:10 PM'),
-  ];
-
   @override
   Widget build(BuildContext context) {
     final con = controller;
@@ -50,8 +43,6 @@ class HsBookingDetailsView extends GetView<HomeServiceController> {
                     ],
                   ),
                   const Spacer(),
-                  const Icon(Icons.share_outlined,
-                      color: Color(0xFF1A1A1A), size: 22),
                 ],
               ),
             ),
@@ -118,6 +109,8 @@ class HsBookingDetailsView extends GetView<HomeServiceController> {
                       ],
                     ),
                   ),
+                  // Status timeline & work proof hidden for now.
+                  /*
                   const SizedBox(height: 18),
                   const _Label('STATUS TIMELINE'),
                   const SizedBox(height: 10),
@@ -127,9 +120,9 @@ class HsBookingDetailsView extends GetView<HomeServiceController> {
                         color: AppColors.white,
                         borderRadius: BorderRadius.circular(16)),
                     child: Column(
-                      children: List.generate(_timeline.length, (i) {
-                        final t = _timeline[i];
-                        final last = i == _timeline.length - 1;
+                      children: List.generate(con.timeline.length, (i) {
+                        final t = con.timeline[i];
+                        final last = i == con.timeline.length - 1;
                         return IntrinsicHeight(
                           child: Row(
                             crossAxisAlignment: CrossAxisAlignment.start,
@@ -147,22 +140,31 @@ class HsBookingDetailsView extends GetView<HomeServiceController> {
                                 ],
                               ),
                               const SizedBox(width: 12),
-                              Padding(
-                                padding: EdgeInsets.only(bottom: last ? 8 : 18),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(t.$1,
-                                        style: const TextStyle(
-                                            fontSize: 14,
-                                            fontWeight: FontWeight.w700,
-                                            color: Color(0xFF0F172A))),
-                                    const SizedBox(height: 1),
-                                    Text(t.$2,
-                                        style: const TextStyle(
-                                            fontSize: 12,
-                                            color: Color(0xFFE07A1F))),
-                                  ],
+                              Expanded(
+                                child: Padding(
+                                  padding:
+                                      EdgeInsets.only(bottom: last ? 8 : 18),
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(t.statusLabel,
+                                          style: const TextStyle(
+                                              fontSize: 14,
+                                              fontWeight: FontWeight.w700,
+                                              color: Color(0xFF0F172A))),
+                                      const SizedBox(height: 1),
+                                      if (t.note.isNotEmpty)
+                                        Text(t.note,
+                                            style: const TextStyle(
+                                                fontSize: 12,
+                                                color: Color(0xFF64748B))),
+                                      Text(t.timeLabel,
+                                          style: const TextStyle(
+                                              fontSize: 12,
+                                              color: Color(0xFFE07A1F))),
+                                    ],
+                                  ),
                                 ),
                               ),
                             ],
@@ -189,6 +191,7 @@ class HsBookingDetailsView extends GetView<HomeServiceController> {
                       Expanded(child: _ProofBox(label: 'After', tinted: true)),
                     ],
                   ),
+                  */
                   const SizedBox(height: 18),
                   const _Label('INVOICE'),
                   const SizedBox(height: 10),
@@ -199,9 +202,7 @@ class HsBookingDetailsView extends GetView<HomeServiceController> {
                         borderRadius: BorderRadius.circular(16)),
                     child: Column(
                       children: [
-                        _fee('Service charge', '৳${con.totalPrice}'),
-                        const Divider(height: 1, color: Color(0xFFF1F5F9)),
-                        _fee('Parts', '৳0'),
+                        _fee('Service charge', '৳${con.subtotalAmount}'),
                         const Divider(height: 1, color: Color(0xFFF1F5F9)),
                         _fee('VAT (5%)', '৳${con.vat}'),
                         const Divider(height: 1, color: Color(0xFFF1F5F9)),
@@ -243,33 +244,39 @@ class HsBookingDetailsView extends GetView<HomeServiceController> {
                       Expanded(
                         child: SizedBox(
                           height: 52,
+                          // Rebook hidden for now — replaced with dispute.
+                          // child: OutlinedButton(
+                          //   onPressed: () {},
+                          //   child: const Text('Rebook'),
+                          // ),
                           child: OutlinedButton(
-                            onPressed: () {},
+                            onPressed: () => _showDisputeDialog(context, con),
                             style: OutlinedButton.styleFrom(
                               side:
-                                  const BorderSide(color: Color(0xFFE2E8F0)),
+                                  const BorderSide(color: Color(0xFFFECACA)),
                               shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(14)),
                             ),
-                            child: const Text('Rebook',
+                            child: const Text('Report issue',
                                 style: TextStyle(
                                     fontSize: 15,
                                     fontWeight: FontWeight.w700,
-                                    color: Color(0xFF0F172A))),
+                                    color: Color(0xFFDC2626))),
                           ),
                         ),
                       ),
                     ],
                   ),
-                  const SizedBox(height: 8),
-                  TextButton(
-                    onPressed: () {},
-                    child: const Text('Report an issue (dispute)',
-                        style: TextStyle(
-                            fontSize: 13.5,
-                            fontWeight: FontWeight.w700,
-                            color: Color(0xFFDC2626))),
-                  ),
+                  // Duplicate dispute link hidden — dispute now in the row above.
+                  // const SizedBox(height: 8),
+                  // TextButton(
+                  //   onPressed: () => _showDisputeDialog(context, con),
+                  //   child: const Text('Report an issue (dispute)',
+                  //       style: TextStyle(
+                  //           fontSize: 13.5,
+                  //           fontWeight: FontWeight.w700,
+                  //           color: Color(0xFFDC2626))),
+                  // ),
                 ],
               ),
             ),
@@ -301,6 +308,67 @@ class HsBookingDetailsView extends GetView<HomeServiceController> {
       );
 }
 
+void _showDisputeDialog(BuildContext context, HomeServiceController con) {
+  final reasonCtrl = TextEditingController();
+  final descCtrl = TextEditingController();
+  showDialog(
+    context: context,
+    builder: (_) => AlertDialog(
+      backgroundColor: Colors.white,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+      title: const Text('Report an issue',
+          style: TextStyle(fontWeight: FontWeight.w800)),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          TextField(
+            controller: reasonCtrl,
+            decoration: InputDecoration(
+              hintText: 'Reason',
+              filled: true,
+              fillColor: const Color(0xFFF7F8FA),
+              border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide.none),
+            ),
+          ),
+          const SizedBox(height: 12),
+          TextField(
+            controller: descCtrl,
+            maxLines: 3,
+            decoration: InputDecoration(
+              hintText: 'Describe what went wrong…',
+              filled: true,
+              fillColor: const Color(0xFFF7F8FA),
+              border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide.none),
+            ),
+          ),
+        ],
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Get.back(),
+          child: const Text('Cancel',
+              style: TextStyle(color: Color(0xFF64748B))),
+        ),
+        ElevatedButton(
+          onPressed: () {
+            if (reasonCtrl.text.trim().isEmpty) return;
+            Get.back();
+            con.submitDispute(reasonCtrl.text.trim(), descCtrl.text.trim());
+          },
+          style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFFDC2626),
+              foregroundColor: Colors.white),
+          child: const Text('Submit'),
+        ),
+      ],
+    ),
+  );
+}
+
 class _Label extends StatelessWidget {
   const _Label(this.text);
   final String text;
@@ -313,6 +381,7 @@ class _Label extends StatelessWidget {
           letterSpacing: 0.6));
 }
 
+// ignore: unused_element
 class _ProofBox extends StatelessWidget {
   const _ProofBox({required this.label, required this.tinted});
   final String label;

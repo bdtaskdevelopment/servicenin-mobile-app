@@ -75,21 +75,56 @@ class PhysioBookView extends GetView<PhysioController> {
                           ),
                         ],
                       ),
+                      if (con.sessionType == 1) ...[
+                        const SizedBox(height: 18),
+                        const _Label('HOME ADDRESS'),
+                        const SizedBox(height: 10),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 14),
+                          decoration: BoxDecoration(
+                            color: AppColors.white,
+                            borderRadius: BorderRadius.circular(12),
+                            border:
+                                Border.all(color: const Color(0xFFE2E8F0)),
+                          ),
+                          child: TextField(
+                            controller: con.homeAddressCtrl,
+                            decoration: const InputDecoration(
+                              hintText: 'Where should the therapist visit?',
+                              hintStyle: TextStyle(color: Color(0xFF94A3B8)),
+                              border: InputBorder.none,
+                              isCollapsed: true,
+                              contentPadding:
+                                  EdgeInsets.symmetric(vertical: 14),
+                            ),
+                          ),
+                        ),
+                      ],
                       const SizedBox(height: 18),
                       const _Label('DATE'),
                       const SizedBox(height: 10),
-                      Row(
-                        children: List.generate(con.dates.length, (i) {
-                          final d = con.dates[i];
-                          final sel = con.dateIndex == i;
-                          return Expanded(
-                            child: Padding(
-                              padding: EdgeInsets.only(
-                                  right: i == con.dates.length - 1 ? 0 : 10),
-                              child: GestureDetector(
-                                onTap: () => con.setDate(i),
+                      if (con.loadingDates && con.scheduleDates.isEmpty)
+                        const Padding(
+                          padding: EdgeInsets.symmetric(vertical: 10),
+                          child: Center(
+                              child: CircularProgressIndicator(
+                                  strokeWidth: 2.4, color: _brown)),
+                        )
+                      else
+                        SizedBox(
+                          height: 64,
+                          child: ListView.separated(
+                            scrollDirection: Axis.horizontal,
+                            itemCount: con.scheduleDates.length,
+                            separatorBuilder: (_, __) =>
+                                const SizedBox(width: 10),
+                            itemBuilder: (_, i) {
+                              final d = con.scheduleDates[i];
+                              final sel = con.dateIndex == i;
+                              return GestureDetector(
+                                onTap: () => con.selectDate(i),
                                 child: Container(
-                                  height: 64,
+                                  width: 76,
                                   decoration: BoxDecoration(
                                     color: sel ? _brown : AppColors.white,
                                     borderRadius: BorderRadius.circular(12),
@@ -102,7 +137,7 @@ class PhysioBookView extends GetView<PhysioController> {
                                     mainAxisAlignment:
                                         MainAxisAlignment.center,
                                     children: [
-                                      Text(d.$1,
+                                      Text(d.label,
                                           style: TextStyle(
                                               fontSize: 12,
                                               fontWeight: FontWeight.w600,
@@ -110,7 +145,7 @@ class PhysioBookView extends GetView<PhysioController> {
                                                   ? Colors.white
                                                   : const Color(0xFF64748B))),
                                       const SizedBox(height: 2),
-                                      Text(d.$2,
+                                      Text(d.dayShort,
                                           style: TextStyle(
                                               fontSize: 13,
                                               fontWeight: FontWeight.w800,
@@ -120,52 +155,156 @@ class PhysioBookView extends GetView<PhysioController> {
                                     ],
                                   ),
                                 ),
-                              ),
-                            ),
-                          );
-                        }),
-                      ),
+                              );
+                            },
+                          ),
+                        ),
                       const SizedBox(height: 18),
                       const _Label('TIME'),
                       const SizedBox(height: 12),
-                      GridView.count(
-                        crossAxisCount: 3,
-                        shrinkWrap: true,
-                        physics: const NeverScrollableScrollPhysics(),
-                        mainAxisSpacing: 12,
-                        crossAxisSpacing: 12,
-                        childAspectRatio: 2.4,
-                        children: List.generate(con.times.length, (i) {
-                          final sel = con.timeIndex == i;
-                          return GestureDetector(
-                            onTap: () => con.setTime(i),
-                            child: Container(
-                              alignment: Alignment.center,
-                              decoration: BoxDecoration(
-                                color: sel ? _brown : AppColors.white,
-                                borderRadius: BorderRadius.circular(12),
-                                border: Border.all(
+                      if (con.loadingSlots && con.slots.isEmpty)
+                        const Padding(
+                          padding: EdgeInsets.symmetric(vertical: 10),
+                          child: Center(
+                              child: CircularProgressIndicator(
+                                  strokeWidth: 2.4, color: _brown)),
+                        )
+                      else if (con.slots.isEmpty)
+                        const Text('No slots for this date.',
+                            style: TextStyle(
+                                fontSize: 13, color: Color(0xFF94A3B8)))
+                      else
+                        GridView.count(
+                          crossAxisCount: 3,
+                          shrinkWrap: true,
+                          physics: const NeverScrollableScrollPhysics(),
+                          mainAxisSpacing: 12,
+                          crossAxisSpacing: 12,
+                          childAspectRatio: 2.4,
+                          children: con.slots.map((s) {
+                            final sel = con.selectedSlotAt == s.scheduledAt;
+                            final disabled = !s.available;
+                            return GestureDetector(
+                              onTap: disabled
+                                  ? null
+                                  : () => con.selectSlot(s.scheduledAt),
+                              child: Opacity(
+                                opacity: disabled ? 0.45 : 1,
+                                child: Container(
+                                  alignment: Alignment.center,
+                                  decoration: BoxDecoration(
                                     color: sel
                                         ? _brown
-                                        : const Color(0xFFE2E8F0)),
+                                        : (disabled
+                                            ? const Color(0xFFF1F5F9)
+                                            : AppColors.white),
+                                    borderRadius: BorderRadius.circular(12),
+                                    border: Border.all(
+                                        color: sel
+                                            ? _brown
+                                            : const Color(0xFFE2E8F0)),
+                                  ),
+                                  child: Text(s.time,
+                                      style: TextStyle(
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.w700,
+                                          decoration: disabled
+                                              ? TextDecoration.lineThrough
+                                              : null,
+                                          color: sel
+                                              ? Colors.white
+                                              : const Color(0xFF0F172A))),
+                                ),
                               ),
-                              child: Text(con.times[i],
-                                  style: TextStyle(
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.w700,
-                                      color: sel
-                                          ? Colors.white
-                                          : const Color(0xFF0F172A))),
+                            );
+                          }).toList(),
+                        ),
+                      const SizedBox(height: 18),
+                      const _Label('NOTES (OPTIONAL)'),
+                      const SizedBox(height: 10),
+                      Container(
+                        padding: const EdgeInsets.all(14),
+                        decoration: BoxDecoration(
+                          color: AppColors.white,
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: const Color(0xFFE2E8F0)),
+                        ),
+                        child: TextField(
+                          controller: con.notesCtrl,
+                          maxLines: 2,
+                          decoration: const InputDecoration(
+                            hintText: 'Describe your concern (optional)…',
+                            hintStyle: TextStyle(color: Color(0xFF94A3B8)),
+                            border: InputBorder.none,
+                            isCollapsed: true,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 18),
+                      const _Label('PAYMENT'),
+                      const SizedBox(height: 10),
+                      Column(
+                        children: con.paymentMethods.map((m) {
+                          final sel = con.selectedPaymentKey == m.key;
+                          final disabled = !m.enabled;
+                          return Padding(
+                            padding: const EdgeInsets.only(bottom: 10),
+                            child: GestureDetector(
+                              onTap: disabled
+                                  ? null
+                                  : () => con.selectPayment(m.key),
+                              child: Opacity(
+                                opacity: disabled ? 0.5 : 1,
+                                child: Container(
+                                  padding: const EdgeInsets.all(14),
+                                  decoration: BoxDecoration(
+                                    color: AppColors.white,
+                                    borderRadius: BorderRadius.circular(12),
+                                    border: Border.all(
+                                        color: sel
+                                            ? _brown
+                                            : const Color(0xFFE2E8F0),
+                                        width: sel ? 1.6 : 1.2),
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      Icon(
+                                          sel
+                                              ? Icons.radio_button_checked
+                                              : Icons.radio_button_off,
+                                          size: 20,
+                                          color: sel
+                                              ? _brown
+                                              : const Color(0xFFCBD5E1)),
+                                      const SizedBox(width: 10),
+                                      Expanded(
+                                        child: Text(m.label,
+                                            style: const TextStyle(
+                                                fontSize: 14,
+                                                fontWeight: FontWeight.w700,
+                                                color: Color(0xFF0F172A))),
+                                      ),
+                                      if (disabled)
+                                        const Text('Soon',
+                                            style: TextStyle(
+                                                fontSize: 11,
+                                                color: Color(0xFF94A3B8))),
+                                    ],
+                                  ),
+                                ),
+                              ),
                             ),
                           );
-                        }),
+                        }).toList(),
                       ),
                     ],
                   ),
                 ),
                 _BottomBar(
-                  left: '${con.selectedDateLabel} · ${con.selectedTime}',
-                  price: t?.fee ?? '',
+                  left: 'When',
+                  price:
+                      '${con.selectedDateLabel} · ${con.selectedTime}',
+                  loading: con.booking,
                   onTap: con.confirmBooking,
                 ),
               ],
@@ -297,10 +436,14 @@ class _TypeCard extends StatelessWidget {
 
 class _BottomBar extends StatelessWidget {
   const _BottomBar(
-      {required this.left, required this.price, required this.onTap});
+      {required this.left,
+      required this.price,
+      required this.onTap,
+      this.loading = false});
   final String left;
   final String price;
   final VoidCallback onTap;
+  final bool loading;
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -327,7 +470,7 @@ class _BottomBar extends StatelessWidget {
             child: SizedBox(
               height: 54,
               child: ElevatedButton(
-                onPressed: onTap,
+                onPressed: loading ? null : onTap,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: _brown,
                   foregroundColor: Colors.white,
@@ -335,9 +478,16 @@ class _BottomBar extends StatelessWidget {
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(14)),
                 ),
-                child: const Text('Confirm booking',
-                    style: TextStyle(
-                        fontSize: 16, fontWeight: FontWeight.w800)),
+                child: loading
+                    ? const SizedBox(
+                        width: 22,
+                        height: 22,
+                        child: CircularProgressIndicator(
+                            strokeWidth: 2.4, color: Colors.white),
+                      )
+                    : const Text('Confirm booking',
+                        style: TextStyle(
+                            fontSize: 16, fontWeight: FontWeight.w800)),
               ),
             ),
           ),

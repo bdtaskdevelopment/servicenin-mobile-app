@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../../core/values/app_colors.dart';
-import '../../../routes/app_pages.dart';
 import '../controllers/home_service_controller.dart';
 
 const _teal = Color(0xFF0E9F8E);
@@ -45,11 +44,12 @@ class HomeServiceView extends GetView<HomeServiceController> {
                     ],
                   ),
                   const Spacer(),
-                  GestureDetector(
-                    onTap: () => Get.toNamed(Routes.HS_PROVIDER),
-                    child: const Icon(Icons.work_outline_rounded,
-                        color: Color(0xFF1A1A1A), size: 22),
-                  ),
+                  // Provider entry hidden for now.
+                  // GestureDetector(
+                  //   onTap: () => Get.toNamed(Routes.HS_PROVIDER),
+                  //   child: const Icon(Icons.work_outline_rounded,
+                  //       color: Color(0xFF1A1A1A), size: 22),
+                  // ),
                 ],
               ),
             ),
@@ -61,7 +61,10 @@ class HomeServiceView extends GetView<HomeServiceController> {
                     children: [
                       _Hero(),
                       const SizedBox(height: 14),
-                      const _ActiveCard(),
+                      GestureDetector(
+                        onTap: con.openMyBookings,
+                        child: const _ActiveCard(),
+                      ),
                       const SizedBox(height: 22),
                       GestureDetector(
                         onTap: con.openAll,
@@ -84,21 +87,35 @@ class HomeServiceView extends GetView<HomeServiceController> {
                             .toList(),
                       ),
                       const SizedBox(height: 20),
-                      GestureDetector(
-                        onTap: con.openSubscriptions,
-                        child: const _SubscribeBanner(),
-                      ),
-                      const SizedBox(height: 22),
+                      // Subscriptions section hidden for now.
+                      // GestureDetector(
+                      //   onTap: con.openSubscriptions,
+                      //   child: const _SubscriptionCard(),
+                      // ),
+                      // const SizedBox(height: 22),
                       const Text('Popular this week',
                           style: TextStyle(
                               fontSize: 17,
                               fontWeight: FontWeight.w800,
                               color: Color(0xFF0F172A))),
                       const SizedBox(height: 12),
-                      ...con.popular.map((s) => Padding(
-                            padding: const EdgeInsets.only(bottom: 12),
-                            child: _ServiceCard(service: s),
-                          )),
+                      if (con.loadingPopular && con.popular.isEmpty)
+                        const Padding(
+                          padding: EdgeInsets.symmetric(vertical: 16),
+                          child: Center(
+                            child: CircularProgressIndicator(
+                                strokeWidth: 2.4, color: _darkTeal),
+                          ),
+                        )
+                      else
+                        ...con.popular.map((s) => Padding(
+                              padding: const EdgeInsets.only(bottom: 12),
+                              child: GestureDetector(
+                                onTap: () =>
+                                    con.openCategoryById(s.id, s.name),
+                                child: _ServiceCard(service: s),
+                              ),
+                            )),
                     ],
                   );
                 },
@@ -189,42 +206,26 @@ class _ActiveCard extends StatelessWidget {
             height: 44,
             decoration: BoxDecoration(
                 color: _tile, borderRadius: BorderRadius.circular(12)),
-            child: const Icon(Icons.ac_unit_rounded, color: _teal, size: 22),
+            child: const Icon(Icons.receipt_long_rounded,
+                color: _teal, size: 22),
           ),
           const SizedBox(width: 12),
           const Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('AC General Service ×2',
+                Text('My bookings',
                     style: TextStyle(
                         fontSize: 14.5,
                         fontWeight: FontWeight.w700,
                         color: Color(0xFF0F172A))),
                 SizedBox(height: 2),
-                Text('Jamal Uddin · arriving soon',
+                Text('Track your service bookings',
                     style: TextStyle(fontSize: 12, color: Color(0xFF94A3B8))),
               ],
             ),
           ),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-            decoration: BoxDecoration(
-                color: const Color(0xFFFDE8D5),
-                borderRadius: BorderRadius.circular(20)),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: const [
-                Icon(Icons.circle, size: 7, color: Color(0xFFF15A24)),
-                SizedBox(width: 4),
-                Text('Track',
-                    style: TextStyle(
-                        fontSize: 11,
-                        fontWeight: FontWeight.w700,
-                        color: Color(0xFFE07A1F))),
-              ],
-            ),
-          ),
+          const Icon(Icons.chevron_right_rounded, color: Color(0xFF94A3B8)),
         ],
       ),
     );
@@ -285,6 +286,56 @@ class _CatTile extends StatelessWidget {
   }
 }
 
+// ── Subscriptions navigation card ───────────────────────────────────
+// ignore: unused_element
+class _SubscriptionCard extends StatelessWidget {
+  const _SubscriptionCard();
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+            colors: [Color(0xFF1E2A4A), Color(0xFF3A3F8A)],
+            begin: Alignment.centerLeft,
+            end: Alignment.centerRight),
+        borderRadius: BorderRadius.circular(18),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 40,
+            height: 40,
+            decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.12),
+                borderRadius: BorderRadius.circular(12)),
+            child: const Icon(Icons.calendar_month_rounded,
+                color: Color(0xFFF59E0B), size: 22),
+          ),
+          const SizedBox(width: 14),
+          const Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('Subscriptions',
+                    style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 15,
+                        fontWeight: FontWeight.w800)),
+                SizedBox(height: 2),
+                Text('Recurring AC care, weekly cleaning & more',
+                    style: TextStyle(color: Color(0xFFCBD5E1), fontSize: 12)),
+              ],
+            ),
+          ),
+          const Icon(Icons.chevron_right_rounded, color: Colors.white),
+        ],
+      ),
+    );
+  }
+}
+
+// ignore: unused_element
 class _SubscribeBanner extends StatelessWidget {
   const _SubscribeBanner();
   @override

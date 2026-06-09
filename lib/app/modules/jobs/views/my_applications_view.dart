@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../../core/values/app_colors.dart';
+import '../../../data/models/response/jobs_response.dart';
 import '../controllers/jobs_controller.dart';
 
 const _orange = Color(0xFFC2410C);
@@ -12,7 +13,6 @@ class MyApplicationsView extends GetView<JobsController> {
 
   @override
   Widget build(BuildContext context) {
-    final con = controller;
     return Scaffold(
       backgroundColor: const Color(0xFFF7F8FA),
       appBar: AppBar(
@@ -32,14 +32,39 @@ class MyApplicationsView extends GetView<JobsController> {
                 fontWeight: FontWeight.w800,
                 color: Color(0xFF0F172A))),
       ),
-      body: ListView(
-        padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
-        children: con.applications
-            .map((a) => Padding(
-                  padding: const EdgeInsets.only(bottom: 12),
-                  child: _AppCard(app: a),
-                ))
-            .toList(),
+      body: RefreshIndicator(
+        color: _orange,
+        onRefresh: controller.fetchMyApplications,
+        child: GetBuilder<JobsController>(
+          builder: (con) {
+            if (con.loadingApplications && con.applications.isEmpty) {
+              return const Center(
+                child: CircularProgressIndicator(
+                    strokeWidth: 2.6, color: _orange),
+              );
+            }
+            if (con.applications.isEmpty) {
+              return ListView(
+                children: const [
+                  SizedBox(height: 140),
+                  Center(
+                    child: Text('No applications yet.',
+                        style: TextStyle(color: Color(0xFF94A3B8))),
+                  ),
+                ],
+              );
+            }
+            return ListView(
+              padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
+              children: con.applications
+                  .map((a) => Padding(
+                        padding: const EdgeInsets.only(bottom: 12),
+                        child: _AppCard(app: a),
+                      ))
+                  .toList(),
+            );
+          },
+        ),
       ),
     );
   }
@@ -47,7 +72,7 @@ class MyApplicationsView extends GetView<JobsController> {
 
 class _AppCard extends StatelessWidget {
   const _AppCard({required this.app});
-  final JobApplication app;
+  final JobApplicationModel app;
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -85,7 +110,10 @@ class _AppCard extends StatelessWidget {
                             fontWeight: FontWeight.w800,
                             color: Color(0xFF0F172A))),
                     const SizedBox(height: 2),
-                    Text('${app.company} · ${app.applied}',
+                    Text(
+                        [app.company, app.appliedLabel]
+                            .where((s) => s.isNotEmpty)
+                            .join(' · '),
                         style: const TextStyle(
                             fontSize: 12.5, color: Color(0xFF94A3B8))),
                   ],
@@ -101,21 +129,10 @@ class _AppCard extends StatelessWidget {
             children: [
               _StatusPill(status: app.status),
               const Spacer(),
-              Row(
-                children: const [
-                  Text('View',
-                      style: TextStyle(
-                          fontSize: 13.5,
-                          fontWeight: FontWeight.w800,
-                          color: _orange)),
-                  SizedBox(width: 4),
-                  Text('→',
-                      style: TextStyle(
-                          fontSize: 13.5,
-                          fontWeight: FontWeight.w800,
-                          color: _orange)),
-                ],
-              ),
+              if (app.expectedSalary.isNotEmpty)
+                Text('Expected ৳${app.expectedSalary}',
+                    style: const TextStyle(
+                        fontSize: 12.5, color: Color(0xFF94A3B8))),
             ],
           ),
         ],
@@ -126,31 +143,28 @@ class _AppCard extends StatelessWidget {
 
 class _StatusPill extends StatelessWidget {
   const _StatusPill({required this.status});
-  final AppStatus status;
+  final String status;
   @override
   Widget build(BuildContext context) {
+    final s = status.toLowerCase();
     late Color bg, dot, fg;
     late String label;
-    switch (status) {
-      case AppStatus.shortlisted:
-        bg = const Color(0xFFDCFCE7);
-        dot = const Color(0xFF16A34A);
-        fg = const Color(0xFF15803D);
-        label = 'Shortlisted';
-        break;
-      case AppStatus.underReview:
-        bg = const Color(0xFFE6E7FB);
-        dot = const Color(0xFF6366F1);
-        fg = const Color(0xFF4F46E5);
-        label = 'Under review';
-        break;
-      case AppStatus.notSelected:
-        bg = const Color(0xFFEDF1EE);
-        dot = const Color(0xFF94A3B8);
-        fg = const Color(0xFF475569);
-        label = 'Not selected';
-        break;
+    if (s == 'shortlisted' || s == 'accepted' || s == 'hired') {
+      bg = const Color(0xFFDCFCE7);
+      dot = const Color(0xFF16A34A);
+      fg = const Color(0xFF15803D);
+    } else if (s == 'rejected' || s == 'not_selected') {
+      bg = const Color(0xFFFEE2E2);
+      dot = const Color(0xFFDC2626);
+      fg = const Color(0xFFDC2626);
+    } else {
+      bg = const Color(0xFFE6E7FB);
+      dot = const Color(0xFF6366F1);
+      fg = const Color(0xFF4F46E5);
     }
+    label = status.isEmpty
+        ? 'Pending'
+        : status[0].toUpperCase() + status.substring(1).replaceAll('_', ' ');
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
       decoration:
