@@ -1,18 +1,22 @@
 import 'package:flutter/material.dart';
 
 /// Lightweight, dependency-free shimmer used for loading skeletons across the
-/// app. Wrap a tree of [SnBone]s in [SnShimmer] to animate a light band over
-/// the grey placeholder shapes.
+/// app. Wrap a tree of [SnBone]s in [SnShimmer]; a light band sweeps across the
+/// grey placeholder shapes continuously.
+///
+/// Important: skeleton card backgrounds are kept transparent so that `srcATop`
+/// only tints the opaque [SnBone]s — this keeps the individual shapes visible
+/// (a solid card fill would flatten everything into one grey block).
 ///
 /// Usage:
-///   const SnListSkeleton()                       // generic list placeholder
-///   SnShimmer(child: Column(children: [ SnBone(...) ]))   // custom skeleton
+///   const SnListSkeleton()                              // generic list
+///   SnShimmer(child: Column(children: [ SnBone(...) ])) // custom skeleton
 class SnShimmer extends StatefulWidget {
   const SnShimmer({
     super.key,
     required this.child,
-    this.baseColor = const Color(0xFFE9EDF2),
-    this.highlightColor = const Color(0xFFF7F9FB),
+    this.baseColor = const Color(0xFFD9DFE6),
+    this.highlightColor = const Color(0xFFF3F6F9),
   });
 
   final Widget child;
@@ -32,7 +36,7 @@ class _SnShimmerState extends State<SnShimmer>
     super.initState();
     _controller = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 1250),
+      duration: const Duration(milliseconds: 1100),
     )..repeat();
   }
 
@@ -47,23 +51,21 @@ class _SnShimmerState extends State<SnShimmer>
     return AnimatedBuilder(
       animation: _controller,
       builder: (context, child) {
-        final t = _controller.value;
+        // Sweep the highlight band continuously from left to right.
+        final slide = (_controller.value * 2.0) - 1.0; // -1 → 1
         return ShaderMask(
           blendMode: BlendMode.srcATop,
           shaderCallback: (bounds) {
-            final dx = bounds.width;
-            // Slide the highlight band from left to right (-1 → 2).
-            final slide = (t * 3) - 1;
             return LinearGradient(
-              begin: Alignment.centerLeft,
-              end: Alignment.centerRight,
+              begin: Alignment(slide - 1.0, -0.25),
+              end: Alignment(slide + 1.0, 0.25),
               colors: [
                 widget.baseColor,
                 widget.highlightColor,
                 widget.baseColor,
               ],
-              stops: const [0.35, 0.5, 0.65],
-              transform: _SlideGradient(slide * dx),
+              stops: const [0.25, 0.5, 0.75],
+              tileMode: TileMode.clamp,
             ).createShader(bounds);
           },
           child: child,
@@ -74,14 +76,6 @@ class _SnShimmerState extends State<SnShimmer>
   }
 }
 
-class _SlideGradient extends GradientTransform {
-  const _SlideGradient(this.dx);
-  final double dx;
-  @override
-  Matrix4? transform(Rect bounds, {TextDirection? textDirection}) =>
-      Matrix4.translationValues(dx, 0, 0);
-}
-
 /// A single grey placeholder shape. Tinted/animated by an ancestor [SnShimmer].
 class SnBone extends StatelessWidget {
   const SnBone({
@@ -90,7 +84,7 @@ class SnBone extends StatelessWidget {
     this.height = 14,
     this.radius = 8,
     this.shape = BoxShape.rectangle,
-    this.color = const Color(0xFFE9EDF2),
+    this.color = const Color(0xFFD9DFE6),
   });
 
   final double? width;
@@ -115,6 +109,7 @@ class SnBone extends StatelessWidget {
 }
 
 /// A common "card row" skeleton: leading square, two text lines, trailing pill.
+/// Transparent fill (only the bones are opaque) so the shimmer stays visible.
 class SnCardRowSkeleton extends StatelessWidget {
   const SnCardRowSkeleton({super.key, this.showTrailing = true});
   final bool showTrailing;
@@ -124,9 +119,9 @@ class SnCardRowSkeleton extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Colors.transparent,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFFEDEFF2)),
+        border: Border.all(color: const Color(0xFFE8ECF1)),
       ),
       child: Row(
         children: [
@@ -136,8 +131,8 @@ class SnCardRowSkeleton extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: const [
-                SnBone(width: 160, height: 13),
-                SizedBox(height: 8),
+                SnBone(width: 170, height: 13),
+                SizedBox(height: 9),
                 SnBone(width: 110, height: 11),
               ],
             ),
@@ -210,9 +205,9 @@ class SnGridSkeleton extends StatelessWidget {
         ),
         itemBuilder: (_, _) => Container(
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: Colors.transparent,
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: const Color(0xFFEDEFF2)),
+            border: Border.all(color: const Color(0xFFE8ECF1)),
           ),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
