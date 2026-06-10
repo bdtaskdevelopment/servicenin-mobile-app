@@ -125,6 +125,22 @@ class NagarikGrievance {
   double get lng => _dbl(raw['lng']);
   String get photoUrl => _str(raw['photo_url']);
   String get priority => _str(raw['priority']);
+
+  /// All attached photo URLs from `media[]`, falling back to `photo_url`.
+  List<String> get mediaUrls {
+    final out = <String>[];
+    final media = raw['media'];
+    if (media is List) {
+      for (final m in media) {
+        if (m is Map) {
+          final url = _str(m['url']);
+          if (url.isNotEmpty) out.add(url);
+        }
+      }
+    }
+    if (out.isEmpty && photoUrl.isNotEmpty) out.add(photoUrl);
+    return out;
+  }
   String get status => _str(raw['status']);
   int get upvoteCount => _int(raw['upvote_count']);
   double get ratingAverage => _dbl(raw['rating_average']);

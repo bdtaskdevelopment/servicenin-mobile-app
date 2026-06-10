@@ -102,20 +102,12 @@ class ReportStatusView extends GetView<NagarikController> {
                         ],
                       ),
                       const SizedBox(height: 14),
-                      // Photo
-                      if (g.photoUrl.isNotEmpty &&
-                          g.photoUrl.startsWith('http'))
-                        ClipRRect(
-                          borderRadius: BorderRadius.circular(14),
-                          child: Image.network(
-                            g.photoUrl,
-                            height: 160,
-                            width: double.infinity,
-                            fit: BoxFit.cover,
-                            errorBuilder: (_, _, _) =>
-                                const _PhotoPlaceholder(),
-                          ),
-                        ),
+                      // Photos
+                      if (g.mediaUrls.where((u) => u.startsWith('http')).isNotEmpty)
+                        _PhotoGallery(
+                            urls: g.mediaUrls
+                                .where((u) => u.startsWith('http'))
+                                .toList()),
                       if (g.description.isNotEmpty) ...[
                         const SizedBox(height: 16),
                         Text(g.description,
@@ -175,11 +167,53 @@ class ReportStatusView extends GetView<NagarikController> {
   }
 }
 
+class _PhotoGallery extends StatelessWidget {
+  const _PhotoGallery({required this.urls});
+  final List<String> urls;
+
+  @override
+  Widget build(BuildContext context) {
+    if (urls.length == 1) {
+      return ClipRRect(
+        borderRadius: BorderRadius.circular(14),
+        child: Image.network(
+          urls.first,
+          height: 180,
+          width: double.infinity,
+          fit: BoxFit.cover,
+          errorBuilder: (_, _, _) => const _PhotoPlaceholder(),
+        ),
+      );
+    }
+    return SizedBox(
+      height: 130,
+      child: ListView.separated(
+        scrollDirection: Axis.horizontal,
+        itemCount: urls.length,
+        separatorBuilder: (_, _) => const SizedBox(width: 10),
+        itemBuilder: (_, i) => ClipRRect(
+          borderRadius: BorderRadius.circular(14),
+          child: Image.network(
+            urls[i],
+            height: 130,
+            width: 150,
+            fit: BoxFit.cover,
+            errorBuilder: (_, _, _) => const SizedBox(
+              width: 150,
+              child: _PhotoPlaceholder(),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 class _PhotoPlaceholder extends StatelessWidget {
   const _PhotoPlaceholder();
   @override
   Widget build(BuildContext context) => Container(
-        height: 160,
+        height: 130,
         decoration: BoxDecoration(
           color: const Color(0xFFE8EAED),
           borderRadius: BorderRadius.circular(14),

@@ -1,8 +1,10 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../core/helpers/snack_helper.dart';
@@ -80,9 +82,42 @@ class NagarikController extends GetxController {
   int priorityIndex = 1;
   bool submittingReport = false;
 
+  // Photo evidence (max 3).
+  static const int maxReportImages = 3;
+  final List<File> reportImages = [];
+  final ImagePicker _picker = ImagePicker();
+
   void setCategoryKey(String key) {
     selectedCategoryKey = key;
     update();
+  }
+
+  Future<void> pickReportImages() async {
+    if (reportImages.length >= maxReportImages) {
+      SnackHelper.error('সর্বোচ্চ $maxReportImages টি ছবি যোগ করা যাবে');
+      return;
+    }
+    try {
+      final picked = await _picker.pickMultiImage(imageQuality: 70);
+      if (picked.isEmpty) return;
+      final remaining = maxReportImages - reportImages.length;
+      for (final x in picked.take(remaining)) {
+        reportImages.add(File(x.path));
+      }
+      if (picked.length > remaining) {
+        SnackHelper.error('সর্বোচ্চ $maxReportImages টি ছবি যোগ করা যাবে');
+      }
+      update();
+    } catch (_) {
+      SnackHelper.error('ছবি নির্বাচন করা যায়নি');
+    }
+  }
+
+  void removeReportImage(int i) {
+    if (i >= 0 && i < reportImages.length) {
+      reportImages.removeAt(i);
+      update();
+    }
   }
 
   void setPriority(int i) {
@@ -214,6 +249,7 @@ class NagarikController extends GetxController {
     reportDescription.clear();
     reportAddress.clear();
     reportWard.clear();
+    reportImages.clear();
     update();
     Get.toNamed(Routes.NAGARIK_REPORT_ISSUE);
   }
@@ -225,6 +261,7 @@ class NagarikController extends GetxController {
     reportDescription.clear();
     reportAddress.clear();
     reportWard.clear();
+    reportImages.clear();
     update();
     Get.toNamed(Routes.NAGARIK_REPORT_ISSUE);
   }
@@ -257,9 +294,10 @@ class NagarikController extends GetxController {
           'ward_no': reportWard.text.trim(),
         'priority': priorities[priorityIndex]['value'],
       };
-      final filed = await _repo.fileGrievance(payload);
+      final filed = await _repo.fileGrievance(payload, images: reportImages);
       selectedGrievance = filed;
       grievances.insert(0, filed);
+      reportImages.clear();
       update();
       Get.offNamed(Routes.NAGARIK_STATUS);
     } catch (e) {

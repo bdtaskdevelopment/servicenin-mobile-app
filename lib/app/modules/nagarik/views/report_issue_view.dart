@@ -124,6 +124,21 @@ class ReportIssueView extends GetView<NagarikController> {
                         hint: 'Ward no (optional), e.g. 14',
                         keyboard: TextInputType.number),
                     const SizedBox(height: 18),
+                    Row(
+                      children: [
+                        const _Label('PHOTO EVIDENCE'),
+                        const SizedBox(width: 8),
+                        Text(
+                            '(${con.reportImages.length}/${NagarikController.maxReportImages})',
+                            style: const TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w700,
+                                color: Color(0xFFB0B6C0))),
+                      ],
+                    ),
+                    const SizedBox(height: 10),
+                    _PhotoEvidence(con: con),
+                    const SizedBox(height: 18),
                     const _Label('PRIORITY'),
                     const SizedBox(height: 10),
                     Row(
@@ -195,6 +210,90 @@ class ReportIssueView extends GetView<NagarikController> {
             ],
           ),
         ),
+      ),
+    );
+  }
+}
+
+class _PhotoEvidence extends StatelessWidget {
+  const _PhotoEvidence({required this.con});
+  final NagarikController con;
+
+  @override
+  Widget build(BuildContext context) {
+    final images = con.reportImages;
+    final canAdd = images.length < NagarikController.maxReportImages;
+    return SizedBox(
+      height: 92,
+      child: ListView.separated(
+        scrollDirection: Axis.horizontal,
+        itemCount: images.length + (canAdd ? 1 : 0),
+        separatorBuilder: (_, _) => const SizedBox(width: 12),
+        itemBuilder: (_, i) {
+          if (i == images.length) {
+            // Add tile
+            return GestureDetector(
+              onTap: con.pickReportImages,
+              child: Container(
+                width: 92,
+                height: 92,
+                decoration: BoxDecoration(
+                  color: AppColors.white,
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(
+                      color: const Color(0xFFCBD5E1),
+                      width: 1.2,
+                      strokeAlign: BorderSide.strokeAlignInside),
+                ),
+                child: const Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.add_a_photo_outlined,
+                        color: _orange, size: 24),
+                    SizedBox(height: 6),
+                    Text('Add photo',
+                        style: TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w700,
+                            color: Color(0xFF334155))),
+                  ],
+                ),
+              ),
+            );
+          }
+          return Stack(
+            clipBehavior: Clip.none,
+            children: [
+              ClipRRect(
+                borderRadius: BorderRadius.circular(14),
+                child: Image.file(
+                  images[i],
+                  width: 92,
+                  height: 92,
+                  fit: BoxFit.cover,
+                ),
+              ),
+              Positioned(
+                right: -6,
+                top: -6,
+                child: GestureDetector(
+                  onTap: () => con.removeReportImage(i),
+                  child: Container(
+                    width: 24,
+                    height: 24,
+                    decoration: BoxDecoration(
+                      color: Colors.black.withValues(alpha: 0.6),
+                      shape: BoxShape.circle,
+                      border: Border.all(color: Colors.white, width: 1.5),
+                    ),
+                    child: const Icon(Icons.close_rounded,
+                        size: 14, color: Colors.white),
+                  ),
+                ),
+              ),
+            ],
+          );
+        },
       ),
     );
   }

@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import '../../core/values/app_url.dart';
 import '../models/response/nagarik_response.dart';
 import '../providers/nagarik.provider.dart';
@@ -27,8 +29,12 @@ class NagarikRepository {
   }
 
   // ── Grievances ────────────────────────────────────────────────────
-  Future<NagarikGrievance> fileGrievance(Map<String, dynamic> payload) async {
-    final res = await provider.postData(ApiURL.nagarikGrievances, payload);
+  Future<NagarikGrievance> fileGrievance(
+    Map<String, dynamic> payload, {
+    List<File> images = const [],
+  }) async {
+    final res = await provider.postGrievanceMultipart(
+        ApiURL.nagarikGrievances, payload, images);
     return NagarikGrievance.fromResponse(_payload(res));
   }
 
