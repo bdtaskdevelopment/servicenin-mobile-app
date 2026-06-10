@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 
 import '../../../core/values/app_colors.dart';
 import '../../../data/models/response/donor_response.dart';
+import '../../../global_widget/sn_shimmer.dart';
 import '../controllers/donation_flow_controller.dart';
 
 const _red = Color(0xFFE11D48);
@@ -78,10 +79,7 @@ class LeaderboardView extends GetView<DonationFlowController> {
               ),
               if (con.loadingLeaderboard && list.isEmpty)
                 const Expanded(
-                  child: Center(
-                    child: CircularProgressIndicator(
-                        strokeWidth: 2.6, color: _red),
-                  ),
+                  child: SnListSkeleton(),
                 )
               else if (list.isEmpty)
                 const Expanded(

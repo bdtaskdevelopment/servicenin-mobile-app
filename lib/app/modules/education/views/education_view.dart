@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../../core/values/app_colors.dart';
+import '../../../data/models/response/education_response.dart';
+import '../../../global_widget/sn_shimmer.dart';
 import '../controllers/education_controller.dart';
 
 const _purple = Color(0xFF7C3AED);
@@ -13,7 +15,6 @@ class EducationView extends GetView<EducationController> {
 
   @override
   Widget build(BuildContext context) {
-    final con = controller;
     return Scaffold(
       backgroundColor: const Color(0xFFF7F8FA),
       body: SafeArea(
@@ -45,8 +46,11 @@ class EducationView extends GetView<EducationController> {
                     ],
                   ),
                   const Spacer(),
-                  const Icon(Icons.search_rounded,
-                      color: Color(0xFF1A1A1A), size: 22),
+                  GestureDetector(
+                    onTap: controller.openMyInterests,
+                    child: const Icon(Icons.receipt_long_outlined,
+                        color: Color(0xFF1A1A1A), size: 22),
+                  ),
                 ],
               ),
             ),
@@ -73,7 +77,7 @@ class EducationView extends GetView<EducationController> {
                               color:
                                   sel ? _purple : const Color(0xFFE2E8F0)),
                         ),
-                        child: Text(con.categories[i],
+                        child: Text(con.categories[i].label,
                             style: TextStyle(
                                 fontSize: 13,
                                 fontWeight: FontWeight.w700,
@@ -88,66 +92,92 @@ class EducationView extends GetView<EducationController> {
             ),
             const SizedBox(height: 12),
             Expanded(
-              child: ListView(
-                padding: const EdgeInsets.fromLTRB(16, 4, 16, 24),
-                children: [
-                  // Banner
-                  Container(
-                    padding: const EdgeInsets.all(18),
-                    decoration: BoxDecoration(
-                      gradient: const LinearGradient(
-                          colors: [_darkPurple, _purple],
-                          begin: Alignment.centerLeft,
-                          end: Alignment.centerRight),
-                      borderRadius: BorderRadius.circular(18),
-                    ),
-                    child: Stack(
+              child: GetBuilder<EducationController>(
+                builder: (con) {
+                  final list = con.filteredCenters;
+                  return RefreshIndicator(
+                    color: _purple,
+                    onRefresh: con.fetchCentersNear,
+                    child: ListView(
+                      padding: const EdgeInsets.fromLTRB(16, 4, 16, 24),
                       children: [
-                        Positioned(
-                          right: -4,
-                          top: -8,
-                          child: Icon(Icons.menu_book_rounded,
-                              size: 84,
-                              color: Colors.white.withValues(alpha: 0.13)),
+                        // Banner
+                        Container(
+                          padding: const EdgeInsets.all(18),
+                          decoration: BoxDecoration(
+                            gradient: const LinearGradient(
+                                colors: [_darkPurple, _purple],
+                                begin: Alignment.centerLeft,
+                                end: Alignment.centerRight),
+                            borderRadius: BorderRadius.circular(18),
+                          ),
+                          child: Stack(
+                            children: [
+                              Positioned(
+                                right: -4,
+                                top: -8,
+                                child: Icon(Icons.menu_book_rounded,
+                                    size: 84,
+                                    color: Colors.white
+                                        .withValues(alpha: 0.13)),
+                              ),
+                              Column(
+                                crossAxisAlignment:
+                                    CrossAxisAlignment.start,
+                                children: [
+                                  const Text('সেরা শিক্ষক, সেরা ভবিষ্যৎ',
+                                      style: TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 19,
+                                          fontWeight: FontWeight.w800)),
+                                  const SizedBox(height: 8),
+                                  Text(
+                                      'Verified coaching centers, courses & home tutors near you',
+                                      style: TextStyle(
+                                          color: Colors.white
+                                              .withValues(alpha: 0.9),
+                                          fontSize: 12.5)),
+                                ],
+                              ),
+                            ],
+                          ),
                         ),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Text('সেরা শিক্ষক, সেরা ভবিষ্যৎ',
-                                style: TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 19,
-                                    fontWeight: FontWeight.w800)),
-                            const SizedBox(height: 8),
-                            Text(
-                                'Verified coaching centers, courses & home tutors across Dhaka',
-                                style: TextStyle(
-                                    color:
-                                        Colors.white.withValues(alpha: 0.9),
-                                    fontSize: 12.5)),
-                          ],
-                        ),
+                        const SizedBox(height: 22),
+                        const Text('Centers near you',
+                            style: TextStyle(
+                                fontSize: 17,
+                                fontWeight: FontWeight.w800,
+                                color: Color(0xFF0F172A))),
+                        const SizedBox(height: 2),
+                        Text('${list.length} verified',
+                            style: const TextStyle(
+                                fontSize: 12.5, color: _purple)),
+                        const SizedBox(height: 14),
+                        if (con.loadingCenters && con.centers.isEmpty)
+                          const SnListSkeleton(
+                              padding: EdgeInsets.zero, count: 3)
+                        else if (list.isEmpty)
+                          const Padding(
+                            padding: EdgeInsets.symmetric(vertical: 40),
+                            child: Center(
+                              child: Text('No centers found.',
+                                  style: TextStyle(
+                                      fontSize: 13,
+                                      color: Color(0xFF94A3B8))),
+                            ),
+                          )
+                        else
+                          ...list.map((c) => Padding(
+                                padding: const EdgeInsets.only(bottom: 12),
+                                child: GestureDetector(
+                                  onTap: () => con.openCenter(c),
+                                  child: _CenterCard(center: c),
+                                ),
+                              )),
                       ],
                     ),
-                  ),
-                  const SizedBox(height: 22),
-                  const Text('Centers near you',
-                      style: TextStyle(
-                          fontSize: 17,
-                          fontWeight: FontWeight.w800,
-                          color: Color(0xFF0F172A))),
-                  const SizedBox(height: 2),
-                  const Text('3 verified',
-                      style: TextStyle(fontSize: 12.5, color: _purple)),
-                  const SizedBox(height: 14),
-                  ...con.centers.map((c) => Padding(
-                        padding: const EdgeInsets.only(bottom: 12),
-                        child: GestureDetector(
-                          onTap: () => con.openCenter(c),
-                          child: _CenterCard(center: c),
-                        ),
-                      )),
-                ],
+                  );
+                },
               ),
             ),
           ],
@@ -193,57 +223,76 @@ class _CenterCard extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(center.name,
-                        style: const TextStyle(
-                            fontSize: 15.5,
-                            fontWeight: FontWeight.w800,
-                            color: Color(0xFF0F172A))),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(center.name,
+                              style: const TextStyle(
+                                  fontSize: 15.5,
+                                  fontWeight: FontWeight.w800,
+                                  color: Color(0xFF0F172A))),
+                        ),
+                        if (center.featured)
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 8, vertical: 3),
+                            decoration: BoxDecoration(
+                                color: const Color(0xFFFEF3C7),
+                                borderRadius: BorderRadius.circular(8)),
+                            child: const Text('Featured',
+                                style: TextStyle(
+                                    fontSize: 10.5,
+                                    fontWeight: FontWeight.w800,
+                                    color: Color(0xFFB45309))),
+                          ),
+                      ],
+                    ),
                     const SizedBox(height: 3),
                     Row(
                       children: [
-                        const Icon(Icons.star_rounded,
-                            size: 15, color: Color(0xFFF59E0B)),
+                        const Icon(Icons.location_on_outlined,
+                            size: 14, color: Color(0xFF94A3B8)),
                         const SizedBox(width: 3),
-                        Text('${center.rating} ',
-                            style: const TextStyle(
-                                fontSize: 12.5,
-                                fontWeight: FontWeight.w700,
-                                color: Color(0xFF0F172A))),
-                        Text('( ${center.reviews} ) · ${center.area}',
-                            style: const TextStyle(
-                                fontSize: 12.5, color: Color(0xFF94A3B8))),
+                        Expanded(
+                          child: Text(
+                              [center.typeLabel, center.address]
+                                  .where((s) => s.isNotEmpty)
+                                  .join(' · '),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(
+                                  fontSize: 12.5,
+                                  color: Color(0xFF94A3B8))),
+                        ),
                       ],
                     ),
                   ],
                 ),
               ),
-              const SizedBox(width: 8),
-              Text(center.distance,
-                  style: const TextStyle(
-                      fontSize: 12.5,
-                      fontWeight: FontWeight.w800,
-                      color: Color(0xFF16A34A))),
             ],
           ),
-          const SizedBox(height: 12),
-          Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            children: center.tags
-                .map((t) => Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 10, vertical: 5),
-                      decoration: BoxDecoration(
-                          color: const Color(0xFFF1F5F9),
-                          borderRadius: BorderRadius.circular(8)),
-                      child: Text(t,
-                          style: const TextStyle(
-                              fontSize: 11.5,
-                              fontWeight: FontWeight.w600,
-                              color: Color(0xFF475569))),
-                    ))
-                .toList(),
-          ),
+          if (center.subjectTags.isNotEmpty) ...[
+            const SizedBox(height: 12),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: center.subjectTags
+                  .take(5)
+                  .map((t) => Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 10, vertical: 5),
+                        decoration: BoxDecoration(
+                            color: const Color(0xFFF1F5F9),
+                            borderRadius: BorderRadius.circular(8)),
+                        child: Text(t,
+                            style: const TextStyle(
+                                fontSize: 11.5,
+                                fontWeight: FontWeight.w600,
+                                color: Color(0xFF475569))),
+                      ))
+                  .toList(),
+            ),
+          ],
         ],
       ),
     );

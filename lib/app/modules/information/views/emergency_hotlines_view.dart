@@ -2,16 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../../core/values/app_colors.dart';
+import '../../../data/models/response/info_response.dart';
+import '../../../global_widget/sn_shimmer.dart';
 import '../controllers/information_controller.dart';
-
-const _tile = Color(0xFFEEF0FB);
 
 class EmergencyHotlinesView extends GetView<InformationController> {
   const EmergencyHotlinesView({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final con = controller;
     return Scaffold(
       backgroundColor: const Color(0xFFF7F8FA),
       body: SafeArea(
@@ -46,48 +45,91 @@ class EmergencyHotlinesView extends GetView<InformationController> {
               ),
             ),
             Expanded(
-              child: ListView(
-                padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
-                children: [
-                  // 999 card
-                  Container(
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      gradient: const LinearGradient(
-                          colors: [Color(0xFFE8333A), Color(0xFFC2182B)],
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight),
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                    child: Row(
+              child: GetBuilder<InformationController>(
+                builder: (con) {
+                  final hero = con.nationalEmergency;
+                  final rows = con.emergencyCards;
+                  if (con.loadingEmergency && rows.isEmpty && hero == null) {
+                    return const SnListSkeleton();
+                  }
+                  return RefreshIndicator(
+                    color: const Color(0xFFE8333A),
+                    onRefresh: con.fetchEmergency,
+                    child: ListView(
+                      padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
                       children: [
-                        const Icon(Icons.call_rounded,
-                            color: Colors.white, size: 26),
-                        const SizedBox(width: 14),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Text('999',
-                                style: TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 24,
-                                    fontWeight: FontWeight.w800,
-                                    height: 1.1)),
-                            Text('National Emergency · Police · Fire · Ambulance',
-                                style: TextStyle(
-                                    color: Colors.white.withValues(alpha: 0.9),
-                                    fontSize: 11.5)),
-                          ],
+                        // National emergency hero
+                        GestureDetector(
+                          onTap: () => con.callHotline(
+                              hero?.hotline.isNotEmpty == true
+                                  ? hero!.hotline
+                                  : '999'),
+                          child: Container(
+                            padding: const EdgeInsets.all(16),
+                            decoration: BoxDecoration(
+                              gradient: const LinearGradient(
+                                  colors: [
+                                    Color(0xFFE8333A),
+                                    Color(0xFFC2182B)
+                                  ],
+                                  begin: Alignment.topLeft,
+                                  end: Alignment.bottomRight),
+                              borderRadius: BorderRadius.circular(16),
+                            ),
+                            child: Row(
+                              children: [
+                                const Icon(Icons.call_rounded,
+                                    color: Colors.white, size: 26),
+                                const SizedBox(width: 14),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                          hero?.hotline.isNotEmpty == true
+                                              ? hero!.hotline
+                                              : '999',
+                                          style: const TextStyle(
+                                              color: Colors.white,
+                                              fontSize: 24,
+                                              fontWeight: FontWeight.w800,
+                                              height: 1.1)),
+                                      Text(
+                                          hero?.title.isNotEmpty == true
+                                              ? hero!.title
+                                              : 'National Emergency · Police · Fire · Ambulance',
+                                          style: TextStyle(
+                                              color: Colors.white
+                                                  .withValues(alpha: 0.9),
+                                              fontSize: 11.5)),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
                         ),
+                        const SizedBox(height: 14),
+                        if (rows.isEmpty && !con.loadingEmergency)
+                          const Padding(
+                            padding: EdgeInsets.symmetric(vertical: 30),
+                            child: Center(
+                              child: Text('No hotlines available.',
+                                  style: TextStyle(
+                                      fontSize: 13,
+                                      color: Color(0xFF94A3B8))),
+                            ),
+                          )
+                        else
+                          ...rows.map((e) => Padding(
+                                padding: const EdgeInsets.only(bottom: 12),
+                                child: _HotlineRow(entry: e, con: con),
+                              )),
                       ],
                     ),
-                  ),
-                  const SizedBox(height: 14),
-                  ...con.allHotlines.map((h) => Padding(
-                        padding: const EdgeInsets.only(bottom: 12),
-                        child: _HotlineRow(hotline: h),
-                      )),
-                ],
+                  );
+                },
               ),
             ),
           ],
@@ -98,54 +140,72 @@ class EmergencyHotlinesView extends GetView<InformationController> {
 }
 
 class _HotlineRow extends StatelessWidget {
-  const _HotlineRow({required this.hotline});
-  final Hotline hotline;
+  const _HotlineRow({required this.entry, required this.con});
+  final InfoEntry entry;
+  final InformationController con;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-          color: AppColors.white,
-          borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: const Color(0xFFEDEFF2))),
-      child: Row(
-        children: [
-          Container(
-            width: 44,
-            height: 44,
-            decoration: BoxDecoration(
-                color: _tile, borderRadius: BorderRadius.circular(12)),
-            child: Icon(hotline.icon, color: hotline.color, size: 21),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(hotline.label,
-                    style: const TextStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.w700,
-                        color: Color(0xFF0F172A))),
-                const SizedBox(height: 2),
-                Text(hotline.number,
-                    style: const TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w600,
-                        color: Color(0xFFE07A1F))),
-              ],
+    return GestureDetector(
+      onTap: () => con.callHotline(entry.callNumber),
+      child: Container(
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+            color: AppColors.white,
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(color: const Color(0xFFEDEFF2))),
+        child: Row(
+          children: [
+            Container(
+              width: 44,
+              height: 44,
+              decoration: BoxDecoration(
+                  color: const Color(0xFFFDECEC),
+                  borderRadius: BorderRadius.circular(12)),
+              child: const Icon(Icons.emergency_share_rounded,
+                  color: Color(0xFFE8333A), size: 21),
             ),
-          ),
-          Container(
-            width: 40,
-            height: 40,
-            decoration: const BoxDecoration(
-                color: Color(0xFFD9F7E6), shape: BoxShape.circle),
-            child: const Icon(Icons.call_rounded,
-                color: Color(0xFF16A34A), size: 20),
-          ),
-        ],
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(entry.title,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w700,
+                          color: Color(0xFF0F172A))),
+                  if (entry.titleBn.isNotEmpty) ...[
+                    const SizedBox(height: 2),
+                    Text(entry.titleBn,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                            fontSize: 12, color: Color(0xFF94A3B8))),
+                  ],
+                  if (entry.callNumber.isNotEmpty) ...[
+                    const SizedBox(height: 2),
+                    Text(entry.callNumber,
+                        style: const TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600,
+                            color: Color(0xFFE07A1F))),
+                  ],
+                ],
+              ),
+            ),
+            Container(
+              width: 40,
+              height: 40,
+              decoration: const BoxDecoration(
+                  color: Color(0xFFD9F7E6), shape: BoxShape.circle),
+              child: const Icon(Icons.call_rounded,
+                  color: Color(0xFF16A34A), size: 20),
+            ),
+          ],
+        ),
       ),
     );
   }

@@ -56,10 +56,10 @@ class EnquiryDoneView extends GetView<EducationController> {
                     child: Column(
                       children: [
                         _row(Icons.menu_book_rounded,
-                            course?.title ?? 'HSC Physics (Batch 2026)'),
+                            course?.title ?? 'Your selected course'),
                         const SizedBox(height: 14),
                         _row(Icons.account_balance_outlined,
-                            center?.name ?? 'Mentors Coaching Center'),
+                            center?.name ?? 'Your selected center'),
                         const SizedBox(height: 14),
                         _row(Icons.call_rounded,
                             'Center calls back within 24 hours'),

@@ -3,7 +3,8 @@ import 'package:get/get.dart';
 
 import '../../../core/utils/service_nav.dart';
 import '../../../core/values/app_colors.dart';
-import '../../../data/models/sn_service.dart';
+import '../../../data/models/response/home_response.dart';
+import '../../../global_widget/sn_shimmer.dart';
 import '../controllers/search_controller.dart';
 
 class SearchView extends GetView<SnSearchController> {
@@ -43,7 +44,8 @@ class SearchView extends GetView<SnSearchController> {
                               autofocus: true,
                               decoration: const InputDecoration(
                                 hintText: 'Search services...',
-                                hintStyle: TextStyle(color: Color(0xFF94A3B8)),
+                                hintStyle:
+                                    TextStyle(color: Color(0xFF94A3B8)),
                                 border: InputBorder.none,
                                 isCollapsed: true,
                               ),
@@ -67,35 +69,49 @@ class SearchView extends GetView<SnSearchController> {
                   return ListView(
                     padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
                     children: [
-                      if (con.query.trim().isEmpty) ...[
+                      if (con.query.trim().isEmpty &&
+                          con.trending.isNotEmpty) ...[
                         const _SectionLabel('TRENDING'),
                         const SizedBox(height: 12),
                         Wrap(
                           spacing: 10,
                           runSpacing: 10,
-                          children: SnSearchController.trending
+                          children: con.trending
                               .map((t) => _TrendingChip(
-                                    label: t,
-                                    onTap: () => con.applyChip(t),
+                                    label: t.name,
+                                    onTap: () => con.applyChip(t.name),
                                   ))
                               .toList(),
                         ),
                         const SizedBox(height: 22),
                       ],
-                      const _SectionLabel('ALL SERVICES'),
+                      _SectionLabel(con.query.trim().isEmpty
+                          ? 'ALL SERVICES'
+                          : 'RESULTS'),
                       const SizedBox(height: 12),
-                      ...con.results.map((s) => Padding(
-                            padding: const EdgeInsets.only(bottom: 12),
-                            child: _ServiceRow(service: s),
-                          )),
-                      if (con.results.isEmpty)
-                        const Padding(
-                          padding: EdgeInsets.only(top: 40),
-                          child: Center(
-                            child: Text('কোন সেবা পাওয়া যায়নি',
-                                style: TextStyle(color: Color(0xFF94A3B8))),
+                      if ((con.searching && con.searchResults.isEmpty) ||
+                          (con.query.trim().isEmpty &&
+                              con.loadingServices &&
+                              con.allServices.isEmpty))
+                        const SnListSkeleton(
+                          count: 5,
+                          padding: EdgeInsets.zero,
+                          showTrailing: false,
+                        )
+                      else ...[
+                        ...con.results.map((s) => Padding(
+                              padding: const EdgeInsets.only(bottom: 12),
+                              child: _ServiceRow(service: s),
+                            )),
+                        if (con.results.isEmpty)
+                          const Padding(
+                            padding: EdgeInsets.only(top: 40),
+                            child: Center(
+                              child: Text('কোন সেবা পাওয়া যায়নি',
+                                  style: TextStyle(color: Color(0xFF94A3B8))),
+                            ),
                           ),
-                        ),
+                      ],
                     ],
                   );
                 },
@@ -177,37 +193,45 @@ class _TrendingChip extends StatelessWidget {
 
 class _ServiceRow extends StatelessWidget {
   const _ServiceRow({required this.service});
-  final SnService service;
+  final HomeService service;
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () => ServiceNav.open(service),
+      onTap: () => ServiceNav.openByKey(service.key),
       child: Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-      decoration: BoxDecoration(
-        color: AppColors.white,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: const Color(0xFFEDEFF2)),
-      ),
-      child: Row(
-        children: [
-          Icon(service.icon, color: const Color(0xFF0F172A), size: 24),
-          const SizedBox(width: 14),
-          Expanded(
-            child: Text(
-              service.name,
-              style: const TextStyle(
-                fontSize: 15,
-                fontWeight: FontWeight.w700,
-                color: Color(0xFF0F172A),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        decoration: BoxDecoration(
+          color: AppColors.white,
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(color: const Color(0xFFEDEFF2)),
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 42,
+              height: 42,
+              decoration: BoxDecoration(
+                color: service.color.withValues(alpha: 0.14),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Icon(service.iconData, color: service.color, size: 22),
+            ),
+            const SizedBox(width: 14),
+            Expanded(
+              child: Text(
+                service.name,
+                style: const TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w700,
+                  color: Color(0xFF0F172A),
+                ),
               ),
             ),
-          ),
-          const Icon(Icons.keyboard_arrow_right_rounded,
-              color: Color(0xFFCBD5E1)),
-        ],
-      ),
+            const Icon(Icons.keyboard_arrow_right_rounded,
+                color: Color(0xFFCBD5E1)),
+          ],
+        ),
       ),
     );
   }

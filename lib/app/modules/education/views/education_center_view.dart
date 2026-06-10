@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../../core/values/app_colors.dart';
+import '../../../data/models/response/education_response.dart';
+import '../../../global_widget/sn_shimmer.dart';
 import '../controllers/education_controller.dart';
 
 const _purple = Color(0xFF7C3AED);
@@ -12,132 +14,162 @@ class EducationCenterView extends GetView<EducationController> {
 
   @override
   Widget build(BuildContext context) {
-    final con = controller;
-    final center = con.center;
-    if (center == null) {
-      return const Scaffold(body: SizedBox.shrink());
-    }
     return Scaffold(
       backgroundColor: const Color(0xFFF7F8FA),
       body: SafeArea(
-        child: Column(
-          children: [
-            // Header
-            Padding(
-              padding: const EdgeInsets.fromLTRB(8, 6, 16, 4),
-              child: Row(
-                children: [
-                  IconButton(
-                    splashRadius: 22,
-                    onPressed: () => Get.back(),
-                    icon: const Icon(Icons.arrow_back_ios_new_rounded,
-                        size: 20, color: Color(0xFF1A1A1A)),
-                  ),
-                  const Text('Center',
-                      style: TextStyle(
-                          fontSize: 19,
-                          fontWeight: FontWeight.w800,
-                          color: Color(0xFF0F172A))),
-                  const Spacer(),
-                  const Icon(Icons.share_outlined,
-                      color: Color(0xFF1A1A1A), size: 21),
-                ],
-              ),
-            ),
-            Expanded(
-              child: ListView(
-                padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
-                children: [
-                  // Identity
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+        child: GetBuilder<EducationController>(
+          builder: (con) {
+            final center = con.center;
+            if (center == null) {
+              return const SizedBox.shrink();
+            }
+            return Column(
+              children: [
+                // Header
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(8, 6, 16, 4),
+                  child: Row(
                     children: [
-                      Container(
-                        width: 64,
-                        height: 64,
-                        decoration: BoxDecoration(
-                            color: _tile,
-                            borderRadius: BorderRadius.circular(16)),
-                        child: const Icon(Icons.menu_book_rounded,
-                            color: _purple, size: 32),
+                      IconButton(
+                        splashRadius: 22,
+                        onPressed: () => Get.back(),
+                        icon: const Icon(Icons.arrow_back_ios_new_rounded,
+                            size: 20, color: Color(0xFF1A1A1A)),
                       ),
-                      const SizedBox(width: 14),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(center.name,
-                                style: const TextStyle(
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.w800,
-                                    color: Color(0xFF0F172A))),
-                            const SizedBox(height: 3),
-                            Text('${center.area} · ${center.distance}',
-                                style: const TextStyle(
-                                    fontSize: 12.5, color: Color(0xFF94A3B8))),
-                            const SizedBox(height: 5),
-                            Row(
+                      const Text('Center',
+                          style: TextStyle(
+                              fontSize: 19,
+                              fontWeight: FontWeight.w800,
+                              color: Color(0xFF0F172A))),
+                    ],
+                  ),
+                ),
+                Expanded(
+                  child: ListView(
+                    padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+                    children: [
+                      // Identity
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Container(
+                            width: 64,
+                            height: 64,
+                            decoration: BoxDecoration(
+                                color: _tile,
+                                borderRadius: BorderRadius.circular(16)),
+                            child: const Icon(Icons.menu_book_rounded,
+                                color: _purple, size: 32),
+                          ),
+                          const SizedBox(width: 14),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                const Icon(Icons.star_rounded,
-                                    size: 16, color: Color(0xFF0F172A)),
-                                const SizedBox(width: 3),
-                                Text(center.rating,
+                                Text(center.name,
                                     style: const TextStyle(
-                                        fontSize: 13,
+                                        fontSize: 18,
                                         fontWeight: FontWeight.w800,
                                         color: Color(0xFF0F172A))),
-                                Text(' (${center.reviews} reviews)',
+                                const SizedBox(height: 3),
+                                Text(
+                                    [center.typeLabel, center.address]
+                                        .where((s) => s.isNotEmpty)
+                                        .join(' · '),
                                     style: const TextStyle(
                                         fontSize: 12.5,
                                         color: Color(0xFF94A3B8))),
+                                if (center.targetGrades.isNotEmpty) ...[
+                                  const SizedBox(height: 5),
+                                  Text('Grades: ${center.targetGrades}',
+                                      style: const TextStyle(
+                                          fontSize: 12.5,
+                                          fontWeight: FontWeight.w700,
+                                          color: _purple)),
+                                ],
                               ],
+                            ),
+                          ),
+                        ],
+                      ),
+                      if (center.description.isNotEmpty) ...[
+                        const SizedBox(height: 14),
+                        Text(center.description,
+                            style: const TextStyle(
+                                fontSize: 13,
+                                height: 1.5,
+                                color: Color(0xFF475569))),
+                      ],
+                      if (center.contactPhone.isNotEmpty) ...[
+                        const SizedBox(height: 12),
+                        Row(
+                          children: [
+                            const Icon(Icons.call_outlined,
+                                size: 16, color: Color(0xFF64748B)),
+                            const SizedBox(width: 8),
+                            Text(center.contactPhone,
+                                style: const TextStyle(
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w700,
+                                    color: Color(0xFF0F172A))),
+                          ],
+                        ),
+                      ],
+                      const SizedBox(height: 22),
+                      const Text('Courses & batches',
+                          style: TextStyle(
+                              fontSize: 17,
+                              fontWeight: FontWeight.w800,
+                              color: Color(0xFF0F172A))),
+                      const SizedBox(height: 2),
+                      Text('${con.courses.length} available',
+                          style: const TextStyle(
+                              fontSize: 12.5, color: _purple)),
+                      const SizedBox(height: 14),
+                      if (con.loadingCourses && con.courses.isEmpty)
+                        const SnListSkeleton(
+                            padding: EdgeInsets.zero, count: 3)
+                      else if (con.courses.isEmpty)
+                        const Padding(
+                          padding: EdgeInsets.symmetric(vertical: 24),
+                          child: Text('No courses listed yet.',
+                              style: TextStyle(
+                                  fontSize: 13, color: Color(0xFF94A3B8))),
+                        )
+                      else
+                        ...con.courses.map((c) => Padding(
+                              padding: const EdgeInsets.only(bottom: 12),
+                              child: _CourseCard(course: c, con: con),
+                            )),
+                      const SizedBox(height: 4),
+                      // Note
+                      Container(
+                        padding: const EdgeInsets.all(14),
+                        decoration: BoxDecoration(
+                            color: const Color(0xFFEAF1FB),
+                            borderRadius: BorderRadius.circular(14)),
+                        child: Row(
+                          children: const [
+                            Icon(Icons.verified_user_outlined,
+                                size: 18, color: Color(0xFF2563EB)),
+                            SizedBox(width: 10),
+                            Expanded(
+                              child: Text(
+                                  'Register interest — the center calls you back to confirm seat & schedule. No online payment yet.',
+                                  style: TextStyle(
+                                      fontSize: 12.5,
+                                      height: 1.4,
+                                      color: Color(0xFF2563EB))),
                             ),
                           ],
                         ),
                       ),
                     ],
                   ),
-                  const SizedBox(height: 22),
-                  const Text('Courses & batches',
-                      style: TextStyle(
-                          fontSize: 17,
-                          fontWeight: FontWeight.w800,
-                          color: Color(0xFF0F172A))),
-                  const SizedBox(height: 2),
-                  Text('${center.courses.length} available',
-                      style: const TextStyle(fontSize: 12.5, color: _purple)),
-                  const SizedBox(height: 14),
-                  ...center.courses.map((c) => Padding(
-                        padding: const EdgeInsets.only(bottom: 12),
-                        child: _CourseCard(course: c, con: con),
-                      )),
-                  const SizedBox(height: 4),
-                  // Note
-                  Container(
-                    padding: const EdgeInsets.all(14),
-                    decoration: BoxDecoration(
-                        color: const Color(0xFFEAF1FB),
-                        borderRadius: BorderRadius.circular(14)),
-                    child: Row(
-                      children: const [
-                        Icon(Icons.verified_user_outlined,
-                            size: 18, color: Color(0xFF2563EB)),
-                        SizedBox(width: 10),
-                        Expanded(
-                          child: Text(
-                              'Submit an enquiry — the center calls you back to confirm seat & schedule. No online payment yet.',
-                              style: TextStyle(
-                                  fontSize: 12.5,
-                                  height: 1.4,
-                                  color: Color(0xFF2563EB))),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
+                ),
+              ],
+            );
+          },
         ),
       ),
     );
@@ -171,43 +203,59 @@ class _CourseCard extends StatelessWidget {
                             fontWeight: FontWeight.w800,
                             color: Color(0xFF0F172A))),
                     const SizedBox(height: 3),
-                    Text('${course.teacher} · ${course.duration}',
+                    Text(
+                        [course.instructor, course.durationText]
+                            .where((s) => s.isNotEmpty)
+                            .join(' · '),
                         style: const TextStyle(
                             fontSize: 12.5, color: Color(0xFF94A3B8))),
                   ],
                 ),
               ),
-              const SizedBox(width: 8),
-              Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                decoration: BoxDecoration(
-                    color: _tile, borderRadius: BorderRadius.circular(20)),
-                child: Text(course.online ? 'Online' : 'Offline',
-                    style: const TextStyle(
-                        fontSize: 11,
-                        fontWeight: FontWeight.w700,
-                        color: _purple)),
-              ),
+              if (course.targetClass.isNotEmpty) ...[
+                const SizedBox(width: 8),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 10, vertical: 5),
+                  decoration: BoxDecoration(
+                      color: _tile, borderRadius: BorderRadius.circular(20)),
+                  child: Text(course.targetClass,
+                      style: const TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w700,
+                          color: _purple)),
+                ),
+              ],
             ],
           ),
+          if (course.schedule.isNotEmpty) ...[
+            const SizedBox(height: 10),
+            Row(
+              children: [
+                const Icon(Icons.schedule_rounded,
+                    size: 15, color: Color(0xFF94A3B8)),
+                const SizedBox(width: 6),
+                Expanded(
+                  child: Text(course.schedule,
+                      style: const TextStyle(
+                          fontSize: 12.5,
+                          fontWeight: FontWeight.w600,
+                          color: Color(0xFF475569))),
+                ),
+              ],
+            ),
+          ],
           const Padding(
             padding: EdgeInsets.symmetric(vertical: 12),
             child: _DashedDivider(),
           ),
           Row(
             children: [
-              Text(course.price,
+              Text(course.feeLabel,
                   style: const TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w800,
                       color: Color(0xFF0F172A))),
-              const SizedBox(width: 8),
-              Text('· ${course.seats}',
-                  style: const TextStyle(
-                      fontSize: 12.5,
-                      fontWeight: FontWeight.w700,
-                      color: Color(0xFFE07A1F))),
               const Spacer(),
               SizedBox(
                 height: 40,
@@ -221,7 +269,7 @@ class _CourseCard extends StatelessWidget {
                     shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12)),
                   ),
-                  child: const Text('Enquire',
+                  child: const Text('Enroll',
                       style: TextStyle(
                           fontSize: 14, fontWeight: FontWeight.w800)),
                 ),

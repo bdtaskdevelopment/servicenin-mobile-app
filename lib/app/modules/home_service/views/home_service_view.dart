@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../../core/values/app_colors.dart';
+import '../../../global_widget/sn_shimmer.dart';
 import '../controllers/home_service_controller.dart';
 
 const _teal = Color(0xFF0E9F8E);
@@ -100,12 +101,9 @@ class HomeServiceView extends GetView<HomeServiceController> {
                               color: Color(0xFF0F172A))),
                       const SizedBox(height: 12),
                       if (con.loadingPopular && con.popular.isEmpty)
-                        const Padding(
-                          padding: EdgeInsets.symmetric(vertical: 16),
-                          child: Center(
-                            child: CircularProgressIndicator(
-                                strokeWidth: 2.4, color: _darkTeal),
-                          ),
+                        const SnListSkeleton(
+                          count: 4,
+                          padding: EdgeInsets.zero,
                         )
                       else
                         ...con.popular.map((s) => Padding(

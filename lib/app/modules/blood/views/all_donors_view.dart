@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import '../../../global_widget/sn_shimmer.dart';
 import '../controllers/blood_controller.dart';
 import '../widgets/blood_widgets.dart';
 
@@ -67,10 +68,7 @@ class AllDonorsView extends GetView<BloodController> {
 
   Widget _body(BloodController con) {
     if (con.loadingAllDonors && con.allDonors.isEmpty) {
-      return const Center(
-        child: CircularProgressIndicator(
-            strokeWidth: 2.6, color: Color(0xFFE11D48)),
-      );
+      return const SnListSkeleton(padding: EdgeInsets.fromLTRB(16, 8, 16, 24));
     }
     if (con.allDonors.isEmpty) {
       return ListView(

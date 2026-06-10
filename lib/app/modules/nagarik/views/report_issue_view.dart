@@ -58,12 +58,13 @@ class ReportIssueView extends GetView<NagarikController> {
                       physics: const NeverScrollableScrollPhysics(),
                       mainAxisSpacing: 12,
                       crossAxisSpacing: 12,
-                      childAspectRatio: 1.25,
-                      children: List.generate(con.issueCategories.length, (i) {
-                        final sel = con.categoryIndex == i;
+                      childAspectRatio: 1.15,
+                      children: con.categories.map((c) {
+                        final sel = con.selectedCategoryKey == c.key;
                         return GestureDetector(
-                          onTap: () => con.setCategory(i),
+                          onTap: () => con.setCategoryKey(c.key),
                           child: Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 4),
                             decoration: BoxDecoration(
                               color: sel ? _tile : AppColors.white,
                               borderRadius: BorderRadius.circular(14),
@@ -76,15 +77,18 @@ class ReportIssueView extends GetView<NagarikController> {
                             child: Column(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                Icon(con.issueIcons[i],
+                                Icon(nagarikCategoryIcon(c.icon),
                                     size: 24,
                                     color: sel
                                         ? _orange
                                         : const Color(0xFF334155)),
                                 const SizedBox(height: 8),
-                                Text(con.issueCategories[i],
+                                Text(c.label,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    textAlign: TextAlign.center,
                                     style: TextStyle(
-                                        fontSize: 12.5,
+                                        fontSize: 12,
                                         fontWeight: FontWeight.w700,
                                         color: sel
                                             ? const Color(0xFF0F172A)
@@ -93,137 +97,49 @@ class ReportIssueView extends GetView<NagarikController> {
                             ),
                           ),
                         );
-                      }),
+                      }).toList(),
                     ),
                     const SizedBox(height: 18),
-                    const _Label('PHOTO EVIDENCE'),
+                    const _Label('TITLE'),
                     const SizedBox(height: 10),
-                    DottedBox(
-                      child: Column(
-                        children: [
-                          Container(
-                            width: 56,
-                            height: 56,
-                            decoration: BoxDecoration(
-                                color: _tile,
-                                borderRadius: BorderRadius.circular(16)),
-                            child: const Icon(Icons.photo_camera_outlined,
-                                color: _orange, size: 26),
-                          ),
-                          const SizedBox(height: 10),
-                          const Text('Tap to add photo',
-                              style: TextStyle(
-                                  fontSize: 13.5,
-                                  fontWeight: FontWeight.w700,
-                                  color: Color(0xFF334155))),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 18),
-                    const _Label('LOCATION'),
-                    const SizedBox(height: 10),
-                    Container(
-                      padding: const EdgeInsets.all(14),
-                      decoration: BoxDecoration(
-                          color: AppColors.white,
-                          borderRadius: BorderRadius.circular(14),
-                          border:
-                              Border.all(color: const Color(0xFFEDEFF2))),
-                      child: Row(
-                        children: [
-                          Container(
-                            width: 42,
-                            height: 42,
-                            decoration: BoxDecoration(
-                                color: _tile,
-                                borderRadius: BorderRadius.circular(12)),
-                            child: const Icon(Icons.location_on_outlined,
-                                color: _orange, size: 21),
-                          ),
-                          const SizedBox(width: 12),
-                          const Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text('Road 27, Banani · Ward 19',
-                                    style: TextStyle(
-                                        fontSize: 14,
-                                        fontWeight: FontWeight.w800,
-                                        color: Color(0xFF0F172A))),
-                                SizedBox(height: 2),
-                                Text('GPS pinned · auto-routed to ward officer',
-                                    style: TextStyle(
-                                        fontSize: 11.5,
-                                        color: Color(0xFF94A3B8))),
-                              ],
-                            ),
-                          ),
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 10, vertical: 5),
-                            decoration: BoxDecoration(
-                                color: const Color(0xFFDCFCE7),
-                                borderRadius: BorderRadius.circular(20)),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: const [
-                                Icon(Icons.circle,
-                                    size: 7, color: Color(0xFF16A34A)),
-                                SizedBox(width: 4),
-                                Text('GPS',
-                                    style: TextStyle(
-                                        fontSize: 11,
-                                        fontWeight: FontWeight.w700,
-                                        color: Color(0xFF15803D))),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
+                    _Input(
+                        controller: con.reportTitle,
+                        hint: 'Short summary, e.g. Blocked drain on Road 7'),
                     const SizedBox(height: 18),
                     const _Label('DESCRIBE THE ISSUE'),
                     const SizedBox(height: 10),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 16, vertical: 6),
-                      decoration: BoxDecoration(
-                          color: AppColors.white,
-                          borderRadius: BorderRadius.circular(14),
-                          border:
-                              Border.all(color: const Color(0xFFEDEFF2))),
-                      child: const TextField(
-                        maxLines: 4,
-                        style: TextStyle(
-                            fontSize: 14.5, color: Color(0xFF0F172A)),
-                        decoration: InputDecoration(
-                          isCollapsed: true,
-                          contentPadding: EdgeInsets.symmetric(vertical: 10),
-                          border: InputBorder.none,
-                          hintText:
-                              'What\'s wrong, how long has it been there…',
-                          hintStyle: TextStyle(
-                              fontSize: 14.5, color: Color(0xFFB8C0CC)),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 16),
+                    _Input(
+                        controller: con.reportDescription,
+                        hint: 'What\'s wrong, how long it\'s been there…',
+                        maxLines: 4),
+                    const SizedBox(height: 18),
+                    const _Label('LOCATION'),
+                    const SizedBox(height: 10),
+                    _Input(
+                        controller: con.reportAddress,
+                        hint: 'Address, e.g. Road 7, Dhanmondi'),
+                    const SizedBox(height: 12),
+                    _Input(
+                        controller: con.reportWard,
+                        hint: 'Ward no (optional), e.g. 14',
+                        keyboard: TextInputType.number),
+                    const SizedBox(height: 18),
+                    const _Label('PRIORITY'),
+                    const SizedBox(height: 10),
                     Row(
-                      children: List.generate(3, (i) {
-                        const labels = ['Low', 'Medium', 'Urgent'];
+                      children: List.generate(con.priorities.length, (i) {
                         final sel = con.priorityIndex == i;
                         return Expanded(
                           child: Padding(
-                            padding:
-                                EdgeInsets.only(right: i == 2 ? 0 : 10),
+                            padding: EdgeInsets.only(
+                                right: i == con.priorities.length - 1 ? 0 : 10),
                             child: GestureDetector(
                               onTap: () => con.setPriority(i),
                               child: Container(
                                 height: 48,
                                 alignment: Alignment.center,
                                 decoration: BoxDecoration(
-                                  color:
-                                      sel ? _tile : AppColors.white,
+                                  color: sel ? _tile : AppColors.white,
                                   borderRadius: BorderRadius.circular(12),
                                   border: Border.all(
                                       color: sel
@@ -231,7 +147,7 @@ class ReportIssueView extends GetView<NagarikController> {
                                           : const Color(0xFFE2E8F0),
                                       width: sel ? 1.6 : 1.2),
                                 ),
-                                child: Text(labels[i],
+                                child: Text(con.priorities[i]['label']!,
                                     style: TextStyle(
                                         fontSize: 14,
                                         fontWeight: FontWeight.w700,
@@ -254,7 +170,8 @@ class ReportIssueView extends GetView<NagarikController> {
                   width: double.infinity,
                   height: 54,
                   child: ElevatedButton(
-                    onPressed: con.submitReport,
+                    onPressed:
+                        con.submittingReport ? null : con.submitReport,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: _orange,
                       foregroundColor: Colors.white,
@@ -262,9 +179,16 @@ class ReportIssueView extends GetView<NagarikController> {
                       shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(14)),
                     ),
-                    child: const Text('Submit to DNCC',
-                        style: TextStyle(
-                            fontSize: 16, fontWeight: FontWeight.w800)),
+                    child: con.submittingReport
+                        ? const SizedBox(
+                            width: 22,
+                            height: 22,
+                            child: CircularProgressIndicator(
+                                strokeWidth: 2.4, color: Colors.white),
+                          )
+                        : const Text('Submit to DNCC',
+                            style: TextStyle(
+                                fontSize: 16, fontWeight: FontWeight.w800)),
                   ),
                 ),
               ),
@@ -288,23 +212,40 @@ class _Label extends StatelessWidget {
           letterSpacing: 0.6));
 }
 
-class DottedBox extends StatelessWidget {
-  const DottedBox({super.key, required this.child});
-  final Widget child;
+class _Input extends StatelessWidget {
+  const _Input({
+    required this.controller,
+    required this.hint,
+    this.maxLines = 1,
+    this.keyboard,
+  });
+  final TextEditingController controller;
+  final String hint;
+  final int maxLines;
+  final TextInputType? keyboard;
+
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.symmetric(vertical: 28),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
       decoration: BoxDecoration(
-        color: AppColors.white,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-            color: const Color(0xFFCBD5E1),
-            width: 1.2,
-            strokeAlign: BorderSide.strokeAlignInside),
+          color: AppColors.white,
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(color: const Color(0xFFEDEFF2))),
+      child: TextField(
+        controller: controller,
+        maxLines: maxLines,
+        keyboardType: keyboard,
+        style: const TextStyle(fontSize: 14.5, color: Color(0xFF0F172A)),
+        decoration: InputDecoration(
+          isCollapsed: true,
+          contentPadding: const EdgeInsets.symmetric(vertical: 10),
+          border: InputBorder.none,
+          hintText: hint,
+          hintStyle:
+              const TextStyle(fontSize: 14.5, color: Color(0xFFB8C0CC)),
+        ),
       ),
-      child: child,
     );
   }
 }

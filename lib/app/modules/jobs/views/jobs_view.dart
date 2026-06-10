@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 
 import '../../../core/values/app_colors.dart';
 import '../../../data/models/response/jobs_response.dart';
+import '../../../global_widget/sn_shimmer.dart';
 import '../controllers/jobs_controller.dart';
 
 const _orange = Color(0xFFC2410C);
@@ -141,10 +142,7 @@ class JobsView extends GetView<JobsController> {
               child: GetBuilder<JobsController>(
                 builder: (con) {
                   if (con.loadingJobs && con.jobs.isEmpty) {
-                    return const Center(
-                      child: CircularProgressIndicator(
-                          strokeWidth: 2.6, color: _orange),
-                    );
+                    return const SnListSkeleton();
                   }
                   return RefreshIndicator(
                     color: _orange,

@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 
 import '../../../core/values/app_colors.dart';
 import '../../../data/models/response/blood_response_response.dart';
+import '../../../global_widget/sn_shimmer.dart';
 import '../controllers/blood_controller.dart';
 import '../widgets/blood_widgets.dart';
 
@@ -71,9 +72,7 @@ class MyResponsesView extends GetView<BloodController> {
 
   Widget _body(BloodController con) {
     if (con.loadingResponses && con.myResponses.isEmpty) {
-      return const Center(
-        child: CircularProgressIndicator(strokeWidth: 2.6, color: _red),
-      );
+      return const SnListSkeleton(padding: EdgeInsets.fromLTRB(16, 8, 16, 24));
     }
     if (con.myResponses.isEmpty) {
       return ListView(

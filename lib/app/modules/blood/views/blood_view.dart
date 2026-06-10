@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../../core/values/app_colors.dart';
+import '../../../global_widget/sn_shimmer.dart';
 import '../../../routes/app_pages.dart';
 import '../controllers/blood_controller.dart';
 import '../widgets/blood_widgets.dart';
@@ -546,17 +547,7 @@ class _NearestDonors extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (con.loadingNearest && con.nearestDonors.isEmpty) {
-      return const Padding(
-        padding: EdgeInsets.symmetric(vertical: 24),
-        child: Center(
-          child: SizedBox(
-            width: 24,
-            height: 24,
-            child: CircularProgressIndicator(
-                strokeWidth: 2.4, color: Color(0xFFE11D48)),
-          ),
-        ),
-      );
+      return const SnListSkeleton(count: 3, padding: EdgeInsets.zero);
     }
 
     if (con.nearestDonors.isEmpty) {

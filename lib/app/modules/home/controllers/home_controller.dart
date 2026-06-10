@@ -1,40 +1,102 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-import '../../../data/models/sn_service.dart';
+import '../../../data/models/response/home_response.dart';
+import '../../../data/repositories/home.repo.dart';
 
 class HomeController extends GetxController {
-  // Promo banner carousel
+  HomeRepository get _repo => Get.find<HomeRepository>();
+
+  // ── Banner carousel ─────────────────────────────────────────────────
+  List<HomeBanner> banners = [];
+  bool loadingBanners = false;
   int promoIndex = 0;
+  final PageController bannerController =
+      PageController(viewportFraction: 0.92);
+  Timer? _autoScroll;
+
   void setPromo(int i) {
     promoIndex = i;
     update();
   }
 
-  final List<RecentService> recent = const [
-    RecentService(
-      title: 'Healthcare',
-      subtitle: 'Dr. Salma Akter',
-      time: '2 days ago',
-      icon: Icons.medical_services_rounded,
-      color: Color(0xFF14B8A6),
-      bg: Color(0xFFD9F7EF),
-    ),
-    RecentService(
-      title: 'Home Service',
-      subtitle: 'AC Cleaning',
-      time: 'Yesterday',
-      icon: Icons.home_repair_service_rounded,
-      color: Color(0xFF6366F1),
-      bg: Color(0xFFE6E7FB),
-    ),
-    RecentService(
-      title: 'Nagarik Sheba',
-      subtitle: 'Pothole',
-      time: '3 days ago',
-      icon: Icons.account_balance_rounded,
-      color: Color(0xFFF15A24),
-      bg: Color(0xFFFDE7DC),
-    ),
-  ];
+  // ── Popular / recent service shortcuts ──────────────────────────────
+  List<HomeService> popular = [];
+  bool loadingPopular = false;
+  List<HomeService> recent = [];
+  bool loadingRecent = false;
+
+  @override
+  void onInit() {
+    super.onInit();
+    fetchBanners();
+    fetchPopular();
+    fetchRecent();
+  }
+
+  Future<void> fetchBanners() async {
+    loadingBanners = true;
+    update();
+    try {
+      banners = await _repo.fetchBanners();
+      _startAutoScroll();
+    } catch (_) {
+    } finally {
+      loadingBanners = false;
+      update();
+    }
+  }
+
+  Future<void> fetchPopular() async {
+    loadingPopular = true;
+    update();
+    try {
+      popular = await _repo.fetchPopular(limit: 6);
+    } catch (_) {
+    } finally {
+      loadingPopular = false;
+      update();
+    }
+  }
+
+  Future<void> fetchRecent() async {
+    loadingRecent = true;
+    update();
+    try {
+      recent = await _repo.fetchRecent(limit: 6);
+    } catch (_) {
+    } finally {
+      loadingRecent = false;
+      update();
+    }
+  }
+
+  Future<void> refreshAll() async {
+    await fetchBanners();
+    await fetchPopular();
+    await fetchRecent();
+  }
+
+  void _startAutoScroll() {
+    _autoScroll?.cancel();
+    if (banners.length < 2) return;
+    _autoScroll = Timer.periodic(const Duration(seconds: 4), (_) {
+      if (!bannerController.hasClients || banners.isEmpty) return;
+      final next = (promoIndex + 1) % banners.length;
+      bannerController.animateToPage(
+        next,
+        duration: const Duration(milliseconds: 450),
+        curve: Curves.easeInOut,
+      );
+    });
+  }
+
+  @override
+  void onClose() {
+    _autoScroll?.cancel();
+    bannerController.dispose();
+    super.onClose();
+  }
 }

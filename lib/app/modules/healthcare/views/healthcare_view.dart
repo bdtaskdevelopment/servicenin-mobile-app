@@ -2,6 +2,7 @@
 import 'package:get/get.dart';
 
 import '../../../core/values/app_colors.dart';
+import '../../../global_widget/sn_shimmer.dart';
 import '../../../routes/app_pages.dart';
 import '../controllers/booking_controller.dart';
 import '../controllers/healthcare_controller.dart';
@@ -104,12 +105,9 @@ class HealthcareView extends GetView<HealthcareController> {
                       ),
                       const SizedBox(height: 12),
                       if (con.loadingDoctors && con.doctors.isEmpty)
-                        const Padding(
-                          padding: EdgeInsets.symmetric(vertical: 20),
-                          child: Center(
-                            child: CircularProgressIndicator(
-                                strokeWidth: 2.4, color: _green),
-                          ),
+                        const SnListSkeleton(
+                          count: 4,
+                          padding: EdgeInsets.zero,
                         )
                       else if (con.doctors.isEmpty)
                         const Padding(

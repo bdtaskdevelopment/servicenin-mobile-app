@@ -44,17 +44,20 @@ import '../modules/funeral/bindings/funeral_binding.dart';
 import '../modules/funeral/views/funeral_view.dart';
 import '../modules/funeral/views/funeral_request_view.dart';
 import '../modules/funeral/views/funeral_done_view.dart';
+import '../modules/funeral/views/funeral_requests_view.dart';
 import '../modules/education/bindings/education_binding.dart';
 import '../modules/education/views/education_view.dart';
 import '../modules/education/views/education_center_view.dart';
 import '../modules/education/views/course_enquiry_view.dart';
 import '../modules/education/views/enquiry_done_view.dart';
+import '../modules/education/views/education_interests_view.dart';
 import '../modules/nagarik/bindings/nagarik_binding.dart';
 import '../modules/nagarik/views/nagarik_view.dart';
 import '../modules/nagarik/views/nagarik_reports_view.dart';
 import '../modules/nagarik/views/report_issue_view.dart';
 import '../modules/nagarik/views/report_status_view.dart';
 import '../modules/nagarik/views/nagarik_chat_view.dart';
+import '../modules/nagarik/views/nagarik_ticket_create_view.dart';
 import '../modules/account/bindings/account_binding.dart';
 import '../modules/account/views/profile_view.dart';
 import '../modules/account/views/edit_profile_view.dart';
@@ -339,6 +342,11 @@ class AppPages {
       binding: FuneralBinding(),
     ),
     GetPage(
+      name: _Paths.FUNERAL_REQUESTS,
+      page: () => const FuneralRequestsView(),
+      binding: FuneralBinding(),
+    ),
+    GetPage(
       name: _Paths.EDUCATION,
       page: () => const EducationView(),
       binding: EducationBinding(),
@@ -356,6 +364,11 @@ class AppPages {
     GetPage(
       name: _Paths.EDUCATION_DONE,
       page: () => const EnquiryDoneView(),
+      binding: EducationBinding(),
+    ),
+    GetPage(
+      name: _Paths.EDUCATION_INTERESTS,
+      page: () => const EducationInterestsView(),
       binding: EducationBinding(),
     ),
     GetPage(
@@ -381,6 +394,11 @@ class AppPages {
     GetPage(
       name: _Paths.NAGARIK_CHAT,
       page: () => const NagarikChatView(),
+      binding: NagarikBinding(),
+    ),
+    GetPage(
+      name: _Paths.NAGARIK_TICKET_CREATE,
+      page: () => const NagarikTicketCreateView(),
       binding: NagarikBinding(),
     ),
     GetPage(

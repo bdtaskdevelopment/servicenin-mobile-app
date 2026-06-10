@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../../core/values/app_colors.dart';
+import '../../../global_widget/sn_shimmer.dart';
 import '../controllers/appointments_controller.dart';
 
 const _green = Color(0xFF16A34A);
@@ -427,12 +428,7 @@ class _PrescriptionsSection extends StatelessWidget {
                 color: Color(0xFF0F172A))),
         const SizedBox(height: 12),
         if (con.loadingPrescriptions && con.doctorPrescriptions.isEmpty)
-          const Center(
-            child: Padding(
-              padding: EdgeInsets.all(8),
-              child: CircularProgressIndicator(strokeWidth: 2.4, color: _green),
-            ),
-          )
+          const SnListSkeleton(count: 3, padding: EdgeInsets.zero)
         else if (con.doctorPrescriptions.isEmpty)
           Container(
             padding: const EdgeInsets.all(14),

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../../core/values/app_colors.dart';
+import '../../../global_widget/sn_shimmer.dart';
 import '../controllers/physio_controller.dart';
 
 const _orange = Color(0xFFB45309);
@@ -37,10 +38,7 @@ class PhysioSessionsView extends GetView<PhysioController> {
         child: GetBuilder<PhysioController>(
           builder: (con) {
             if (con.loadingSessions && con.sessions.isEmpty) {
-              return const Center(
-                child: CircularProgressIndicator(
-                    strokeWidth: 2.6, color: _orange),
-              );
+              return const SnListSkeleton();
             }
             if (con.sessions.isEmpty) {
               return ListView(

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../../core/values/app_colors.dart';
+import '../../../global_widget/sn_shimmer.dart';
 import '../controllers/matchmaking_controller.dart';
 
 const _maroon = Color(0xFFB11D5C);
@@ -101,8 +102,7 @@ class _Card extends StatelessWidget {
 
 Widget _loaderOrEmpty(bool loading, bool empty, String emptyText) {
   if (loading) {
-    return const Center(
-        child: CircularProgressIndicator(strokeWidth: 2.6, color: _maroon));
+    return const SnListSkeleton();
   }
   return ListView(
     children: [

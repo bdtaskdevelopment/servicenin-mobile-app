@@ -1,167 +1,435 @@
+import 'dart:async';
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:url_launcher/url_launcher.dart';
 
+import '../../../core/helpers/snack_helper.dart';
+import '../../../core/values/storage.dart';
+import '../../../data/models/response/nagarik_response.dart';
+import '../../../data/repositories/nagarik.repo.dart';
+import '../../../data/services/storage.service.dart';
 import '../../../routes/app_pages.dart';
 
-class NagarikCategory {
-  const NagarikCategory(this.label, this.icon);
-  final String label;
-  final IconData icon;
-}
-
-enum ReportStatus { inProgress, resolved }
-
-class Grievance {
-  const Grievance({
-    required this.title,
-    required this.ref,
-    required this.ago,
-    required this.icon,
-    required this.status,
-    this.ward = 'Banani · Ward 19',
-  });
-  final String title;
-  final String ref;
-  final String ago;
-  final IconData icon;
-  final ReportStatus status;
-  final String ward;
-}
-
-class Ticket {
-  const Ticket({
-    required this.title,
-    required this.code,
-    required this.dept,
-    required this.ago,
-    required this.status,
-  });
-  final String title;
-  final String code;
-  final String dept;
-  final String ago;
-  final ReportStatus status;
+IconData nagarikCategoryIcon(String icon) {
+  switch (icon.toLowerCase()) {
+    case 'road':
+      return Icons.add_road_rounded;
+    case 'garbage':
+    case 'waste':
+    case 'trash':
+      return Icons.delete_outline_rounded;
+    case 'drain':
+    case 'drainage':
+    case 'water':
+      return Icons.waves_rounded;
+    case 'light':
+    case 'streetlight':
+    case 'bulb':
+      return Icons.lightbulb_outline_rounded;
+    case 'water_supply':
+    case 'tap':
+      return Icons.water_drop_outlined;
+    case 'mosquito':
+    case 'health':
+      return Icons.shield_outlined;
+    case 'tree':
+    case 'park':
+      return Icons.park_outlined;
+    case 'noise':
+      return Icons.volume_up_outlined;
+    default:
+      return Icons.report_problem_outlined;
+  }
 }
 
 class NagarikController extends GetxController {
-  final List<NagarikCategory> categories = const [
-    NagarikCategory('রাস্তা', Icons.add_road_rounded),
-    NagarikCategory('আবর্জনা', Icons.delete_outline_rounded),
-    NagarikCategory('ড্রেন', Icons.waves_rounded),
-    NagarikCategory('বাতি', Icons.lightbulb_outline_rounded),
-    NagarikCategory('পানি', Icons.water_drop_outlined),
-    NagarikCategory('মশা', Icons.shield_outlined),
-  ];
+  NagarikRepository get _repo => Get.find<NagarikRepository>();
 
-  final List<Grievance> grievances = const [
-    Grievance(
-      title: 'Large pothole on Road 27',
-      ref: 'DNCC-2026-04823',
-      ago: '3 days ago',
-      icon: Icons.add_road_rounded,
-      status: ReportStatus.inProgress,
-    ),
-    Grievance(
-      title: 'Garbage not collected for a week',
-      ref: 'DNCC-2026-04760',
-      ago: '6 days ago',
-      icon: Icons.delete_outline_rounded,
-      status: ReportStatus.resolved,
-    ),
-    Grievance(
-      title: 'Street light out near park',
-      ref: 'DNCC-2026-04711',
-      ago: '1 week ago',
-      icon: Icons.lightbulb_outline_rounded,
-      status: ReportStatus.resolved,
-    ),
-  ];
+  // ── Hotlines ────────────────────────────────────────────────────────
+  NagarikHotlinesData? hotlines;
+  bool loadingHotlines = false;
 
-  final List<Ticket> tickets = const [
-    Ticket(
-      title: 'Holding tax payment failed',
-      code: 'TK-8841',
-      dept: 'Tax',
-      ago: '1 day ago',
-      status: ReportStatus.inProgress,
-    ),
-    Ticket(
-      title: 'Trade license renewal query',
-      code: 'TK-8790',
-      dept: 'License',
-      ago: '4 days ago',
-      status: ReportStatus.resolved,
-    ),
-  ];
+  // ── Report categories ───────────────────────────────────────────────
+  List<NagarikReportCategory> categories = [];
+  bool loadingCategories = false;
 
-  // Currently-viewed report / ticket
-  Grievance? selectedGrievance;
-  Ticket? selectedTicket;
+  // ── Grievances ──────────────────────────────────────────────────────
+  List<NagarikGrievance> grievances = [];
+  bool loadingGrievances = false;
+  NagarikGrievance? selectedGrievance;
+  bool loadingGrievanceDetail = false;
 
-  // ---- Report-an-issue form ----
-  int categoryIndex = 0; // Roads default
-  final List<String> issueCategories = const [
-    'Roads',
-    'Garbage',
-    'Drainage',
-    'Street light',
-    'Water',
-    'Mosquito',
+  // ── Tickets ─────────────────────────────────────────────────────────
+  List<NagarikTicket> tickets = [];
+  bool loadingTickets = false;
+  NagarikTicket? selectedTicket;
+
+  // ── Report-an-issue form ────────────────────────────────────────────
+  String selectedCategoryKey = '';
+  final TextEditingController reportTitle = TextEditingController();
+  final TextEditingController reportDescription = TextEditingController();
+  final TextEditingController reportAddress = TextEditingController();
+  final TextEditingController reportWard = TextEditingController();
+  final List<Map<String, String>> priorities = const [
+    {'label': 'Low', 'value': 'low'},
+    {'label': 'Medium', 'value': 'medium'},
+    {'label': 'Urgent', 'value': 'high'},
   ];
-  final List<IconData> issueIcons = const [
-    Icons.add_road_rounded,
-    Icons.delete_outline_rounded,
-    Icons.waves_rounded,
-    Icons.lightbulb_outline_rounded,
-    Icons.water_drop_outlined,
-    Icons.shield_outlined,
-  ];
-  void setCategory(int i) {
-    categoryIndex = i;
+  int priorityIndex = 1;
+  bool submittingReport = false;
+
+  void setCategoryKey(String key) {
+    selectedCategoryKey = key;
     update();
   }
 
-  int priorityIndex = 1; // Low / Medium / Urgent — Medium default
   void setPriority(int i) {
     priorityIndex = i;
     update();
   }
 
-  // ---- Navigation ----
-  void openReports() => Get.toNamed(Routes.NAGARIK_REPORTS);
-  void seeAllReports() => Get.toNamed(Routes.NAGARIK_REPORTS);
+  // ── Ticket-create form ──────────────────────────────────────────────
+  final List<Map<String, String>> ticketCategories = const [
+    {'label': 'Holding Tax', 'value': 'holding_tax'},
+    {'label': 'Trade License', 'value': 'trade_license'},
+    {'label': 'Birth Certificate', 'value': 'birth_certificate'},
+    {'label': 'Tax Assessment', 'value': 'tax_assessment'},
+    {'label': 'Other', 'value': 'other'},
+  ];
+  String ticketCategoryKey = 'holding_tax';
+  final TextEditingController ticketSubject = TextEditingController();
+  final TextEditingController ticketDescription = TextEditingController();
+  int ticketPriorityIndex = 1;
+  bool creatingTicket = false;
+
+  void setTicketCategory(String key) {
+    ticketCategoryKey = key;
+    update();
+  }
+
+  void setTicketPriority(int i) {
+    ticketPriorityIndex = i;
+    update();
+  }
+
+  // ── Chat ────────────────────────────────────────────────────────────
+  List<NagarikMessage> messages = [];
+  bool loadingMessages = false;
+  bool sendingMessage = false;
+  final TextEditingController chatInput = TextEditingController();
+  Timer? _poll;
+  String? myUserId;
+
+  @override
+  void onInit() {
+    super.onInit();
+    myUserId = _currentUserId();
+    fetchHotlines();
+    fetchCategories();
+    fetchGrievances();
+  }
+
+  // ── Loaders ─────────────────────────────────────────────────────────
+  Future<void> fetchHotlines() async {
+    loadingHotlines = true;
+    update();
+    try {
+      hotlines = await _repo.fetchHotlines();
+    } catch (_) {
+    } finally {
+      loadingHotlines = false;
+      update();
+    }
+  }
+
+  Future<void> fetchCategories() async {
+    loadingCategories = true;
+    update();
+    try {
+      categories = await _repo.fetchCategories();
+      if (selectedCategoryKey.isEmpty && categories.isNotEmpty) {
+        selectedCategoryKey = categories.first.key;
+      }
+    } catch (e) {
+      SnackHelper.error(e.toString().replaceFirst('Exception: ', ''));
+    } finally {
+      loadingCategories = false;
+      update();
+    }
+  }
+
+  Future<void> fetchGrievances() async {
+    loadingGrievances = true;
+    update();
+    try {
+      grievances = await _repo.fetchMyGrievances();
+    } catch (e) {
+      SnackHelper.error(e.toString().replaceFirst('Exception: ', ''));
+    } finally {
+      loadingGrievances = false;
+      update();
+    }
+  }
+
+  Future<void> fetchTickets() async {
+    loadingTickets = true;
+    update();
+    try {
+      tickets = await _repo.fetchMyTickets();
+    } catch (e) {
+      SnackHelper.error(e.toString().replaceFirst('Exception: ', ''));
+    } finally {
+      loadingTickets = false;
+      update();
+    }
+  }
+
+  // ── Hotlines: dial ──────────────────────────────────────────────────
+  Future<void> callNumber(String number) async {
+    final n = number.trim();
+    if (n.isEmpty) return;
+    try {
+      await launchUrl(Uri.parse('tel:$n'),
+          mode: LaunchMode.externalApplication);
+    } catch (_) {
+      SnackHelper.error('ডায়াল করা যায়নি');
+    }
+  }
+
+  // ── Navigation ──────────────────────────────────────────────────────
+  void openReports() {
+    fetchGrievances();
+    fetchTickets();
+    Get.toNamed(Routes.NAGARIK_REPORTS);
+  }
 
   void reportIssue() {
-    categoryIndex = 0;
+    if (selectedCategoryKey.isEmpty && categories.isNotEmpty) {
+      selectedCategoryKey = categories.first.key;
+    }
     priorityIndex = 1;
+    reportTitle.clear();
+    reportDescription.clear();
+    reportAddress.clear();
+    reportWard.clear();
     update();
     Get.toNamed(Routes.NAGARIK_REPORT_ISSUE);
   }
 
-  void openCategory(int i) {
-    categoryIndex = i;
+  void openCategory(String key) {
+    selectedCategoryKey = key;
     priorityIndex = 1;
+    reportTitle.clear();
+    reportDescription.clear();
+    reportAddress.clear();
+    reportWard.clear();
     update();
     Get.toNamed(Routes.NAGARIK_REPORT_ISSUE);
   }
 
-  void submitReport() => Get.toNamed(Routes.NAGARIK_STATUS);
+  // ── File a grievance ────────────────────────────────────────────────
+  Future<void> submitReport() async {
+    if (submittingReport) return;
+    if (selectedCategoryKey.isEmpty) {
+      SnackHelper.error('একটি ক্যাটাগরি নির্বাচন করুন');
+      return;
+    }
+    if (reportTitle.text.trim().isEmpty) {
+      SnackHelper.error('সমস্যার শিরোনাম দিন');
+      return;
+    }
+    if (reportDescription.text.trim().isEmpty) {
+      SnackHelper.error('সমস্যার বিবরণ দিন');
+      return;
+    }
+    submittingReport = true;
+    update();
+    try {
+      final payload = <String, dynamic>{
+        'category': selectedCategoryKey,
+        'title': reportTitle.text.trim(),
+        'description': reportDescription.text.trim(),
+        if (reportAddress.text.trim().isNotEmpty)
+          'address': reportAddress.text.trim(),
+        if (reportWard.text.trim().isNotEmpty)
+          'ward_no': reportWard.text.trim(),
+        'priority': priorities[priorityIndex]['value'],
+      };
+      final filed = await _repo.fileGrievance(payload);
+      selectedGrievance = filed;
+      grievances.insert(0, filed);
+      update();
+      Get.offNamed(Routes.NAGARIK_STATUS);
+    } catch (e) {
+      SnackHelper.error(e.toString().replaceFirst('Exception: ', ''));
+    } finally {
+      submittingReport = false;
+      update();
+    }
+  }
 
-  void openGrievance(Grievance g) {
+  // ── Grievance detail ────────────────────────────────────────────────
+  void openGrievance(NagarikGrievance g) {
     selectedGrievance = g;
     update();
     Get.toNamed(Routes.NAGARIK_STATUS);
+    _loadGrievanceDetail(g.id);
   }
 
-  void supportTicket() {
-    selectedTicket = tickets.first;
+  Future<void> _loadGrievanceDetail(String id) async {
+    if (id.isEmpty) return;
+    loadingGrievanceDetail = true;
     update();
-    Get.toNamed(Routes.NAGARIK_CHAT);
+    try {
+      selectedGrievance = await _repo.fetchGrievance(id);
+    } catch (_) {
+    } finally {
+      loadingGrievanceDetail = false;
+      update();
+    }
   }
 
-  void openTicket(Ticket t) {
+  // ── Create a support ticket ─────────────────────────────────────────
+  void newTicket() {
+    ticketCategoryKey = ticketCategories.first['value']!;
+    ticketSubject.clear();
+    ticketDescription.clear();
+    ticketPriorityIndex = 1;
+    update();
+    Get.toNamed(Routes.NAGARIK_TICKET_CREATE);
+  }
+
+  Future<void> submitTicket() async {
+    if (creatingTicket) return;
+    if (ticketSubject.text.trim().isEmpty) {
+      SnackHelper.error('বিষয় দিন');
+      return;
+    }
+    if (ticketDescription.text.trim().isEmpty) {
+      SnackHelper.error('বিস্তারিত লিখুন');
+      return;
+    }
+    creatingTicket = true;
+    update();
+    try {
+      final payload = <String, dynamic>{
+        'category': ticketCategoryKey,
+        'subject': ticketSubject.text.trim(),
+        'description': ticketDescription.text.trim(),
+        'priority': priorities[ticketPriorityIndex]['value'],
+      };
+      final ticket = await _repo.createTicket(payload);
+      tickets.insert(0, ticket);
+      selectedTicket = ticket;
+      update();
+      // Replace the create screen with the ticket chat.
+      Get.offNamed(Routes.NAGARIK_CHAT);
+      _startChat(ticket.id);
+    } catch (e) {
+      SnackHelper.error(e.toString().replaceFirst('Exception: ', ''));
+    } finally {
+      creatingTicket = false;
+      update();
+    }
+  }
+
+  // ── Open ticket chat ────────────────────────────────────────────────
+  void openTicket(NagarikTicket t) {
     selectedTicket = t;
+    messages = t.messages;
     update();
     Get.toNamed(Routes.NAGARIK_CHAT);
+    _startChat(t.id);
+  }
+
+  void _startChat(String ticketId) {
+    fetchMessages(ticketId, showLoader: messages.isEmpty);
+    _poll?.cancel();
+    _poll = Timer.periodic(
+        const Duration(seconds: 3), (_) => fetchMessages(ticketId));
+  }
+
+  void stopChat() {
+    _poll?.cancel();
+    _poll = null;
+  }
+
+  Future<void> fetchMessages(String ticketId,
+      {bool showLoader = false}) async {
+    if (showLoader) {
+      loadingMessages = true;
+      update();
+    }
+    try {
+      final fetched = await _repo.fetchTicketMessages(ticketId);
+      if (!_sameThread(fetched, messages)) {
+        messages = fetched;
+        update();
+      }
+    } catch (_) {
+    } finally {
+      if (showLoader) {
+        loadingMessages = false;
+        update();
+      }
+    }
+  }
+
+  Future<void> sendMessage() async {
+    final text = chatInput.text.trim();
+    final ticket = selectedTicket;
+    if (text.isEmpty || ticket == null || sendingMessage) return;
+    sendingMessage = true;
+    chatInput.clear();
+    update();
+    try {
+      final sent = await _repo.sendTicketMessage(ticket.id, text);
+      messages = [...messages, sent];
+      update();
+      // Reconcile with server (gets sender/profile populated).
+      fetchMessages(ticket.id);
+    } catch (e) {
+      chatInput.text = text;
+      SnackHelper.error(e.toString().replaceFirst('Exception: ', ''));
+    } finally {
+      sendingMessage = false;
+      update();
+    }
+  }
+
+  bool isMine(NagarikMessage m) => m.senderId == myUserId;
+
+  bool _sameThread(List<NagarikMessage> a, List<NagarikMessage> b) {
+    if (a.length != b.length) return false;
+    for (var i = 0; i < a.length; i++) {
+      if (a[i].id != b[i].id) return false;
+    }
+    return true;
+  }
+
+  String? _currentUserId() {
+    final raw = StorageService.read(StorageConstants.userInfo);
+    if (raw is String && raw.trim().isNotEmpty) {
+      try {
+        final map = jsonDecode(raw);
+        if (map is Map) return map['id']?.toString();
+      } catch (_) {}
+    }
+    return null;
+  }
+
+  @override
+  void onClose() {
+    stopChat();
+    reportTitle.dispose();
+    reportDescription.dispose();
+    reportAddress.dispose();
+    reportWard.dispose();
+    ticketSubject.dispose();
+    ticketDescription.dispose();
+    chatInput.dispose();
+    super.onClose();
   }
 }

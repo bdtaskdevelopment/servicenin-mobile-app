@@ -4,6 +4,7 @@ import 'package:latlong2/latlong.dart';
 
 import '../../../core/values/app_colors.dart';
 import '../../../global_widget/sn_map.dart';
+import '../../../global_widget/sn_shimmer.dart';
 import '../controllers/ambulance_controller.dart';
 import '../controllers/fare_controller.dart';
 
@@ -399,10 +400,17 @@ class _TypeSelector extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (c.loadingTypes && c.types.isEmpty) {
-      return const SizedBox(
-        height: 84,
-        child: Center(
-          child: CircularProgressIndicator(strokeWidth: 2.4, color: _red),
+      return SnShimmer(
+        child: SizedBox(
+          height: 116,
+          child: ListView.separated(
+            scrollDirection: Axis.horizontal,
+            physics: const NeverScrollableScrollPhysics(),
+            itemCount: 4,
+            separatorBuilder: (_, _) => const SizedBox(width: 10),
+            itemBuilder: (_, _) =>
+                const SnBone(width: 132, height: 116, radius: 14),
+          ),
         ),
       );
     }
@@ -526,10 +534,35 @@ class _FareCard extends StatelessWidget {
         border: Border.all(color: const Color(0xFFEDEFF2)),
       ),
       child: c.loadingFare && f == null
-          ? const Center(
-              child: Padding(
-                padding: EdgeInsets.symmetric(vertical: 8),
-                child: CircularProgressIndicator(strokeWidth: 2.4, color: _red),
+          ? const SnShimmer(
+              child: Column(
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      SnBone(width: 90, height: 12),
+                      SnBone(width: 50, height: 12),
+                    ],
+                  ),
+                  SizedBox(height: 14),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      SnBone(width: 110, height: 12),
+                      SnBone(width: 46, height: 12),
+                    ],
+                  ),
+                  SizedBox(height: 14),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      SnBone(width: 80, height: 12),
+                      SnBone(width: 56, height: 12),
+                    ],
+                  ),
+                  SizedBox(height: 18),
+                  SnBone(width: double.infinity, height: 26, radius: 8),
+                ],
               ),
             )
           : f == null
@@ -644,11 +677,9 @@ class _PayList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (c.loadingMethods && c.methods.isEmpty) {
-      return const Center(
-        child: Padding(
-          padding: EdgeInsets.all(8),
-          child: CircularProgressIndicator(strokeWidth: 2.4, color: _red),
-        ),
+      return const SnListSkeleton(
+        count: 3,
+        padding: EdgeInsets.zero,
       );
     }
     return Column(

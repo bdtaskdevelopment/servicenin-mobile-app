@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../../core/values/app_colors.dart';
+import '../../../global_widget/sn_shimmer.dart';
 import '../controllers/home_service_controller.dart';
 
 const _teal = Color(0xFF0E9F8E);
@@ -114,11 +115,19 @@ class ConfirmBookingView extends GetView<HomeServiceController> {
                       const _Label('WHEN?'),
                       const SizedBox(height: 10),
                       if (con.loadingDates && con.scheduleDates.isEmpty)
-                        const Padding(
-                          padding: EdgeInsets.symmetric(vertical: 12),
-                          child: Center(
-                              child: CircularProgressIndicator(
-                                  strokeWidth: 2.4, color: _darkTeal)),
+                        SnShimmer(
+                          child: SizedBox(
+                            height: 64,
+                            child: ListView.separated(
+                              scrollDirection: Axis.horizontal,
+                              physics: const NeverScrollableScrollPhysics(),
+                              itemCount: 5,
+                              separatorBuilder: (_, _) =>
+                                  const SizedBox(width: 10),
+                              itemBuilder: (_, _) => const SnBone(
+                                  width: 78, height: 64, radius: 12),
+                            ),
+                          ),
                         )
                       else
                         SizedBox(
@@ -178,11 +187,10 @@ class ConfirmBookingView extends GetView<HomeServiceController> {
                       const _Label('TIME SLOT'),
                       const SizedBox(height: 10),
                       if (con.loadingSlots && con.slots.isEmpty)
-                        const Padding(
-                          padding: EdgeInsets.symmetric(vertical: 12),
-                          child: Center(
-                              child: CircularProgressIndicator(
-                                  strokeWidth: 2.4, color: _darkTeal)),
+                        const SnListSkeleton(
+                          count: 4,
+                          padding: EdgeInsets.zero,
+                          showTrailing: false,
                         )
                       else
                         Column(

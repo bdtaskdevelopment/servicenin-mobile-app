@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 
 import '../../../core/values/app_colors.dart';
 import '../../../data/models/response/matchmaking_response.dart';
+import '../../../global_widget/sn_shimmer.dart';
 import '../controllers/mm_chat_controller.dart';
 
 const _maroon = Color(0xFFB11D5C);
@@ -90,10 +91,7 @@ class _MmChatViewState extends State<MmChatView> {
             child: GetBuilder<MmChatController>(
               builder: (c) {
                 if (c.loading && c.messages.isEmpty) {
-                  return const Center(
-                    child: CircularProgressIndicator(
-                        strokeWidth: 2.6, color: _maroon),
-                  );
+                  return const SnListSkeleton();
                 }
                 if (c.messages.isEmpty) {
                   return const Center(

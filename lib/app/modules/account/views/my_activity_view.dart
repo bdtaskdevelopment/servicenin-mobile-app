@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 
 import '../../../core/values/app_colors.dart';
 import '../../../data/models/response/activity_response.dart';
+import '../../../global_widget/sn_shimmer.dart';
 import '../controllers/account_controller.dart';
 
 class MyActivityView extends GetView<AccountController> {
@@ -67,10 +68,7 @@ class MyActivityView extends GetView<AccountController> {
 
   Widget _body(AccountController con) {
     if (con.loadingActivity && con.activities.isEmpty) {
-      return const Center(
-        child: CircularProgressIndicator(
-            strokeWidth: 2.6, color: Color(0xFF1E2A4A)),
-      );
+      return const SnListSkeleton();
     }
 
     if (con.activities.isEmpty) {

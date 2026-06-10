@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../../core/values/app_colors.dart';
+import '../../../global_widget/sn_shimmer.dart';
 import '../controllers/blood_controller.dart';
 import '../widgets/blood_widgets.dart';
 
@@ -92,10 +93,7 @@ class _RequestsList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (con.loadingRequests && con.requestList.isEmpty) {
-      return const Center(
-        child: CircularProgressIndicator(
-            strokeWidth: 2.6, color: Color(0xFFE11D48)),
-      );
+      return const SnListSkeleton(padding: EdgeInsets.fromLTRB(16, 8, 16, 24));
     }
 
     final items = con.visibleRequestEntries;

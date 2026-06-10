@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../../core/values/app_colors.dart';
+import '../../../global_widget/sn_shimmer.dart';
 import '../controllers/home_service_controller.dart';
 
 const _teal = Color(0xFF0E9F8E);
@@ -90,9 +91,8 @@ class HsServiceListView extends GetView<HomeServiceController> {
                   ),
                 Expanded(
                   child: (con.loadingSub || con.searching) && services.isEmpty
-                      ? const Center(
-                          child: CircularProgressIndicator(
-                              strokeWidth: 2.6, color: _darkTeal))
+                      ? const SnListSkeleton(
+                          padding: EdgeInsets.fromLTRB(16, 8, 16, 16))
                       : services.isEmpty
                           ? Center(
                               child: Text(

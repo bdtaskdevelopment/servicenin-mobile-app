@@ -58,15 +58,27 @@ class InformationController extends GetxController {
   bool loadingInfo = false;
   bool detailLoading = false;
 
-  /// The hero "National Emergency" entry (subtype == national_emergency).
+  // ── Emergency contacts from /api/v1/info/emergency ────────────────
+  List<InfoEntry> emergencyEntries = [];
+  bool loadingEmergency = false;
+
+  /// The hero "National Emergency" entry — preferring the emergency feed,
+  /// then the directory.
   InfoEntry? get nationalEmergency {
+    for (final e in emergencyEntries) {
+      if (e.isNationalEmergency) return e;
+    }
     for (final e in infoEntries) {
       if (e.isNationalEmergency) return e;
     }
     return null;
   }
 
-  /// Everything except the hero card — rendered under it.
+  /// Emergency contacts minus the national-emergency hero.
+  List<InfoEntry> get emergencyCards =>
+      emergencyEntries.where((e) => !e.isNationalEmergency).toList();
+
+  /// The full directory from /api/v1/info (hospitals, offices, etc.).
   List<InfoEntry> get infoCards =>
       infoEntries.where((e) => !e.isNationalEmergency).toList();
 
@@ -74,6 +86,7 @@ class InformationController extends GetxController {
   void onInit() {
     super.onInit();
     fetchInfo();
+    fetchEmergency();
   }
 
   /// GET /api/v1/info — load all entries.
@@ -86,6 +99,20 @@ class InformationController extends GetxController {
       SnackHelper.error(e.toString().replaceFirst('Exception: ', ''));
     } finally {
       loadingInfo = false;
+      update();
+    }
+  }
+
+  /// GET /api/v1/info/emergency — load emergency contacts.
+  Future<void> fetchEmergency() async {
+    loadingEmergency = true;
+    update();
+    try {
+      emergencyEntries = await _infoRepo.fetchEmergency();
+    } catch (e) {
+      SnackHelper.error(e.toString().replaceFirst('Exception: ', ''));
+    } finally {
+      loadingEmergency = false;
       update();
     }
   }

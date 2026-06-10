@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 
 import '../../../core/values/app_colors.dart';
 import '../../../data/models/response/service_response.dart';
+import '../../../global_widget/sn_shimmer.dart';
 import '../controllers/home_service_controller.dart';
 
 const _teal = Color(0xFF0E9F8E);
@@ -53,10 +54,7 @@ class HsMyBookingsView extends GetView<HomeServiceController> {
                 child: GetBuilder<HomeServiceController>(
                   builder: (con) {
                     if (con.loadingMyBookings && con.myBookings.isEmpty) {
-                      return const Center(
-                        child: CircularProgressIndicator(
-                            strokeWidth: 2.6, color: _darkTeal),
-                      );
+                      return const SnListSkeleton();
                     }
                     if (con.myBookings.isEmpty) {
                       return ListView(

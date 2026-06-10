@@ -164,8 +164,64 @@ class ApiURL {
   static final String jobsEmployerRegister =
       'api/v1/jobs/employers/register';
 
+  //===== Funeral
+  static final String funeralCoordinator = 'api/v1/funeral/coordinator';
+  static final String funeralServices = 'api/v1/funeral/services';
+  static final String funeralUnitsAvailable =
+      'api/v1/funeral/units/available';
+  static final String funeralRequests = 'api/v1/funeral/requests';
+  static final String funeralRequestsMy = 'api/v1/funeral/requests/my';
+
+  //===== Education
+  static final String educationCategories = 'api/v1/education/categories';
+  static final String educationCentersNear =
+      'api/v1/education/centers/near';
+  static String educationCenter(String id) => 'api/v1/education/centers/$id';
+  static String educationCenterCourses(String id) =>
+      'api/v1/education/centers/$id/courses';
+  static String educationCourse(String id) => 'api/v1/education/courses/$id';
+  static final String educationInterests = 'api/v1/education/interests';
+  static final String educationInterestsMy =
+      'api/v1/education/interests/my';
+
+  //===== Home dashboard
+  static final String homeBanners = 'api/v1/home/banners';
+  static final String homeServices = 'api/v1/home/services';
+  static String homeTrending({int limit = 6}) =>
+      'api/v1/home/trending?limit=$limit';
+  static String homePopular({int limit = 6}) =>
+      'api/v1/home/popular?limit=$limit';
+  static String homeRecent({int limit = 6}) =>
+      'api/v1/home/recent?limit=$limit';
+  static String homeSearch(String q) =>
+      'api/v1/home/search?q=${Uri.encodeQueryComponent(q)}';
+  static String homeMyOrders({int days = 60}) =>
+      'api/v1/home/my-orders?days=$days';
+
+  //===== Notifications (ServiceNin)
+  static final String snNotifications = 'api/v1/notifications';
+  static final String snNotificationsUnreadCount =
+      'api/v1/notifications/unread-count';
+  static String snNotificationRead(String id) =>
+      'api/v1/notifications/$id/read';
+  static final String snNotificationsReadAll =
+      'api/v1/notifications/read-all';
+
+  //===== Nagarik Seba (civic grievances + support)
+  static final String nagarikHotlines = 'api/v1/nagarik/hotlines';
+  static final String nagarikCategories = 'api/v1/nagarik/categories';
+  static final String nagarikGrievances = 'api/v1/nagarik/grievances';
+  static String nagarikGrievanceById(String id) =>
+      'api/v1/nagarik/grievances/$id';
+  static final String nagarikTickets = 'api/v1/nagarik/tickets';
+  static String nagarikTicketById(String id) =>
+      'api/v1/nagarik/tickets/$id';
+  static String nagarikTicketMessages(String id) =>
+      'api/v1/nagarik/tickets/$id/messages';
+
   //===== Information / hotlines (ServiceNin)
   static final String info = 'api/v1/info';
+  static final String infoEmergency = 'api/v1/info/emergency';
   static String infoById(String id) => 'api/v1/info/$id';
 
   //===== profile (ServiceNin — no leading slash, appends to base ending "/")

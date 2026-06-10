@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 
 import '../../../core/values/app_colors.dart';
 import '../../../data/models/response/chat_message_response.dart';
+import '../../../global_widget/sn_shimmer.dart';
 import '../controllers/blood_chat_controller.dart';
 
 const _red = Color(0xFFE11D48);
@@ -108,10 +109,7 @@ class _BloodChatViewState extends State<BloodChatView> {
             child: GetBuilder<BloodChatController>(
               builder: (c) {
                 if (c.loading && c.messages.isEmpty) {
-                  return const Center(
-                    child: CircularProgressIndicator(
-                        strokeWidth: 2.6, color: _red),
-                  );
+                  return const SnListSkeleton(showTrailing: false);
                 }
                 if (c.messages.isEmpty) {
                   return const Center(

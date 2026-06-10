@@ -23,6 +23,12 @@ class InfoRepository {
     return InfoEntry.listFromResponse(_payload(res));
   }
 
+  /// GET /api/v1/info/emergency — emergency contacts only.
+  Future<List<InfoEntry>> fetchEmergency() async {
+    final res = await provider.getData(ApiURL.infoEmergency);
+    return InfoEntry.listFromResponse(_payload(res));
+  }
+
   /// GET /api/v1/info/{id} — a single entry.
   Future<InfoEntry> fetchById(String id) async {
     final res = await provider.getData(ApiURL.infoById(id));

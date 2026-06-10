@@ -5,7 +5,6 @@ import '../../../core/values/app_colors.dart';
 import '../controllers/funeral_controller.dart';
 
 const _charcoal = Color(0xFF332F2C);
-const _green = Color(0xFF16A34A);
 const _greenTile = Color(0xFFD6F5E3);
 const _grayTile = Color(0xFFE8EAED);
 const _checkText = Color(0xFFB45309);
@@ -71,38 +70,47 @@ class FuneralDoneView extends GetView<FuneralController> {
                                   color: _grayTile,
                                   borderRadius: BorderRadius.circular(12)),
                               alignment: Alignment.center,
-                              child: const Text('AK',
-                                  style: TextStyle(
-                                      fontSize: 15,
-                                      fontWeight: FontWeight.w800,
-                                      color: Color(0xFF334155))),
+                              child: const Icon(Icons.receipt_long_outlined,
+                                  color: Color(0xFF334155), size: 22),
                             ),
                             const SizedBox(width: 12),
-                            const Expanded(
+                            Expanded(
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text('Coordinator Abdul Karim',
-                                      style: TextStyle(
+                                  Text(
+                                      con.lastRequest?.registrationNo.isNotEmpty ==
+                                              true
+                                          ? con.lastRequest!.registrationNo
+                                          : 'Funeral request',
+                                      style: const TextStyle(
                                           fontSize: 15,
                                           fontWeight: FontWeight.w800,
                                           color: Color(0xFF0F172A))),
-                                  SizedBox(height: 2),
-                                  Text('Calling you now · réf FUN-2026-0142',
-                                      style: TextStyle(
+                                  const SizedBox(height: 2),
+                                  Text(
+                                      con.lastRequest?.deceasedName.isNotEmpty ==
+                                              true
+                                          ? con.lastRequest!.deceasedName
+                                          : 'A coordinator is being assigned',
+                                      style: const TextStyle(
                                           fontSize: 12,
                                           color: Color(0xFF94A3B8))),
                                 ],
                               ),
                             ),
                             Container(
-                              width: 42,
-                              height: 42,
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 10, vertical: 6),
                               decoration: BoxDecoration(
                                   color: _greenTile,
-                                  borderRadius: BorderRadius.circular(12)),
-                              child: const Icon(Icons.call_rounded,
-                                  color: _green, size: 20),
+                                  borderRadius: BorderRadius.circular(20)),
+                              child: Text(
+                                  con.lastRequest?.statusLabel ?? 'Pending',
+                                  style: const TextStyle(
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.w700,
+                                      color: Color(0xFF15803D))),
                             ),
                           ],
                         ),
@@ -110,11 +118,12 @@ class FuneralDoneView extends GetView<FuneralController> {
                           padding: EdgeInsets.symmetric(vertical: 14),
                           child: _DashedDivider(),
                         ),
-                        _check('Body transport (freezer van) on the way'),
+                        _check('Your request has been registered'),
                         const SizedBox(height: 12),
-                        _check('Ghusl & kafan attendants arranged'),
+                        _check('A coordinator will call you shortly'),
                         const SizedBox(height: 12),
-                        _check('Janaza & burial coordination in progress'),
+                        _check(
+                            'Track progress anytime from “My requests”'),
                       ],
                     ),
                   ),

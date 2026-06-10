@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 
 import '../../../core/values/app_colors.dart';
 import '../../../data/models/response/service_response.dart';
+import '../../../global_widget/sn_shimmer.dart';
 import '../controllers/hs_chat_controller.dart';
 
 const _darkTeal = Color(0xFF0E7C6B);
@@ -88,10 +89,7 @@ class _HsChatViewState extends State<HsChatView> {
             child: GetBuilder<HsChatController>(
               builder: (c) {
                 if (c.loading && c.messages.isEmpty) {
-                  return const Center(
-                    child: CircularProgressIndicator(
-                        strokeWidth: 2.6, color: _darkTeal),
-                  );
+                  return const SnListSkeleton(showTrailing: false);
                 }
                 if (c.messages.isEmpty) {
                   return const Center(

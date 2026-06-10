@@ -1,158 +1,89 @@
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import '../../../core/helpers/snack_helper.dart';
+import '../../../data/models/response/education_response.dart';
+import '../../../data/repositories/education.repo.dart';
 import '../../../routes/app_pages.dart';
 
-class EduCourse {
-  const EduCourse({
-    required this.title,
-    required this.teacher,
-    required this.duration,
-    required this.price,
-    required this.seats,
-    required this.online,
-  });
-  final String title;
-  final String teacher;
-  final String duration;
-  final String price;
-  final String seats;
-  final bool online;
-}
-
-class EduCenter {
-  const EduCenter({
-    required this.name,
-    required this.area,
-    required this.distance,
-    required this.rating,
-    required this.reviews,
-    required this.tags,
-    required this.courses,
-  });
-  final String name;
-  final String area;
-  final String distance;
-  final String rating;
-  final String reviews;
-  final List<String> tags;
-  final List<EduCourse> courses;
+IconData eduCategoryIcon(String icon) {
+  switch (icon.toLowerCase()) {
+    case 'book':
+    case 'books':
+      return Icons.menu_book_rounded;
+    case 'school':
+    case 'graduate':
+      return Icons.school_outlined;
+    case 'language':
+    case 'english':
+      return Icons.translate_rounded;
+    case 'science':
+    case 'medical':
+      return Icons.science_outlined;
+    case 'computer':
+    case 'code':
+      return Icons.computer_outlined;
+    case 'calculator':
+    case 'math':
+      return Icons.calculate_outlined;
+    default:
+      return Icons.menu_book_rounded;
+  }
 }
 
 class EducationController extends GetxController {
-  final List<String> categories = const [
-    'All',
-    'HSC',
-    'Admission',
-    'Medical',
-    'English',
-    'IELTS',
+  EducationRepository get _repo => Get.find<EducationRepository>();
+
+  // ── Categories ──────────────────────────────────────────────────────
+  // Index 0 is a synthetic "All" entry; API categories follow.
+  List<EduCategory> categories = [
+    EduCategory(key: 'all', label: 'All', icon: 'book'),
   ];
+  bool loadingCategories = false;
   int categoryIndex = 0;
+
   void setCategory(int i) {
     categoryIndex = i;
     update();
   }
 
-  final List<EduCenter> centers = const [
-    EduCenter(
-      name: 'Mentors Coaching Center',
-      area: 'Dhanmondi 27',
-      distance: '1.1 km',
-      rating: '4.8',
-      reviews: '210',
-      tags: ['HSC', 'Admission', 'English'],
-      courses: [
-        EduCourse(
-          title: 'HSC Physics (Batch 2026)',
-          teacher: 'Engr. Rakib',
-          duration: '4 months',
-          price: '৳3,500',
-          seats: '8 left',
-          online: false,
-        ),
-        EduCourse(
-          title: 'University Admission — Science',
-          teacher: 'Dr. Hasan',
-          duration: '6 months',
-          price: '৳8,000',
-          seats: '15 left',
-          online: false,
-        ),
-        EduCourse(
-          title: 'Spoken English',
-          teacher: 'Ms. Farah',
-          duration: '3 months',
-          price: '৳2,500',
-          seats: 'Open',
-          online: true,
-        ),
-      ],
-    ),
-    EduCenter(
-      name: 'UCC Uttara',
-      area: 'Uttara Sector 6',
-      distance: '5.4 km',
-      rating: '4.6',
-      reviews: '156',
-      tags: ['Medical', 'Engineering'],
-      courses: [
-        EduCourse(
-          title: 'Medical Admission Crash',
-          teacher: 'Dr. Nabila',
-          duration: '5 months',
-          price: '৳12,000',
-          seats: '6 left',
-          online: false,
-        ),
-        EduCourse(
-          title: 'Engineering Admission',
-          teacher: 'Engr. Sami',
-          duration: '5 months',
-          price: '৳10,000',
-          seats: '10 left',
-          online: false,
-        ),
-      ],
-    ),
-    EduCenter(
-      name: 'Bright Future Tutors',
-      area: 'Mirpur 10',
-      distance: '7.2 km',
-      rating: '4.5',
-      reviews: '88',
-      tags: ['Class 6–10', 'Home tutor'],
-      courses: [
-        EduCourse(
-          title: 'Class 9–10 Math & Science',
-          teacher: 'Tahmid Sir',
-          duration: 'Monthly',
-          price: '৳4,000',
-          seats: 'Open',
-          online: false,
-        ),
-        EduCourse(
-          title: 'Home Tutor (any subject)',
-          teacher: 'Verified tutors',
-          duration: 'Flexible',
-          price: '৳3,000',
-          seats: 'Open',
-          online: false,
-        ),
-      ],
-    ),
-  ];
+  // ── Centers ─────────────────────────────────────────────────────────
+  List<EduCenter> centers = [];
+  bool loadingCenters = false;
 
-  // Selection
+  List<EduCenter> get filteredCenters {
+    if (categoryIndex <= 0 || categoryIndex >= categories.length) {
+      return centers;
+    }
+    final cat = categories[categoryIndex];
+    final needle = cat.label.toLowerCase();
+    final key = cat.key.toLowerCase();
+    final hits = centers.where((c) {
+      final hay =
+          '${c.subjects} ${c.targetGrades} ${c.instituteType} ${c.name}'
+              .toLowerCase();
+      return hay.contains(needle) ||
+          hay.contains(key) ||
+          needle.split(' ').any((w) => w.length > 2 && hay.contains(w));
+    }).toList();
+    // Don't show an empty screen when the fuzzy match misses.
+    return hits.isEmpty ? centers : hits;
+  }
+
+  // ── Center detail ───────────────────────────────────────────────────
   EduCenter? center;
+  List<EduCourse> courses = [];
+  bool loadingCourses = false;
+
+  // ── Course / enquiry ────────────────────────────────────────────────
   EduCourse? course;
 
-  // Enquiry form
-  final List<String> grades = const [
-    'Class 6–8',
-    'SSC',
-    'HSC',
-    'Admission',
-    'University',
+  final List<Map<String, String>> grades = const [
+    {'label': 'Class 6-8', 'value': 'class_6_8'},
+    {'label': 'SSC', 'value': 'ssc'},
+    {'label': 'HSC', 'value': 'hsc'},
+    {'label': 'Admission', 'value': 'admission'},
+    {'label': 'University', 'value': 'university'},
   ];
   int gradeIndex = 2; // HSC default
   void setGrade(int i) {
@@ -160,22 +91,156 @@ class EducationController extends GetxController {
     update();
   }
 
-  // ---- Navigation ----
+  final TextEditingController studentName = TextEditingController();
+  final TextEditingController parentContact = TextEditingController();
+  final TextEditingController subjectNeeded = TextEditingController();
+  final TextEditingController preferredTime = TextEditingController();
+  final TextEditingController notes = TextEditingController();
+  bool submitting = false;
+  EduInterest? lastInterest;
+
+  // ── My enrollments ──────────────────────────────────────────────────
+  List<EduInterest> myInterests = [];
+  bool loadingInterests = false;
+
+  @override
+  void onInit() {
+    super.onInit();
+    fetchCategories();
+    fetchCentersNear();
+  }
+
+  Future<void> fetchCategories() async {
+    loadingCategories = true;
+    update();
+    try {
+      final fetched = await _repo.fetchCategories();
+      categories = [
+        EduCategory(key: 'all', label: 'All', icon: 'book'),
+        ...fetched,
+      ];
+    } catch (_) {
+    } finally {
+      loadingCategories = false;
+      update();
+    }
+  }
+
+  Future<void> fetchCentersNear() async {
+    loadingCenters = true;
+    update();
+    try {
+      centers = await _repo.fetchCentersNear();
+    } catch (e) {
+      SnackHelper.error(e.toString().replaceFirst('Exception: ', ''));
+    } finally {
+      loadingCenters = false;
+      update();
+    }
+  }
+
+  // ── Navigation ──────────────────────────────────────────────────────
   void openCenter(EduCenter c) {
     center = c;
+    courses = [];
     update();
     Get.toNamed(Routes.EDUCATION_CENTER);
+    fetchCenterCourses(c.id);
+  }
+
+  Future<void> fetchCenterCourses(String centerId) async {
+    loadingCourses = true;
+    update();
+    try {
+      courses = await _repo.fetchCenterCourses(centerId);
+    } catch (e) {
+      SnackHelper.error(e.toString().replaceFirst('Exception: ', ''));
+    } finally {
+      loadingCourses = false;
+      update();
+    }
   }
 
   void enquire(EduCourse c) {
     course = c;
     gradeIndex = 2;
+    studentName.clear();
+    parentContact.clear();
+    subjectNeeded.text = c.title;
+    preferredTime.clear();
+    notes.clear();
     update();
     Get.toNamed(Routes.EDUCATION_ENQUIRY);
   }
 
-  void submitEnquiry() => Get.toNamed(Routes.EDUCATION_DONE);
+  Future<void> submitEnquiry() async {
+    if (submitting) return;
+    if (studentName.text.trim().isEmpty) {
+      SnackHelper.error('শিক্ষার্থীর নাম দিন');
+      return;
+    }
+    if (parentContact.text.trim().isEmpty) {
+      SnackHelper.error('অভিভাবকের যোগাযোগ নম্বর দিন');
+      return;
+    }
+    if (center == null || course == null) {
+      SnackHelper.error('কোর্স নির্বাচন করুন');
+      return;
+    }
+    submitting = true;
+    update();
+    try {
+      final payload = <String, dynamic>{
+        'center_id': center!.id,
+        'course_id': course!.id,
+        'student_name': studentName.text.trim(),
+        'student_grade': grades[gradeIndex]['value'],
+        'parent_contact': parentContact.text.trim(),
+        if (subjectNeeded.text.trim().isNotEmpty)
+          'subject_needed': subjectNeeded.text.trim(),
+        if (preferredTime.text.trim().isNotEmpty)
+          'preferred_time': preferredTime.text.trim(),
+        if (notes.text.trim().isNotEmpty) 'notes': notes.text.trim(),
+      };
+      lastInterest = await _repo.registerInterest(payload);
+      Get.toNamed(Routes.EDUCATION_DONE);
+    } catch (e) {
+      SnackHelper.error(e.toString().replaceFirst('Exception: ', ''));
+    } finally {
+      submitting = false;
+      update();
+    }
+  }
+
+  // ── My enrollments ──────────────────────────────────────────────────
+  void openMyInterests() {
+    fetchMyInterests();
+    Get.toNamed(Routes.EDUCATION_INTERESTS);
+  }
+
+  Future<void> fetchMyInterests() async {
+    loadingInterests = true;
+    update();
+    try {
+      myInterests = await _repo.fetchMyInterests();
+    } catch (e) {
+      SnackHelper.error(e.toString().replaceFirst('Exception: ', ''));
+    } finally {
+      loadingInterests = false;
+      update();
+    }
+  }
 
   void backToEducation() =>
-      Get.until((r) => Get.currentRoute == Routes.EDUCATION);
+      Get.until((r) => r.settings.name == Routes.EDUCATION);
+
+  @override
+  void onClose() {
+    studentName.dispose();
+    parentContact.dispose();
+    subjectNeeded.dispose();
+    preferredTime.dispose();
+    notes.dispose();
+    super.onClose();
+  }
 }

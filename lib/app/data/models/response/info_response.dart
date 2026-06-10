@@ -14,6 +14,11 @@ class InfoEntry {
     required this.description,
     required this.descriptionBn,
     required this.hotline,
+    required this.phone,
+    required this.address,
+    required this.division,
+    required this.district,
+    required this.officeHours,
     required this.isEmergency,
     required this.isActive,
     required this.verified,
@@ -29,12 +34,27 @@ class InfoEntry {
   final String description;
   final String descriptionBn;
   final String hotline;
+  final String phone;
+  final String address;
+  final String division;
+  final String district;
+  final String officeHours;
   final bool isEmergency;
   final bool isActive;
   final bool verified;
   final int sortOrder;
 
   bool get isNationalEmergency => subtype == 'national_emergency';
+
+  /// The number to dial — hotline takes precedence, then phone.
+  String get callNumber => hotline.isNotEmpty ? hotline : phone;
+
+  /// Readable category label, e.g. "govt_hospital" → "Govt hospital".
+  String get typeLabel {
+    final src = subtype.isNotEmpty ? subtype : category;
+    final s = src.replaceAll('_', ' ');
+    return s.isEmpty ? '' : s[0].toUpperCase() + s.substring(1);
+  }
 
   factory InfoEntry.fromMap(Map<String, dynamic> json) {
     String str(dynamic v) => v?.toString().trim() ?? '';
@@ -48,6 +68,11 @@ class InfoEntry {
       description: str(json['description']),
       descriptionBn: str(json['description_bn']),
       hotline: str(json['hotline']),
+      phone: str(json['phone']),
+      address: str(json['address']),
+      division: str(json['division']),
+      district: str(json['district']),
+      officeHours: str(json['office_hours']),
       isEmergency: json['is_emergency'] == true,
       isActive: json['is_active'] == true,
       verified: json['verified'] == true,

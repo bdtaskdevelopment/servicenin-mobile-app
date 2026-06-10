@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../../core/values/app_colors.dart';
+import '../../../global_widget/sn_shimmer.dart';
 import '../controllers/physio_controller.dart';
 
 const _orange = Color(0xFFB45309);
@@ -132,11 +133,9 @@ class PhysioView extends GetView<PhysioController> {
                       style: const TextStyle(fontSize: 12.5, color: _orange)),
                   const SizedBox(height: 14),
                   if (con.loadingCenters && con.centers.isEmpty)
-                    const Padding(
-                      padding: EdgeInsets.symmetric(vertical: 24),
-                      child: Center(
-                          child: CircularProgressIndicator(
-                              strokeWidth: 2.4, color: _brown)),
+                    const SnListSkeleton(
+                      count: 3,
+                      padding: EdgeInsets.zero,
                     )
                   else if (con.centers.isEmpty)
                     const Padding(

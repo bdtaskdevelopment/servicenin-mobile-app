@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import '../../../global_widget/sn_shimmer.dart';
 import '../../../routes/app_pages.dart';
 import '../controllers/booking_controller.dart';
 import '../controllers/healthcare_controller.dart';
@@ -53,10 +54,8 @@ class AllAvailableDoctorsView extends GetView<HealthcareController> {
                 child: GetBuilder<HealthcareController>(
                   builder: (con) {
                     if (con.loadingDoctors && con.doctors.isEmpty) {
-                      return const Center(
-                        child: CircularProgressIndicator(
-                            strokeWidth: 2.6, color: _green),
-                      );
+                      return const SnListSkeleton(
+                          padding: EdgeInsets.fromLTRB(16, 8, 16, 24));
                     }
                     if (con.doctors.isEmpty) {
                       return ListView(

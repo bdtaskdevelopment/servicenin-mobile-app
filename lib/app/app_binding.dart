@@ -11,6 +11,10 @@ import 'data/providers/service.provider.dart';
 import 'data/providers/physio.provider.dart';
 import 'data/providers/matchmaking.provider.dart';
 import 'data/providers/jobs.provider.dart';
+import 'data/providers/funeral.provider.dart';
+import 'data/providers/education.provider.dart';
+import 'data/providers/nagarik.provider.dart';
+import 'data/providers/home.provider.dart';
 import 'data/providers/app.provider.dart';
 import 'data/providers/auth.provider.dart';
 import 'data/providers/blood.provider.dart';
@@ -22,6 +26,10 @@ import 'data/repositories/service.repo.dart';
 import 'data/repositories/physio.repo.dart';
 import 'data/repositories/matchmaking.repo.dart';
 import 'data/repositories/jobs.repo.dart';
+import 'data/repositories/funeral.repo.dart';
+import 'data/repositories/education.repo.dart';
+import 'data/repositories/nagarik.repo.dart';
+import 'data/repositories/home.repo.dart';
 import 'data/repositories/app.repo.dart';
 import 'data/repositories/auth.repo.dart';
 import 'data/repositories/blood.repo.dart';
@@ -91,6 +99,30 @@ class AppDependencyInjection {
     Get.lazyPut<JobsProvider>(() => JobsProvider(), fenix: true);
     Get.lazyPut<JobsRepository>(
       () => JobsRepository(provider: Get.find()),
+      fenix: true,
+    );
+
+    Get.lazyPut<FuneralProvider>(() => FuneralProvider(), fenix: true);
+    Get.lazyPut<FuneralRepository>(
+      () => FuneralRepository(provider: Get.find()),
+      fenix: true,
+    );
+
+    Get.lazyPut<EducationProvider>(() => EducationProvider(), fenix: true);
+    Get.lazyPut<EducationRepository>(
+      () => EducationRepository(provider: Get.find()),
+      fenix: true,
+    );
+
+    Get.lazyPut<NagarikProvider>(() => NagarikProvider(), fenix: true);
+    Get.lazyPut<NagarikRepository>(
+      () => NagarikRepository(provider: Get.find()),
+      fenix: true,
+    );
+
+    Get.lazyPut<HomeProvider>(() => HomeProvider(), fenix: true);
+    Get.lazyPut<HomeRepository>(
+      () => HomeRepository(provider: Get.find()),
       fenix: true,
     );
 

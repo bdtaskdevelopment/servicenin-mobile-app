@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 
 import '../../../core/values/app_colors.dart';
 import '../../../data/models/response/healthcare_response.dart';
+import '../../../global_widget/sn_shimmer.dart';
 import '../controllers/appointments_controller.dart';
 
 const _green = Color(0xFF15803D);
@@ -50,10 +51,7 @@ class AppointmentsView extends GetView<AppointmentsController> {
         body: GetBuilder<AppointmentsController>(
           builder: (con) {
             if (con.loading && con.all.isEmpty) {
-              return const Center(
-                child: CircularProgressIndicator(
-                    strokeWidth: 2.6, color: _green),
-              );
+              return const SnListSkeleton();
             }
             return TabBarView(
               children: [

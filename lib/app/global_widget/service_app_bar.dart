@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../core/values/app_colors.dart';
+import '../modules/notifications/controllers/notifications_controller.dart';
 import '../routes/app_pages.dart';
 
 /// The ServiceNin brand app bar: SN logo, name + tagline, and search /
@@ -69,6 +70,15 @@ class ServiceAppBar extends StatelessWidget implements PreferredSizeWidget {
     );
   }
 
+  VoidCallback get _onBell =>
+      onNotifications ??
+      () async {
+        await Get.toNamed(Routes.NOTIFICATIONS);
+        if (Get.isRegistered<NotificationsController>()) {
+          Get.find<NotificationsController>().fetchUnreadCount();
+        }
+      };
+
   Widget _logo() {
     return Container(
       width: 40,
@@ -102,14 +112,21 @@ class ServiceAppBar extends StatelessWidget implements PreferredSizeWidget {
   }
 
   Widget _bell() {
+    final button = _circleButton(Icons.notifications_none_rounded, _onBell);
+    if (Get.isRegistered<NotificationsController>()) {
+      return GetBuilder<NotificationsController>(
+        builder: (con) => _bellStack(button, con.hasUnread),
+      );
+    }
+    return _bellStack(button, hasNotification);
+  }
+
+  Widget _bellStack(Widget button, bool showDot) {
     return Stack(
       clipBehavior: Clip.none,
       children: [
-        _circleButton(
-          Icons.notifications_none_rounded,
-          onNotifications ?? () => Get.toNamed(Routes.NOTIFICATIONS),
-        ),
-        if (hasNotification)
+        button,
+        if (showDot)
           Positioned(
             right: 9,
             top: 9,

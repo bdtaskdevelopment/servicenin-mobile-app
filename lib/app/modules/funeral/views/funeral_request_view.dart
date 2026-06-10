@@ -5,9 +5,6 @@ import '../../../core/values/app_colors.dart';
 import '../controllers/funeral_controller.dart';
 
 const _charcoal = Color(0xFF332F2C);
-const _green = Color(0xFF16A34A);
-const _greenTile = Color(0xFFD6F5E3);
-const _grayTile = Color(0xFFE8EAED);
 
 class FuneralRequestView extends GetView<FuneralController> {
   const FuneralRequestView({super.key});
@@ -20,7 +17,6 @@ class FuneralRequestView extends GetView<FuneralController> {
         child: GetBuilder<FuneralController>(
           builder: (con) => Column(
             children: [
-              // Header
               Padding(
                 padding: const EdgeInsets.fromLTRB(8, 6, 16, 8),
                 child: Row(
@@ -52,15 +48,14 @@ class FuneralRequestView extends GetView<FuneralController> {
                 child: ListView(
                   padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
                   children: [
-                    const _Label('SERVICES NEEDED'),
+                    const _Label('SERVICE NEEDED'),
                     const SizedBox(height: 10),
-                    ...List.generate(con.services.length, (i) {
-                      final s = con.services[i];
-                      final sel = con.selected[i];
+                    ...con.services.map((s) {
+                      final sel = con.selectedServiceKey == s.key;
                       return Padding(
-                        padding: const EdgeInsets.only(bottom: 12),
+                        padding: const EdgeInsets.only(bottom: 10),
                         child: GestureDetector(
-                          onTap: () => con.toggleService(i),
+                          onTap: () => con.selectService(s.key),
                           child: Container(
                             padding: const EdgeInsets.all(14),
                             decoration: BoxDecoration(
@@ -74,95 +69,84 @@ class FuneralRequestView extends GetView<FuneralController> {
                             ),
                             child: Row(
                               children: [
-                                Container(
-                                  width: 42,
-                                  height: 42,
-                                  decoration: BoxDecoration(
-                                      color: _grayTile,
-                                      borderRadius: BorderRadius.circular(12)),
-                                  child: Icon(s.icon,
-                                      color: const Color(0xFF334155),
-                                      size: 21),
-                                ),
-                                const SizedBox(width: 14),
+                                Icon(
+                                    sel
+                                        ? Icons.radio_button_checked
+                                        : Icons.radio_button_off,
+                                    size: 22,
+                                    color: sel
+                                        ? _charcoal
+                                        : const Color(0xFFCBD5E1)),
+                                const SizedBox(width: 12),
                                 Expanded(
-                                  child: Text(s.title,
-                                      style: const TextStyle(
-                                          fontSize: 15,
-                                          fontWeight: FontWeight.w800,
-                                          color: Color(0xFF0F172A))),
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(s.label,
+                                          style: const TextStyle(
+                                              fontSize: 14.5,
+                                              fontWeight: FontWeight.w800,
+                                              color: Color(0xFF0F172A))),
+                                      if (s.priceLabel.isNotEmpty) ...[
+                                        const SizedBox(height: 2),
+                                        Text(s.priceLabel,
+                                            style: const TextStyle(
+                                                fontSize: 12,
+                                                fontWeight: FontWeight.w700,
+                                                color: Color(0xFFC2410C))),
+                                      ],
+                                    ],
+                                  ),
                                 ),
-                                _Check(selected: sel),
                               ],
                             ),
                           ),
                         ),
                       );
                     }),
-                    const SizedBox(height: 6),
-                    const _Label('DETAILS'),
+                    const SizedBox(height: 8),
+                    const _Label('DECEASED DETAILS'),
                     const SizedBox(height: 10),
-                    const _InputCard(
-                        label: 'NAME OF THE DECEASED', hint: 'Full name'),
+                    _Field(con.deceasedName, 'NAME OF THE DECEASED',
+                        'Full name'),
                     const SizedBox(height: 12),
-                    const _InputCard(
-                        label: 'DATE OF PASSING', hint: 'dd / mm / yyyy'),
-                    const SizedBox(height: 12),
-                    const _InputCard(
-                        label: 'CURRENT LOCATION OF BODY',
-                        hint: 'Home / hospital address'),
-                    const SizedBox(height: 12),
-                    // Contact card
-                    Container(
-                      padding: const EdgeInsets.fromLTRB(16, 12, 16, 14),
-                      decoration: BoxDecoration(
-                          color: AppColors.white,
-                          borderRadius: BorderRadius.circular(14),
-                          border:
-                              Border.all(color: const Color(0xFFEDEFF2))),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            children: [
-                              const Text('YOUR CONTACT',
-                                  style: TextStyle(
-                                      fontSize: 11,
-                                      fontWeight: FontWeight.w700,
-                                      color: Color(0xFF94A3B8),
-                                      letterSpacing: 0.6)),
-                              const Spacer(),
-                              Container(
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 8, vertical: 3),
-                                decoration: BoxDecoration(
-                                    color: _greenTile,
-                                    borderRadius: BorderRadius.circular(20)),
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: const [
-                                    Icon(Icons.circle,
-                                        size: 6, color: _green),
-                                    SizedBox(width: 4),
-                                    Text('From profile',
-                                        style: TextStyle(
-                                            fontSize: 10.5,
-                                            fontWeight: FontWeight.w700,
-                                            color: Color(0xFF15803D))),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 6),
-                          const Text('Tanzil Ahmed · 01711-***123',
-                              style: TextStyle(
-                                  fontSize: 15.5,
-                                  fontWeight: FontWeight.w800,
-                                  color: Color(0xFF0F172A))),
-                        ],
-                      ),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: _Field(con.deceasedAge, 'AGE', 'e.g. 78',
+                              kb: TextInputType.number),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(child: _GenderField(con: con)),
+                      ],
                     ),
+                    const SizedBox(height: 12),
+                    _Field(con.deathTime, 'TIME OF DEATH',
+                        'YYYY-MM-DD HH:MM'),
+                    const SizedBox(height: 12),
+                    _Field(con.placeOfDeath, 'PLACE OF DEATH',
+                        'e.g. Dhaka Medical College'),
+                    const SizedBox(height: 12),
+                    _Field(con.causeOfDeath, 'CAUSE OF DEATH (OPTIONAL)',
+                        'e.g. Old age'),
+                    const SizedBox(height: 16),
+                    const _Label('LOCATION OF BODY'),
+                    const SizedBox(height: 10),
+                    _Field(con.address, 'ADDRESS', 'Home / hospital address'),
+                    const SizedBox(height: 12),
+                    _Field(con.wardNo, 'WARD NO (OPTIONAL)', 'e.g. 10'),
+                    const SizedBox(height: 12),
+                    _Field(con.scheduledAt, 'PREFERRED TIME (OPTIONAL)',
+                        'YYYY-MM-DD HH:MM'),
+                    const SizedBox(height: 16),
+                    const _Label('YOUR CONTACT'),
+                    const SizedBox(height: 10),
+                    _Field(con.contactName, 'CONTACT NAME', 'Your name'),
+                    const SizedBox(height: 12),
+                    _Field(con.contactPhone, 'CONTACT PHONE',
+                        '+8801XXXXXXXXX',
+                        kb: TextInputType.phone),
                     const SizedBox(height: 16),
                     Text(
                         'A coordinator will call within minutes to confirm timing, '
@@ -174,14 +158,13 @@ class FuneralRequestView extends GetView<FuneralController> {
                   ],
                 ),
               ),
-              // Submit
               Padding(
                 padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
                 child: SizedBox(
                   width: double.infinity,
                   height: 54,
                   child: ElevatedButton(
-                    onPressed: con.submitRequest,
+                    onPressed: con.submitting ? null : con.submitRequest,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: _charcoal,
                       foregroundColor: Colors.white,
@@ -189,9 +172,16 @@ class FuneralRequestView extends GetView<FuneralController> {
                       shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(14)),
                     ),
-                    child: const Text('Submit request',
-                        style: TextStyle(
-                            fontSize: 16, fontWeight: FontWeight.w800)),
+                    child: con.submitting
+                        ? const SizedBox(
+                            width: 22,
+                            height: 22,
+                            child: CircularProgressIndicator(
+                                strokeWidth: 2.4, color: Colors.white),
+                          )
+                        : const Text('Submit request',
+                            style: TextStyle(
+                                fontSize: 16, fontWeight: FontWeight.w800)),
                   ),
                 ),
               ),
@@ -199,28 +189,6 @@ class FuneralRequestView extends GetView<FuneralController> {
           ),
         ),
       ),
-    );
-  }
-}
-
-class _Check extends StatelessWidget {
-  const _Check({required this.selected});
-  final bool selected;
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: 24,
-      height: 24,
-      decoration: BoxDecoration(
-        color: selected ? _charcoal : Colors.transparent,
-        borderRadius: BorderRadius.circular(7),
-        border: Border.all(
-            color: selected ? _charcoal : const Color(0xFFCBD5E1),
-            width: 1.8),
-      ),
-      child: selected
-          ? const Icon(Icons.check_rounded, size: 15, color: Colors.white)
-          : null,
     );
   }
 }
@@ -237,10 +205,13 @@ class _Label extends StatelessWidget {
           letterSpacing: 0.6));
 }
 
-class _InputCard extends StatelessWidget {
-  const _InputCard({required this.label, required this.hint});
+class _Field extends StatelessWidget {
+  const _Field(this.controller, this.label, this.hint,
+      {this.kb = TextInputType.text});
+  final TextEditingController controller;
   final String label;
   final String hint;
+  final TextInputType kb;
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -259,6 +230,8 @@ class _InputCard extends StatelessWidget {
                   color: Color(0xFF94A3B8),
                   letterSpacing: 0.6)),
           TextField(
+            controller: controller,
+            keyboardType: kb,
             style: const TextStyle(
                 fontSize: 15.5,
                 fontWeight: FontWeight.w700,
@@ -273,6 +246,64 @@ class _InputCard extends StatelessWidget {
                   fontWeight: FontWeight.w500,
                   color: Color(0xFFB0AEB8)),
             ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _GenderField extends StatelessWidget {
+  const _GenderField({required this.con});
+  final FuneralController con;
+  @override
+  Widget build(BuildContext context) {
+    Widget btn(String g, String label) {
+      final sel = con.gender == g;
+      return Expanded(
+        child: GestureDetector(
+          onTap: () => con.setGender(g),
+          child: Container(
+            height: 40,
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              color: sel ? _charcoal : Colors.transparent,
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(
+                  color: sel ? _charcoal : const Color(0xFFE2E8F0)),
+            ),
+            child: Text(label,
+                style: TextStyle(
+                    fontSize: 13.5,
+                    fontWeight: FontWeight.w800,
+                    color: sel ? Colors.white : const Color(0xFF334155))),
+          ),
+        ),
+      );
+    }
+
+    return Container(
+      padding: const EdgeInsets.fromLTRB(12, 10, 12, 8),
+      decoration: BoxDecoration(
+          color: AppColors.white,
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(color: const Color(0xFFEDEFF2))),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text('GENDER',
+              style: TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w700,
+                  color: Color(0xFF94A3B8),
+                  letterSpacing: 0.6)),
+          const SizedBox(height: 6),
+          Row(
+            children: [
+              btn('male', 'Male'),
+              const SizedBox(width: 8),
+              btn('female', 'Female'),
+            ],
           ),
         ],
       ),

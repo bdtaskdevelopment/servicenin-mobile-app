@@ -31,18 +31,22 @@ class CourseEnquiryView extends GetView<EducationController> {
                         icon: const Icon(Icons.arrow_back_ios_new_rounded,
                             size: 20, color: Color(0xFF1A1A1A)),
                       ),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Text('Course enquiry',
-                              style: TextStyle(
-                                  fontSize: 19,
-                                  fontWeight: FontWeight.w800,
-                                  color: Color(0xFF0F172A))),
-                          Text(course?.title ?? '',
-                              style: const TextStyle(
-                                  fontSize: 12, color: Color(0xFF94A3B8))),
-                        ],
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text('Enroll',
+                                style: TextStyle(
+                                    fontSize: 19,
+                                    fontWeight: FontWeight.w800,
+                                    color: Color(0xFF0F172A))),
+                            Text(course?.title ?? '',
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: const TextStyle(
+                                    fontSize: 12, color: Color(0xFF94A3B8))),
+                          ],
+                        ),
                       ),
                     ],
                   ),
@@ -72,7 +76,7 @@ class CourseEnquiryView extends GetView<EducationController> {
                                         : const Color(0xFFE2E8F0),
                                     width: sel ? 1.6 : 1.2),
                               ),
-                              child: Text(con.grades[i],
+                              child: Text(con.grades[i]['label']!,
                                   style: TextStyle(
                                       fontSize: 13.5,
                                       fontWeight: FontWeight.w700,
@@ -84,24 +88,30 @@ class CourseEnquiryView extends GetView<EducationController> {
                         }),
                       ),
                       const SizedBox(height: 18),
-                      const _InputCard(
-                          label: 'STUDENT NAME', hint: 'Full name'),
+                      _InputCard(
+                          controller: con.studentName,
+                          label: 'STUDENT NAME',
+                          hint: 'Full name'),
                       const SizedBox(height: 12),
-                      const _InputCard(
+                      _InputCard(
+                          controller: con.parentContact,
                           label: 'PARENT / GUARDIAN CONTACT',
                           hint: '+880 1XXXXXXXXX',
                           keyboard: TextInputType.phone),
                       const SizedBox(height: 12),
                       _InputCard(
+                          controller: con.subjectNeeded,
                           label: 'SUBJECT NEEDED',
-                          initial: course?.title ?? ''),
+                          hint: 'e.g. Physics, Chemistry'),
                       const SizedBox(height: 12),
-                      const _InputCard(
+                      _InputCard(
+                          controller: con.preferredTime,
                           label: 'PREFERRED TIME',
-                          hint: 'e.g. evening, after 5 PM'),
+                          hint: 'e.g. Evening (5-7 PM)'),
                       const SizedBox(height: 12),
-                      const _InputCard(
-                          label: 'NOTES',
+                      _InputCard(
+                          controller: con.notes,
+                          label: 'NOTES (OPTIONAL)',
                           hint: 'Anything the center should know…',
                           maxLines: 3),
                     ],
@@ -114,7 +124,8 @@ class CourseEnquiryView extends GetView<EducationController> {
                     width: double.infinity,
                     height: 54,
                     child: ElevatedButton(
-                      onPressed: con.submitEnquiry,
+                      onPressed:
+                          con.submitting ? null : con.submitEnquiry,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: _purple,
                         foregroundColor: Colors.white,
@@ -122,9 +133,17 @@ class CourseEnquiryView extends GetView<EducationController> {
                         shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(14)),
                       ),
-                      child: const Text('Submit enquiry',
-                          style: TextStyle(
-                              fontSize: 16, fontWeight: FontWeight.w800)),
+                      child: con.submitting
+                          ? const SizedBox(
+                              width: 22,
+                              height: 22,
+                              child: CircularProgressIndicator(
+                                  strokeWidth: 2.4, color: Colors.white),
+                            )
+                          : const Text('Register interest',
+                              style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w800)),
                     ),
                   ),
                 ),
@@ -151,15 +170,15 @@ class _Label extends StatelessWidget {
 
 class _InputCard extends StatelessWidget {
   const _InputCard({
+    required this.controller,
     required this.label,
     this.hint,
-    this.initial,
     this.maxLines = 1,
     this.keyboard,
   });
+  final TextEditingController controller;
   final String label;
   final String? hint;
-  final String? initial;
   final int maxLines;
   final TextInputType? keyboard;
 
@@ -181,10 +200,9 @@ class _InputCard extends StatelessWidget {
                   color: Color(0xFF94A3B8),
                   letterSpacing: 0.6)),
           TextField(
+            controller: controller,
             maxLines: maxLines,
             keyboardType: keyboard,
-            controller:
-                initial != null ? TextEditingController(text: initial) : null,
             style: const TextStyle(
                 fontSize: 15.5,
                 fontWeight: FontWeight.w700,

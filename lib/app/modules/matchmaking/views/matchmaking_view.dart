@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 
 import '../../../core/values/app_colors.dart';
 import '../../../data/models/response/matchmaking_response.dart';
+import '../../../global_widget/sn_shimmer.dart';
 import '../controllers/matchmaking_controller.dart';
 
 const _maroon = Color(0xFFB11D5C);
@@ -165,12 +166,8 @@ class MatchmakingView extends GetView<MatchmakingController> {
                               fontSize: 12.5, color: Color(0xFF94A3B8))),
                       const SizedBox(height: 14),
                       if (con.loadingSuggestions && con.suggestions.isEmpty)
-                        const Padding(
-                          padding: EdgeInsets.symmetric(vertical: 24),
-                          child: Center(
-                              child: CircularProgressIndicator(
-                                  strokeWidth: 2.4, color: _maroon)),
-                        )
+                        const SnListSkeleton(
+                            count: 3, padding: EdgeInsets.zero)
                       else if (con.suggestions.isEmpty)
                         const Padding(
                           padding: EdgeInsets.symmetric(vertical: 8),

@@ -5,6 +5,7 @@ import 'package:latlong2/latlong.dart';
 import '../../../core/values/app_colors.dart';
 import '../../../data/models/response/service_response.dart';
 import '../../../global_widget/sn_map.dart';
+import '../../../global_widget/sn_shimmer.dart';
 import '../controllers/home_service_controller.dart';
 
 const _teal = Color(0xFF0E9F8E);
@@ -145,12 +146,10 @@ class HsTrackingView extends GetView<HomeServiceController> {
                                   letterSpacing: 0.6)),
                           const SizedBox(height: 12),
                           if (con.loadingTrack && con.timeline.isEmpty)
-                            const Center(
-                              child: Padding(
-                                padding: EdgeInsets.all(8),
-                                child: CircularProgressIndicator(
-                                    strokeWidth: 2.4, color: _darkTeal),
-                              ),
+                            const SnListSkeleton(
+                              count: 3,
+                              padding: EdgeInsets.zero,
+                              showTrailing: false,
                             )
                           else
                             _Timeline(entries: con.timeline),

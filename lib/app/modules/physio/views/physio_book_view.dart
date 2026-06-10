@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../../core/values/app_colors.dart';
+import '../../../global_widget/sn_shimmer.dart';
 import '../controllers/physio_controller.dart';
 
 const _brown = Color(0xFF8A3E12);
@@ -104,11 +105,19 @@ class PhysioBookView extends GetView<PhysioController> {
                       const _Label('DATE'),
                       const SizedBox(height: 10),
                       if (con.loadingDates && con.scheduleDates.isEmpty)
-                        const Padding(
-                          padding: EdgeInsets.symmetric(vertical: 10),
-                          child: Center(
-                              child: CircularProgressIndicator(
-                                  strokeWidth: 2.4, color: _brown)),
+                        SnShimmer(
+                          child: SizedBox(
+                            height: 64,
+                            child: ListView.separated(
+                              scrollDirection: Axis.horizontal,
+                              physics: const NeverScrollableScrollPhysics(),
+                              itemCount: 5,
+                              separatorBuilder: (_, _) =>
+                                  const SizedBox(width: 10),
+                              itemBuilder: (_, _) => const SnBone(
+                                  width: 76, height: 64, radius: 12),
+                            ),
+                          ),
                         )
                       else
                         SizedBox(
@@ -163,11 +172,11 @@ class PhysioBookView extends GetView<PhysioController> {
                       const _Label('TIME'),
                       const SizedBox(height: 12),
                       if (con.loadingSlots && con.slots.isEmpty)
-                        const Padding(
-                          padding: EdgeInsets.symmetric(vertical: 10),
-                          child: Center(
-                              child: CircularProgressIndicator(
-                                  strokeWidth: 2.4, color: _brown)),
+                        const SnGridSkeleton(
+                          count: 6,
+                          crossAxisCount: 3,
+                          padding: EdgeInsets.zero,
+                          childAspectRatio: 2.4,
                         )
                       else if (con.slots.isEmpty)
                         const Text('No slots for this date.',

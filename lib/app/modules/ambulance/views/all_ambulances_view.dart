@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import '../../../global_widget/sn_shimmer.dart';
 import '../controllers/ambulance_controller.dart';
 import '../widgets/ambulance_widgets.dart';
 
@@ -51,10 +52,7 @@ class AllAmbulancesView extends GetView<AmbulanceController> {
                 child: GetBuilder<AmbulanceController>(
                   builder: (con) {
                     if (con.loadingAvailable && con.available.isEmpty) {
-                      return const Center(
-                        child: CircularProgressIndicator(
-                            strokeWidth: 2.6, color: _red),
-                      );
+                      return const SnListSkeleton();
                     }
                     if (con.available.isEmpty) {
                       return ListView(

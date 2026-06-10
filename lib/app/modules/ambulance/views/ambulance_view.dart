@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 
 import '../../../core/values/app_colors.dart';
 import '../../../global_widget/custom_app_bar.dart';
+import '../../../global_widget/sn_shimmer.dart';
 import '../controllers/ambulance_controller.dart';
 import '../widgets/ambulance_widgets.dart';
 
@@ -142,15 +143,9 @@ class _BookingsList extends StatelessWidget {
 class _Loader extends StatelessWidget {
   const _Loader();
   @override
-  Widget build(BuildContext context) => const Padding(
-        padding: EdgeInsets.symmetric(vertical: 24),
-        child: Center(
-          child: SizedBox(
-            width: 24,
-            height: 24,
-            child: CircularProgressIndicator(strokeWidth: 2.4, color: _red),
-          ),
-        ),
+  Widget build(BuildContext context) => const SnListSkeleton(
+        count: 3,
+        padding: EdgeInsets.zero,
       );
 }
 

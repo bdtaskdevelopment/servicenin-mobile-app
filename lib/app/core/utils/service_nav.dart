@@ -9,6 +9,50 @@ import '../../routes/app_pages.dart';
 class ServiceNav {
   ServiceNav._();
 
+  /// Maps an API service `key` (from /api/v1/home/*) to its route.
+  /// Used by Home (popular/recent) and Search where services come from the API.
+  static void openByKey(String key) {
+    switch (key) {
+      case 'blood':
+        Get.toNamed(Routes.BLOOD);
+        break;
+      case 'ambulance':
+        Get.toNamed(Routes.AMBULANCE);
+        break;
+      case 'healthcare':
+        Get.toNamed(Routes.HEALTHCARE);
+        break;
+      case 'info':
+        Get.toNamed(Routes.INFORMATION);
+        break;
+      case 'home_service':
+      case 'services':
+        Get.toNamed(Routes.HOME_SERVICE);
+        break;
+      case 'physio':
+        Get.toNamed(Routes.PHYSIO);
+        break;
+      case 'matchmaking':
+        Get.toNamed(Routes.MATCHMAKING);
+        break;
+      case 'jobs':
+        Get.toNamed(Routes.JOBS);
+        break;
+      case 'funeral':
+        Get.toNamed(Routes.FUNERAL);
+        break;
+      case 'education':
+        Get.toNamed(Routes.EDUCATION);
+        break;
+      case 'nagarik':
+        Get.toNamed(Routes.NAGARIK);
+        break;
+      default:
+        Get.snackbar('ServiceNin', 'শীঘ্রই আসছে',
+            snackPosition: SnackPosition.BOTTOM);
+    }
+  }
+
   static void open(SnService service) {
     switch (service.name) {
       case 'Blood':

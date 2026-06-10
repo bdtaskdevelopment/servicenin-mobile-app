@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-import '../../../core/values/app_colors.dart';
 import '../../../core/utils/service_nav.dart';
+import '../../../core/values/app_colors.dart';
+import '../../../core/values/app_config.dart';
 import '../../../core/values/sn_catalog.dart';
-import '../../../data/models/sn_service.dart';
+import '../../../data/models/response/home_response.dart';
 import '../../../global_widget/section_header.dart';
 import '../../../global_widget/service_app_bar.dart';
 import '../../../global_widget/sn_service_tile.dart';
+import '../../../global_widget/sn_shimmer.dart';
 import '../controllers/home_controller.dart';
 
 class HomeView extends GetView<HomeController> {
@@ -20,60 +22,65 @@ class HomeView extends GetView<HomeController> {
       appBar: const ServiceAppBar(),
       body: GetBuilder<HomeController>(
         builder: (con) {
-          return ListView(
-            padding: const EdgeInsets.only(bottom: 100),
-            children: [
-              const SizedBox(height: 8),
-              _PromoCarousel(con: con),
-              const SizedBox(height: 22),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: SectionHeader(
-                    title: 'All Services',
-                    actionLabel: 'See All →',
-                    onAction: () {}),
-              ),
-              const SizedBox(height: 14),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: GridView.builder(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  padding: EdgeInsets.zero,
-                  itemCount: SnCatalog.services.length,
-                  gridDelegate:
-                      const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 4,
-                    mainAxisSpacing: 12,
-                    crossAxisSpacing: 12,
-                    childAspectRatio: 0.86,
-                  ),
-                  itemBuilder: (_, i) => SnServiceTile(
-                    service: SnCatalog.services[i],
-                    onTap: () => ServiceNav.open(SnCatalog.services[i]),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 24),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: SectionHeader(
-                    title: 'Recent Services',
-                    actionLabel: 'See All →',
-                    onAction: () {}),
-              ),
-              const SizedBox(height: 12),
-              SizedBox(
-                height: 116,
-                child: ListView.separated(
-                  scrollDirection: Axis.horizontal,
+          return RefreshIndicator(
+            color: AppColors.brandOrange,
+            onRefresh: con.refreshAll,
+            child: ListView(
+              padding: const EdgeInsets.only(bottom: 100),
+              children: [
+                const SizedBox(height: 8),
+                _BannerCarousel(con: con),
+                const SizedBox(height: 22),
+                Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16),
-                  itemCount: con.recent.length,
-                  separatorBuilder: (_, _) => const SizedBox(width: 12),
-                  itemBuilder: (_, i) => _RecentCard(item: con.recent[i]),
+                  child: SectionHeader(
+                      title: 'All Services',
+                      actionLabel: 'See All →',
+                      onAction: () => Get.toNamed('/search')),
                 ),
-              ),
-            ],
+                const SizedBox(height: 14),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: GridView.builder(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    padding: EdgeInsets.zero,
+                    itemCount: SnCatalog.services.length,
+                    gridDelegate:
+                        const SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 4,
+                      mainAxisSpacing: 12,
+                      crossAxisSpacing: 12,
+                      childAspectRatio: 0.86,
+                    ),
+                    itemBuilder: (_, i) => SnServiceTile(
+                      service: SnCatalog.services[i],
+                      onTap: () => ServiceNav.open(SnCatalog.services[i]),
+                    ),
+                  ),
+                ),
+                // ── Popular services ──────────────────────────────
+                if (con.popular.isNotEmpty) ...[
+                  const SizedBox(height: 24),
+                  const Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 16),
+                    child: SectionHeader(title: 'Popular Services'),
+                  ),
+                  const SizedBox(height: 12),
+                  _ServiceStrip(services: con.popular),
+                ],
+                // ── Recent services ───────────────────────────────
+                if (con.recent.isNotEmpty) ...[
+                  const SizedBox(height: 24),
+                  const Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 16),
+                    child: SectionHeader(title: 'Recent Services'),
+                  ),
+                  const SizedBox(height: 12),
+                  _ServiceStrip(services: con.recent),
+                ],
+              ],
+            ),
           );
         },
       ),
@@ -81,50 +88,44 @@ class HomeView extends GetView<HomeController> {
   }
 }
 
-// ── Promo carousel ──────────────────────────────────────────────────
-class _PromoCarousel extends StatelessWidget {
-  const _PromoCarousel({required this.con});
+// ── Banner carousel (driven by /api/v1/home/banners, auto-scrolls) ──
+class _BannerCarousel extends StatelessWidget {
+  const _BannerCarousel({required this.con});
   final HomeController con;
-
-  static const _slides = [
-    _PromoData(
-      tag: 'LIMITED · 7 DAYS LEFT',
-      title: '20% off your first doctor visit',
-      subtitle: 'Verified BMDC doctors across Dhaka. Use code SN20.',
-      hotline: '16263',
-      action: 'Find a doctor →',
-      colors: [Color(0xFF0F7A52), Color(0xFF0B5E3F)],
-    ),
-    _PromoData(
-      tag: 'AMBULANCE · 24/7',
-      title: 'Emergency ambulance in minutes',
-      subtitle: 'Nearest verified ambulance, live tracking.',
-      hotline: '16121',
-      action: 'Book now →',
-      colors: [Color(0xFFF15A24), Color(0xFFE14E14)],
-    ),
-  ];
 
   @override
   Widget build(BuildContext context) {
+    if (con.loadingBanners && con.banners.isEmpty) {
+      return Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 22),
+        child: SnShimmer(
+          child: SnBone(
+            width: double.infinity,
+            height: 150,
+            radius: 20,
+          ),
+        ),
+      );
+    }
+    if (con.banners.isEmpty) return const SizedBox.shrink();
     return Column(
       children: [
         SizedBox(
           height: 150,
           child: PageView.builder(
-            controller: PageController(viewportFraction: 0.92),
-            itemCount: _slides.length,
+            controller: con.bannerController,
+            itemCount: con.banners.length,
             onPageChanged: con.setPromo,
             itemBuilder: (_, i) => Padding(
               padding: const EdgeInsets.symmetric(horizontal: 6),
-              child: _PromoSlide(data: _slides[i]),
+              child: _BannerSlide(banner: con.banners[i]),
             ),
           ),
         ),
         const SizedBox(height: 10),
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
-          children: List.generate(_slides.length, (i) {
+          children: List.generate(con.banners.length, (i) {
             final active = con.promoIndex == i;
             return AnimatedContainer(
               duration: const Duration(milliseconds: 250),
@@ -132,7 +133,9 @@ class _PromoCarousel extends StatelessWidget {
               width: active ? 18 : 7,
               height: 7,
               decoration: BoxDecoration(
-                color: active ? AppColors.brandOrange : const Color(0xFFD8DEE6),
+                color: active
+                    ? AppColors.brandOrange
+                    : const Color(0xFFD8DEE6),
                 borderRadius: BorderRadius.circular(4),
               ),
             );
@@ -143,169 +146,172 @@ class _PromoCarousel extends StatelessWidget {
   }
 }
 
-class _PromoData {
-  const _PromoData({
-    required this.tag,
-    required this.title,
-    required this.subtitle,
-    required this.hotline,
-    required this.action,
-    required this.colors,
-  });
-  final String tag;
-  final String title;
-  final String subtitle;
-  final String hotline;
-  final String action;
-  final List<Color> colors;
+const _bannerGradients = <String, List<Color>>{
+  'healthcare': [Color(0xFF0F7A52), Color(0xFF0B5E3F)],
+  'ambulance': [Color(0xFFF15A24), Color(0xFFE14E14)],
+  'blood': [Color(0xFFD7263D), Color(0xFFA61B2B)],
+  'services': [Color(0xFF12877A), Color(0xFF0C6157)],
+  'home_service': [Color(0xFF12877A), Color(0xFF0C6157)],
+  'physio': [Color(0xFF7C3AED), Color(0xFF5B21B6)],
+  'matchmaking': [Color(0xFFDB2777), Color(0xFFA21457)],
+  'jobs': [Color(0xFF2563EB), Color(0xFF1D4ED8)],
+  'education': [Color(0xFFEA9A0B), Color(0xFFB45309)],
+  'nagarik': [Color(0xFF1E2A4A), Color(0xFF2D3E63)],
+};
+
+String _bannerImageUrl(String path) {
+  if (path.isEmpty) return '';
+  if (path.startsWith('http')) return path;
+  final base = AppConfig.baseUrl.endsWith('/')
+      ? AppConfig.baseUrl.substring(0, AppConfig.baseUrl.length - 1)
+      : AppConfig.baseUrl;
+  return path.startsWith('/') ? '$base$path' : '$base/$path';
 }
 
-class _PromoSlide extends StatelessWidget {
-  const _PromoSlide({required this.data});
-  final _PromoData data;
+class _BannerSlide extends StatelessWidget {
+  const _BannerSlide({required this.banner});
+  final HomeBanner banner;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.fromLTRB(18, 16, 18, 16),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: data.colors,
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
+    final colors = _bannerGradients[banner.type] ??
+        const [Color(0xFF0F7A52), Color(0xFF0B5E3F)];
+    final img = _bannerImageUrl(banner.imageUrl);
+    return GestureDetector(
+      onTap: () => ServiceNav.openByKey(banner.type),
+      child: ClipRRect(
         borderRadius: BorderRadius.circular(20),
-      ),
-      child: Stack(
-        children: [
-          Positioned(
-            right: -10,
-            bottom: -10,
-            child: Icon(Icons.medical_services_outlined,
-                size: 96, color: Colors.white.withValues(alpha: 0.12)),
-          ),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.20),
-                  borderRadius: BorderRadius.circular(6),
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            DecoratedBox(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: colors,
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
                 ),
-                child: Text(data.tag,
-                    style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 9,
-                        fontWeight: FontWeight.w700,
-                        letterSpacing: 0.5)),
               ),
-              const SizedBox(height: 8),
-              Text(data.title,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 18,
-                      fontWeight: FontWeight.w800,
-                      height: 1.15)),
-              const SizedBox(height: 4),
-              Text(data.subtitle,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                      color: Colors.white.withValues(alpha: 0.85),
-                      fontSize: 11.5)),
-              const Spacer(),
-              Row(
+            ),
+            if (img.isNotEmpty)
+              Opacity(
+                opacity: 0.28,
+                child: Image.network(
+                  img,
+                  fit: BoxFit.cover,
+                  errorBuilder: (_, _, _) => const SizedBox.shrink(),
+                ),
+              ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(18, 16, 18, 16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _pill(Icons.call_rounded, data.hotline, false),
-                  const SizedBox(width: 10),
-                  _pill(null, data.action, true),
+                  if (banner.title.isNotEmpty)
+                    Text(banner.title,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 18,
+                            fontWeight: FontWeight.w800,
+                            height: 1.15)),
+                  const SizedBox(height: 4),
+                  if (banner.subtitle.isNotEmpty)
+                    Text(banner.subtitle,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                            color: Colors.white.withValues(alpha: 0.9),
+                            fontSize: 12)),
+                  const Spacer(),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 14, vertical: 8),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text('View →',
+                            style: TextStyle(
+                                color: colors.first,
+                                fontSize: 12,
+                                fontWeight: FontWeight.w800)),
+                      ],
+                    ),
+                  ),
                 ],
               ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _pill(IconData? icon, String label, bool solid) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-      decoration: BoxDecoration(
-        color: solid ? Colors.white : Colors.white.withValues(alpha: 0.16),
-        borderRadius: BorderRadius.circular(10),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          if (icon != null) ...[
-            Icon(icon, size: 14, color: Colors.white),
-            const SizedBox(width: 5),
+            ),
           ],
-          Text(label,
-              style: TextStyle(
-                  color: solid ? const Color(0xFF0F172A) : Colors.white,
-                  fontSize: 12,
-                  fontWeight: FontWeight.w700)),
-        ],
+        ),
       ),
     );
   }
 }
 
-// ── Recent service card ─────────────────────────────────────────────
-class _RecentCard extends StatelessWidget {
-  const _RecentCard({required this.item});
-  final RecentService item;
+// ── Horizontal service shortcut strip (popular / recent) ────────────
+class _ServiceStrip extends StatelessWidget {
+  const _ServiceStrip({required this.services});
+  final List<HomeService> services;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: 200,
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: item.bg,
-        borderRadius: BorderRadius.circular(16),
+    return SizedBox(
+      height: 120,
+      child: ListView.separated(
+        scrollDirection: Axis.horizontal,
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        itemCount: services.length,
+        separatorBuilder: (_, _) => const SizedBox(width: 12),
+        itemBuilder: (_, i) => _ServiceCard(service: services[i]),
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Icon(item.icon, color: item.color, size: 24),
-              Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.7),
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: Text(item.status,
-                    style: TextStyle(
-                        fontSize: 10,
-                        fontWeight: FontWeight.w700,
-                        color: item.color)),
+    );
+  }
+}
+
+class _ServiceCard extends StatelessWidget {
+  const _ServiceCard({required this.service});
+  final HomeService service;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: () => ServiceNav.openByKey(service.key),
+      child: Container(
+        width: 156,
+        padding: const EdgeInsets.all(14),
+        decoration: BoxDecoration(
+          color: service.color.withValues(alpha: 0.10),
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Container(
+              width: 40,
+              height: 40,
+              decoration: BoxDecoration(
+                color: service.color.withValues(alpha: 0.16),
+                borderRadius: BorderRadius.circular(12),
               ),
-            ],
-          ),
-          const Spacer(),
-          Text(item.title,
-              style: const TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w700,
-                  color: Color(0xFF0F172A))),
-          const SizedBox(height: 2),
-          Text(item.subtitle,
-              style: const TextStyle(fontSize: 12, color: Color(0xFF475569))),
-          const SizedBox(height: 6),
-          Text(item.time,
-              style: const TextStyle(fontSize: 11, color: Color(0xFF94A3B8))),
-        ],
+              child: Icon(service.iconData, color: service.color, size: 21),
+            ),
+            const SizedBox(height: 10),
+            Text(service.name,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(
+                    fontSize: 13,
+                    height: 1.2,
+                    fontWeight: FontWeight.w700,
+                    color: Color(0xFF0F172A))),
+          ],
+        ),
       ),
     );
   }
