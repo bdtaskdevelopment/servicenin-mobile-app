@@ -124,7 +124,6 @@ class AppTheme {
       ),
       titleLarge: GoogleFonts.poppins(
         textStyle: AppTextStyleDark.titleLarge,
-
       ),
       titleMedium:
           GoogleFonts.poppins(textStyle: AppTextStyleDark.titleMedium),
