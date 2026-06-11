@@ -32,8 +32,8 @@ class HsBookingDetailsView extends GetView<HomeServiceController> {
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text('Booking details',
-                          style: TextStyle(
+                      Text('Booking details'.tr,
+                          style: const TextStyle(
                               fontSize: 19,
                               fontWeight: FontWeight.w800,
                               color: Color(0xFF0F172A))),
@@ -92,14 +92,14 @@ class HsBookingDetailsView extends GetView<HomeServiceController> {
                           decoration: BoxDecoration(
                               color: const Color(0xFFFEF3C7),
                               borderRadius: BorderRadius.circular(20)),
-                          child: const Row(
+                          child: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              Icon(Icons.circle,
+                              const Icon(Icons.circle,
                                   size: 7, color: Color(0xFFD97706)),
-                              SizedBox(width: 4),
-                              Text('In progress',
-                                  style: TextStyle(
+                              const SizedBox(width: 4),
+                              Text('In progress'.tr,
+                                  style: const TextStyle(
                                       fontSize: 11,
                                       fontWeight: FontWeight.w700,
                                       color: Color(0xFFB45309))),
@@ -193,7 +193,7 @@ class HsBookingDetailsView extends GetView<HomeServiceController> {
                   ),
                   */
                   const SizedBox(height: 18),
-                  const _Label('INVOICE'),
+                  _Label('INVOICE'.tr),
                   const SizedBox(height: 10),
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -202,11 +202,11 @@ class HsBookingDetailsView extends GetView<HomeServiceController> {
                         borderRadius: BorderRadius.circular(16)),
                     child: Column(
                       children: [
-                        _fee('Service charge', '৳${con.subtotalAmount}'),
+                        _fee('Service charge'.tr, '৳${con.subtotalAmount}'),
                         const Divider(height: 1, color: Color(0xFFF1F5F9)),
-                        _fee('VAT (5%)', '৳${con.vat}'),
+                        _fee('VAT (5%)'.tr, '৳${con.vat}'),
                         const Divider(height: 1, color: Color(0xFFF1F5F9)),
-                        _fee('Total paid', '৳${con.totalPaid}', bold: true),
+                        _fee('Total paid'.tr, '৳${con.totalPaid}', bold: true),
                       ],
                     ),
                   ),
@@ -233,8 +233,8 @@ class HsBookingDetailsView extends GetView<HomeServiceController> {
                               shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(14)),
                             ),
-                            child: const Text('Rate service',
-                                style: TextStyle(
+                            child: Text('Rate service'.tr,
+                                style: const TextStyle(
                                     fontSize: 15,
                                     fontWeight: FontWeight.w800)),
                           ),
@@ -257,8 +257,8 @@ class HsBookingDetailsView extends GetView<HomeServiceController> {
                               shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(14)),
                             ),
-                            child: const Text('Report issue',
-                                style: TextStyle(
+                            child: Text('Report issue'.tr,
+                                style: const TextStyle(
                                     fontSize: 15,
                                     fontWeight: FontWeight.w700,
                                     color: Color(0xFFDC2626))),
@@ -316,15 +316,15 @@ void _showDisputeDialog(BuildContext context, HomeServiceController con) {
     builder: (_) => AlertDialog(
       backgroundColor: Colors.white,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
-      title: const Text('Report an issue',
-          style: TextStyle(fontWeight: FontWeight.w800)),
+      title: Text('Report an issue'.tr,
+          style: const TextStyle(fontWeight: FontWeight.w800)),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           TextField(
             controller: reasonCtrl,
             decoration: InputDecoration(
-              hintText: 'Reason',
+              hintText: 'Reason'.tr,
               filled: true,
               fillColor: const Color(0xFFF7F8FA),
               border: OutlineInputBorder(
@@ -337,7 +337,7 @@ void _showDisputeDialog(BuildContext context, HomeServiceController con) {
             controller: descCtrl,
             maxLines: 3,
             decoration: InputDecoration(
-              hintText: 'Describe what went wrong…',
+              hintText: 'Describe what went wrong…'.tr,
               filled: true,
               fillColor: const Color(0xFFF7F8FA),
               border: OutlineInputBorder(
@@ -350,8 +350,8 @@ void _showDisputeDialog(BuildContext context, HomeServiceController con) {
       actions: [
         TextButton(
           onPressed: () => Get.back(),
-          child: const Text('Cancel',
-              style: TextStyle(color: Color(0xFF64748B))),
+          child: Text('Cancel'.tr,
+              style: const TextStyle(color: Color(0xFF64748B))),
         ),
         ElevatedButton(
           onPressed: () {
@@ -362,7 +362,7 @@ void _showDisputeDialog(BuildContext context, HomeServiceController con) {
           style: ElevatedButton.styleFrom(
               backgroundColor: const Color(0xFFDC2626),
               foregroundColor: Colors.white),
-          child: const Text('Submit'),
+          child: Text('Submit'.tr),
         ),
       ],
     ),

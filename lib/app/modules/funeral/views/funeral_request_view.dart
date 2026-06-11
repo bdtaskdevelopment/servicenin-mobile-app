@@ -27,17 +27,17 @@ class FuneralRequestView extends GetView<FuneralController> {
                       icon: const Icon(Icons.arrow_back_ios_new_rounded,
                           size: 20, color: Color(0xFF1A1A1A)),
                     ),
-                    const Column(
+                    Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('Request service',
-                            style: TextStyle(
+                        Text('Request service'.tr,
+                            style: const TextStyle(
                                 fontSize: 19,
                                 fontWeight: FontWeight.w800,
                                 color: Color(0xFF0F172A))),
-                        SizedBox(height: 1),
-                        Text('A coordinator will call you',
-                            style: TextStyle(
+                        const SizedBox(height: 1),
+                        Text('A coordinator will call you'.tr,
+                            style: const TextStyle(
                                 fontSize: 12, color: Color(0xFF94A3B8))),
                       ],
                     ),
@@ -48,7 +48,7 @@ class FuneralRequestView extends GetView<FuneralController> {
                 child: ListView(
                   padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
                   children: [
-                    const _Label('SERVICE NEEDED'),
+                    _Label('SERVICE NEEDED'.tr),
                     const SizedBox(height: 10),
                     ...con.services.map((s) {
                       final sel = con.selectedServiceKey == s.key;
@@ -106,15 +106,15 @@ class FuneralRequestView extends GetView<FuneralController> {
                       );
                     }),
                     const SizedBox(height: 8),
-                    const _Label('DECEASED DETAILS'),
+                    _Label('DECEASED DETAILS'.tr),
                     const SizedBox(height: 10),
-                    _Field(con.deceasedName, 'NAME OF THE DECEASED',
-                        'Full name'),
+                    _Field(con.deceasedName, 'NAME OF THE DECEASED'.tr,
+                        'Full name'.tr),
                     const SizedBox(height: 12),
                     Row(
                       children: [
                         Expanded(
-                          child: _Field(con.deceasedAge, 'AGE', 'e.g. 78',
+                          child: _Field(con.deceasedAge, 'AGE'.tr, 'e.g. 78'.tr,
                               kb: TextInputType.number),
                         ),
                         const SizedBox(width: 12),
@@ -122,35 +122,36 @@ class FuneralRequestView extends GetView<FuneralController> {
                       ],
                     ),
                     const SizedBox(height: 12),
-                    _Field(con.deathTime, 'TIME OF DEATH',
+                    _Field(con.deathTime, 'TIME OF DEATH'.tr,
                         'YYYY-MM-DD HH:MM'),
                     const SizedBox(height: 12),
-                    _Field(con.placeOfDeath, 'PLACE OF DEATH',
-                        'e.g. Dhaka Medical College'),
+                    _Field(con.placeOfDeath, 'PLACE OF DEATH'.tr,
+                        'e.g. Dhaka Medical College'.tr),
                     const SizedBox(height: 12),
-                    _Field(con.causeOfDeath, 'CAUSE OF DEATH (OPTIONAL)',
-                        'e.g. Old age'),
+                    _Field(con.causeOfDeath, 'CAUSE OF DEATH (OPTIONAL)'.tr,
+                        'e.g. Old age'.tr),
                     const SizedBox(height: 16),
-                    const _Label('LOCATION OF BODY'),
+                    _Label('LOCATION OF BODY'.tr),
                     const SizedBox(height: 10),
-                    _Field(con.address, 'ADDRESS', 'Home / hospital address'),
+                    _Field(con.address, 'ADDRESS'.tr,
+                        'Home / hospital address'.tr),
                     const SizedBox(height: 12),
-                    _Field(con.wardNo, 'WARD NO (OPTIONAL)', 'e.g. 10'),
+                    _Field(con.wardNo, 'WARD NO (OPTIONAL)'.tr, 'e.g. 10'.tr),
                     const SizedBox(height: 12),
-                    _Field(con.scheduledAt, 'PREFERRED TIME (OPTIONAL)',
+                    _Field(con.scheduledAt, 'PREFERRED TIME (OPTIONAL)'.tr,
                         'YYYY-MM-DD HH:MM'),
                     const SizedBox(height: 16),
-                    const _Label('YOUR CONTACT'),
+                    _Label('YOUR CONTACT'.tr),
                     const SizedBox(height: 10),
-                    _Field(con.contactName, 'CONTACT NAME', 'Your name'),
+                    _Field(con.contactName, 'CONTACT NAME'.tr, 'Your name'.tr),
                     const SizedBox(height: 12),
-                    _Field(con.contactPhone, 'CONTACT PHONE',
+                    _Field(con.contactPhone, 'CONTACT PHONE'.tr,
                         '+8801XXXXXXXXX',
                         kb: TextInputType.phone),
                     const SizedBox(height: 16),
                     Text(
-                        'A coordinator will call within minutes to confirm timing, '
-                        'costs and arrange everything. No payment is taken online.',
+                        'A coordinator will call within minutes to confirm timing, costs and arrange everything. No payment is taken online.'
+                            .tr,
                         style: TextStyle(
                             fontSize: 12.5,
                             height: 1.5,
@@ -179,8 +180,8 @@ class FuneralRequestView extends GetView<FuneralController> {
                             child: CircularProgressIndicator(
                                 strokeWidth: 2.4, color: Colors.white),
                           )
-                        : const Text('Submit request',
-                            style: TextStyle(
+                        : Text('Submit request'.tr,
+                            style: const TextStyle(
                                 fontSize: 16, fontWeight: FontWeight.w800)),
                   ),
                 ),
@@ -291,8 +292,8 @@ class _GenderField extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text('GENDER',
-              style: TextStyle(
+          Text('GENDER'.tr,
+              style: const TextStyle(
                   fontSize: 11,
                   fontWeight: FontWeight.w700,
                   color: Color(0xFF94A3B8),
@@ -300,9 +301,9 @@ class _GenderField extends StatelessWidget {
           const SizedBox(height: 6),
           Row(
             children: [
-              btn('male', 'Male'),
+              btn('male', 'Male'.tr),
               const SizedBox(width: 8),
-              btn('female', 'Female'),
+              btn('female', 'Female'.tr),
             ],
           ),
         ],

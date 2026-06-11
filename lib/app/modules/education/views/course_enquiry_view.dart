@@ -35,8 +35,8 @@ class CourseEnquiryView extends GetView<EducationController> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Text('Enroll',
-                                style: TextStyle(
+                            Text('Enroll'.tr,
+                                style: const TextStyle(
                                     fontSize: 19,
                                     fontWeight: FontWeight.w800,
                                     color: Color(0xFF0F172A))),
@@ -55,7 +55,7 @@ class CourseEnquiryView extends GetView<EducationController> {
                   child: ListView(
                     padding: const EdgeInsets.fromLTRB(16, 6, 16, 16),
                     children: [
-                      const _Label('STUDENT GRADE'),
+                      _Label('STUDENT GRADE'.tr),
                       const SizedBox(height: 10),
                       Wrap(
                         spacing: 10,
@@ -90,29 +90,29 @@ class CourseEnquiryView extends GetView<EducationController> {
                       const SizedBox(height: 18),
                       _InputCard(
                           controller: con.studentName,
-                          label: 'STUDENT NAME',
-                          hint: 'Full name'),
+                          label: 'STUDENT NAME'.tr,
+                          hint: 'Full name'.tr),
                       const SizedBox(height: 12),
                       _InputCard(
                           controller: con.parentContact,
-                          label: 'PARENT / GUARDIAN CONTACT',
+                          label: 'PARENT / GUARDIAN CONTACT'.tr,
                           hint: '+880 1XXXXXXXXX',
                           keyboard: TextInputType.phone),
                       const SizedBox(height: 12),
                       _InputCard(
                           controller: con.subjectNeeded,
-                          label: 'SUBJECT NEEDED',
-                          hint: 'e.g. Physics, Chemistry'),
+                          label: 'SUBJECT NEEDED'.tr,
+                          hint: 'e.g. Physics, Chemistry'.tr),
                       const SizedBox(height: 12),
                       _InputCard(
                           controller: con.preferredTime,
-                          label: 'PREFERRED TIME',
-                          hint: 'e.g. Evening (5-7 PM)'),
+                          label: 'PREFERRED TIME'.tr,
+                          hint: 'e.g. Evening (5-7 PM)'.tr),
                       const SizedBox(height: 12),
                       _InputCard(
                           controller: con.notes,
-                          label: 'NOTES (OPTIONAL)',
-                          hint: 'Anything the center should know…',
+                          label: 'NOTES (OPTIONAL)'.tr,
+                          hint: 'Anything the center should know…'.tr,
                           maxLines: 3),
                     ],
                   ),
@@ -140,8 +140,8 @@ class CourseEnquiryView extends GetView<EducationController> {
                               child: CircularProgressIndicator(
                                   strokeWidth: 2.4, color: Colors.white),
                             )
-                          : const Text('Register interest',
-                              style: TextStyle(
+                          : Text('Register interest'.tr,
+                              style: const TextStyle(
                                   fontSize: 16,
                                   fontWeight: FontWeight.w800)),
                     ),

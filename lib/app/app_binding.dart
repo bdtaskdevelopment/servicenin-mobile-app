@@ -4,6 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'app_controller.dart';
 import 'app_service.dart';
+import 'core/languages/language_controller.dart';
 import 'core/values/app_config.dart';
 import 'data/providers/ambulance.provider.dart';
 import 'data/providers/healthcare.provider.dart';
@@ -58,6 +59,8 @@ class AppDependencyInjection {
       fenix: true,
     );
     Get.lazyPut<AppController>(() => AppController(), fenix: true);
+
+    Get.put<LanguageController>(LanguageController(), permanent: true);
 
     Get.lazyPut<BloodProvider>(() => BloodProvider(), fenix: true);
     Get.lazyPut<BloodRepository>(

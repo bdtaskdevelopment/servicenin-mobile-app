@@ -1,3 +1,4 @@
+import 'package:animate_do/animate_do.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:latlong2/latlong.dart';
@@ -33,17 +34,17 @@ class FareEstimateView extends GetView<FareController> {
                     icon: const Icon(Icons.arrow_back_ios_new_rounded,
                         size: 20, color: Color(0xFF1A1A1A)),
                   ),
-                  const Column(
+                  Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('Fare estimate',
-                          style: TextStyle(
+                      Text('Fare estimate'.tr,
+                          style: const TextStyle(
                               fontSize: 19,
                               fontWeight: FontWeight.w800,
                               color: Color(0xFF0F172A))),
-                      SizedBox(height: 1),
-                      Text('Cash on completion · No advance',
-                          style: TextStyle(
+                      const SizedBox(height: 1),
+                      Text('Cash on completion · No advance'.tr,
+                          style: const TextStyle(
                               fontSize: 12, color: Color(0xFF94A3B8))),
                     ],
                   ),
@@ -65,7 +66,7 @@ class FareEstimateView extends GetView<FareController> {
                     ),
                   ),
                   const SizedBox(height: 14),
-                  const _Label('AMBULANCE TYPE'),
+                  _Label('AMBULANCE TYPE'.tr),
                   const SizedBox(height: 10),
                   GetBuilder<FareController>(builder: (c) => _TypeSelector(c: c)),
                   const SizedBox(height: 14),
@@ -76,7 +77,7 @@ class FareEstimateView extends GetView<FareController> {
                   const SizedBox(height: 14),
                   _PatientCard(c: controller),
                   const SizedBox(height: 18),
-                  const _Label('PAYMENT METHOD'),
+                  _Label('PAYMENT METHOD'.tr),
                   const SizedBox(height: 12),
                   GetBuilder<FareController>(builder: (c) => _PayList(c: c)),
                 ],
@@ -106,8 +107,8 @@ class FareEstimateView extends GetView<FareController> {
                             child: CircularProgressIndicator(
                                 strokeWidth: 2.4, color: Colors.white),
                           )
-                        : const Text('Confirm & dispatch',
-                            style: TextStyle(
+                        : Text('Confirm & dispatch'.tr,
+                            style: const TextStyle(
                                 fontSize: 16, fontWeight: FontWeight.w800)),
                   ),
                 ),
@@ -179,17 +180,17 @@ class _LocationPicker extends StatelessWidget {
         children: [
           _LocBlock(
             dotColor: _green,
-            label: 'PICKUP',
+            label: 'PICKUP'.tr,
             division: con.pickupDivision,
             zilla: con.pickupZilla,
             onDivision: () => _sheet(
-              title: 'Pickup division',
+              title: 'Pickup division'.tr,
               options: con.divisions,
               selected: con.pickupDivision,
               onSelect: con.setPickupDivision,
             ),
             onZilla: () => _sheet(
-              title: 'Pickup district',
+              title: 'Pickup district'.tr,
               options: con.pickupDistricts,
               selected: con.pickupZilla,
               onSelect: con.setPickupZilla,
@@ -201,17 +202,17 @@ class _LocationPicker extends StatelessWidget {
           ),
           _LocBlock(
             dotColor: _red,
-            label: 'DESTINATION',
+            label: 'DESTINATION'.tr,
             division: con.dropDivision,
             zilla: con.dropZilla,
             onDivision: () => _sheet(
-              title: 'Destination division',
+              title: 'Destination division'.tr,
               options: con.divisions,
               selected: con.dropDivision,
               onSelect: con.setDropDivision,
             ),
             onZilla: () => _sheet(
-              title: 'Destination district',
+              title: 'Destination district'.tr,
               options: con.dropDistricts,
               selected: con.dropZilla,
               onSelect: con.setDropZilla,
@@ -333,11 +334,11 @@ class _LocBlock extends StatelessWidget {
           children: [
             Expanded(
                 child: _DropChip(
-                    label: 'Division', value: division, onTap: onDivision)),
+                    label: 'Division'.tr, value: division, onTap: onDivision)),
             const SizedBox(width: 10),
             Expanded(
                 child:
-                    _DropChip(label: 'District', value: zilla, onTap: onZilla)),
+                    _DropChip(label: 'District'.tr, value: zilla, onTap: onZilla)),
           ],
         ),
       ],
@@ -415,10 +416,13 @@ class _TypeSelector extends StatelessWidget {
       );
     }
     if (c.types.isEmpty) {
-      return const Text('No ambulance types available',
-          style: TextStyle(fontSize: 13, color: Color(0xFF94A3B8)));
+      return Text('No ambulance types available'.tr,
+          style: const TextStyle(fontSize: 13, color: Color(0xFF94A3B8)));
     }
-    return SizedBox(
+    return FadeInUp(
+      from: 18,
+      duration: const Duration(milliseconds: 350),
+      child: SizedBox(
       height: 116,
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
@@ -479,6 +483,7 @@ class _TypeSelector extends StatelessWidget {
           );
         },
       ),
+      ),
     );
   }
 }
@@ -500,9 +505,9 @@ class _EmergencyToggle extends StatelessWidget {
         children: [
           const Icon(Icons.emergency_share_rounded, color: _red, size: 20),
           const SizedBox(width: 10),
-          const Expanded(
-            child: Text('Emergency dispatch',
-                style: TextStyle(
+          Expanded(
+            child: Text('Emergency dispatch'.tr,
+                style: const TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w700,
                     color: Color(0xFF0F172A))),
@@ -566,26 +571,29 @@ class _FareCard extends StatelessWidget {
               ),
             )
           : f == null
-              ? const Text('Select pickup & destination to estimate the fare.',
-                  style: TextStyle(fontSize: 13, color: Color(0xFF94A3B8)))
-              : Column(
+              ? Text('Select pickup & destination to estimate the fare.'.tr,
+                  style: const TextStyle(fontSize: 13, color: Color(0xFF94A3B8)))
+              : FadeInUp(
+                  from: 18,
+                  duration: const Duration(milliseconds: 350),
+                  child: Column(
                   children: [
-                    _row('Distance', '${f.distanceKm} km'),
-                    _row('Base fare', '৳${f.baseFare}'),
-                    _row('Mileage (৳${f.perKmFare}/km)', '৳${f.mileageCharge}'),
+                    _row('Distance'.tr, '${f.distanceKm} km'),
+                    _row('Base fare'.tr, '৳${f.baseFare}'),
+                    _row('${'Mileage'.tr} (৳${f.perKmFare}/km)', '৳${f.mileageCharge}'),
                     if (f.emergencyCharge > 0)
-                      _row('Emergency', '৳${f.emergencyCharge}'),
-                    if (f.nightCharge > 0) _row('Night', '৳${f.nightCharge}'),
-                    if (f.taxAmount > 0) _row('Tax', '৳${f.taxAmount}'),
+                      _row('Emergency'.tr, '৳${f.emergencyCharge}'),
+                    if (f.nightCharge > 0) _row('Night'.tr, '৳${f.nightCharge}'),
+                    if (f.taxAmount > 0) _row('Tax'.tr, '৳${f.taxAmount}'),
                     const Padding(
                       padding: EdgeInsets.symmetric(vertical: 8),
                       child: Divider(height: 1, color: Color(0xFFF1F5F9)),
                     ),
                     Row(
                       children: [
-                        const Expanded(
-                          child: Text('ESTIMATED TOTAL',
-                              style: TextStyle(
+                        Expanded(
+                          child: Text('ESTIMATED TOTAL'.tr,
+                              style: const TextStyle(
                                   fontSize: 12.5,
                                   fontWeight: FontWeight.w800,
                                   color: Color(0xFF0F172A),
@@ -599,6 +607,7 @@ class _FareCard extends StatelessWidget {
                       ],
                     ),
                   ],
+                ),
                 ),
     );
   }
@@ -637,9 +646,9 @@ class _PatientCard extends StatelessWidget {
       ),
       child: Column(
         children: [
-          _field('Patient name', c.patientNameCtrl, TextInputType.text),
+          _field('Patient name'.tr, c.patientNameCtrl, TextInputType.text),
           const SizedBox(height: 10),
-          _field('Contact phone', c.phoneCtrl, TextInputType.phone),
+          _field('Contact phone'.tr, c.phoneCtrl, TextInputType.phone),
         ],
       ),
     );
@@ -682,7 +691,10 @@ class _PayList extends StatelessWidget {
         padding: EdgeInsets.zero,
       );
     }
-    return Column(
+    return FadeInUp(
+      from: 18,
+      duration: const Duration(milliseconds: 350),
+      child: Column(
       children: c.methods.map((m) {
         final sel = m.key == c.selectedMethod;
         final disabled = !m.enabled;
@@ -733,8 +745,8 @@ class _PayList extends StatelessWidget {
                         decoration: BoxDecoration(
                             color: const Color(0xFFF1F5F9),
                             borderRadius: BorderRadius.circular(20)),
-                        child: const Text('Soon',
-                            style: TextStyle(
+                        child: Text('Soon'.tr,
+                            style: const TextStyle(
                                 fontSize: 10.5,
                                 fontWeight: FontWeight.w700,
                                 color: Color(0xFF94A3B8))),
@@ -746,6 +758,7 @@ class _PayList extends StatelessWidget {
           ),
         );
       }).toList(),
+      ),
     );
   }
 }

@@ -82,9 +82,9 @@ class BookingConfirmedView extends GetView<AmbulanceController> {
           // Details
           Expanded(
             child: b == null
-                ? const Center(
-                    child: Text('No booking found',
-                        style: TextStyle(color: Color(0xFF94A3B8))),
+                ? Center(
+                    child: Text('No booking found'.tr,
+                        style: const TextStyle(color: Color(0xFF94A3B8))),
                   )
                 : ListView(
                     padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
@@ -106,8 +106,8 @@ class BookingConfirmedView extends GetView<AmbulanceController> {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                const Text('Ambulance booked',
-                                    style: TextStyle(
+                                Text('Ambulance booked'.tr,
+                                    style: const TextStyle(
                                         fontSize: 18,
                                         fontWeight: FontWeight.w800,
                                         color: Color(0xFF0F172A))),
@@ -129,7 +129,7 @@ class BookingConfirmedView extends GetView<AmbulanceController> {
                           children: [
                             _RouteRow(
                                 dot: _green,
-                                label: 'PICKUP',
+                                label: 'PICKUP'.tr,
                                 value: b.pickupAddress.isNotEmpty
                                     ? b.pickupAddress
                                     : '${b.pickupZilla}, ${b.pickupDivision}'),
@@ -148,7 +148,7 @@ class BookingConfirmedView extends GetView<AmbulanceController> {
                             ),
                             _RouteRow(
                                 dot: _red,
-                                label: 'DESTINATION',
+                                label: 'DESTINATION'.tr,
                                 value: b.destination.isNotEmpty
                                     ? b.destination
                                     : '${b.dropZilla}, ${b.dropDivision}'),
@@ -162,27 +162,27 @@ class BookingConfirmedView extends GetView<AmbulanceController> {
                           children: [
                             _InfoRow(
                                 icon: Icons.airport_shuttle_rounded,
-                                label: 'Ambulance',
+                                label: 'Ambulance'.tr,
                                 value: b.typeName),
                             _InfoRow(
                                 icon: Icons.straighten_rounded,
-                                label: 'Distance',
+                                label: 'Distance'.tr,
                                 value: '${b.distanceKm} km'),
                             _InfoRow(
                                 icon: Icons.person_outline_rounded,
-                                label: 'Patient',
+                                label: 'Patient'.tr,
                                 value: b.patientName.isEmpty
                                     ? '—'
                                     : b.patientName),
                             _InfoRow(
                                 icon: Icons.call_outlined,
-                                label: 'Contact',
+                                label: 'Contact'.tr,
                                 value: b.customerPhone.isEmpty
                                     ? '—'
                                     : b.customerPhone),
                             _InfoRow(
                                 icon: Icons.bolt_rounded,
-                                label: 'Type',
+                                label: 'Type'.tr,
                                 value: b.bookingType.isEmpty
                                     ? '—'
                                     : b.bookingType),
@@ -196,11 +196,11 @@ class BookingConfirmedView extends GetView<AmbulanceController> {
                           children: [
                             _InfoRow(
                                 icon: Icons.payments_outlined,
-                                label: 'Payment',
+                                label: 'Payment'.tr,
                                 value: _cap(b.paymentMethod)),
                             _InfoRow(
                                 icon: Icons.schedule_rounded,
-                                label: 'Payment status',
+                                label: 'Payment status'.tr,
                                 value: _cap(b.paymentStatus)),
                             const Padding(
                               padding: EdgeInsets.symmetric(vertical: 8),
@@ -209,9 +209,9 @@ class BookingConfirmedView extends GetView<AmbulanceController> {
                             ),
                             Row(
                               children: [
-                                const Expanded(
-                                  child: Text('TOTAL FARE',
-                                      style: TextStyle(
+                                Expanded(
+                                  child: Text('TOTAL FARE'.tr,
+                                      style: const TextStyle(
                                           fontSize: 12.5,
                                           fontWeight: FontWeight.w800,
                                           color: Color(0xFF0F172A),
@@ -240,8 +240,8 @@ class BookingConfirmedView extends GetView<AmbulanceController> {
                             shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(14)),
                           ),
-                          child: const Text('Back to ambulance home',
-                              style: TextStyle(
+                          child: Text('Back to ambulance home'.tr,
+                              style: const TextStyle(
                                   fontSize: 15, fontWeight: FontWeight.w800)),
                         ),
                       ),

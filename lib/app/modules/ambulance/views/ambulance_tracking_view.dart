@@ -44,8 +44,8 @@ class AmbulanceTrackingView extends GetView<EmergencyController> {
             child: _round(Icons.refresh_rounded, () {
               amb.refreshAmbulance();
               Get.snackbar(
-                'Location updated',
-                'Ambulance position refreshed',
+                'Location updated'.tr,
+                'Ambulance position refreshed'.tr,
                 snackPosition: SnackPosition.TOP,
                 margin: const EdgeInsets.all(12),
                 duration: const Duration(seconds: 1),
@@ -78,7 +78,7 @@ class AmbulanceTrackingView extends GetView<EmergencyController> {
                           const Icon(Icons.circle,
                               size: 9, color: Color(0xFF22C55E)),
                           const SizedBox(width: 6),
-                          Text('On the way · ${con.estArrival}',
+                          Text('${'On the way'.tr} · ${con.estArrival}',
                               style: const TextStyle(
                                   fontSize: 12.5,
                                   fontWeight: FontWeight.w700,
@@ -163,14 +163,14 @@ class _Panel extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text('LIVE · ON THE WAY',
-                            style: TextStyle(
+                        Text('LIVE · ON THE WAY'.tr,
+                            style: const TextStyle(
                                 fontSize: 11,
                                 fontWeight: FontWeight.w800,
                                 color: _red,
                                 letterSpacing: 0.5)),
                         const SizedBox(height: 4),
-                        Text('Arriving in ${con.estArrival}',
+                        Text('${'Arriving in'.tr} ${con.estArrival}',
                             style: const TextStyle(
                                 fontSize: 22,
                                 fontWeight: FontWeight.w800,
@@ -265,27 +265,27 @@ class _Panel extends StatelessWidget {
               ),
               const SizedBox(height: 14),
               Row(
-                children: const [
+                children: [
                   Expanded(
                       child: _ActionBtn(
                           icon: Icons.call_rounded,
-                          label: 'Call driver',
-                          bg: Color(0xFFD9F7E6),
-                          fg: Color(0xFF16A34A))),
-                  SizedBox(width: 10),
+                          label: 'Call driver'.tr,
+                          bg: const Color(0xFFD9F7E6),
+                          fg: const Color(0xFF16A34A))),
+                  const SizedBox(width: 10),
                   Expanded(
                       child: _ActionBtn(
                           icon: Icons.notifications_active_outlined,
-                          label: 'Call support',
-                          bg: Color(0xFFFDE4E4),
+                          label: 'Call support'.tr,
+                          bg: const Color(0xFFFDE4E4),
                           fg: _red)),
-                  SizedBox(width: 10),
+                  const SizedBox(width: 10),
                   Expanded(
                       child: _ActionBtn(
                           icon: Icons.share_outlined,
-                          label: 'Share trip',
-                          bg: Color(0xFFE6E7FB),
-                          fg: Color(0xFF4F46E5))),
+                          label: 'Share trip'.tr,
+                          bg: const Color(0xFFE6E7FB),
+                          fg: const Color(0xFF4F46E5))),
                 ],
               ),
               const SizedBox(height: 14),
@@ -299,15 +299,15 @@ class _Panel extends StatelessWidget {
                       style: BorderStyle.solid),
                 ),
                 alignment: Alignment.center,
-                child: const Text('▶ Simulate: trip completed → payment',
-                    style: TextStyle(
+                child: Text('▶ Simulate: trip completed → payment'.tr,
+                    style: const TextStyle(
                         fontSize: 12.5,
                         fontWeight: FontWeight.w600,
                         color: Color(0xFF64748B))),
               ),
               const SizedBox(height: 16),
-              const Text('TRIP STATUS',
-                  style: TextStyle(
+              Text('TRIP STATUS'.tr,
+                  style: const TextStyle(
                       fontSize: 11.5,
                       fontWeight: FontWeight.w700,
                       color: Color(0xFF94A3B8),

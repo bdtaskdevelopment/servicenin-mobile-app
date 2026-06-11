@@ -1,3 +1,4 @@
+import 'package:animate_do/animate_do.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -26,8 +27,8 @@ class PhysioSessionsView extends GetView<PhysioController> {
           icon: const Icon(Icons.arrow_back_ios_new_rounded,
               size: 20, color: Color(0xFF1A1A1A)),
         ),
-        title: const Text('My sessions',
-            style: TextStyle(
+        title: Text('My sessions'.tr,
+            style: const TextStyle(
                 fontSize: 19,
                 fontWeight: FontWeight.w800,
                 color: Color(0xFF0F172A))),
@@ -42,23 +43,27 @@ class PhysioSessionsView extends GetView<PhysioController> {
             }
             if (con.sessions.isEmpty) {
               return ListView(
-                children: const [
-                  SizedBox(height: 140),
+                children: [
+                  const SizedBox(height: 140),
                   Center(
-                    child: Text('No sessions yet.',
-                        style: TextStyle(color: Color(0xFF94A3B8))),
+                    child: Text('No sessions yet.'.tr,
+                        style: const TextStyle(color: Color(0xFF94A3B8))),
                   ),
                 ],
               );
             }
-            return ListView(
-              padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
-              children: con.sessions
-                  .map((s) => Padding(
-                        padding: const EdgeInsets.only(bottom: 12),
-                        child: _SessionCard(session: s),
-                      ))
-                  .toList(),
+            return FadeInUp(
+              from: 18,
+              duration: const Duration(milliseconds: 350),
+              child: ListView(
+                padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
+                children: con.sessions
+                    .map((s) => Padding(
+                          padding: const EdgeInsets.only(bottom: 12),
+                          child: _SessionCard(session: s),
+                        ))
+                    .toList(),
+              ),
             );
           },
         ),
@@ -169,11 +174,11 @@ class _StatusPill extends StatelessWidget {
             borderRadius: BorderRadius.circular(20)),
         child: Row(
           mainAxisSize: MainAxisSize.min,
-          children: const [
-            Icon(Icons.circle, size: 7, color: Color(0xFF16A34A)),
-            SizedBox(width: 4),
-            Text('Upcoming',
-                style: TextStyle(
+          children: [
+            const Icon(Icons.circle, size: 7, color: Color(0xFF16A34A)),
+            const SizedBox(width: 4),
+            Text('Upcoming'.tr,
+                style: const TextStyle(
                     fontSize: 11,
                     fontWeight: FontWeight.w700,
                     color: Color(0xFF15803D))),
@@ -186,8 +191,8 @@ class _StatusPill extends StatelessWidget {
       decoration: BoxDecoration(
           color: const Color(0xFFEDF1EE),
           borderRadius: BorderRadius.circular(20)),
-      child: const Text('Completed',
-          style: TextStyle(
+      child: Text('Completed'.tr,
+          style: const TextStyle(
               fontSize: 11,
               fontWeight: FontWeight.w700,
               color: Color(0xFF475569))),

@@ -1,23 +1,11 @@
-import 'from/bn_bd.dart';
-import 'from/en_us.dart';
+import 'sn_strings.dart';
 
 abstract class AppTranslation {
+  /// Locale keys match the `Locale(languageCode)` used in [GetMaterialApp]:
+  /// `en` (English source text, empty map → falls back to the key) and `bn`
+  /// (Bangla translations keyed by the English source text).
   static Map<String, Map<String, String>> translationsKeys = {
-    "en_US": enUS,
-    "bn": bnBd,
+    'en': snEn,
+    'bn': snBn,
   };
 }
-
-// final selectedLanguage = Get.locale!.languageCode.obs;
-// var selectIndex = 0.obs;
-// void changeLanguage(String lang, int index) async {
-//   // print('language: ' + lang);
-//   // selectIndex.value = index;
-//   // await appCon.getLanguageInfo(lang);
-
-//   Locale locale = Locale(lang);
-//   Get.updateLocale(locale);
-//   selectedLanguage.value = lang;
-//   selectIndex.value = index;
-//   await preferences.setString(AppKeys.languageCode, lang.toString());
-// }

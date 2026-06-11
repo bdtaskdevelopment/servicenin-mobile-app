@@ -33,7 +33,7 @@ class GuideListView extends GetView<InformationController> {
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(con.selectedCategory?.name ?? 'Guides',
+                          Text(con.selectedCategory?.name ?? 'Guides'.tr,
                               style: const TextStyle(
                                   fontSize: 19,
                                   fontWeight: FontWeight.w800,
@@ -48,9 +48,9 @@ class GuideListView extends GetView<InformationController> {
                 ),
                 Expanded(
                   child: guides.isEmpty
-                      ? const Center(
-                          child: Text('No guides yet',
-                              style: TextStyle(color: Color(0xFF94A3B8))))
+                      ? Center(
+                          child: Text('No guides yet'.tr,
+                              style: const TextStyle(color: Color(0xFF94A3B8))))
                       : ListView(
                           padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
                           children: guides
@@ -131,8 +131,8 @@ class _GuideCard extends StatelessWidget {
                     style: const TextStyle(
                         fontSize: 12, color: Color(0xFFE07A1F))),
                 const Spacer(),
-                const Text('Read →',
-                    style: TextStyle(
+                Text('Read →'.tr,
+                    style: const TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.w800,
                         color: _purple)),

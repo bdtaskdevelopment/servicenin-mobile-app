@@ -33,8 +33,8 @@ class AmbulanceNotificationsView
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text('Notifications',
-                              style: TextStyle(
+                          Text('Notifications'.tr,
+                              style: const TextStyle(
                                   fontSize: 19,
                                   fontWeight: FontWeight.w800,
                                   color: Color(0xFF0F172A))),
@@ -61,17 +61,17 @@ class AmbulanceNotificationsView
                   padding: const EdgeInsets.fromLTRB(16, 10, 16, 10),
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
-                    children: const [
-                      Text('● v2',
+                    children: [
+                      const Text('● v2',
                           style: TextStyle(
                               fontSize: 11,
                               fontWeight: FontWeight.w700,
                               color: Color(0xFFB45309))),
-                      SizedBox(width: 8),
+                      const SizedBox(width: 8),
                       Expanded(
                         child: Text(
-                          'Notification feed is v2 — no notifications endpoint in the current API.',
-                          style: TextStyle(
+                          'Notification feed is v2 — no notifications endpoint in the current API.'.tr,
+                          style: const TextStyle(
                               fontSize: 12,
                               color: Color(0xFFB45309),
                               height: 1.4),
@@ -134,11 +134,11 @@ class AmbulanceNotificationsView
                         ...con.itemsFor(section).map((n) => _NotifTile(item: n)),
                       ],
                       if (con.sections.isEmpty)
-                        const Padding(
-                          padding: EdgeInsets.only(top: 60),
+                        Padding(
+                          padding: const EdgeInsets.only(top: 60),
                           child: Center(
-                            child: Text('No notifications',
-                                style: TextStyle(color: Color(0xFF94A3B8))),
+                            child: Text('No notifications'.tr,
+                                style: const TextStyle(color: Color(0xFF94A3B8))),
                           ),
                         ),
                     ],

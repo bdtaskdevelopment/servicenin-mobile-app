@@ -41,15 +41,15 @@ class ProviderDashboardView extends GetView<ProviderController> {
                           icon: const Icon(Icons.arrow_back_ios_new_rounded,
                               size: 20, color: Colors.white),
                         ),
-                        const Column(
+                        Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text('Provider dashboard',
-                                style: TextStyle(
+                            Text('Provider dashboard'.tr,
+                                style: const TextStyle(
                                     fontSize: 19,
                                     fontWeight: FontWeight.w800,
                                     color: Colors.white)),
-                            Text('Jamal Uddin',
+                            const Text('Jamal Uddin',
                                 style: TextStyle(
                                     fontSize: 12, color: Color(0xFFCDEDE6))),
                           ],
@@ -68,8 +68,8 @@ class ProviderDashboardView extends GetView<ProviderController> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text('AVAILABLE BALANCE',
-                              style: TextStyle(
+                          Text('AVAILABLE BALANCE'.tr,
+                              style: const TextStyle(
                                   color: Color(0xFFCDEDE6),
                                   fontSize: 11,
                                   fontWeight: FontWeight.w700,
@@ -83,12 +83,12 @@ class ProviderDashboardView extends GetView<ProviderController> {
                           const SizedBox(height: 6),
                           Row(
                             children: [
-                              Text('Pending ${con.pending}',
+                              Text('${'Pending'.tr} ${con.pending}',
                                   style: const TextStyle(
                                       color: Color(0xFFCDEDE6),
                                       fontSize: 12.5)),
                               const SizedBox(width: 18),
-                              Text('Withdrawn ${con.withdrawn}',
+                              Text('${'Withdrawn'.tr} ${con.withdrawn}',
                                   style: const TextStyle(
                                       color: Color(0xFFCDEDE6),
                                       fontSize: 12.5)),
@@ -107,8 +107,8 @@ class ProviderDashboardView extends GetView<ProviderController> {
                                 shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(12)),
                               ),
-                              child: const Text('Withdraw earnings',
-                                  style: TextStyle(
+                              child: Text('Withdraw earnings'.tr,
+                                  style: const TextStyle(
                                       fontSize: 15,
                                       fontWeight: FontWeight.w800)),
                             ),
@@ -127,28 +127,28 @@ class ProviderDashboardView extends GetView<ProviderController> {
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: Row(
               children: [
-                _stat(con.jobsDone, 'Jobs done'),
+                _stat(con.jobsDone, 'Jobs done'.tr),
                 const SizedBox(width: 12),
-                _stat(con.rating, 'Rating'),
+                _stat(con.rating, 'Rating'.tr),
                 const SizedBox(width: 12),
-                _stat(con.acceptance, 'Acceptance'),
+                _stat(con.acceptance, 'Acceptance'.tr),
               ],
             ),
           ),
           const SizedBox(height: 22),
-          const Padding(
-            padding: EdgeInsets.symmetric(horizontal: 16),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Assigned jobs',
-                    style: TextStyle(
+                Text('Assigned jobs'.tr,
+                    style: const TextStyle(
                         fontSize: 17,
                         fontWeight: FontWeight.w800,
                         color: Color(0xFF0F172A))),
-                SizedBox(height: 2),
-                Text('Tap to accept or navigate',
-                    style: TextStyle(fontSize: 12, color: Color(0xFF94A3B8))),
+                const SizedBox(height: 2),
+                Text('Tap to accept or navigate'.tr,
+                    style: const TextStyle(fontSize: 12, color: Color(0xFF94A3B8))),
               ],
             ),
           ),
@@ -242,7 +242,7 @@ class _JobCard extends StatelessWidget {
                             ? const Color(0xFFD97706)
                             : const Color(0xFF6366F1)),
                     const SizedBox(width: 4),
-                    Text(inProgress ? 'In progress' : 'Assigned',
+                    Text(inProgress ? 'In progress'.tr : 'Assigned'.tr,
                         style: TextStyle(
                             fontSize: 11,
                             fontWeight: FontWeight.w700,
@@ -272,8 +272,8 @@ class _JobCard extends StatelessWidget {
                   child: ElevatedButton.icon(
                     onPressed: con.navigateJob,
                     icon: const Icon(Icons.location_on_outlined, size: 16),
-                    label: const Text('Navigate',
-                        style: TextStyle(
+                    label: Text('Navigate'.tr,
+                        style: const TextStyle(
                             fontSize: 13.5, fontWeight: FontWeight.w800)),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: _navy,
@@ -285,7 +285,7 @@ class _JobCard extends StatelessWidget {
                   ),
                 )
               else ...[
-                _ghost('Decline', const Color(0xFF334155)),
+                _ghost('Decline'.tr, const Color(0xFF334155)),
                 const SizedBox(width: 10),
                 SizedBox(
                   height: 40,
@@ -299,8 +299,8 @@ class _JobCard extends StatelessWidget {
                       shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(10)),
                     ),
-                    child: const Text('Accept',
-                        style: TextStyle(
+                    child: Text('Accept'.tr,
+                        style: const TextStyle(
                             fontSize: 13.5, fontWeight: FontWeight.w800)),
                   ),
                 ),

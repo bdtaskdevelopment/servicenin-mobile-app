@@ -1,7 +1,9 @@
+import 'package:animate_do/animate_do.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../../core/values/app_colors.dart';
+import '../../../global_widget/sn_shimmer.dart';
 import '../controllers/account_controller.dart';
 import '../widgets/profile_avatar.dart';
 
@@ -43,8 +45,8 @@ class ProfileView extends GetView<AccountController> {
                           icon: const Icon(Icons.arrow_back_ios_new_rounded,
                               size: 20, color: Colors.white),
                         ),
-                        const Text('Profile',
-                            style: TextStyle(
+                        Text('Profile'.tr,
+                            style: const TextStyle(
                                 fontSize: 19,
                                 fontWeight: FontWeight.w800,
                                 color: Colors.white)),
@@ -88,7 +90,12 @@ class ProfileView extends GetView<AccountController> {
             ),
           ),
           Expanded(
-            child: ListView(
+            child: (con.loading && con.profile == null)
+                ? const _ProfileRowsSkeleton()
+                : FadeInUp(
+              from: 18,
+              duration: const Duration(milliseconds: 350),
+              child: ListView(
               padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
               children: [
                 Container(
@@ -106,38 +113,39 @@ class ProfileView extends GetView<AccountController> {
                     children: [
                       _Row(
                         icon: Icons.call_outlined,
-                        label: 'PHONE (LOGIN)',
+                        label: 'PHONE (LOGIN)'.tr,
                         value: con.maskedPhone,
                         trailing: const _VerifiedPill(),
                       ),
                       const _Divider(),
                       _Row(
                         icon: Icons.chat_bubble_outline_rounded,
-                        label: 'EMAIL',
+                        label: 'EMAIL'.tr,
                         value: con.email,
                       ),
                       const _Divider(),
                       _Row(
                         icon: Icons.person_outline_rounded,
-                        label: 'GENDER',
+                        label: 'GENDER'.tr,
                         value: con.gender,
                       ),
                       const _Divider(),
                       _Row(
                         icon: Icons.water_drop_outlined,
-                        label: 'BLOOD GROUP',
+                        label: 'BLOOD GROUP'.tr,
                         value: con.bloodGroup,
                       ),
                       const _Divider(),
                       _Row(
                         icon: Icons.location_on_outlined,
-                        label: 'ADDRESS',
+                        label: 'ADDRESS'.tr,
                         value: con.address,
                       ),
                     ],
                   ),
                 ),
               ],
+            ),
             ),
           ),
           // Edit profile button
@@ -155,14 +163,60 @@ class ProfileView extends GetView<AccountController> {
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(14)),
                 ),
-                child: const Text('Edit profile',
+                child: Text('Edit profile'.tr,
                     style:
-                        TextStyle(fontSize: 16, fontWeight: FontWeight.w800)),
+                        const TextStyle(fontSize: 16, fontWeight: FontWeight.w800)),
               ),
             ),
           ),
         ],
         ),
+      ),
+    );
+  }
+}
+
+class _ProfileRowsSkeleton extends StatelessWidget {
+  const _ProfileRowsSkeleton();
+  @override
+  Widget build(BuildContext context) {
+    return SnShimmer(
+      child: ListView(
+        padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
+        physics: const NeverScrollableScrollPhysics(),
+        children: [
+          Container(
+            decoration: BoxDecoration(
+              color: Colors.transparent,
+              borderRadius: BorderRadius.circular(18),
+              border: Border.all(color: const Color(0xFFE8ECF1)),
+            ),
+            child: Column(
+              children: List.generate(
+                5,
+                (_) => const Padding(
+                  padding: EdgeInsets.all(14),
+                  child: Row(
+                    children: [
+                      SnBone(width: 42, height: 42, radius: 12),
+                      SizedBox(width: 14),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            SnBone(width: 90, height: 10),
+                            SizedBox(height: 8),
+                            SnBone(width: 150, height: 13),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -230,11 +284,11 @@ class _VerifiedPill extends StatelessWidget {
           borderRadius: BorderRadius.circular(20)),
       child: Row(
         mainAxisSize: MainAxisSize.min,
-        children: const [
-          Icon(Icons.circle, size: 7, color: Color(0xFF16A34A)),
-          SizedBox(width: 5),
-          Text('Verified',
-              style: TextStyle(
+        children: [
+          const Icon(Icons.circle, size: 7, color: Color(0xFF16A34A)),
+          const SizedBox(width: 5),
+          Text('Verified'.tr,
+              style: const TextStyle(
                   fontSize: 11,
                   fontWeight: FontWeight.w700,
                   color: Color(0xFF15803D))),

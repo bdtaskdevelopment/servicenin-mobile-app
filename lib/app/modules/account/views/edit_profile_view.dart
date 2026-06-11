@@ -30,8 +30,8 @@ class EditProfileView extends GetView<AccountController> {
                       icon: const Icon(Icons.arrow_back_ios_new_rounded,
                           size: 20, color: Color(0xFF1A1A1A)),
                     ),
-                    const Text('Edit profile',
-                        style: TextStyle(
+                    Text('Edit profile'.tr,
+                        style: const TextStyle(
                             fontSize: 19,
                             fontWeight: FontWeight.w800,
                             color: Color(0xFF0F172A))),
@@ -99,8 +99,8 @@ class EditProfileView extends GetView<AccountController> {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                const Text('PHONE (LOGIN)',
-                                    style: TextStyle(
+                                Text('PHONE (LOGIN)'.tr,
+                                    style: const TextStyle(
                                         fontSize: 10.5,
                                         fontWeight: FontWeight.w700,
                                         color: Color(0xFF94A3B8),
@@ -122,12 +122,12 @@ class EditProfileView extends GetView<AccountController> {
                                 borderRadius: BorderRadius.circular(20)),
                             child: Row(
                               mainAxisSize: MainAxisSize.min,
-                              children: const [
-                                Icon(Icons.circle,
+                              children: [
+                                const Icon(Icons.circle,
                                     size: 7, color: Color(0xFF16A34A)),
-                                SizedBox(width: 5),
-                                Text('Verified',
-                                    style: TextStyle(
+                                const SizedBox(width: 5),
+                                Text('Verified'.tr,
+                                    style: const TextStyle(
                                         fontSize: 11,
                                         fontWeight: FontWeight.w700,
                                         color: Color(0xFF15803D))),
@@ -138,14 +138,14 @@ class EditProfileView extends GetView<AccountController> {
                       ),
                     ),
                     const SizedBox(height: 14),
-                    _InputCard(label: 'FULL NAME', controller: con.nameCtrl),
+                    _InputCard(label: 'FULL NAME'.tr, controller: con.nameCtrl),
                     const SizedBox(height: 14),
                     _InputCard(
-                        label: 'EMAIL',
+                        label: 'EMAIL'.tr,
                         controller: con.emailCtrl,
                         keyboardType: TextInputType.emailAddress),
                     const SizedBox(height: 16),
-                    const _Label('GENDER'),
+                    _Label('GENDER'.tr),
                     const SizedBox(height: 10),
                     Row(
                       children: List.generate(con.genders.length, (i) {
@@ -183,7 +183,7 @@ class EditProfileView extends GetView<AccountController> {
                       }),
                     ),
                     const SizedBox(height: 16),
-                    const _Label('BLOOD GROUP'),
+                    _Label('BLOOD GROUP'.tr),
                     const SizedBox(height: 10),
                     GridView.count(
                       crossAxisCount: 4,
@@ -219,7 +219,7 @@ class EditProfileView extends GetView<AccountController> {
                       }).toList(),
                     ),
                     const SizedBox(height: 16),
-                    const _Label('ADDRESS'),
+                    _Label('ADDRESS'.tr),
                     const SizedBox(height: 10),
                     _InputCard(
                         label: null,
@@ -251,8 +251,8 @@ class EditProfileView extends GetView<AccountController> {
                             child: CircularProgressIndicator(
                                 strokeWidth: 2.5, color: Colors.white),
                           )
-                        : const Text('Save changes',
-                            style: TextStyle(
+                        : Text('Save changes'.tr,
+                            style: const TextStyle(
                                 fontSize: 16, fontWeight: FontWeight.w800)),
                   ),
                 ),

@@ -30,8 +30,8 @@ class EmergencyBookingView extends GetView<EmergencyController> {
                       icon: const Icon(Icons.arrow_back_ios_new_rounded,
                           size: 20, color: Colors.white),
                     ),
-                    const Text('Emergency Booking',
-                        style: TextStyle(
+                    Text('Emergency Booking'.tr,
+                        style: const TextStyle(
                             fontSize: 19,
                             fontWeight: FontWeight.w800,
                             color: Colors.white)),
@@ -55,15 +55,15 @@ class EmergencyBookingView extends GetView<EmergencyController> {
             padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
-              children: const [
-                Text("Stay calm. We've pre-filled everything.",
-                    style: TextStyle(
+              children: [
+                Text("Stay calm. We've pre-filled everything.".tr,
+                    style: const TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w700,
                         color: Color(0xFF0F172A))),
-                SizedBox(height: 2),
-                Text('আপনি ২ ট্যাপ আম্বুলেন্স পাবেন · Confirm to dispatch.',
-                    style: TextStyle(fontSize: 12, color: Color(0xFF94A3B8))),
+                const SizedBox(height: 2),
+                Text('Book an ambulance in 2 taps · Confirm to dispatch.'.tr,
+                    style: const TextStyle(fontSize: 12, color: Color(0xFF94A3B8))),
               ],
             ),
           ),
@@ -75,14 +75,14 @@ class EmergencyBookingView extends GetView<EmergencyController> {
                   children: [
                     _Field(
                       icon: Icons.location_on_outlined,
-                      label: 'PICKUP',
+                      label: 'PICKUP'.tr,
                       value: con.pickup,
                       trailing: _pill('GPS'),
                     ),
                     const SizedBox(height: 12),
                     _Field(
                       icon: Icons.local_hospital_outlined,
-                      label: 'TAKE TO',
+                      label: 'TAKE TO'.tr,
                       value: con.takeTo,
                       sub: con.hospital,
                       chevron: true,
@@ -90,28 +90,28 @@ class EmergencyBookingView extends GetView<EmergencyController> {
                     const SizedBox(height: 12),
                     _Field(
                       icon: Icons.favorite_border_rounded,
-                      label: 'PATIENT CONDITION',
+                      label: 'PATIENT CONDITION'.tr,
                       value: con.conditionLabel,
                       dropdown: true,
                     ),
                     const SizedBox(height: 12),
                     _Field(
                       icon: Icons.airport_shuttle_rounded,
-                      label: 'AMBULANCE',
+                      label: 'AMBULANCE'.tr,
                       value: con.ambulanceType,
-                      sub: 'Recommended for selected condition',
+                      sub: 'Recommended for selected condition'.tr,
                       dropdown: true,
                     ),
                     const SizedBox(height: 12),
                     _Field(
                       icon: Icons.call_outlined,
-                      label: 'EMERGENCY CONTACT',
+                      label: 'EMERGENCY CONTACT'.tr,
                       value: con.contact,
                       dropdown: true,
                     ),
                     const SizedBox(height: 18),
-                    const Text('CONDITION (TAP TO OVERRIDE)',
-                        style: TextStyle(
+                    Text('CONDITION (TAP TO OVERRIDE)'.tr,
+                        style: const TextStyle(
                             fontSize: 11.5,
                             fontWeight: FontWeight.w700,
                             color: Color(0xFF94A3B8),
@@ -149,11 +149,11 @@ class EmergencyBookingView extends GetView<EmergencyController> {
                     const SizedBox(height: 18),
                     const Divider(height: 1, color: Color(0xFFEDEFF2)),
                     const SizedBox(height: 14),
-                    _summaryRow('Est. arrival', con.estArrival),
+                    _summaryRow('Est. arrival'.tr, con.estArrival),
                     const SizedBox(height: 10),
-                    _summaryRow('Distance', con.distance),
+                    _summaryRow('Distance'.tr, con.distance),
                     const SizedBox(height: 10),
-                    _summaryRow('Est. fare', con.fare),
+                    _summaryRow('Est. fare'.tr, con.fare),
                   ],
                 );
               },
@@ -192,8 +192,8 @@ class EmergencyBookingView extends GetView<EmergencyController> {
                         shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(14)),
                       ),
-                      child: const Text('HOLD to Confirm',
-                          style: TextStyle(
+                      child: Text('HOLD to Confirm'.tr,
+                          style: const TextStyle(
                               fontSize: 16, fontWeight: FontWeight.w800)),
                     ),
                   ),

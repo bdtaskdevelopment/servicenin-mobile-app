@@ -28,17 +28,17 @@ class ConnectedDonorsView extends GetView<BloodController> {
                     icon: const Icon(Icons.arrow_back_ios_new_rounded,
                         size: 20, color: Color(0xFF1A1A1A)),
                   ),
-                  const Column(
+                  Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('My donors',
-                          style: TextStyle(
+                      Text('My donors'.tr,
+                          style: const TextStyle(
                               fontSize: 19,
                               fontWeight: FontWeight.w800,
                               color: Color(0xFF0F172A))),
-                      SizedBox(height: 1),
-                      Text('Donors you\'ve connected with',
-                          style: TextStyle(
+                      const SizedBox(height: 1),
+                      Text('Donors you\'ve connected with'.tr,
+                          style: const TextStyle(
                               fontSize: 12, color: Color(0xFF94A3B8))),
                     ],
                   ),
@@ -55,14 +55,14 @@ class ConnectedDonorsView extends GetView<BloodController> {
                         color: const Color(0xFFFDE4E4),
                         borderRadius: BorderRadius.circular(14)),
                     child: Row(
-                      children: const [
-                        Icon(Icons.info_outline_rounded,
+                      children: [
+                        const Icon(Icons.info_outline_rounded,
                             size: 18, color: _red),
-                        SizedBox(width: 10),
+                        const SizedBox(width: 10),
                         Expanded(
                           child: Text(
-                              'Saved after a successful donation — reach them directly next time you need blood.',
-                              style: TextStyle(
+                              'Saved after a successful donation — reach them directly next time you need blood.'.tr,
+                              style: const TextStyle(
                                   fontSize: 12.5,
                                   height: 1.4,
                                   color: Color(0xFF9F1239))),
@@ -173,8 +173,8 @@ class _DonorTile extends StatelessWidget {
                   child: OutlinedButton.icon(
                     onPressed: () => con.callDonor(donor),
                     icon: const Icon(Icons.call_outlined, size: 18),
-                    label: const Text('Call',
-                        style: TextStyle(
+                    label: Text('Call'.tr,
+                        style: const TextStyle(
                             fontSize: 14, fontWeight: FontWeight.w800)),
                     style: OutlinedButton.styleFrom(
                       foregroundColor: const Color(0xFF334155),
@@ -193,8 +193,8 @@ class _DonorTile extends StatelessWidget {
                     onPressed: () => con.openDonorChat(donor),
                     icon: const Icon(Icons.chat_bubble_outline_rounded,
                         size: 18),
-                    label: const Text('Message',
-                        style: TextStyle(
+                    label: Text('Message'.tr,
+                        style: const TextStyle(
                             fontSize: 14, fontWeight: FontWeight.w800)),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: _red,

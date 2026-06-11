@@ -1,3 +1,4 @@
+import 'package:animate_do/animate_do.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -32,8 +33,8 @@ class BloodView extends GetView<BloodController> {
                             onTap: () => Get.toNamed(Routes.BLOOD_NEED),
                             isPrimary: true,
                             icon: Icons.water_drop_rounded,
-                            title: 'Need blood',
-                            subtitle: 'রক্তের অনুরোধ পাঠান',
+                            title: 'Need blood'.tr,
+                            subtitle: 'Send a blood request'.tr,
                           ),
                         ),
                         const SizedBox(width: 12),
@@ -42,8 +43,8 @@ class BloodView extends GetView<BloodController> {
                             onTap: controller.openDonate,
                             isPrimary: false,
                             icon: Icons.favorite_rounded,
-                            title: 'Donate',
-                            subtitle: 'রক্ত দিন · জীবন বাঁচান',
+                            title: 'Donate'.tr,
+                            subtitle: 'Give blood · save lives'.tr,
                           ),
                         ),
                       ],
@@ -111,15 +112,15 @@ class _Header extends StatelessWidget {
           ),
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
-            children: const [
-              Text('Blood Bank',
-                  style: TextStyle(
+            children: [
+              Text('Blood Bank'.tr,
+                  style: const TextStyle(
                       fontSize: 19,
                       fontWeight: FontWeight.w800,
                       color: Color(0xFF0F172A))),
-              SizedBox(height: 1),
-              Text('Donors near you · ServiceNin',
-                  style: TextStyle(fontSize: 12, color: Color(0xFF94A3B8))),
+              const SizedBox(height: 1),
+              Text('Donors near you · ServiceNin'.tr,
+                  style: const TextStyle(fontSize: 12, color: Color(0xFF94A3B8))),
             ],
           ),
           const Spacer(),
@@ -231,16 +232,16 @@ class _AvailabilityCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text('Available for donation',
-                    style: TextStyle(
+                Text('Available for donation'.tr,
+                    style: const TextStyle(
                         fontSize: 14.5,
                         fontWeight: FontWeight.w800,
                         color: Color(0xFF0F172A))),
                 const SizedBox(height: 2),
                 Text(
                   on
-                      ? 'You\'ll receive nearby blood requests'
-                      : 'You\'re paused — no requests for now',
+                      ? 'You\'ll receive nearby blood requests'.tr
+                      : 'You\'re paused — no requests for now'.tr,
                   style: const TextStyle(fontSize: 12, color: Color(0xFF94A3B8)),
                 ),
               ],
@@ -281,8 +282,8 @@ class _DonorCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text("You're a registered donor",
-                    style: TextStyle(
+                Text("You're a registered donor".tr,
+                    style: const TextStyle(
                         fontSize: 14.5,
                         fontWeight: FontWeight.w700,
                         color: Color(0xFF0F172A))),
@@ -304,11 +305,11 @@ class _DonorCard extends StatelessWidget {
             ),
             child: Row(
               mainAxisSize: MainAxisSize.min,
-              children: const [
-                Icon(Icons.check_circle, size: 13, color: Color(0xFF16A34A)),
-                SizedBox(width: 4),
-                Text('Available',
-                    style: TextStyle(
+              children: [
+                const Icon(Icons.check_circle, size: 13, color: Color(0xFF16A34A)),
+                const SizedBox(width: 4),
+                Text('Available'.tr,
+                    style: const TextStyle(
                         fontSize: 11,
                         fontWeight: FontWeight.w700,
                         color: Color(0xFF15803D))),
@@ -347,18 +348,18 @@ class _RegisterDonorCard extends StatelessWidget {
                 size: 22, color: Color(0xFFE11D48)),
           ),
           const SizedBox(width: 12),
-          const Expanded(
+          Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Become a donor',
-                    style: TextStyle(
+                Text('Become a donor'.tr,
+                    style: const TextStyle(
                         fontSize: 14.5,
                         fontWeight: FontWeight.w800,
                         color: Color(0xFF0F172A))),
-                SizedBox(height: 2),
-                Text('Register & verify · get nearby requests',
-                    style: TextStyle(fontSize: 12, color: Color(0xFF94A3B8))),
+                const SizedBox(height: 2),
+                Text('Register & verify · get nearby requests'.tr,
+                    style: const TextStyle(fontSize: 12, color: Color(0xFF94A3B8))),
               ],
             ),
           ),
@@ -462,18 +463,18 @@ class _MyResponsesCard extends StatelessWidget {
                 size: 22, color: Color(0xFFE11D48)),
           ),
           const SizedBox(width: 12),
-          const Expanded(
+          Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('My responses',
-                    style: TextStyle(
+                Text('My responses'.tr,
+                    style: const TextStyle(
                         fontSize: 14.5,
                         fontWeight: FontWeight.w800,
                         color: Color(0xFF0F172A))),
-                SizedBox(height: 2),
-                Text('Requests you responded to · chat or call',
-                    style: TextStyle(fontSize: 12, color: Color(0xFF94A3B8))),
+                const SizedBox(height: 2),
+                Text('Requests you responded to · chat or call'.tr,
+                    style: const TextStyle(fontSize: 12, color: Color(0xFF94A3B8))),
               ],
             ),
           ),
@@ -511,24 +512,24 @@ class _RequestsHeader extends StatelessWidget {
       children: [
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
-          children: const [
-            Text('Requests near you',
-                style: TextStyle(
+          children: [
+            Text('Requests near you'.tr,
+                style: const TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w800,
                     color: Color(0xFF0F172A))),
-            SizedBox(height: 2),
-            Text('Matching your group & area',
-                style: TextStyle(fontSize: 12, color: Color(0xFF94A3B8))),
+            const SizedBox(height: 2),
+            Text('Matching your group & area'.tr,
+                style: const TextStyle(fontSize: 12, color: Color(0xFF94A3B8))),
           ],
         ),
         const Spacer(),
         GestureDetector(
           onTap: onSeeAll,
-          child: const Padding(
-            padding: EdgeInsets.only(top: 2),
-            child: Text('See all →',
-                style: TextStyle(
+          child: Padding(
+            padding: const EdgeInsets.only(top: 2),
+            child: Text('See all →'.tr,
+                style: const TextStyle(
                     fontSize: 13,
                     fontWeight: FontWeight.w700,
                     color: AppColors.brandOrange)),
@@ -558,8 +559,8 @@ class _NearestDonors extends StatelessWidget {
           borderRadius: BorderRadius.circular(16),
           border: Border.all(color: const Color(0xFFEDEFF2)),
         ),
-        child: const Text('No donors near you right now.',
-            style: TextStyle(fontSize: 13, color: Color(0xFF94A3B8))),
+        child: Text('No donors near you right now.'.tr,
+            style: const TextStyle(fontSize: 13, color: Color(0xFF94A3B8))),
       );
     }
 
@@ -567,12 +568,17 @@ class _NearestDonors extends StatelessWidget {
     final shown = con.nearestDonors.take(3).toList();
     return Column(
       children: [
-        ...shown.map((d) => Padding(
-              padding: const EdgeInsets.only(bottom: 12),
-              child: DonorCard(
-                donor: d,
-                onView: () => con.viewDonor(d),
-                onCall: () => con.callPhone(d.phone),
+        ...shown.asMap().entries.map((e) => FadeInUp(
+              from: 18,
+              duration: const Duration(milliseconds: 350),
+              delay: Duration(milliseconds: 70 * e.key),
+              child: Padding(
+                padding: const EdgeInsets.only(bottom: 12),
+                child: DonorCard(
+                  donor: e.value,
+                  onView: () => con.viewDonor(e.value),
+                  onCall: () => con.callPhone(e.value.phone),
+                ),
               ),
             )),
       ],
@@ -587,9 +593,9 @@ class _LeaderboardCard extends StatelessWidget {
   final bool loading;
 
   String get _subtitle {
-    if (loading && rank == 0) return 'Finding your position…';
+    if (loading && rank == 0) return 'Finding your position…'.tr;
     if (rank > 0) return "You're #$rank this season · keep going!";
-    return 'Donate to join the leaderboard';
+    return 'Donate to join the leaderboard'.tr;
   }
 
   @override
@@ -613,8 +619,8 @@ class _LeaderboardCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text('Donor leaderboard',
-                    style: TextStyle(
+                Text('Donor leaderboard'.tr,
+                    style: const TextStyle(
                         color: Colors.white,
                         fontSize: 15,
                         fontWeight: FontWeight.w800)),

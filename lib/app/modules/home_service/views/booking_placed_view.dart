@@ -32,18 +32,18 @@ class BookingPlacedView extends GetView<HomeServiceController> {
                     ),
                   ),
                   const SizedBox(height: 18),
-                  const Center(
-                    child: Text('Booking placed',
-                        style: TextStyle(
+                  Center(
+                    child: Text('Booking placed'.tr,
+                        style: const TextStyle(
                             fontSize: 23,
                             fontWeight: FontWeight.w800,
                             color: Color(0xFF0F172A))),
                   ),
                   const SizedBox(height: 6),
-                  const Center(
-                    child: Text('আমরা একজন দক্ষ টেকনিশিয়ান খুঁজছি…',
+                  Center(
+                    child: Text('We are finding a skilled technician…'.tr,
                         style:
-                            TextStyle(fontSize: 13.5, color: Color(0xFF64748B))),
+                            const TextStyle(fontSize: 13.5, color: Color(0xFF64748B))),
                   ),
                   const SizedBox(height: 24),
                   Container(
@@ -68,14 +68,14 @@ class BookingPlacedView extends GetView<HomeServiceController> {
                               decoration: BoxDecoration(
                                   color: const Color(0xFFEDE9FE),
                                   borderRadius: BorderRadius.circular(20)),
-                              child: const Row(
+                              child: Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  Icon(Icons.circle,
+                                  const Icon(Icons.circle,
                                       size: 7, color: Color(0xFF7C3AED)),
-                                  SizedBox(width: 4),
-                                  Text('Finding pro',
-                                      style: TextStyle(
+                                  const SizedBox(width: 4),
+                                  Text('Finding pro'.tr,
+                                      style: const TextStyle(
                                           fontSize: 11,
                                           fontWeight: FontWeight.w700,
                                           color: Color(0xFF7C3AED))),
@@ -99,7 +99,7 @@ class BookingPlacedView extends GetView<HomeServiceController> {
                         _row(Icons.location_on_outlined, con.address),
                         const SizedBox(height: 10),
                         _row(Icons.bolt_rounded,
-                            'Pay after service · ৳${con.totalPaid}'),
+                            '${'Pay after service'.tr} · ৳${con.totalPaid}'),
                       ],
                     ),
                   ),
@@ -122,16 +122,16 @@ class BookingPlacedView extends GetView<HomeServiceController> {
                         shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(14)),
                       ),
-                      child: const Text('Track booking',
-                          style: TextStyle(
+                      child: Text('Track booking'.tr,
+                          style: const TextStyle(
                               fontSize: 16, fontWeight: FontWeight.w800)),
                     ),
                   ),
                   const SizedBox(height: 10),
                   TextButton(
                     onPressed: con.backToHomeService,
-                    child: const Text('Back to Home Service',
-                        style: TextStyle(
+                    child: Text('Back to Home Service'.tr,
+                        style: const TextStyle(
                             fontSize: 14,
                             fontWeight: FontWeight.w600,
                             color: Color(0xFF64748B))),

@@ -31,14 +31,14 @@ class SelectAmbulanceView extends GetView<SelectAmbulanceController> {
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text('Select ambulance',
-                          style: TextStyle(
+                      Text('Select ambulance'.tr,
+                          style: const TextStyle(
                               fontSize: 19,
                               fontWeight: FontWeight.w800,
                               color: Color(0xFF0F172A))),
                       const SizedBox(height: 1),
                       Text(
-                          '${controller.totalTypes} types · ${controller.totalAvailable} available nearby',
+                          '${controller.totalTypes} ${'types'.tr} · ${controller.totalAvailable} ${'available nearby'.tr}',
                           style: const TextStyle(
                               fontSize: 12, color: Color(0xFF94A3B8))),
                     ],
@@ -79,8 +79,8 @@ class SelectAmbulanceView extends GetView<SelectAmbulanceController> {
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  const Text('For condition',
-                                      style: TextStyle(
+                                  Text('For condition'.tr,
+                                      style: const TextStyle(
                                           fontSize: 11.5,
                                           color: Color(0xFF94A3B8))),
                                   const SizedBox(height: 1),
@@ -92,8 +92,8 @@ class SelectAmbulanceView extends GetView<SelectAmbulanceController> {
                                 ],
                               ),
                             ),
-                            const Text('Change',
-                                style: TextStyle(
+                            Text('Change'.tr,
+                                style: const TextStyle(
                                     fontSize: 13,
                                     fontWeight: FontWeight.w700,
                                     color: AppColors.brandOrange)),
@@ -127,8 +127,8 @@ class SelectAmbulanceView extends GetView<SelectAmbulanceController> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        const Text('EST. FARE',
-                            style: TextStyle(
+                        Text('EST. FARE'.tr,
+                            style: const TextStyle(
                                 fontSize: 10.5,
                                 fontWeight: FontWeight.w700,
                                 color: Color(0xFF94A3B8),
@@ -154,8 +154,8 @@ class SelectAmbulanceView extends GetView<SelectAmbulanceController> {
                           shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(14)),
                         ),
-                        child: const Text('Continue →',
-                            style: TextStyle(
+                        child: Text('Continue →'.tr,
+                            style: const TextStyle(
                                 fontSize: 16, fontWeight: FontWeight.w800)),
                       ),
                     ),
@@ -293,11 +293,11 @@ class _TypeCard extends StatelessWidget {
                 ),
                 Row(
                   children: [
-                    _price('৳${type.base}', 'BASE'),
+                    _price('৳${type.base}', 'BASE'.tr),
                     const SizedBox(width: 22),
-                    _price('৳${type.perKm}/km', 'PER KM'),
+                    _price('৳${type.perKm}/km', 'PER KM'.tr),
                     const SizedBox(width: 22),
-                    _price(type.eta, 'ETA', color: _teal),
+                    _price(type.eta, 'ETA'.tr, color: _teal),
                     const Spacer(),
                     Container(
                       padding: const EdgeInsets.symmetric(
@@ -311,7 +311,7 @@ class _TypeCard extends StatelessWidget {
                           const Icon(Icons.circle,
                               size: 6, color: Color(0xFF16A34A)),
                           const SizedBox(width: 4),
-                          Text('${type.avail} avail',
+                          Text('${type.avail} ${'avail'.tr}',
                               style: const TextStyle(
                                   fontSize: 11,
                                   fontWeight: FontWeight.w700,
@@ -337,8 +337,8 @@ class _TypeCard extends StatelessWidget {
                     bottomLeft: Radius.circular(12),
                   ),
                 ),
-                child: const Text('✓ SELECTED',
-                    style: TextStyle(
+                child: Text('✓ SELECTED'.tr,
+                    style: const TextStyle(
                         fontSize: 10.5,
                         fontWeight: FontWeight.w800,
                         color: Colors.white,

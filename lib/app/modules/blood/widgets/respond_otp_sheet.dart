@@ -60,15 +60,15 @@ class _RespondOtpSheetState extends State<RespondOtpSheet> {
                 ),
               ),
               const SizedBox(height: 18),
-              const Text('Verify your response',
-                  style: TextStyle(
+              Text('Verify your response'.tr,
+                  style: const TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.w800,
                       color: Color(0xFF0F172A))),
               const SizedBox(height: 6),
-              const Text(
-                'Enter the 6-digit code we sent to confirm your offer to donate.',
-                style: TextStyle(
+              Text(
+                'Enter the 6-digit code we sent to confirm your offer to donate.'.tr,
+                style: const TextStyle(
                     fontSize: 13, color: Color(0xFF64748B), height: 1.4),
               ),
               const SizedBox(height: 20),
@@ -104,8 +104,8 @@ class _RespondOtpSheetState extends State<RespondOtpSheet> {
                             child: CircularProgressIndicator(
                                 strokeWidth: 2.5, color: Colors.white),
                           )
-                        : const Text('Confirm & verify',
-                            style: TextStyle(
+                        : Text('Confirm & verify'.tr,
+                            style: const TextStyle(
                                 fontSize: 16, fontWeight: FontWeight.w700)),
                   ),
                 ),

@@ -23,9 +23,9 @@ class OtpView extends GetView<AuthController> {
               return Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
-                    'OTP লিখুন',
-                    style: TextStyle(
+                  Text(
+                    'Enter OTP'.tr,
+                    style: const TextStyle(
                       fontSize: 26,
                       fontWeight: FontWeight.w800,
                       color: Color(0xFF0F172A),
@@ -35,7 +35,7 @@ class OtpView extends GetView<AuthController> {
                   Text.rich(
                     TextSpan(
                       text:
-                          '${con.displayPhone} নম্বরে একটি 6-সংখ্যার কোড পাঠানো হয়েছে। ',
+                          '${'A 6-digit code has been sent to '.tr}${con.displayPhone}. ',
                       style: const TextStyle(
                         fontSize: 13.5,
                         color: Color(0xFF64748B),
@@ -46,9 +46,9 @@ class OtpView extends GetView<AuthController> {
                           alignment: PlaceholderAlignment.middle,
                           child: GestureDetector(
                             onTap: () => Get.back(),
-                            child: const Text(
-                              'নম্বর পরিবর্তন করুন',
-                              style: TextStyle(
+                            child: Text(
+                              'Change number'.tr,
+                              style: const TextStyle(
                                 fontSize: 13.5,
                                 color: AppColors.brandOrange,
                                 fontWeight: FontWeight.w700,
@@ -71,9 +71,9 @@ class OtpView extends GetView<AuthController> {
                     child: con.canResend
                         ? GestureDetector(
                             onTap: con.resendOtp,
-                            child: const Text(
-                              'কোড আবার পাঠান',
-                              style: TextStyle(
+                            child: Text(
+                              'Resend code'.tr,
+                              style: const TextStyle(
                                 fontSize: 14,
                                 color: AppColors.brandOrange,
                                 fontWeight: FontWeight.w700,
@@ -82,7 +82,7 @@ class OtpView extends GetView<AuthController> {
                           )
                         : Text.rich(
                             TextSpan(
-                              text: 'কোড পাননি?   ',
+                              text: '${'Didn\'t get the code?'.tr}   ',
                               style: const TextStyle(
                                   fontSize: 14, color: Color(0xFF64748B)),
                               children: [
@@ -101,9 +101,9 @@ class OtpView extends GetView<AuthController> {
                   Center(
                     child: GestureDetector(
                       onTap: () {},
-                      child: const Text(
-                        'অন্য পদ্ধতিতে যাচাই করুন',
-                        style: TextStyle(
+                      child: Text(
+                        'Verify another way'.tr,
+                        style: const TextStyle(
                           fontSize: 13.5,
                           color: Color(0xFF64748B),
                           fontWeight: FontWeight.w500,
@@ -113,7 +113,7 @@ class OtpView extends GetView<AuthController> {
                   ),
                   const Spacer(),
                   PrimaryButton(
-                    label: 'যাচাই করুন',
+                    label: 'Verify'.tr,
                     enabled: con.isOtpComplete,
                     onPressed: con.verifyOtp,
                   ),

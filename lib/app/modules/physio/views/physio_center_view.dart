@@ -1,3 +1,4 @@
+import 'package:animate_do/animate_do.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -35,8 +36,8 @@ class PhysioCenterView extends GetView<PhysioController> {
                     icon: const Icon(Icons.arrow_back_ios_new_rounded,
                         size: 20, color: Color(0xFF1A1A1A)),
                   ),
-                  const Text('Center',
-                      style: TextStyle(
+                  Text('Center'.tr,
+                      style: const TextStyle(
                           fontSize: 19,
                           fontWeight: FontWeight.w800,
                           color: Color(0xFF0F172A))),
@@ -111,14 +112,14 @@ class PhysioCenterView extends GetView<PhysioController> {
                         ),
                       ],
                       const SizedBox(height: 22),
-                      const Text('Therapists',
-                          style: TextStyle(
+                      Text('Therapists'.tr,
+                          style: const TextStyle(
                               fontSize: 17,
                               fontWeight: FontWeight.w800,
                               color: Color(0xFF0F172A))),
                       const SizedBox(height: 2),
-                      const Text('Pick one to book a session',
-                          style: TextStyle(fontSize: 12.5, color: _orange)),
+                      Text('Pick one to book a session'.tr,
+                          style: const TextStyle(fontSize: 12.5, color: _orange)),
                       const SizedBox(height: 14),
                       if (con.loadingCenter && center.therapists.isEmpty)
                         const SnListSkeleton(
@@ -126,18 +127,29 @@ class PhysioCenterView extends GetView<PhysioController> {
                           padding: EdgeInsets.zero,
                         )
                       else if (center.therapists.isEmpty)
-                        const Text('No therapists available.',
-                            style: TextStyle(
+                        Text('No therapists available.'.tr,
+                            style: const TextStyle(
                                 fontSize: 13, color: Color(0xFF94A3B8)))
                       else
-                        ...center.therapists.map((t) => Padding(
-                              padding: const EdgeInsets.only(bottom: 12),
-                              child: _TherapistCard(therapist: t, con: con),
-                            )),
+                        ...center.therapists
+                            .toList()
+                            .asMap()
+                            .entries
+                            .map((e) => FadeInUp(
+                                  from: 18,
+                                  duration: const Duration(milliseconds: 350),
+                                  delay: Duration(milliseconds: 70 * e.key),
+                                  child: Padding(
+                                    padding:
+                                        const EdgeInsets.only(bottom: 12),
+                                    child: _TherapistCard(
+                                        therapist: e.value, con: con),
+                                  ),
+                                )),
                       if (center.about.isNotEmpty) ...[
                         const SizedBox(height: 14),
-                        const Text('About',
-                            style: TextStyle(
+                        Text('About'.tr,
+                            style: const TextStyle(
                                 fontSize: 17,
                                 fontWeight: FontWeight.w800,
                                 color: Color(0xFF0F172A))),
@@ -210,8 +222,8 @@ class _TherapistCard extends StatelessWidget {
                             fontSize: 15,
                             fontWeight: FontWeight.w800,
                             color: Color(0xFF0F172A))),
-                    const Text(' /session',
-                        style: TextStyle(
+                    Text(' /${'session'.tr}',
+                        style: const TextStyle(
                             fontSize: 12, color: Color(0xFF94A3B8))),
                   ],
                 ),
@@ -231,8 +243,8 @@ class _TherapistCard extends StatelessWidget {
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12)),
               ),
-              child: const Text('Book',
-                  style:
+              child: Text('Book'.tr,
+                  style: const
                       TextStyle(fontSize: 14.5, fontWeight: FontWeight.w800)),
             ),
           ),

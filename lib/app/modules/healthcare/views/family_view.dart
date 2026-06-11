@@ -1,8 +1,10 @@
+import 'package:animate_do/animate_do.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../../core/values/app_colors.dart';
 import '../../../data/models/response/healthcare_response.dart';
+import '../../../global_widget/sn_shimmer.dart';
 import '../controllers/healthcare_controller.dart';
 
 const _green = Color(0xFF16A34A);
@@ -38,17 +40,17 @@ class FamilyView extends GetView<HealthcareController> {
                     icon: const Icon(Icons.arrow_back_ios_new_rounded,
                         size: 20, color: Color(0xFF1A1A1A)),
                   ),
-                  const Column(
+                  Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('Family members',
-                          style: TextStyle(
+                      Text('Family members'.tr,
+                          style: const TextStyle(
                               fontSize: 19,
                               fontWeight: FontWeight.w800,
                               color: Color(0xFF0F172A))),
-                      SizedBox(height: 1),
-                      Text('Book & manage care for your family',
-                          style: TextStyle(
+                      const SizedBox(height: 1),
+                      Text('Book & manage care for your family'.tr,
+                          style: const TextStyle(
                               fontSize: 12, color: Color(0xFF94A3B8))),
                     ],
                   ),
@@ -72,13 +74,26 @@ class FamilyView extends GetView<HealthcareController> {
             ),
             Expanded(
               child: GetBuilder<HealthcareController>(
-                builder: (con) => ListView(
+                builder: (con) => con.loadingFamily && con.family.isEmpty
+                    ? const SnListSkeleton(
+                        count: 4,
+                        showTrailing: false,
+                        padding: EdgeInsets.fromLTRB(16, 8, 16, 24))
+                    : ListView(
                   padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
                   children: [
-                    ...con.family.map((m) => Padding(
-                          padding: const EdgeInsets.only(bottom: 12),
-                          child: _MemberCard(member: m),
-                        )),
+                    ...con.family.toList().asMap().entries.map(
+                          (e) => FadeInUp(
+                            from: 18,
+                            duration: const Duration(milliseconds: 350),
+                            delay: Duration(
+                                milliseconds: 70 * (e.key < 6 ? e.key : 6)),
+                            child: Padding(
+                              padding: const EdgeInsets.only(bottom: 12),
+                              child: _MemberCard(member: e.value),
+                            ),
+                          ),
+                        ),
                     const SizedBox(height: 4),
                     GestureDetector(
                       onTap: () => _showAddSheet(con),
@@ -191,11 +206,11 @@ class DottedAddTile extends StatelessWidget {
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
-        children: const [
-          Icon(Icons.add_rounded, color: _darkGreen, size: 20),
-          SizedBox(width: 8),
-          Text('Add family member',
-              style: TextStyle(
+        children: [
+          const Icon(Icons.add_rounded, color: _darkGreen, size: 20),
+          const SizedBox(width: 8),
+          Text('Add family member'.tr,
+              style: const TextStyle(
                   fontSize: 14.5,
                   fontWeight: FontWeight.w800,
                   color: _darkGreen)),
@@ -294,19 +309,19 @@ class _AddFamilySheetState extends State<_AddFamilySheet> {
               ),
             ),
             const SizedBox(height: 18),
-            const Text('Add family member',
-                style: TextStyle(
+            Text('Add family member'.tr,
+                style: const TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.w800,
                     color: Color(0xFF0F172A))),
             const SizedBox(height: 16),
-            const _Label('FULL NAME'),
+            _Label('FULL NAME'.tr),
             const SizedBox(height: 8),
-            _Field(controller: _name, hint: 'e.g. Ayesha Ahmed', onChanged: (_) => setState(() {})),
+            _Field(controller: _name, hint: 'e.g. Ayesha Ahmed'.tr, onChanged: (_) => setState(() {})),
             const SizedBox(height: 14),
-            const _Label('RELATION'),
+            _Label('RELATION'.tr),
             const SizedBox(height: 8),
-            _Field(controller: _relation, hint: 'e.g. Spouse, Son, Mother'),
+            _Field(controller: _relation, hint: 'e.g. Spouse, Son, Mother'.tr),
             const SizedBox(height: 14),
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -315,11 +330,11 @@ class _AddFamilySheetState extends State<_AddFamilySheet> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const _Label('AGE'),
+                      _Label('AGE'.tr),
                       const SizedBox(height: 8),
                       _Field(
                           controller: _age,
-                          hint: 'e.g. 29',
+                          hint: 'e.g. 29'.tr,
                           keyboard: TextInputType.number),
                     ],
                   ),
@@ -329,7 +344,7 @@ class _AddFamilySheetState extends State<_AddFamilySheet> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const _Label('GENDER'),
+                      _Label('GENDER'.tr),
                       const SizedBox(height: 8),
                       Row(
                         children: [
@@ -344,7 +359,7 @@ class _AddFamilySheetState extends State<_AddFamilySheet> {
               ],
             ),
             const SizedBox(height: 14),
-            const _Label('BLOOD GROUP'),
+            _Label('BLOOD GROUP'.tr),
             const SizedBox(height: 10),
             Wrap(
               spacing: 8,
@@ -386,9 +401,9 @@ class _AddFamilySheetState extends State<_AddFamilySheet> {
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(14)),
                 ),
-                child: const Text('Add member',
+                child: Text('Add member'.tr,
                     style:
-                        TextStyle(fontSize: 16, fontWeight: FontWeight.w800)),
+                        const TextStyle(fontSize: 16, fontWeight: FontWeight.w800)),
               ),
             ),
           ],

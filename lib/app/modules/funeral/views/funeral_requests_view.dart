@@ -1,3 +1,4 @@
+import 'package:animate_do/animate_do.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -28,14 +29,20 @@ class FuneralRequestsView extends GetView<FuneralController> {
                   IconButton(
                     splashRadius: 22,
                     onPressed: () => Get.back(),
-                    icon: const Icon(Icons.arrow_back_ios_new_rounded,
-                        size: 20, color: Color(0xFF1A1A1A)),
+                    icon: const Icon(
+                      Icons.arrow_back_ios_new_rounded,
+                      size: 20,
+                      color: Color(0xFF1A1A1A),
+                    ),
                   ),
-                  const Text('My requests',
-                      style: TextStyle(
-                          fontSize: 19,
-                          fontWeight: FontWeight.w800,
-                          color: Color(0xFF0F172A))),
+                  Text(
+                    'My requests'.tr,
+                    style: const TextStyle(
+                      fontSize: 19,
+                      fontWeight: FontWeight.w800,
+                      color: Color(0xFF0F172A),
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -51,12 +58,16 @@ class FuneralRequestsView extends GetView<FuneralController> {
                   return RefreshIndicator(
                     color: _charcoal,
                     onRefresh: con.fetchMyRequests,
-                    child: ListView.separated(
-                      padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
-                      itemCount: con.myRequests.length,
-                      separatorBuilder: (_, __) => const SizedBox(height: 12),
-                      itemBuilder: (_, i) =>
-                          _RequestCard(req: con.myRequests[i]),
+                    child: FadeInUp(
+                      from: 18,
+                      duration: const Duration(milliseconds: 350),
+                      child: ListView.separated(
+                        padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+                        itemCount: con.myRequests.length,
+                        separatorBuilder: (_, _) => const SizedBox(height: 12),
+                        itemBuilder: (_, i) =>
+                            _RequestCard(req: con.myRequests[i]),
+                      ),
                     ),
                   );
                 },
@@ -76,20 +87,28 @@ class _Empty extends StatelessWidget {
     return ListView(
       children: [
         const SizedBox(height: 120),
-        Icon(Icons.receipt_long_outlined,
-            size: 56, color: Colors.black.withValues(alpha: 0.18)),
+        Icon(
+          Icons.receipt_long_outlined,
+          size: 56,
+          color: Colors.black.withValues(alpha: 0.18),
+        ),
         const SizedBox(height: 14),
-        const Center(
-          child: Text('No requests yet',
-              style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w800,
-                  color: Color(0xFF0F172A))),
+        Center(
+          child: Text(
+            'No requests yet'.tr,
+            style: const TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w800,
+              color: Color(0xFF0F172A),
+            ),
+          ),
         ),
         const SizedBox(height: 6),
-        const Center(
-          child: Text('Your funeral service requests will appear here.',
-              style: TextStyle(fontSize: 13, color: _subtitle)),
+        Center(
+          child: Text(
+            'Your funeral service requests will appear here.'.tr,
+            style: const TextStyle(fontSize: 13, color: _subtitle),
+          ),
         ),
       ],
     );
@@ -107,9 +126,10 @@ class _RequestCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-          color: AppColors.white,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: const Color(0xFFEDEFF2))),
+        color: AppColors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: const Color(0xFFEDEFF2)),
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -117,51 +137,64 @@ class _RequestCard extends StatelessWidget {
             children: [
               Expanded(
                 child: Text(
-                    req.registrationNo.isNotEmpty
-                        ? req.registrationNo
-                        : 'Funeral request',
-                    style: const TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w800,
-                        color: Color(0xFF334155))),
+                  req.registrationNo.isNotEmpty
+                      ? req.registrationNo
+                      : 'Funeral request'.tr,
+                  style: const TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w800,
+                    color: Color(0xFF334155),
+                  ),
+                ),
               ),
               Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 5,
+                ),
                 decoration: BoxDecoration(
+                  color: _isPending ? const Color(0xFFFEF3C7) : _greenTile,
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Text(
+                  req.statusLabel,
+                  style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w700,
                     color: _isPending
-                        ? const Color(0xFFFEF3C7)
-                        : _greenTile,
-                    borderRadius: BorderRadius.circular(20)),
-                child: Text(req.statusLabel,
-                    style: TextStyle(
-                        fontSize: 11,
-                        fontWeight: FontWeight.w700,
-                        color: _isPending
-                            ? const Color(0xFFB45309)
-                            : const Color(0xFF15803D))),
+                        ? const Color(0xFFB45309)
+                        : const Color(0xFF15803D),
+                  ),
+                ),
               ),
             ],
           ),
           const SizedBox(height: 10),
-          Text(req.deceasedName,
-              style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w800,
-                  color: Color(0xFF0F172A))),
+          Text(
+            req.deceasedName,
+            style: const TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w800,
+              color: Color(0xFF0F172A),
+            ),
+          ),
           if (req.address.isNotEmpty) ...[
             const SizedBox(height: 4),
             Row(
               children: [
-                const Icon(Icons.location_on_outlined,
-                    size: 15, color: _subtitle),
+                const Icon(
+                  Icons.location_on_outlined,
+                  size: 15,
+                  color: _subtitle,
+                ),
                 const SizedBox(width: 4),
                 Expanded(
-                  child: Text(req.address,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                          fontSize: 12.5, color: _subtitle)),
+                  child: Text(
+                    req.address,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(fontSize: 12.5, color: _subtitle),
+                  ),
                 ),
               ],
             ),
@@ -170,30 +203,33 @@ class _RequestCard extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-                color: _grayTile.withValues(alpha: 0.4),
-                borderRadius: BorderRadius.circular(12)),
+              color: _grayTile.withValues(alpha: 0.4),
+              borderRadius: BorderRadius.circular(12),
+            ),
             child: Column(
               children: [
-                _row('Service', _serviceLabel(req.serviceType)),
+                _row('Service'.tr, _serviceLabel(req.serviceType)),
                 if (req.scheduledAt.isNotEmpty) ...[
                   const SizedBox(height: 8),
-                  _row('Scheduled', req.scheduledAt),
+                  _row('Scheduled'.tr, req.scheduledAt),
                 ],
                 if (req.contactPhone.isNotEmpty) ...[
                   const SizedBox(height: 8),
-                  _row('Contact', req.contactPhone),
+                  _row('Contact'.tr, req.contactPhone),
                 ],
                 if (req.workflowStatus.isNotEmpty) ...[
                   const SizedBox(height: 8),
-                  _row('Stage', _label(req.workflowStatus)),
+                  _row('Stage'.tr, _label(req.workflowStatus)),
                 ],
               ],
             ),
           ),
           if (req.createdLabel.isNotEmpty) ...[
             const SizedBox(height: 10),
-            Text('Requested ${req.createdLabel}',
-                style: const TextStyle(fontSize: 11.5, color: _subtitle)),
+            Text(
+              'Requested ${req.createdLabel}',
+              style: const TextStyle(fontSize: 11.5, color: _subtitle),
+            ),
           ],
         ],
       ),
@@ -201,28 +237,33 @@ class _RequestCard extends StatelessWidget {
   }
 
   Widget _row(String k, String v) => Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          SizedBox(
-            width: 80,
-            child: Text(k,
-                style: const TextStyle(
-                    fontSize: 12.5,
-                    fontWeight: FontWeight.w600,
-                    color: _subtitle)),
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      SizedBox(
+        width: 80,
+        child: Text(
+          k,
+          style: const TextStyle(
+            fontSize: 12.5,
+            fontWeight: FontWeight.w600,
+            color: _subtitle,
           ),
-          Expanded(
-            child: Text(v,
-                style: const TextStyle(
-                    fontSize: 12.5,
-                    fontWeight: FontWeight.w700,
-                    color: Color(0xFF0F172A))),
+        ),
+      ),
+      Expanded(
+        child: Text(
+          v,
+          style: const TextStyle(
+            fontSize: 12.5,
+            fontWeight: FontWeight.w700,
+            color: Color(0xFF0F172A),
           ),
-        ],
-      );
+        ),
+      ),
+    ],
+  );
 
-  static String _serviceLabel(String key) =>
-      key.isEmpty ? '—' : _label(key);
+  static String _serviceLabel(String key) => key.isEmpty ? '—' : _label(key);
 
   static String _label(String s) {
     final t = s.replaceAll('_', ' ');

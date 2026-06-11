@@ -55,15 +55,15 @@ class _RateServiceViewState extends State<RateServiceView> {
                     icon: const Icon(Icons.arrow_back_ios_new_rounded,
                         size: 20, color: Color(0xFF1A1A1A)),
                   ),
-                  const Column(
+                  Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('Rate service',
-                          style: TextStyle(
+                      Text('Rate service'.tr,
+                          style: const TextStyle(
                               fontSize: 19,
                               fontWeight: FontWeight.w800,
                               color: Color(0xFF0F172A))),
-                      Text('SB-5510',
+                      const Text('SB-5510',
                           style: TextStyle(
                               fontSize: 12, color: Color(0xFF94A3B8))),
                     ],
@@ -118,8 +118,8 @@ class _RateServiceViewState extends State<RateServiceView> {
                         borderRadius: BorderRadius.circular(16)),
                     child: Column(
                       children: [
-                        const Text('HOW WAS IT?',
-                            style: TextStyle(
+                        Text('HOW WAS IT?'.tr,
+                            style: const TextStyle(
                                 fontSize: 11.5,
                                 fontWeight: FontWeight.w700,
                                 color: Color(0xFF94A3B8),
@@ -149,7 +149,7 @@ class _RateServiceViewState extends State<RateServiceView> {
                           }),
                         ),
                         const SizedBox(height: 12),
-                        Text(_ratingLabels[rating]!,
+                        Text(_ratingLabels[rating]!.tr,
                             style: const TextStyle(
                                 fontSize: 15,
                                 fontWeight: FontWeight.w800,
@@ -158,8 +158,8 @@ class _RateServiceViewState extends State<RateServiceView> {
                     ),
                   ),
                   const SizedBox(height: 18),
-                  const Text('WHAT WENT WELL?',
-                      style: TextStyle(
+                  Text('WHAT WENT WELL?'.tr,
+                      style: const TextStyle(
                           fontSize: 11.5,
                           fontWeight: FontWeight.w700,
                           color: Color(0xFF94A3B8),
@@ -187,7 +187,7 @@ class _RateServiceViewState extends State<RateServiceView> {
                                     ? _teal
                                     : const Color(0xFFE2E8F0)),
                           ),
-                          child: Text(sel ? '✓ $t' : t,
+                          child: Text(sel ? '✓ ${t.tr}' : t.tr,
                               style: TextStyle(
                                   fontSize: 13,
                                   fontWeight: FontWeight.w700,
@@ -199,8 +199,8 @@ class _RateServiceViewState extends State<RateServiceView> {
                     }).toList(),
                   ),
                   const SizedBox(height: 18),
-                  const Text('COMMENT (OPTIONAL)',
-                      style: TextStyle(
+                  Text('COMMENT (OPTIONAL)'.tr,
+                      style: const TextStyle(
                           fontSize: 11.5,
                           fontWeight: FontWeight.w700,
                           color: Color(0xFF94A3B8),
@@ -215,9 +215,9 @@ class _RateServiceViewState extends State<RateServiceView> {
                     child: TextField(
                       controller: _comment,
                       maxLines: 3,
-                      decoration: const InputDecoration(
-                        hintText: 'Tell others about your experience…',
-                        hintStyle: TextStyle(color: Color(0xFF94A3B8)),
+                      decoration: InputDecoration(
+                        hintText: 'Tell others about your experience…'.tr,
+                        hintStyle: const TextStyle(color: Color(0xFF94A3B8)),
                         border: InputBorder.none,
                         isCollapsed: true,
                       ),
@@ -249,9 +249,9 @@ class _RateServiceViewState extends State<RateServiceView> {
                     shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(14)),
                   ),
-                  child: const Text('Submit rating',
+                  child: Text('Submit rating'.tr,
                       style:
-                          TextStyle(fontSize: 16, fontWeight: FontWeight.w800)),
+                          const TextStyle(fontSize: 16, fontWeight: FontWeight.w800)),
                 ),
               ),
             ),

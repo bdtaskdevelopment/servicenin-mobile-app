@@ -28,17 +28,17 @@ class EmergencyContactsView extends GetView<EmergencyContactsController> {
                 ),
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
-                  children: const [
-                    Text('● v2',
+                  children: [
+                    const Text('● v2',
                         style: TextStyle(
                             fontSize: 11,
                             fontWeight: FontWeight.w700,
                             color: Color(0xFFB45309))),
-                    SizedBox(width: 8),
+                    const SizedBox(width: 8),
                     Expanded(
                       child: Text(
-                        'Emergency contacts are client-side (v2) — no contacts endpoint in the current API.',
-                        style: TextStyle(
+                        'Emergency contacts are client-side (v2) — no contacts endpoint in the current API.'.tr,
+                        style: const TextStyle(
                             fontSize: 12,
                             color: Color(0xFFB45309),
                             height: 1.4),
@@ -79,13 +79,13 @@ class EmergencyContactsView extends GetView<EmergencyContactsController> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text('One-tap SOS',
-                              style: TextStyle(
+                          Text('One-tap SOS'.tr,
+                              style: const TextStyle(
                                   color: Colors.white,
                                   fontSize: 16,
                                   fontWeight: FontWeight.w800)),
                           const SizedBox(height: 2),
-                          Text('Calls 999 + alerts all contacts with location',
+                          Text('Calls 999 + alerts all contacts with location'.tr,
                               style: TextStyle(
                                   color: Colors.white.withValues(alpha: 0.9),
                                   fontSize: 12)),
@@ -98,8 +98,8 @@ class EmergencyContactsView extends GetView<EmergencyContactsController> {
                       decoration: BoxDecoration(
                           color: Colors.white,
                           borderRadius: BorderRadius.circular(10)),
-                      child: const Text('Setup',
-                          style: TextStyle(
+                      child: Text('Setup'.tr,
+                          style: const TextStyle(
                               color: _red,
                               fontSize: 13,
                               fontWeight: FontWeight.w800)),
@@ -108,7 +108,7 @@ class EmergencyContactsView extends GetView<EmergencyContactsController> {
                 ),
               ),
               const SizedBox(height: 20),
-              const _Label('NATIONAL EMERGENCY LINES'),
+              _Label('NATIONAL EMERGENCY LINES'.tr),
               const SizedBox(height: 12),
               GridView.count(
                 crossAxisCount: 2,
@@ -125,13 +125,13 @@ class EmergencyContactsView extends GetView<EmergencyContactsController> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  _Label('YOUR CONTACTS (${con.contacts.length})'),
-                  const Row(
+                  _Label('${'YOUR CONTACTS'.tr} (${con.contacts.length})'),
+                  Row(
                     children: [
-                      Icon(Icons.add, size: 16, color: AppColors.brandOrange),
-                      SizedBox(width: 4),
-                      Text('Add',
-                          style: TextStyle(
+                      const Icon(Icons.add, size: 16, color: AppColors.brandOrange),
+                      const SizedBox(width: 4),
+                      Text('Add'.tr,
+                          style: const TextStyle(
                               fontSize: 13,
                               fontWeight: FontWeight.w700,
                               color: AppColors.brandOrange)),
@@ -165,18 +165,18 @@ class EmergencyContactsView extends GetView<EmergencyContactsController> {
                           color: Color(0xFF4F46E5), size: 20),
                     ),
                     const SizedBox(width: 12),
-                    const Expanded(
+                    Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text('Auto-share trip status',
-                              style: TextStyle(
+                          Text('Auto-share trip status'.tr,
+                              style: const TextStyle(
                                   fontSize: 14,
                                   fontWeight: FontWeight.w700,
                                   color: Color(0xFF0F172A))),
-                          SizedBox(height: 2),
-                          Text('Selected contacts get live tracking link via SMS',
-                              style: TextStyle(
+                          const SizedBox(height: 2),
+                          Text('Selected contacts get live tracking link via SMS'.tr,
+                              style: const TextStyle(
                                   fontSize: 12, color: Color(0xFF94A3B8))),
                         ],
                       ),
@@ -219,15 +219,15 @@ class _ContactsAppBar extends StatelessWidget implements PreferredSizeWidget {
       title: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
-        children: const [
-          Text('Emergency contacts',
-              style: TextStyle(
+        children: [
+          Text('Emergency contacts'.tr,
+              style: const TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.w800,
                   color: Color(0xFF0F172A))),
-          SizedBox(height: 1),
-          Text('Auto-notified when you book',
-              style: TextStyle(fontSize: 12, color: Color(0xFF94A3B8))),
+          const SizedBox(height: 1),
+          Text('Auto-notified when you book'.tr,
+              style: const TextStyle(fontSize: 12, color: Color(0xFF94A3B8))),
         ],
       ),
     );
@@ -369,13 +369,13 @@ class _ContactCard extends StatelessWidget {
                   decoration: BoxDecoration(
                       color: const Color(0xFFE6E7FB),
                       borderRadius: BorderRadius.circular(20)),
-                  child: const Row(
+                  child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(Icons.circle, size: 6, color: Color(0xFF4F46E5)),
-                      SizedBox(width: 4),
-                      Text('Live share',
-                          style: TextStyle(
+                      const Icon(Icons.circle, size: 6, color: Color(0xFF4F46E5)),
+                      const SizedBox(width: 4),
+                      Text('Live share'.tr,
+                          style: const TextStyle(
                               fontSize: 10,
                               fontWeight: FontWeight.w700,
                               color: Color(0xFF4F46E5))),

@@ -30,16 +30,16 @@ class PatientDetailsView extends GetView<BookingController> {
                         icon: const Icon(Icons.arrow_back_ios_new_rounded,
                             size: 20, color: Color(0xFF1A1A1A)),
                       ),
-                      const Column(
+                      Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text('Patient details',
-                              style: TextStyle(
+                          Text('Patient details'.tr,
+                              style: const TextStyle(
                                   fontSize: 19,
                                   fontWeight: FontWeight.w800,
                                   color: Color(0xFF0F172A))),
-                          Text('From your ServiceNin profile',
-                              style: TextStyle(
+                          Text('From your ServiceNin profile'.tr,
+                              style: const TextStyle(
                                   fontSize: 12, color: Color(0xFF94A3B8))),
                         ],
                       ),
@@ -52,10 +52,10 @@ class PatientDetailsView extends GetView<BookingController> {
                     padding: const EdgeInsets.fromLTRB(16, 6, 16, 16),
                     children: [
                       Row(
-                        children: const [
-                          _Label('WHO IS THIS FOR?'),
-                          SizedBox(width: 8),
-                          _V2Badge('saved family · v2'),
+                        children: [
+                          _Label('WHO IS THIS FOR?'.tr),
+                          const SizedBox(width: 8),
+                          _V2Badge('saved family · v2'.tr),
                         ],
                       ),
                       const SizedBox(height: 12),
@@ -128,13 +128,13 @@ class PatientDetailsView extends GetView<BookingController> {
                             border:
                                 Border.all(color: const Color(0xFFE2E8F0)),
                           ),
-                          child: const Row(
+                          child: Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              Icon(Icons.add, size: 18, color: _green),
-                              SizedBox(width: 6),
-                              Text('Add a family member',
-                                  style: TextStyle(
+                              const Icon(Icons.add, size: 18, color: _green),
+                              const SizedBox(width: 6),
+                              Text('Add a family member'.tr,
+                                  style: const TextStyle(
                                       fontSize: 14,
                                       fontWeight: FontWeight.w700,
                                       color: _green)),
@@ -143,7 +143,7 @@ class PatientDetailsView extends GetView<BookingController> {
                         ),
                       ),
                       const SizedBox(height: 18),
-                      const _Label('REASON FOR VISIT'),
+                      _Label('REASON FOR VISIT'.tr),
                       const SizedBox(height: 10),
                       Container(
                         padding: const EdgeInsets.all(14),
@@ -158,9 +158,9 @@ class PatientDetailsView extends GetView<BookingController> {
                             TextField(
                               controller: con.reasonCtrl,
                               maxLines: 2,
-                              decoration: const InputDecoration(
-                                hintText: 'Describe symptoms (optional)…',
-                                hintStyle: TextStyle(color: Color(0xFF94A3B8)),
+                              decoration: InputDecoration(
+                                hintText: 'Describe symptoms (optional)…'.tr,
+                                hintStyle: const TextStyle(color: Color(0xFF94A3B8)),
                                 border: InputBorder.none,
                                 isCollapsed: true,
                               ),
@@ -219,8 +219,8 @@ class PatientDetailsView extends GetView<BookingController> {
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    const Text('Attach reports',
-                                        style: TextStyle(
+                                    Text('Attach reports'.tr,
+                                        style: const TextStyle(
                                             fontSize: 14,
                                             fontWeight: FontWeight.w700,
                                             color: Color(0xFF0F172A))),
@@ -228,7 +228,7 @@ class PatientDetailsView extends GetView<BookingController> {
                                     Text(
                                         con.attachmentName.isNotEmpty
                                             ? con.attachmentName
-                                            : 'Prescriptions, lab tests (optional)',
+                                            : 'Prescriptions, lab tests (optional)'.tr,
                                         maxLines: 1,
                                         overflow: TextOverflow.ellipsis,
                                         style: TextStyle(
@@ -288,8 +288,8 @@ class PatientDetailsView extends GetView<BookingController> {
                             )
                           : Text(
                               con.isPaid
-                                  ? 'Continue to payment →'
-                                  : 'Continue booking',
+                                  ? 'Continue to payment →'.tr
+                                  : 'Continue booking'.tr,
                               style: const TextStyle(
                                   fontSize: 16, fontWeight: FontWeight.w800)),
                     ),
@@ -375,22 +375,22 @@ class _AddPatientSheetState extends State<_AddPatientSheet> {
               ),
             ),
             const SizedBox(height: 18),
-            const Text('Add a family member',
-                style: TextStyle(
+            Text('Add a family member'.tr,
+                style: const TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.w800,
                     color: Color(0xFF0F172A))),
             const SizedBox(height: 16),
-            const _Label('FULL NAME'),
+            _Label('FULL NAME'.tr),
             const SizedBox(height: 8),
             _SheetField(
                 controller: _name,
-                hint: 'e.g. Rokeya Begum',
+                hint: 'e.g. Rokeya Begum'.tr,
                 onChanged: (_) => setState(() {})),
             const SizedBox(height: 14),
-            const _Label('RELATION'),
+            _Label('RELATION'.tr),
             const SizedBox(height: 8),
-            _SheetField(controller: _relation, hint: 'e.g. Mother, Son'),
+            _SheetField(controller: _relation, hint: 'e.g. Mother, Son'.tr),
             const SizedBox(height: 14),
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -399,11 +399,11 @@ class _AddPatientSheetState extends State<_AddPatientSheet> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const _Label('AGE'),
+                      _Label('AGE'.tr),
                       const SizedBox(height: 8),
                       _SheetField(
                           controller: _age,
-                          hint: 'e.g. 61',
+                          hint: 'e.g. 61'.tr,
                           keyboard: TextInputType.number),
                     ],
                   ),
@@ -413,7 +413,7 @@ class _AddPatientSheetState extends State<_AddPatientSheet> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const _Label('GENDER'),
+                      _Label('GENDER'.tr),
                       const SizedBox(height: 8),
                       Row(
                         children: [
@@ -428,7 +428,7 @@ class _AddPatientSheetState extends State<_AddPatientSheet> {
               ],
             ),
             const SizedBox(height: 14),
-            const _Label('BLOOD GROUP'),
+            _Label('BLOOD GROUP'.tr),
             const SizedBox(height: 10),
             Wrap(
               spacing: 8,
@@ -471,9 +471,9 @@ class _AddPatientSheetState extends State<_AddPatientSheet> {
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(14)),
                 ),
-                child: const Text('Add member',
+                child: Text('Add member'.tr,
                     style:
-                        TextStyle(fontSize: 16, fontWeight: FontWeight.w800)),
+                        const TextStyle(fontSize: 16, fontWeight: FontWeight.w800)),
               ),
             ),
           ],

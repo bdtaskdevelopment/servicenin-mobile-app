@@ -60,15 +60,15 @@ class _ConfirmOtpSheetState extends State<ConfirmOtpSheet> {
             ),
           ),
           const SizedBox(height: 18),
-          const Text('Confirm donation',
-              style: TextStyle(
+          Text('Confirm donation'.tr,
+              style: const TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.w800,
                   color: Color(0xFF0F172A))),
           const SizedBox(height: 6),
-          const Text(
-            'Ask the requester for the 6-digit code shown in their app. This confirms the donation and credits your record.',
-            style: TextStyle(fontSize: 13, color: Color(0xFF64748B), height: 1.4),
+          Text(
+            'Ask the requester for the 6-digit code shown in their app. This confirms the donation and credits your record.'.tr,
+            style: const TextStyle(fontSize: 13, color: Color(0xFF64748B), height: 1.4),
           ),
           const SizedBox(height: 20),
           BoxedCodeInput(
@@ -98,8 +98,8 @@ class _ConfirmOtpSheetState extends State<ConfirmOtpSheet> {
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(14)),
               ),
-              child: const Text('Confirm & complete',
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
+              child: Text('Confirm & complete'.tr,
+                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
             ),
           ),
           ],

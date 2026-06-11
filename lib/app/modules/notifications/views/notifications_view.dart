@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import 'package:animate_do/animate_do.dart';
+
 import '../../../core/values/app_colors.dart';
 import '../../../data/models/response/notification_response.dart';
 import '../../../global_widget/custom_app_bar.dart';
@@ -28,16 +30,16 @@ class _NotificationsViewState extends State<NotificationsView> {
     return Scaffold(
       backgroundColor: AppColors.white,
       appBar: CustomAppBar(
-        title: 'Notifications',
+        title: 'Notifications'.tr,
         actions: [
           GetBuilder<NotificationsController>(
             builder: (con) => con.items.isEmpty
                 ? const SizedBox.shrink()
                 : TextButton(
                     onPressed: con.markAllRead,
-                    child: const Text(
-                      'Mark all read',
-                      style: TextStyle(
+                    child: Text(
+                      'Mark all read'.tr,
+                      style: const TextStyle(
                         color: AppColors.brandOrange,
                         fontSize: 14,
                         fontWeight: FontWeight.w700,
@@ -62,9 +64,14 @@ class _NotificationsViewState extends State<NotificationsView> {
               padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
               itemCount: con.items.length,
               separatorBuilder: (_, _) => const SizedBox(height: 12),
-              itemBuilder: (_, i) => _NotificationCard(
-                item: con.items[i],
-                onTap: () => con.markRead(con.items[i]),
+              itemBuilder: (_, i) => FadeInUp(
+                from: 16,
+                duration: const Duration(milliseconds: 300),
+                delay: Duration(milliseconds: 40 * (i % 10)),
+                child: _NotificationCard(
+                  item: con.items[i],
+                  onTap: () => con.markRead(con.items[i]),
+                ),
               ),
             ),
           );
@@ -93,7 +100,10 @@ class _Empty extends StatelessWidget {
             color: Colors.black.withValues(alpha: 0.18)),
         const SizedBox(height: 14),
         Center(
-          child: Text(isError ? 'Could not load notifications' : "You're all caught up",
+          child: Text(
+              isError
+                  ? 'Could not load notifications'.tr
+                  : "You're all caught up".tr,
               style: const TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w800,
@@ -103,7 +113,7 @@ class _Empty extends StatelessWidget {
         Center(
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 32),
-            child: Text(isError ? error! : 'New updates will appear here.',
+            child: Text(isError ? error! : 'New updates will appear here.'.tr,
                 textAlign: TextAlign.center,
                 style: const TextStyle(
                     fontSize: 13, color: Color(0xFF94A3B8))),
@@ -114,7 +124,7 @@ class _Empty extends StatelessWidget {
           Center(
             child: OutlinedButton(
               onPressed: onRetry,
-              child: const Text('Retry'),
+              child: Text('Retry'.tr),
             ),
           ),
         ],

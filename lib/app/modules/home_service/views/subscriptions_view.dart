@@ -30,31 +30,31 @@ class SubscriptionsView extends GetView<SubscriptionsController> {
             icon: const Icon(Icons.arrow_back_ios_new_rounded,
                 size: 20, color: Color(0xFF1A1A1A)),
           ),
-          title: const Column(
+          title: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text('Subscriptions',
-                  style: TextStyle(
+              Text('Subscriptions'.tr,
+                  style: const TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.w800,
                       color: Color(0xFF0F172A))),
-              SizedBox(height: 1),
-              Text('Save with recurring service',
-                  style: TextStyle(fontSize: 12, color: Color(0xFF94A3B8))),
+              const SizedBox(height: 1),
+              Text('Save with recurring service'.tr,
+                  style: const TextStyle(fontSize: 12, color: Color(0xFF94A3B8))),
             ],
           ),
-          bottom: const TabBar(
+          bottom: TabBar(
             indicatorColor: _darkTeal,
             indicatorWeight: 2.5,
             labelColor: _darkTeal,
-            unselectedLabelColor: Color(0xFF94A3B8),
-            labelStyle: TextStyle(fontSize: 14.5, fontWeight: FontWeight.w700),
+            unselectedLabelColor: const Color(0xFF94A3B8),
+            labelStyle: const TextStyle(fontSize: 14.5, fontWeight: FontWeight.w700),
             unselectedLabelStyle:
-                TextStyle(fontSize: 14.5, fontWeight: FontWeight.w600),
+                const TextStyle(fontSize: 14.5, fontWeight: FontWeight.w600),
             tabs: [
-              Tab(text: 'Plans'),
-              Tab(text: 'My subscriptions'),
+              Tab(text: 'Plans'.tr),
+              Tab(text: 'My subscriptions'.tr),
             ],
           ),
         ),
@@ -144,10 +144,10 @@ class _PlanCard extends StatelessWidget {
                     fontSize: 18,
                     fontWeight: FontWeight.w800,
                     color: Color(0xFF0F172A)),
-                children: const [
+                children: [
                   TextSpan(
-                      text: ' /visit',
-                      style: TextStyle(
+                      text: ' /${'visit'.tr}',
+                      style: const TextStyle(
                           fontSize: 12,
                           fontWeight: FontWeight.w500,
                           color: Color(0xFF94A3B8))),
@@ -166,9 +166,9 @@ class _PlanCard extends StatelessWidget {
                     shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(10)),
                   ),
-                  child: const Text('Subscribe',
+                  child: Text('Subscribe'.tr,
                       style:
-                          TextStyle(fontSize: 14, fontWeight: FontWeight.w800)),
+                          const TextStyle(fontSize: 14, fontWeight: FontWeight.w800)),
                 ),
               ),
             ],
@@ -222,13 +222,13 @@ class _MySubCard extends StatelessWidget {
                 decoration: BoxDecoration(
                     color: const Color(0xFFDCFCE7),
                     borderRadius: BorderRadius.circular(20)),
-                child: const Row(
+                child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(Icons.circle, size: 7, color: Color(0xFF16A34A)),
-                    SizedBox(width: 4),
-                    Text('Active',
-                        style: TextStyle(
+                    const Icon(Icons.circle, size: 7, color: Color(0xFF16A34A)),
+                    const SizedBox(width: 4),
+                    Text('Active'.tr,
+                        style: const TextStyle(
                             fontSize: 11,
                             fontWeight: FontWeight.w700,
                             color: Color(0xFF15803D))),
@@ -240,11 +240,11 @@ class _MySubCard extends StatelessWidget {
           const SizedBox(height: 14),
           Row(
             children: [
-              Expanded(child: _ActionBtn('Pause', const Color(0xFF334155))),
+              Expanded(child: _ActionBtn('Pause'.tr, const Color(0xFF334155))),
               const SizedBox(width: 10),
-              Expanded(child: _ActionBtn('Reschedule', const Color(0xFF334155))),
+              Expanded(child: _ActionBtn('Reschedule'.tr, const Color(0xFF334155))),
               const SizedBox(width: 10),
-              Expanded(child: _ActionBtn('Cancel', const Color(0xFFDC2626))),
+              Expanded(child: _ActionBtn('Cancel'.tr, const Color(0xFFDC2626))),
             ],
           ),
         ],

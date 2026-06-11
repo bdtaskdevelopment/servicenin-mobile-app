@@ -99,8 +99,8 @@ class DonorTrackingView extends GetView<DonationFlowController> {
                                 shape: BoxShape.circle),
                           ),
                           const SizedBox(width: 6),
-                          const Text('Donor on the way',
-                              style: TextStyle(
+                          Text('Donor on the way'.tr,
+                              style: const TextStyle(
                                   fontSize: 12.5,
                                   fontWeight: FontWeight.w700,
                                   color: Color(0xFF16A34A))),
@@ -168,18 +168,18 @@ class DonorTrackingView extends GetView<DonationFlowController> {
                           Expanded(
                               child: _ActionBtn(
                                   icon: Icons.chat_bubble_outline_rounded,
-                                  label: 'Chat',
+                                  label: 'Chat'.tr,
                                   onTap: con.openChat)),
                           const SizedBox(width: 10),
-                          const Expanded(
+                          Expanded(
                               child: _ActionBtn(
                                   icon: Icons.call_outlined,
-                                  label: 'Voice call')),
+                                  label: 'Voice call'.tr)),
                           const SizedBox(width: 10),
-                          const Expanded(
+                          Expanded(
                               child: _ActionBtn(
                                   icon: Icons.share_outlined,
-                                  label: 'Live location')),
+                                  label: 'Live location'.tr)),
                         ],
                       ),
                       const SizedBox(height: 14),
@@ -197,8 +197,8 @@ class DonorTrackingView extends GetView<DonationFlowController> {
                             shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(14)),
                           ),
-                          child: const Text('Confirm donation · enter OTP',
-                              style: TextStyle(
+                          child: Text('Confirm donation · enter OTP'.tr,
+                              style: const TextStyle(
                                   fontSize: 15.5,
                                   fontWeight: FontWeight.w700)),
                         ),
@@ -349,10 +349,10 @@ class _StatusSteps extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final steps = [
-      'Donor accepted the request',
-      'En route to $hospital',
-      'Arrived & donating',
-      'Donation confirmed (OTP)',
+      'Donor accepted the request'.tr,
+      '${'En route to'.tr} $hospital',
+      'Arrived & donating'.tr,
+      'Donation confirmed (OTP)'.tr,
     ];
     return Container(
       padding: const EdgeInsets.all(14),

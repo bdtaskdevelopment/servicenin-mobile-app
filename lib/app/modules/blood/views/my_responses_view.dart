@@ -1,3 +1,4 @@
+import 'package:animate_do/animate_do.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -31,17 +32,17 @@ class MyResponsesView extends GetView<BloodController> {
                       icon: const Icon(Icons.arrow_back_ios_new_rounded,
                           size: 20, color: Color(0xFF1A1A1A)),
                     ),
-                    const Column(
+                    Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('My responses',
-                            style: TextStyle(
+                        Text('My responses'.tr,
+                            style: const TextStyle(
                                 fontSize: 19,
                                 fontWeight: FontWeight.w800,
                                 color: Color(0xFF0F172A))),
-                        SizedBox(height: 1),
-                        Text('Requests you offered to donate',
-                            style: TextStyle(
+                        const SizedBox(height: 1),
+                        Text('Requests you offered to donate'.tr,
+                            style: const TextStyle(
                                 fontSize: 12, color: Color(0xFF94A3B8))),
                       ],
                     ),
@@ -81,9 +82,9 @@ class MyResponsesView extends GetView<BloodController> {
           Icon(Icons.favorite_border_rounded,
               size: 56, color: Colors.black.withValues(alpha: 0.12)),
           const SizedBox(height: 12),
-          const Text("You haven't responded to any requests yet",
+          Text("You haven't responded to any requests yet".tr,
               textAlign: TextAlign.center,
-              style: TextStyle(
+              style: const TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w700,
                   color: Color(0xFF94A3B8))),
@@ -93,9 +94,14 @@ class MyResponsesView extends GetView<BloodController> {
     return ListView(
       padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
       children: [
-        ...con.myResponses.map((r) => Padding(
-              padding: const EdgeInsets.only(bottom: 12),
-              child: _ResponseCard(res: r, con: con),
+        ...con.myResponses.toList().asMap().entries.map((e) => FadeInUp(
+              from: 18,
+              duration: const Duration(milliseconds: 350),
+              delay: Duration(milliseconds: 70 * (e.key < 6 ? e.key : 6)),
+              child: Padding(
+                padding: const EdgeInsets.only(bottom: 12),
+                child: _ResponseCard(res: e.value, con: con),
+              ),
             )),
       ],
     );
@@ -215,10 +221,10 @@ class _ResponseCard extends StatelessWidget {
               Expanded(
                 child: Text(
                     res.otpVerified
-                        ? 'Verified${res.respondedLabel.isNotEmpty ? ' · ${res.respondedLabel}' : ''}'
+                        ? '${'Verified'.tr}${res.respondedLabel.isNotEmpty ? ' · ${res.respondedLabel}' : ''}'
                         : (res.respondedLabel.isNotEmpty
                             ? res.respondedLabel
-                            : 'Awaiting verification'),
+                            : 'Awaiting verification'.tr),
                     style: const TextStyle(
                         fontSize: 12, color: Color(0xFF64748B))),
               ),
@@ -236,8 +242,8 @@ class _ResponseCard extends StatelessWidget {
                   child: OutlinedButton.icon(
                     onPressed: () => con.callPhone(res.phone),
                     icon: const Icon(Icons.call_outlined, size: 18),
-                    label: const Text('Call',
-                        style: TextStyle(
+                    label: Text('Call'.tr,
+                        style: const TextStyle(
                             fontSize: 14, fontWeight: FontWeight.w800)),
                     style: OutlinedButton.styleFrom(
                       foregroundColor: const Color(0xFF334155),
@@ -256,8 +262,8 @@ class _ResponseCard extends StatelessWidget {
                     onPressed: () => con.openResponseChat(res),
                     icon: const Icon(Icons.chat_bubble_outline_rounded,
                         size: 18),
-                    label: const Text('Message',
-                        style: TextStyle(
+                    label: Text('Message'.tr,
+                        style: const TextStyle(
                             fontSize: 14, fontWeight: FontWeight.w800)),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: _red,

@@ -1,3 +1,4 @@
+import 'package:animate_do/animate_do.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -28,23 +29,23 @@ class InterestsView extends GetView<MatchmakingController> {
             icon: const Icon(Icons.arrow_back_ios_new_rounded,
                 size: 20, color: Color(0xFF1A1A1A)),
           ),
-          title: const Text('Interests',
-              style: TextStyle(
+          title: Text('Interests'.tr,
+              style: const TextStyle(
                   fontSize: 19,
                   fontWeight: FontWeight.w800,
                   color: Color(0xFF0F172A))),
-          bottom: const TabBar(
+          bottom: TabBar(
             indicatorColor: _maroon,
             indicatorWeight: 2.5,
             labelColor: _maroon,
-            unselectedLabelColor: Color(0xFF94A3B8),
-            labelStyle: TextStyle(fontSize: 13.5, fontWeight: FontWeight.w800),
+            unselectedLabelColor: const Color(0xFF94A3B8),
+            labelStyle: const TextStyle(fontSize: 13.5, fontWeight: FontWeight.w800),
             unselectedLabelStyle:
-                TextStyle(fontSize: 13.5, fontWeight: FontWeight.w600),
+                const TextStyle(fontSize: 13.5, fontWeight: FontWeight.w600),
             tabs: [
-              Tab(text: 'Received'),
-              Tab(text: 'Sent'),
-              Tab(text: 'Matches'),
+              Tab(text: 'Received'.tr),
+              Tab(text: 'Sent'.tr),
+              Tab(text: 'Matches'.tr),
             ],
           ),
         ),
@@ -121,16 +122,21 @@ class _ReceivedTab extends StatelessWidget {
   Widget build(BuildContext context) {
     if (con.received.isEmpty) {
       return _loaderOrEmpty(
-          con.loadingReceived, true, 'No interests received.');
+          con.loadingReceived, true, 'No interests received.'.tr);
     }
     return RefreshIndicator(
       color: _maroon,
       onRefresh: con.fetchReceived,
       child: ListView(
         padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
-        children: con.received.map((it) {
+        children: con.received.toList().asMap().entries.map((e) {
+          final it = e.value;
           final s = it.sender;
-          return Padding(
+          return FadeInUp(
+            from: 18,
+            duration: const Duration(milliseconds: 350),
+            delay: Duration(milliseconds: 70 * e.key),
+            child: Padding(
             padding: const EdgeInsets.only(bottom: 12),
             child: _Card(
               child: Column(
@@ -186,8 +192,8 @@ class _ReceivedTab extends StatelessWidget {
                                     borderRadius:
                                         BorderRadius.circular(12)),
                               ),
-                              child: const Text('Decline',
-                                  style: TextStyle(
+                              child: Text('Decline'.tr,
+                                  style: const TextStyle(
                                       fontSize: 14,
                                       fontWeight: FontWeight.w700,
                                       color: Color(0xFF334155))),
@@ -210,8 +216,8 @@ class _ReceivedTab extends StatelessWidget {
                                     borderRadius:
                                         BorderRadius.circular(12)),
                               ),
-                              child: const Text('Accept & share',
-                                  style: TextStyle(
+                              child: Text('Accept & share'.tr,
+                                  style: const TextStyle(
                                       fontSize: 14,
                                       fontWeight: FontWeight.w800)),
                             ),
@@ -229,6 +235,7 @@ class _ReceivedTab extends StatelessWidget {
                 ],
               ),
             ),
+            ),
           );
         }).toList(),
       ),
@@ -242,16 +249,21 @@ class _SentTab extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (con.sent.isEmpty) {
-      return _loaderOrEmpty(con.loadingSent, true, 'No interests sent.');
+      return _loaderOrEmpty(con.loadingSent, true, 'No interests sent.'.tr);
     }
     return RefreshIndicator(
       color: _maroon,
       onRefresh: con.fetchSent,
       child: ListView(
         padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
-        children: con.sent.map((it) {
+        children: con.sent.toList().asMap().entries.map((e) {
+          final it = e.value;
           final r = it.receiver;
-          return Padding(
+          return FadeInUp(
+            from: 18,
+            duration: const Duration(milliseconds: 350),
+            delay: Duration(milliseconds: 70 * e.key),
+            child: Padding(
             padding: const EdgeInsets.only(bottom: 12),
             child: _Card(
               child: Column(
@@ -285,6 +297,7 @@ class _SentTab extends StatelessWidget {
                 ],
               ),
             ),
+            ),
           );
         }).toList(),
       ),
@@ -298,16 +311,21 @@ class _MatchesTab extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (con.matches.isEmpty) {
-      return _loaderOrEmpty(con.loadingMatches, true, 'No matches yet.');
+      return _loaderOrEmpty(con.loadingMatches, true, 'No matches yet.'.tr);
     }
     return RefreshIndicator(
       color: _maroon,
       onRefresh: con.fetchMatches,
       child: ListView(
         padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
-        children: con.matches.map((m) {
+        children: con.matches.toList().asMap().entries.map((e) {
+          final m = e.value;
           final p = m.match;
-          return Padding(
+          return FadeInUp(
+            from: 18,
+            duration: const Duration(milliseconds: 350),
+            delay: Duration(milliseconds: 70 * e.key),
+            child: Padding(
             padding: const EdgeInsets.only(bottom: 12),
             child: _Card(
               child: Row(
@@ -337,8 +355,8 @@ class _MatchesTab extends StatelessWidget {
                         con.openChat(m.interest.id, p.code),
                     icon: const Icon(Icons.chat_bubble_outline_rounded,
                         size: 16),
-                    label: const Text('Chat',
-                        style: TextStyle(
+                    label: Text('Chat'.tr,
+                        style: const TextStyle(
                             fontSize: 13, fontWeight: FontWeight.w800)),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: _maroon,
@@ -350,6 +368,7 @@ class _MatchesTab extends StatelessWidget {
                   ),
                 ],
               ),
+            ),
             ),
           );
         }).toList(),
@@ -380,7 +399,7 @@ class _StatusChip extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       decoration:
           BoxDecoration(color: bg, borderRadius: BorderRadius.circular(20)),
-      child: Text(status.isEmpty ? 'Pending' : mmHumanize(status),
+      child: Text(status.isEmpty ? 'Pending'.tr : mmHumanize(status),
           style: TextStyle(
               fontSize: 11, fontWeight: FontWeight.w800, color: fg)),
     );

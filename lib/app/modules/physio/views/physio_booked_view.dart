@@ -34,17 +34,17 @@ class PhysioBookedView extends GetView<PhysioController> {
                     ),
                   ),
                   const SizedBox(height: 20),
-                  const Center(
-                    child: Text('Session booked',
-                        style: TextStyle(
+                  Center(
+                    child: Text('Session booked'.tr,
+                        style: const TextStyle(
                             fontSize: 24,
                             fontWeight: FontWeight.w800,
                             color: Color(0xFF0F172A))),
                   ),
                   const SizedBox(height: 6),
-                  const Center(
-                    child: Text('আপনার ফিজিও সেশন নিশ্চিত রয়েছে',
-                        style: TextStyle(
+                  Center(
+                    child: Text('Your physio session is confirmed'.tr,
+                        style: const TextStyle(
                             fontSize: 13.5, color: Color(0xFF64748B))),
                   ),
                   const SizedBox(height: 26),
@@ -72,8 +72,8 @@ class PhysioBookedView extends GetView<PhysioController> {
                         _row(
                             Icons.bolt_rounded,
                             con.sessionType == 1
-                                ? 'Home visit · ${con.selectedPaymentKey}'
-                                : 'At center · ${con.selectedPaymentKey}'),
+                                ? '${'Home visit'.tr} · ${con.selectedPaymentKey}'
+                                : '${'At center'.tr} · ${con.selectedPaymentKey}'),
                       ],
                     ),
                   ),
@@ -96,16 +96,16 @@ class PhysioBookedView extends GetView<PhysioController> {
                         shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(14)),
                       ),
-                      child: const Text('View my sessions',
-                          style: TextStyle(
+                      child: Text('View my sessions'.tr,
+                          style: const TextStyle(
                               fontSize: 16, fontWeight: FontWeight.w800)),
                     ),
                   ),
                   const SizedBox(height: 10),
                   TextButton(
                     onPressed: con.backToPhysioHome,
-                    child: const Text('Back to Physio home',
-                        style: TextStyle(
+                    child: Text('Back to Physio home'.tr,
+                        style: const TextStyle(
                             fontSize: 14,
                             fontWeight: FontWeight.w600,
                             color: Color(0xFF64748B))),

@@ -92,8 +92,8 @@ class _BloodChatViewState extends State<BloodChatView> {
                                     fontSize: 16,
                                     fontWeight: FontWeight.w800,
                                     color: Color(0xFF0F172A))),
-                            const Text('blood request chat',
-                                style: TextStyle(
+                            Text('blood request chat'.tr,
+                                style: const TextStyle(
                                     fontSize: 12, color: Color(0xFF94A3B8))),
                           ],
                         ),
@@ -112,9 +112,9 @@ class _BloodChatViewState extends State<BloodChatView> {
                   return const SnListSkeleton(showTrailing: false);
                 }
                 if (c.messages.isEmpty) {
-                  return const Center(
-                    child: Text('No messages yet — say hello 👋',
-                        style: TextStyle(color: Color(0xFF94A3B8))),
+                  return Center(
+                    child: Text('No messages yet — say hello 👋'.tr,
+                        style: const TextStyle(color: Color(0xFF94A3B8))),
                   );
                 }
                 _maybeScrollToEnd();
@@ -153,9 +153,9 @@ class _BloodChatViewState extends State<BloodChatView> {
                           maxLines: 4,
                           onSubmitted: (_) => con.send(),
                           textInputAction: TextInputAction.send,
-                          decoration: const InputDecoration(
-                            hintText: 'Type a message…',
-                            hintStyle: TextStyle(color: Color(0xFF94A3B8)),
+                          decoration: InputDecoration(
+                            hintText: 'Type a message…'.tr,
+                            hintStyle: const TextStyle(color: Color(0xFF94A3B8)),
                             border: InputBorder.none,
                             isCollapsed: true,
                           ),

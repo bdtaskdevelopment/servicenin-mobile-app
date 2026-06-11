@@ -34,17 +34,17 @@ class EnquiryDoneView extends GetView<EducationController> {
                     ),
                   ),
                   const SizedBox(height: 20),
-                  const Center(
-                    child: Text('Enquiry submitted',
-                        style: TextStyle(
+                  Center(
+                    child: Text('Enquiry submitted'.tr,
+                        style: const TextStyle(
                             fontSize: 24,
                             fontWeight: FontWeight.w800,
                             color: Color(0xFF0F172A))),
                   ),
                   const SizedBox(height: 6),
-                  const Center(
-                    child: Text('সেন্টার শীঘ্রই আপনাকে কল করবে',
-                        style: TextStyle(
+                  Center(
+                    child: Text('The center will call you shortly'.tr,
+                        style: const TextStyle(
                             fontSize: 13.5, color: Color(0xFF64748B))),
                   ),
                   const SizedBox(height: 26),
@@ -56,13 +56,13 @@ class EnquiryDoneView extends GetView<EducationController> {
                     child: Column(
                       children: [
                         _row(Icons.menu_book_rounded,
-                            course?.title ?? 'Your selected course'),
+                            course?.title ?? 'Your selected course'.tr),
                         const SizedBox(height: 14),
                         _row(Icons.account_balance_outlined,
-                            center?.name ?? 'Your selected center'),
+                            center?.name ?? 'Your selected center'.tr),
                         const SizedBox(height: 14),
                         _row(Icons.call_rounded,
-                            'Center calls back within 24 hours'),
+                            'Center calls back within 24 hours'.tr),
                       ],
                     ),
                   ),
@@ -83,9 +83,9 @@ class EnquiryDoneView extends GetView<EducationController> {
                     shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(14)),
                   ),
-                  child: const Text('Back to Education',
-                      style:
-                          TextStyle(fontSize: 16, fontWeight: FontWeight.w800)),
+                  child: Text('Back to Education'.tr,
+                      style: const TextStyle(
+                          fontSize: 16, fontWeight: FontWeight.w800)),
                 ),
               ),
             ),

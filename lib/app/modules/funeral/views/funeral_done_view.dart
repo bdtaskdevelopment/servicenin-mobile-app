@@ -35,9 +35,9 @@ class FuneralDoneView extends GetView<FuneralController> {
                     ),
                   ),
                   const SizedBox(height: 18),
-                  const Center(
-                    child: Text('Request received',
-                        style: TextStyle(
+                  Center(
+                    child: Text('Request received'.tr,
+                        style: const TextStyle(
                             fontSize: 24,
                             fontWeight: FontWeight.w800,
                             color: Color(0xFF0F172A))),
@@ -45,8 +45,8 @@ class FuneralDoneView extends GetView<FuneralController> {
                   const SizedBox(height: 8),
                   Center(
                     child: Text(
-                        'May Allah grant you patience. A coordinator is '
-                        'being assigned and will call you shortly.',
+                        'May Allah grant you patience. A coordinator is being assigned and will call you shortly.'
+                            .tr,
                         textAlign: TextAlign.center,
                         style: TextStyle(
                             fontSize: 13.5,
@@ -82,7 +82,7 @@ class FuneralDoneView extends GetView<FuneralController> {
                                       con.lastRequest?.registrationNo.isNotEmpty ==
                                               true
                                           ? con.lastRequest!.registrationNo
-                                          : 'Funeral request',
+                                          : 'Funeral request'.tr,
                                       style: const TextStyle(
                                           fontSize: 15,
                                           fontWeight: FontWeight.w800,
@@ -92,7 +92,7 @@ class FuneralDoneView extends GetView<FuneralController> {
                                       con.lastRequest?.deceasedName.isNotEmpty ==
                                               true
                                           ? con.lastRequest!.deceasedName
-                                          : 'A coordinator is being assigned',
+                                          : 'A coordinator is being assigned'.tr,
                                       style: const TextStyle(
                                           fontSize: 12,
                                           color: Color(0xFF94A3B8))),
@@ -106,7 +106,7 @@ class FuneralDoneView extends GetView<FuneralController> {
                                   color: _greenTile,
                                   borderRadius: BorderRadius.circular(20)),
                               child: Text(
-                                  con.lastRequest?.statusLabel ?? 'Pending',
+                                  con.lastRequest?.statusLabel ?? 'Pending'.tr,
                                   style: const TextStyle(
                                       fontSize: 11,
                                       fontWeight: FontWeight.w700,
@@ -118,12 +118,12 @@ class FuneralDoneView extends GetView<FuneralController> {
                           padding: EdgeInsets.symmetric(vertical: 14),
                           child: _DashedDivider(),
                         ),
-                        _check('Your request has been registered'),
+                        _check('Your request has been registered'.tr),
                         const SizedBox(height: 12),
-                        _check('A coordinator will call you shortly'),
+                        _check('A coordinator will call you shortly'.tr),
                         const SizedBox(height: 12),
                         _check(
-                            'Track progress anytime from “My requests”'),
+                            'Track progress anytime from “My requests”'.tr),
                       ],
                     ),
                   ),
@@ -145,9 +145,9 @@ class FuneralDoneView extends GetView<FuneralController> {
                     shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(14)),
                   ),
-                  child: const Text('Done',
-                      style:
-                          TextStyle(fontSize: 16, fontWeight: FontWeight.w800)),
+                  child: Text('Done'.tr,
+                      style: const TextStyle(
+                          fontSize: 16, fontWeight: FontWeight.w800)),
                 ),
               ),
             ),

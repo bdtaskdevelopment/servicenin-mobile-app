@@ -66,17 +66,17 @@ class _HsChatViewState extends State<HsChatView> {
                       icon: const Icon(Icons.arrow_back_ios_new_rounded,
                           size: 20, color: Color(0xFF1A1A1A)),
                     ),
-                    const Column(
+                    Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('Service chat',
-                            style: TextStyle(
+                        Text('Service chat'.tr,
+                            style: const TextStyle(
                                 fontSize: 17,
                                 fontWeight: FontWeight.w800,
                                 color: Color(0xFF0F172A))),
-                        SizedBox(height: 1),
-                        Text('Message your provider',
-                            style: TextStyle(
+                        const SizedBox(height: 1),
+                        Text('Message your provider'.tr,
+                            style: const TextStyle(
                                 fontSize: 12, color: Color(0xFF94A3B8))),
                       ],
                     ),
@@ -92,9 +92,9 @@ class _HsChatViewState extends State<HsChatView> {
                   return const SnListSkeleton(showTrailing: false);
                 }
                 if (c.messages.isEmpty) {
-                  return const Center(
-                    child: Text('No messages yet — say hello 👋',
-                        style: TextStyle(color: Color(0xFF94A3B8))),
+                  return Center(
+                    child: Text('No messages yet — say hello 👋'.tr,
+                        style: const TextStyle(color: Color(0xFF94A3B8))),
                   );
                 }
                 _maybeScrollToEnd();
@@ -132,9 +132,9 @@ class _HsChatViewState extends State<HsChatView> {
                           maxLines: 4,
                           onSubmitted: (_) => con.send(),
                           textInputAction: TextInputAction.send,
-                          decoration: const InputDecoration(
-                            hintText: 'Type a message…',
-                            hintStyle: TextStyle(color: Color(0xFF94A3B8)),
+                          decoration: InputDecoration(
+                            hintText: 'Type a message…'.tr,
+                            hintStyle: const TextStyle(color: Color(0xFF94A3B8)),
                             border: InputBorder.none,
                             isCollapsed: true,
                           ),

@@ -1,3 +1,4 @@
+import 'package:animate_do/animate_do.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -30,17 +31,17 @@ class AllAvailableDoctorsView extends GetView<HealthcareController> {
                     icon: const Icon(Icons.arrow_back_ios_new_rounded,
                         size: 20, color: Color(0xFF1A1A1A)),
                   ),
-                  const Column(
+                  Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('Available today',
-                          style: TextStyle(
+                      Text('Available today'.tr,
+                          style: const TextStyle(
                               fontSize: 19,
                               fontWeight: FontWeight.w800,
                               color: Color(0xFF0F172A))),
-                      SizedBox(height: 1),
-                      Text('Doctors taking patients today',
-                          style: TextStyle(
+                      const SizedBox(height: 1),
+                      Text('Doctors taking patients today'.tr,
+                          style: const TextStyle(
                               fontSize: 12, color: Color(0xFF94A3B8))),
                     ],
                   ),
@@ -59,11 +60,11 @@ class AllAvailableDoctorsView extends GetView<HealthcareController> {
                     }
                     if (con.doctors.isEmpty) {
                       return ListView(
-                        children: const [
-                          SizedBox(height: 140),
+                        children: [
+                          const SizedBox(height: 140),
                           Center(
-                            child: Text('No doctors available today.',
-                                style: TextStyle(color: Color(0xFF94A3B8))),
+                            child: Text('No doctors available today.'.tr,
+                                style: const TextStyle(color: Color(0xFF94A3B8))),
                           ),
                         ],
                       );
@@ -71,14 +72,25 @@ class AllAvailableDoctorsView extends GetView<HealthcareController> {
                     return ListView(
                       padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
                       children: con.doctors
-                          .map((d) => Padding(
-                                padding: const EdgeInsets.only(bottom: 12),
-                                child: GestureDetector(
-                                  onTap: () {
-                                    Get.find<BookingController>().setDoctor(d);
-                                    Get.toNamed(Routes.HC_DOCTOR_PROFILE);
-                                  },
-                                  child: HcDoctorCard(doctor: d),
+                          .toList()
+                          .asMap()
+                          .entries
+                          .map((e) => FadeInUp(
+                                from: 18,
+                                duration: const Duration(milliseconds: 350),
+                                delay: Duration(
+                                    milliseconds:
+                                        70 * (e.key < 6 ? e.key : 6)),
+                                child: Padding(
+                                  padding: const EdgeInsets.only(bottom: 12),
+                                  child: GestureDetector(
+                                    onTap: () {
+                                      Get.find<BookingController>()
+                                          .setDoctor(e.value);
+                                      Get.toNamed(Routes.HC_DOCTOR_PROFILE);
+                                    },
+                                    child: HcDoctorCard(doctor: e.value),
+                                  ),
                                 ),
                               ))
                           .toList(),

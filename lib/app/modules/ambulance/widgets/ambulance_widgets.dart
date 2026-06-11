@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
 import '../../../core/values/app_colors.dart';
 import '../../../data/models/response/ambulance_booking_response.dart';
@@ -70,13 +71,13 @@ class AmbulanceCard extends StatelessWidget {
                 decoration: BoxDecoration(
                     color: const Color(0xFFDCFCE7),
                     borderRadius: BorderRadius.circular(20)),
-                child: const Row(
+                child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(Icons.circle, size: 6, color: Color(0xFF16A34A)),
-                    SizedBox(width: 4),
-                    Text('Available',
-                        style: TextStyle(
+                    const Icon(Icons.circle, size: 6, color: Color(0xFF16A34A)),
+                    const SizedBox(width: 4),
+                    Text('Available'.tr,
+                        style: const TextStyle(
                             fontSize: 11,
                             fontWeight: FontWeight.w700,
                             color: Color(0xFF15803D))),
@@ -192,7 +193,7 @@ class BookingCard extends StatelessWidget {
   }
 
   String _statusLabel(String s) {
-    if (s.isEmpty) return 'Pending';
+    if (s.isEmpty) return 'Pending'.tr;
     return s[0].toUpperCase() + s.substring(1).replaceAll('_', ' ');
   }
 }

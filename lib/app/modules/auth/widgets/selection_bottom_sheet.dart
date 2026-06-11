@@ -89,7 +89,7 @@ class _SelectionBottomSheetState extends State<SelectionBottomSheet> {
             child: TextField(
               onChanged: _search,
               decoration: InputDecoration(
-                hintText: 'খুঁজুন...',
+                hintText: 'Search...'.tr,
                 hintStyle: const TextStyle(color: Color(0xFF94A3B8)),
                 filled: true,
                 fillColor: const Color(0xFFF1F5F9),

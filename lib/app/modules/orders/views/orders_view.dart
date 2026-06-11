@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import 'package:animate_do/animate_do.dart';
+
 import '../../../core/utils/service_nav.dart';
 import '../../../core/values/app_colors.dart';
 import '../../../data/models/response/home_response.dart';
@@ -72,7 +74,7 @@ class OrdersView extends GetView<OrdersController> {
     return Scaffold(
       backgroundColor: AppColors.white,
       appBar: ServiceAppBar(
-        title: 'My Orders',
+        title: 'My Orders'.tr,
         subtitle: '${controller.total}টি অর্ডার · সব সেবা',
       ),
       body: GetBuilder<OrdersController>(
@@ -90,9 +92,17 @@ class OrdersView extends GetView<OrdersController> {
             child: ListView(
               padding: const EdgeInsets.fromLTRB(16, 12, 16, 100),
               children: con.orders
-                  .map((o) => Padding(
-                        padding: const EdgeInsets.only(bottom: 12),
-                        child: _OrderCard(order: o),
+                  .toList()
+                  .asMap()
+                  .entries
+                  .map((e) => FadeInUp(
+                        from: 18,
+                        duration: const Duration(milliseconds: 350),
+                        delay: Duration(milliseconds: 50 * (e.key % 8)),
+                        child: Padding(
+                          padding: const EdgeInsets.only(bottom: 12),
+                          child: _OrderCard(order: e.value),
+                        ),
                       ))
                   .toList(),
             ),
@@ -113,17 +123,17 @@ class _Empty extends StatelessWidget {
         Icon(Icons.receipt_long_outlined,
             size: 56, color: Colors.black.withValues(alpha: 0.18)),
         const SizedBox(height: 14),
-        const Center(
-          child: Text('No orders yet',
-              style: TextStyle(
+        Center(
+          child: Text('No orders yet'.tr,
+              style: const TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w800,
                   color: Color(0xFF0F172A))),
         ),
         const SizedBox(height: 6),
-        const Center(
-          child: Text('Your activity across all services appears here.',
-              style: TextStyle(fontSize: 13, color: Color(0xFF94A3B8))),
+        Center(
+          child: Text('Your activity across all services appears here.'.tr,
+              style: const TextStyle(fontSize: 13, color: Color(0xFF94A3B8))),
         ),
       ],
     );

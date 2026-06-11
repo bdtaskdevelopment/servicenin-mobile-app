@@ -20,11 +20,11 @@ class DonorDetailView extends GetView<BloodController> {
         body: SafeArea(
           child: Column(
             children: [
-              _BackBar(title: 'Donor', subtitle: ''),
-              const Expanded(
+              _BackBar(title: 'Donor'.tr, subtitle: ''),
+              Expanded(
                 child: Center(
-                  child: Text('Donor not found',
-                      style: TextStyle(color: Color(0xFF94A3B8))),
+                  child: Text('Donor not found'.tr,
+                      style: const TextStyle(color: Color(0xFF94A3B8))),
                 ),
               ),
             ],
@@ -39,7 +39,7 @@ class DonorDetailView extends GetView<BloodController> {
       body: SafeArea(
         child: Column(
           children: [
-            _BackBar(title: 'Donor', subtitle: donor.bloodGroup),
+            _BackBar(title: 'Donor'.tr, subtitle: donor.bloodGroup),
             Expanded(
               child: ListView(
                 padding: const EdgeInsets.fromLTRB(16, 16, 16, 20),
@@ -108,8 +108,8 @@ class DonorDetailView extends GetView<BloodController> {
                                               color: const Color(0xFFDCFCE7),
                                               borderRadius:
                                                   BorderRadius.circular(20)),
-                                          child: const Text('Available',
-                                              style: TextStyle(
+                                          child: Text('Available'.tr,
+                                              style: const TextStyle(
                                                   fontSize: 11,
                                                   fontWeight: FontWeight.w800,
                                                   color: Color(0xFF15803D))),
@@ -127,33 +127,33 @@ class DonorDetailView extends GetView<BloodController> {
                         ),
                         _InfoRow(
                           icon: Icons.water_drop_outlined,
-                          label: 'Total donations',
+                          label: 'Total donations'.tr,
                           value: '${donor.totalDonations}',
                         ),
                         const SizedBox(height: 16),
                         _InfoRow(
                           icon: Icons.event_available_outlined,
-                          label: 'Last donated',
+                          label: 'Last donated'.tr,
                           value: donor.lastDonatedLabel.isNotEmpty
                               ? donor.lastDonatedLabel
                                   .replaceFirst('Last donated ', '')
-                              : 'Not recorded',
+                              : 'Not recorded'.tr,
                         ),
                         const SizedBox(height: 16),
                         _InfoRow(
                           icon: Icons.location_on_outlined,
-                          label: 'Area',
+                          label: 'Area'.tr,
                           value: donor.address.isNotEmpty
                               ? donor.address
-                              : 'Not shared',
+                              : 'Not shared'.tr,
                         ),
                         const SizedBox(height: 16),
                         _InfoRow(
                           icon: Icons.call_outlined,
-                          label: 'Phone',
+                          label: 'Phone'.tr,
                           value: donor.phone.isNotEmpty
                               ? donor.phone
-                              : 'Not available',
+                              : 'Not available'.tr,
                         ),
                         if (donor.notes.isNotEmpty) ...[
                           const SizedBox(height: 16),
@@ -212,8 +212,8 @@ class DonorDetailView extends GetView<BloodController> {
                               borderRadius: BorderRadius.circular(14)),
                         ),
                         icon: const Icon(Icons.call_rounded, size: 20),
-                        label: const Text('Call donor',
-                            style: TextStyle(
+                        label: Text('Call donor'.tr,
+                            style: const TextStyle(
                                 fontSize: 15.5, fontWeight: FontWeight.w700)),
                       ),
                     ),

@@ -46,10 +46,8 @@ class _MyAppState extends State<MyApp> {
       getPages: AppPages.routes,
       translationsKeys: AppTranslation.translationsKeys,
       locale: Locale(StorageService.read(StorageConstants.languageCode) ??
-          AppConst.langCodeEn),
-      fallbackLocale: Locale(
-          StorageService.read(StorageConstants.languageCode) ??
-              AppConst.langCodeEn),
+          AppConst.langCodeBn),
+      fallbackLocale: const Locale(AppConst.langCodeEn),
       popGesture: true,
       routingCallback: (routing) {},
       onInit: () {},

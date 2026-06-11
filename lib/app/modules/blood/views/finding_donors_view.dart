@@ -32,8 +32,8 @@ class FindingDonorsView extends GetView<DonationFlowController> {
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text('Finding donors',
-                          style: TextStyle(
+                      Text('Finding donors'.tr,
+                          style: const TextStyle(
                               fontSize: 19,
                               fontWeight: FontWeight.w800,
                               color: Color(0xFF0F172A))),
@@ -55,15 +55,15 @@ class FindingDonorsView extends GetView<DonationFlowController> {
                     padding: const EdgeInsets.fromLTRB(16, 18, 16, 4),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
-                      children: const [
-                        Text('Donors responding',
-                            style: TextStyle(
+                      children: [
+                        Text('Donors responding'.tr,
+                            style: const TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.w800,
                                 color: Color(0xFF0F172A))),
-                        SizedBox(height: 2),
-                        Text('Accept one to start coordination',
-                            style: TextStyle(
+                        const SizedBox(height: 2),
+                        Text('Accept one to start coordination'.tr,
+                            style: const TextStyle(
                                 fontSize: 12, color: Color(0xFF94A3B8))),
                       ],
                     ),
@@ -91,8 +91,8 @@ class FindingDonorsView extends GetView<DonationFlowController> {
                     shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(14)),
                   ),
-                  child: const Text('Cancel request',
-                      style: TextStyle(
+                  child: Text('Cancel request'.tr,
+                      style: const TextStyle(
                           fontSize: 15,
                           fontWeight: FontWeight.w700,
                           color: Color(0xFF334155))),
@@ -137,22 +137,22 @@ class _Hero extends StatelessWidget {
                 color: Colors.white, size: 38),
           ),
           const SizedBox(height: 16),
-          const Text('Broadcasting to donors',
-              style: TextStyle(
+          Text('Broadcasting to donors'.tr,
+              style: const TextStyle(
                   color: Colors.white,
                   fontSize: 20,
                   fontWeight: FontWeight.w800)),
           const SizedBox(height: 4),
-          Text('${con.group} · কাছাকাছি ডোনারদের জানানো হচ্ছে…',
+          Text('${con.group} · ${'Notifying nearby donors…'.tr}',
               style: TextStyle(
                   color: Colors.white.withValues(alpha: 0.9), fontSize: 13)),
           const SizedBox(height: 20),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
-              _stat('${con.notified}', 'Notified'),
-              _stat('${con.responded}', 'Responded'),
-              _stat('${con.nearest}km', 'Nearest'),
+              _stat('${con.notified}', 'Notified'.tr),
+              _stat('${con.responded}', 'Responded'.tr),
+              _stat('${con.nearest}km', 'Nearest'.tr),
             ],
           ),
         ],
@@ -238,8 +238,8 @@ class _DonorCard extends StatelessWidget {
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(20)),
               ),
-              child: const Text('Accept',
-                  style:
+              child: Text('Accept'.tr,
+                  style: const
                       TextStyle(fontSize: 13.5, fontWeight: FontWeight.w700)),
             ),
           ),

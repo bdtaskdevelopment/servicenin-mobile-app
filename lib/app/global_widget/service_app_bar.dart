@@ -11,7 +11,7 @@ class ServiceAppBar extends StatelessWidget implements PreferredSizeWidget {
   const ServiceAppBar({
     super.key,
     this.title = 'ServiceNin',
-    this.subtitle = 'আপনার শহর, আপনার সেবা',
+    this.subtitle = 'Your city, your service',
     this.onSearch,
     this.onNotifications,
     this.hasNotification = true,
@@ -43,7 +43,7 @@ class ServiceAppBar extends StatelessWidget implements PreferredSizeWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Text(
-                  title,
+                  title.tr,
                   style: const TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.w800,
@@ -52,7 +52,7 @@ class ServiceAppBar extends StatelessWidget implements PreferredSizeWidget {
                 ),
                 const SizedBox(height: 2),
                 Text(
-                  subtitle,
+                  subtitle.tr,
                   style: const TextStyle(fontSize: 11, color: Color(0xFF94A3B8)),
                 ),
               ],

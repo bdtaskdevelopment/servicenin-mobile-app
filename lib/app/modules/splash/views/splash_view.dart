@@ -81,8 +81,8 @@ class SplashView extends StatelessWidget {
                             delay: const Duration(milliseconds: 250),
                             child: Column(
                               mainAxisSize: MainAxisSize.min,
-                              children: const [
-                                Text(
+                              children: [
+                                const Text(
                                   'ServiceNin',
                                   style: TextStyle(
                                     color: Color(0xFF0F172A),
@@ -91,10 +91,10 @@ class SplashView extends StatelessWidget {
                                     letterSpacing: 0.2,
                                   ),
                                 ),
-                                SizedBox(height: 8),
+                                const SizedBox(height: 8),
                                 Text(
-                                  'আপনার শহর, আপনার সেবা',
-                                  style: TextStyle(
+                                  'Your city, your service'.tr,
+                                  style: const TextStyle(
                                     color: Color(0xFF94A3B8),
                                     fontSize: 14,
                                     fontWeight: FontWeight.w500,

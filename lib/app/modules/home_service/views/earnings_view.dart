@@ -33,12 +33,12 @@ class EarningsView extends GetView<ProviderController> {
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text('Earnings',
-                              style: TextStyle(
+                          Text('Earnings'.tr,
+                              style: const TextStyle(
                                   fontSize: 19,
                                   fontWeight: FontWeight.w800,
                                   color: Color(0xFF0F172A))),
-                          Text('Balance ${con.balance}',
+                          Text('${'Balance'.tr} ${con.balance}',
                               style: const TextStyle(
                                   fontSize: 12, color: Color(0xFF94A3B8))),
                         ],
@@ -63,8 +63,8 @@ class EarningsView extends GetView<ProviderController> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Text('This month',
-                                style: TextStyle(
+                            Text('This month'.tr,
+                                style: const TextStyle(
                                     color: Color(0xFFB6C0CC),
                                     fontSize: 12.5,
                                     fontWeight: FontWeight.w600)),
@@ -82,7 +82,7 @@ class EarningsView extends GetView<ProviderController> {
                         ),
                       ),
                       const SizedBox(height: 20),
-                      const _Label('WITHDRAW TO'),
+                      _Label('WITHDRAW TO'.tr),
                       const SizedBox(height: 10),
                       Row(
                         children: List.generate(con.withdrawMethods.length,
@@ -122,7 +122,7 @@ class EarningsView extends GetView<ProviderController> {
                         }),
                       ),
                       const SizedBox(height: 22),
-                      const _Label('WITHDRAWAL HISTORY'),
+                      _Label('WITHDRAWAL HISTORY'.tr),
                       const SizedBox(height: 10),
                       ...con.history.map((h) => Padding(
                             padding: const EdgeInsets.only(bottom: 12),
@@ -141,8 +141,8 @@ class EarningsView extends GetView<ProviderController> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          const Text('Available',
-                              style: TextStyle(
+                          Text('Available'.tr,
+                              style: const TextStyle(
                                   fontSize: 11.5, color: Color(0xFF94A3B8))),
                           Text(con.balance,
                               style: const TextStyle(
@@ -164,8 +164,8 @@ class EarningsView extends GetView<ProviderController> {
                               shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(14)),
                             ),
-                            child: const Text('Withdraw all',
-                                style: TextStyle(
+                            child: Text('Withdraw all'.tr,
+                                style: const TextStyle(
                                     fontSize: 16,
                                     fontWeight: FontWeight.w800)),
                           ),
@@ -238,8 +238,8 @@ class _HistoryRow extends StatelessWidget {
             decoration: BoxDecoration(
                 color: const Color(0xFFDCFCE7),
                 borderRadius: BorderRadius.circular(20)),
-            child: const Text('Paid',
-                style: TextStyle(
+            child: Text('Paid'.tr,
+                style: const TextStyle(
                     fontSize: 11,
                     fontWeight: FontWeight.w700,
                     color: Color(0xFF15803D))),

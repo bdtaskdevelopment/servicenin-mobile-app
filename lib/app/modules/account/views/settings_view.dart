@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import '../../../core/languages/language_controller.dart';
 import '../../../core/values/app_colors.dart';
 import '../controllers/account_controller.dart';
 
@@ -30,8 +31,8 @@ class SettingsView extends GetView<AccountController> {
                       icon: const Icon(Icons.arrow_back_ios_new_rounded,
                           size: 20, color: Color(0xFF1A1A1A)),
                     ),
-                    const Text('Language & settings',
-                        style: TextStyle(
+                    Text('Language & settings'.tr,
+                        style: const TextStyle(
                             fontSize: 19,
                             fontWeight: FontWeight.w800,
                             color: Color(0xFF0F172A))),
@@ -42,28 +43,30 @@ class SettingsView extends GetView<AccountController> {
                 child: ListView(
                   padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
                   children: [
-                    const _Label('LANGUAGE'),
+                    _Label('LANGUAGE'.tr),
                     const SizedBox(height: 10),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: _LangCard(
-                            title: 'বাংলা',
-                            subtitle: 'Bangla',
-                            selected: con.languageIndex == 0,
-                            onTap: () => con.setLanguage(0),
+                    GetBuilder<LanguageController>(
+                      builder: (lang) => Row(
+                        children: [
+                          Expanded(
+                            child: _LangCard(
+                              title: 'বাংলা',
+                              subtitle: 'Bangla',
+                              selected: lang.index == 0,
+                              onTap: () => lang.setByIndex(0),
+                            ),
                           ),
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: _LangCard(
-                            title: 'English',
-                            subtitle: 'English',
-                            selected: con.languageIndex == 1,
-                            onTap: () => con.setLanguage(1),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: _LangCard(
+                              title: 'English',
+                              subtitle: 'English',
+                              selected: lang.index == 1,
+                              onTap: () => lang.setByIndex(1),
+                            ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                     // ── Notifications section hidden for now ──────────────
                     /*
@@ -85,7 +88,7 @@ class SettingsView extends GetView<AccountController> {
                     ),
                     */
                     const SizedBox(height: 18),
-                    const _Label('ABOUT'),
+                    _Label('ABOUT'.tr),
                     const SizedBox(height: 10),
                     Container(
                       decoration: BoxDecoration(
@@ -94,7 +97,7 @@ class SettingsView extends GetView<AccountController> {
                       child: Column(
                         children: [
                           _AboutRow(
-                            label: 'App version',
+                            label: 'App version'.tr,
                             trailing: const Text('3.0.0',
                                 style: TextStyle(
                                     fontSize: 13.5,
@@ -102,7 +105,7 @@ class SettingsView extends GetView<AccountController> {
                           ),
                           const _AboutDivider(),
                           _AboutRow(
-                            label: 'Terms of service',
+                            label: 'Terms of service'.tr,
                             onTap: con.openTerms,
                             trailing: const Icon(
                                 Icons.chevron_right_rounded,
@@ -110,7 +113,7 @@ class SettingsView extends GetView<AccountController> {
                           ),
                           const _AboutDivider(),
                           _AboutRow(
-                            label: 'Privacy policy',
+                            label: 'Privacy policy'.tr,
                             onTap: con.openPrivacy,
                             trailing: const Icon(
                                 Icons.chevron_right_rounded,
@@ -120,8 +123,8 @@ class SettingsView extends GetView<AccountController> {
                       ),
                     ),
                     const SizedBox(height: 20),
-                    const Text('ACCOUNT',
-                        style: TextStyle(
+                    Text('ACCOUNT'.tr,
+                        style: const TextStyle(
                             fontSize: 12,
                             fontWeight: FontWeight.w700,
                             color: Color(0xFFDC2626),
@@ -147,18 +150,18 @@ class SettingsView extends GetView<AccountController> {
                                   color: Color(0xFFDC2626), size: 21),
                             ),
                             const SizedBox(width: 14),
-                            const Expanded(
+                            Expanded(
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text('Delete account',
-                                      style: TextStyle(
+                                  Text('Delete account'.tr,
+                                      style: const TextStyle(
                                           fontSize: 15,
                                           fontWeight: FontWeight.w800,
                                           color: Color(0xFFDC2626))),
-                                  SizedBox(height: 2),
-                                  Text('Permanently remove your ServiceNin ID',
-                                      style: TextStyle(
+                                  const SizedBox(height: 2),
+                                  Text('Permanently remove your ServiceNin ID'.tr,
+                                      style: const TextStyle(
                                           fontSize: 12.5,
                                           color: Color(0xFF94A3B8))),
                                 ],

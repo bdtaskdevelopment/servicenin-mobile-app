@@ -29,17 +29,17 @@ class ReportIssueView extends GetView<NagarikController> {
                       icon: const Icon(Icons.arrow_back_ios_new_rounded,
                           size: 20, color: Color(0xFF1A1A1A)),
                     ),
-                    const Column(
+                    Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('Report an issue',
-                            style: TextStyle(
+                        Text('Report an issue'.tr,
+                            style: const TextStyle(
                                 fontSize: 19,
                                 fontWeight: FontWeight.w800,
                                 color: Color(0xFF0F172A))),
-                        SizedBox(height: 1),
-                        Text('Goes directly to DNCC',
-                            style: TextStyle(
+                        const SizedBox(height: 1),
+                        Text('Goes directly to DNCC'.tr,
+                            style: const TextStyle(
                                 fontSize: 12, color: Color(0xFF94A3B8))),
                       ],
                     ),
@@ -50,7 +50,7 @@ class ReportIssueView extends GetView<NagarikController> {
                 child: ListView(
                   padding: const EdgeInsets.fromLTRB(16, 6, 16, 16),
                   children: [
-                    const _Label('CATEGORY'),
+                    _Label('CATEGORY'.tr),
                     const SizedBox(height: 10),
                     GridView.count(
                       crossAxisCount: 3,
@@ -100,33 +100,33 @@ class ReportIssueView extends GetView<NagarikController> {
                       }).toList(),
                     ),
                     const SizedBox(height: 18),
-                    const _Label('TITLE'),
+                    _Label('TITLE'.tr),
                     const SizedBox(height: 10),
                     _Input(
                         controller: con.reportTitle,
-                        hint: 'Short summary, e.g. Blocked drain on Road 7'),
+                        hint: 'Short summary, e.g. Blocked drain on Road 7'.tr),
                     const SizedBox(height: 18),
-                    const _Label('DESCRIBE THE ISSUE'),
+                    _Label('DESCRIBE THE ISSUE'.tr),
                     const SizedBox(height: 10),
                     _Input(
                         controller: con.reportDescription,
-                        hint: 'What\'s wrong, how long it\'s been there…',
+                        hint: 'What\'s wrong, how long it\'s been there…'.tr,
                         maxLines: 4),
                     const SizedBox(height: 18),
-                    const _Label('LOCATION'),
+                    _Label('LOCATION'.tr),
                     const SizedBox(height: 10),
                     _Input(
                         controller: con.reportAddress,
-                        hint: 'Address, e.g. Road 7, Dhanmondi'),
+                        hint: 'Address, e.g. Road 7, Dhanmondi'.tr),
                     const SizedBox(height: 12),
                     _Input(
                         controller: con.reportWard,
-                        hint: 'Ward no (optional), e.g. 14',
+                        hint: 'Ward no (optional), e.g. 14'.tr,
                         keyboard: TextInputType.number),
                     const SizedBox(height: 18),
                     Row(
                       children: [
-                        const _Label('PHOTO EVIDENCE'),
+                        _Label('PHOTO EVIDENCE'.tr),
                         const SizedBox(width: 8),
                         Text(
                             '(${con.reportImages.length}/${NagarikController.maxReportImages})',
@@ -201,8 +201,8 @@ class ReportIssueView extends GetView<NagarikController> {
                             child: CircularProgressIndicator(
                                 strokeWidth: 2.4, color: Colors.white),
                           )
-                        : const Text('Submit to DNCC',
-                            style: TextStyle(
+                        : Text('Submit to DNCC'.tr,
+                            style: const TextStyle(
                                 fontSize: 16, fontWeight: FontWeight.w800)),
                   ),
                 ),
@@ -245,14 +245,14 @@ class _PhotoEvidence extends StatelessWidget {
                       width: 1.2,
                       strokeAlign: BorderSide.strokeAlignInside),
                 ),
-                child: const Column(
+                child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(Icons.add_a_photo_outlined,
+                    const Icon(Icons.add_a_photo_outlined,
                         color: _orange, size: 24),
-                    SizedBox(height: 6),
-                    Text('Add photo',
-                        style: TextStyle(
+                    const SizedBox(height: 6),
+                    Text('Add photo'.tr,
+                        style: const TextStyle(
                             fontSize: 11,
                             fontWeight: FontWeight.w700,
                             color: Color(0xFF334155))),

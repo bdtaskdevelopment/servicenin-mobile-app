@@ -32,8 +32,8 @@ class _NagarikChatViewState extends State<NagarikChatView> {
         builder: (con) {
           final t = con.selectedTicket;
           final code = t == null
-              ? 'Ticket'
-              : (t.categoryLabel.isNotEmpty ? t.categoryLabel : 'Ticket');
+              ? 'Ticket'.tr
+              : (t.categoryLabel.isNotEmpty ? t.categoryLabel : 'Ticket'.tr);
           final subject = t?.subject ?? '';
           final visible = con.messages
               .where((m) => m.message.trim().isNotEmpty)
@@ -64,8 +64,8 @@ class _NagarikChatViewState extends State<NagarikChatView> {
                                       fontSize: 18,
                                       fontWeight: FontWeight.w800,
                                       color: Color(0xFF0F172A))),
-                              const Text('DNCC support',
-                                  style: TextStyle(
+                              Text('DNCC support'.tr,
+                                  style: const TextStyle(
                                       fontSize: 12,
                                       color: Color(0xFF94A3B8))),
                             ],
@@ -114,12 +114,13 @@ class _NagarikChatViewState extends State<NagarikChatView> {
                             Center(child: _SubjectChip(subject)),
                           const SizedBox(height: 14),
                           if (visible.isEmpty)
-                            const Padding(
-                              padding: EdgeInsets.only(top: 40),
+                            Padding(
+                              padding: const EdgeInsets.only(top: 40),
                               child: Center(
                                 child: Text(
-                                    'No messages yet. Start the conversation.',
-                                    style: TextStyle(
+                                    'No messages yet. Start the conversation.'
+                                        .tr,
+                                    style: const TextStyle(
                                         fontSize: 13,
                                         color: Color(0xFF94A3B8))),
                               ),
@@ -154,14 +155,14 @@ class _NagarikChatViewState extends State<NagarikChatView> {
                               minLines: 1,
                               maxLines: 4,
                               onSubmitted: (_) => con.sendMessage(),
-                              decoration: const InputDecoration(
-                                hintText: 'Reply to support…',
-                                hintStyle:
-                                    TextStyle(color: Color(0xFF94A3B8)),
+                              decoration: InputDecoration(
+                                hintText: 'Reply to support…'.tr,
+                                hintStyle: const TextStyle(
+                                    color: Color(0xFF94A3B8)),
                                 border: InputBorder.none,
                                 isCollapsed: true,
                                 contentPadding:
-                                    EdgeInsets.symmetric(vertical: 14),
+                                    const EdgeInsets.symmetric(vertical: 14),
                               ),
                               style: const TextStyle(
                                   fontSize: 14.5, color: Color(0xFF0F172A)),
@@ -236,7 +237,9 @@ class _Bubble extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.only(left: 4, bottom: 4),
               child: Text(
-                  msg.senderName.isNotEmpty ? msg.senderName : 'DNCC Support',
+                  msg.senderName.isNotEmpty
+                      ? msg.senderName
+                      : 'DNCC Support'.tr,
                   style: const TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.w700,

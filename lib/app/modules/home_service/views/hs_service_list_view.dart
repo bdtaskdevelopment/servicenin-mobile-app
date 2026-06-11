@@ -1,3 +1,4 @@
+import 'package:animate_do/animate_do.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -41,7 +42,7 @@ class HsServiceListView extends GetView<HomeServiceController> {
                                   fontSize: 19,
                                   fontWeight: FontWeight.w800,
                                   color: Color(0xFF0F172A))),
-                          Text('${services.length} services available',
+                          Text('${services.length} ${'services available'.tr}',
                               style: const TextStyle(
                                   fontSize: 12, color: Color(0xFF94A3B8))),
                         ],
@@ -74,10 +75,10 @@ class HsServiceListView extends GetView<HomeServiceController> {
                             child: TextField(
                               autofocus: true,
                               onChanged: con.onQueryChanged,
-                              decoration: const InputDecoration(
-                                hintText: 'Search services…',
+                              decoration: InputDecoration(
+                                hintText: 'Search services…'.tr,
                                 hintStyle:
-                                    TextStyle(color: Color(0xFF94A3B8)),
+                                    const TextStyle(color: Color(0xFF94A3B8)),
                                 border: InputBorder.none,
                                 isCollapsed: true,
                               ),
@@ -97,11 +98,14 @@ class HsServiceListView extends GetView<HomeServiceController> {
                           ? Center(
                               child: Text(
                                   isSearch
-                                      ? 'Search for a service'
-                                      : 'No services found',
+                                      ? 'Search for a service'.tr
+                                      : 'No services found'.tr,
                                   style: const TextStyle(
                                       color: Color(0xFF94A3B8))))
-                          : ListView(
+                          : FadeInUp(
+                          from: 18,
+                          duration: const Duration(milliseconds: 350),
+                          child: ListView(
                           padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
                           children: services
                               .map((s) => Padding(
@@ -110,6 +114,7 @@ class HsServiceListView extends GetView<HomeServiceController> {
                                     child: _ServiceRow(service: s, con: con),
                                   ))
                               .toList(),
+                        ),
                         ),
                 ),
                 // Review booking bar
@@ -205,8 +210,8 @@ class _AddButton extends StatelessWidget {
           borderRadius: BorderRadius.circular(10),
           border: Border.all(color: _teal, width: 1.4),
         ),
-        child: const Text('Add +',
-            style: TextStyle(
+        child: Text('Add +'.tr,
+            style: const TextStyle(
                 fontSize: 14, fontWeight: FontWeight.w800, color: _teal)),
       ),
     );
@@ -289,9 +294,9 @@ class _ReviewBar extends StatelessWidget {
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(14)),
                 ),
-                child: const Text('Review booking →',
+                child: Text('Review booking →'.tr,
                     style:
-                        TextStyle(fontSize: 16, fontWeight: FontWeight.w800)),
+                        const TextStyle(fontSize: 16, fontWeight: FontWeight.w800)),
               ),
             ),
           ),

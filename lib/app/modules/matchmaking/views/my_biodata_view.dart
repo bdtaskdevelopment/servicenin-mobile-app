@@ -30,15 +30,15 @@ class MyBiodataView extends GetView<MatchmakingController> {
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text('My biodata',
-                            style: TextStyle(
+                        Text('My biodata'.tr,
+                            style: const TextStyle(
                                 fontSize: 19,
                                 fontWeight: FontWeight.w800,
                                 color: Color(0xFF0F172A))),
                         Text(
                             con.hasProfile
-                                ? '${con.completion}% complete'
-                                : 'Create your profile',
+                                ? '${con.completion}% ${'complete'.tr}'
+                                : 'Create your profile'.tr,
                             style: const TextStyle(
                                 fontSize: 12, color: Color(0xFF94A3B8))),
                       ],
@@ -71,16 +71,16 @@ class MyBiodataView extends GetView<MatchmakingController> {
                         )),
                     const SizedBox(height: 4),
                     RichText(
-                      text: const TextSpan(
-                        style: TextStyle(
+                      text: TextSpan(
+                        style: const TextStyle(
                             fontSize: 12.5, height: 1.45, color: _maroon),
                         children: [
                           TextSpan(
-                              text: 'Privacy: ',
-                              style: TextStyle(fontWeight: FontWeight.w800)),
+                              text: '${'Privacy'.tr}: ',
+                              style: const TextStyle(fontWeight: FontWeight.w800)),
                           TextSpan(
                               text:
-                                  'Your name & photos stay hidden until you accept someone\'s interest.'),
+                                  'Your name & photos stay hidden until you accept someone\'s interest.'.tr),
                         ],
                       ),
                     ),
@@ -108,7 +108,7 @@ class MyBiodataView extends GetView<MatchmakingController> {
                             child: CircularProgressIndicator(
                                 strokeWidth: 2.4, color: Colors.white),
                           )
-                        : Text(con.hasProfile ? 'Update biodata' : 'Save biodata',
+                        : Text(con.hasProfile ? 'Update biodata'.tr : 'Save biodata'.tr,
                             style: const TextStyle(
                                 fontSize: 16, fontWeight: FontWeight.w800)),
                   ),
@@ -177,7 +177,7 @@ class _TextField extends StatelessWidget {
               isDense: true,
               contentPadding: const EdgeInsets.symmetric(vertical: 8),
               border: InputBorder.none,
-              hintText: 'Enter ${field.label.toLowerCase()}',
+              hintText: '${'Enter'.tr} ${field.label.toLowerCase()}',
               hintStyle: const TextStyle(
                   fontSize: 15.5,
                   fontWeight: FontWeight.w500,
@@ -212,7 +212,7 @@ class _Dropdown extends StatelessWidget {
             child: DropdownButton<String>(
               isExpanded: true,
               value: (value != null && options.contains(value)) ? value : null,
-              hint: Text('Select ${field.label.toLowerCase()}',
+              hint: Text('${'Select'.tr} ${field.label.toLowerCase()}',
                   style: const TextStyle(
                       fontSize: 15.5,
                       fontWeight: FontWeight.w500,

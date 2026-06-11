@@ -33,17 +33,17 @@ class PostJobView extends GetView<JobsController> {
                       icon: const Icon(Icons.arrow_back_ios_new_rounded,
                           size: 20, color: Color(0xFF1A1A1A)),
                     ),
-                    const Column(
+                    Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('Post a job',
-                            style: TextStyle(
+                        Text('Post a job'.tr,
+                            style: const TextStyle(
                                 fontSize: 19,
                                 fontWeight: FontWeight.w800,
                                 color: Color(0xFF0F172A))),
-                        SizedBox(height: 1),
-                        Text('Register as employer first',
-                            style: TextStyle(
+                        const SizedBox(height: 1),
+                        Text('Register as employer first'.tr,
+                            style: const TextStyle(
                                 fontSize: 12, color: Color(0xFF94A3B8))),
                       ],
                     ),
@@ -70,18 +70,18 @@ class PostJobView extends GetView<JobsController> {
                             const Icon(Icons.apartment_rounded,
                                 color: Colors.white, size: 26),
                             const SizedBox(width: 12),
-                            const Expanded(
+                            Expanded(
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text('Employer registration',
-                                      style: TextStyle(
+                                  Text('Employer registration'.tr,
+                                      style: const TextStyle(
                                           color: Colors.white,
                                           fontSize: 15,
                                           fontWeight: FontWeight.w800)),
-                                  SizedBox(height: 2),
-                                  Text('Tap to register your company',
-                                      style: TextStyle(
+                                  const SizedBox(height: 2),
+                                  Text('Tap to register your company'.tr,
+                                      style: const TextStyle(
                                           color: Color(0xFFFFE3D5),
                                           fontSize: 12)),
                                 ],
@@ -94,24 +94,24 @@ class PostJobView extends GetView<JobsController> {
                       ),
                     ),
                     const SizedBox(height: 18),
-                    const _FieldLabel('JOB TITLE'),
-                    _Input(con.postTitle, 'e.g. Senior Go Engineer'),
+                    _FieldLabel('JOB TITLE'.tr),
+                    _Input(con.postTitle, 'e.g. Senior Go Engineer'.tr),
                     const SizedBox(height: 14),
-                    const _FieldLabel('CATEGORY'),
+                    _FieldLabel('CATEGORY'.tr),
                     _Dropdown(
                       value: con.postCategory,
                       options: con.categories.where((c) => c != 'All').toList(),
                       onSelect: con.setPostCategory,
                     ),
                     const SizedBox(height: 14),
-                    const _FieldLabel('JOB TYPE'),
+                    _FieldLabel('JOB TYPE'.tr),
                     _Dropdown(
                       value: con.postJobType,
                       options: con.jobTypes,
                       onSelect: con.setPostJobType,
                     ),
                     const SizedBox(height: 14),
-                    const _FieldLabel('WORKPLACE'),
+                    _FieldLabel('WORKPLACE'.tr),
                     _Dropdown(
                       value: con.postWorkplace,
                       options: con.workplaceTypes,
@@ -124,7 +124,7 @@ class PostJobView extends GetView<JobsController> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              const _FieldLabel('LOCATION'),
+                              _FieldLabel('LOCATION'.tr),
                               _Input(con.postLocation, 'Dhaka'),
                             ],
                           ),
@@ -134,7 +134,7 @@ class PostJobView extends GetView<JobsController> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              const _FieldLabel('DISTRICT'),
+                              _FieldLabel('DISTRICT'.tr),
                               _Input(con.postDistrict, 'Dhaka'),
                             ],
                           ),
@@ -148,7 +148,7 @@ class PostJobView extends GetView<JobsController> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              const _FieldLabel('SALARY MIN'),
+                              _FieldLabel('SALARY MIN'.tr),
                               _Input(con.postSalaryMin, '80000',
                                   kb: TextInputType.number),
                             ],
@@ -159,7 +159,7 @@ class PostJobView extends GetView<JobsController> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              const _FieldLabel('SALARY MAX'),
+                              _FieldLabel('SALARY MAX'.tr),
                               _Input(con.postSalaryMax, '150000',
                                   kb: TextInputType.number),
                             ],
@@ -174,7 +174,7 @@ class PostJobView extends GetView<JobsController> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              const _FieldLabel('VACANCIES'),
+                              _FieldLabel('VACANCIES'.tr),
                               _Input(con.postVacancy, '1',
                                   kb: TextInputType.number),
                             ],
@@ -185,7 +185,7 @@ class PostJobView extends GetView<JobsController> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              const _FieldLabel('DEADLINE'),
+                              _FieldLabel('DEADLINE'.tr),
                               _Input(con.postDeadline, '2026-07-15'),
                             ],
                           ),
@@ -193,19 +193,19 @@ class PostJobView extends GetView<JobsController> {
                       ],
                     ),
                     const SizedBox(height: 14),
-                    const _FieldLabel('EXPERIENCE REQUIRED'),
-                    _Input(con.postExperience, 'e.g. 3+ years'),
+                    _FieldLabel('EXPERIENCE REQUIRED'.tr),
+                    _Input(con.postExperience, 'e.g. 3+ years'.tr),
                     const SizedBox(height: 14),
-                    const _FieldLabel('EDUCATION'),
-                    _Input(con.postEducation, 'e.g. BSc in CSE'),
+                    _FieldLabel('EDUCATION'.tr),
+                    _Input(con.postEducation, 'e.g. BSc in CSE'.tr),
                     const SizedBox(height: 14),
-                    const _FieldLabel('DESCRIPTION'),
-                    _Input(con.postDescription, 'Short overview of the role…',
+                    _FieldLabel('DESCRIPTION'.tr),
+                    _Input(con.postDescription, 'Short overview of the role…'.tr,
                         maxLines: 3),
                     const SizedBox(height: 14),
-                    const _FieldLabel('REQUIREMENTS'),
+                    _FieldLabel('REQUIREMENTS'.tr),
                     _Input(con.postRequirements,
-                        'e.g. 3+ years Go, PostgreSQL',
+                        'e.g. 3+ years Go, PostgreSQL'.tr,
                         maxLines: 3),
                   ],
                 ),
@@ -231,8 +231,8 @@ class PostJobView extends GetView<JobsController> {
                             child: CircularProgressIndicator(
                                 strokeWidth: 2.4, color: Colors.white),
                           )
-                        : const Text('Publish job',
-                            style: TextStyle(
+                        : Text('Publish job'.tr,
+                            style: const TextStyle(
                                 fontSize: 16, fontWeight: FontWeight.w800)),
                   ),
                 ),
@@ -318,7 +318,7 @@ class _Dropdown extends StatelessWidget {
         child: Row(
           children: [
             Expanded(
-              child: Text(value.isEmpty ? 'Select' : _humanize(value),
+              child: Text(value.isEmpty ? 'Select'.tr : _humanize(value),
                   style: const TextStyle(
                       fontSize: 14.5,
                       fontWeight: FontWeight.w700,

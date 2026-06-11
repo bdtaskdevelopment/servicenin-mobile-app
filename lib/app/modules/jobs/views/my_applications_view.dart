@@ -1,3 +1,4 @@
+import 'package:animate_do/animate_do.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -27,8 +28,8 @@ class MyApplicationsView extends GetView<JobsController> {
           icon: const Icon(Icons.arrow_back_ios_new_rounded,
               size: 20, color: Color(0xFF1A1A1A)),
         ),
-        title: const Text('My applications',
-            style: TextStyle(
+        title: Text('My applications'.tr,
+            style: const TextStyle(
                 fontSize: 19,
                 fontWeight: FontWeight.w800,
                 color: Color(0xFF0F172A))),
@@ -43,11 +44,11 @@ class MyApplicationsView extends GetView<JobsController> {
             }
             if (con.applications.isEmpty) {
               return ListView(
-                children: const [
-                  SizedBox(height: 140),
+                children: [
+                  const SizedBox(height: 140),
                   Center(
-                    child: Text('No applications yet.',
-                        style: TextStyle(color: Color(0xFF94A3B8))),
+                    child: Text('No applications yet.'.tr,
+                        style: const TextStyle(color: Color(0xFF94A3B8))),
                   ),
                 ],
               );
@@ -55,9 +56,17 @@ class MyApplicationsView extends GetView<JobsController> {
             return ListView(
               padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
               children: con.applications
-                  .map((a) => Padding(
-                        padding: const EdgeInsets.only(bottom: 12),
-                        child: _AppCard(app: a),
+                  .toList()
+                  .asMap()
+                  .entries
+                  .map((e) => FadeInUp(
+                        from: 18,
+                        duration: const Duration(milliseconds: 350),
+                        delay: Duration(milliseconds: 70 * e.key),
+                        child: Padding(
+                          padding: const EdgeInsets.only(bottom: 12),
+                          child: _AppCard(app: e.value),
+                        ),
                       ))
                   .toList(),
             );
@@ -128,7 +137,7 @@ class _AppCard extends StatelessWidget {
               _StatusPill(status: app.status),
               const Spacer(),
               if (app.expectedSalary.isNotEmpty)
-                Text('Expected ৳${app.expectedSalary}',
+                Text('${'Expected'.tr} ৳${app.expectedSalary}',
                     style: const TextStyle(
                         fontSize: 12.5, color: Color(0xFF94A3B8))),
             ],
@@ -161,7 +170,7 @@ class _StatusPill extends StatelessWidget {
       fg = const Color(0xFF4F46E5);
     }
     label = status.isEmpty
-        ? 'Pending'
+        ? 'Pending'.tr
         : status[0].toUpperCase() + status.substring(1).replaceAll('_', ' ');
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),

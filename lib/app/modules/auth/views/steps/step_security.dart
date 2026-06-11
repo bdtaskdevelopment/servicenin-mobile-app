@@ -17,22 +17,22 @@ class StepSecurity extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
-                'অ্যাকাউন্টটি সুরক্ষিত করুন',
-                style: TextStyle(
+              Text(
+                'Secure your account'.tr,
+                style: const TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.w800,
                   color: Color(0xFF0F172A),
                 ),
               ),
               const SizedBox(height: 8),
-              const Text(
-                'একটি 4-সংখ্যার PIN বানান। এটি ওয়ালেট ও সংবেদনশীল কাজে লাগবে।',
-                style: TextStyle(
+              Text(
+                'Set a 4-digit PIN. You\'ll use it for your wallet and sensitive actions.'.tr,
+                style: const TextStyle(
                     fontSize: 14, color: Color(0xFF64748B), height: 1.5),
               ),
               const SizedBox(height: 24),
-              const _Label('PIN বানান'),
+              _Label('Set PIN'.tr),
               const SizedBox(height: 10),
               BoxedCodeInput(
                 length: 4,
@@ -41,7 +41,7 @@ class StepSecurity extends StatelessWidget {
                 onChanged: con.setPin,
               ),
               const SizedBox(height: 22),
-              const _Label('PIN নিশ্চিত করুন'),
+              _Label('Confirm PIN'.tr),
               const SizedBox(height: 10),
               BoxedCodeInput(
                 length: 4,
@@ -52,16 +52,16 @@ class StepSecurity extends StatelessWidget {
               const SizedBox(height: 26),
               ToggleTile(
                 icon: Icons.fingerprint_rounded,
-                title: 'বায়োমেট্রিক লগইন',
-                subtitle: 'আঙুলের ছাপ বা ফেস আনলক',
+                title: 'Biometric login'.tr,
+                subtitle: 'Fingerprint or face unlock'.tr,
                 value: con.biometricEnabled,
                 onChanged: con.toggleBiometric,
               ),
               const SizedBox(height: 12),
               ToggleTile(
                 icon: Icons.notifications_none_rounded,
-                title: 'নোটিফিকেশন অ্যালার্ট',
-                subtitle: 'রঙ ও অন্যান্য সেবার জন্য সতর্কতা',
+                title: 'Notification alerts'.tr,
+                subtitle: 'Alerts for blood and other services'.tr,
                 value: con.notificationEnabled,
                 onChanged: con.toggleNotification,
               ),

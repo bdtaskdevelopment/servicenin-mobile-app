@@ -1,3 +1,4 @@
+import 'package:animate_do/animate_do.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -34,8 +35,8 @@ class HomeView extends GetView<HomeController> {
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16),
                   child: SectionHeader(
-                      title: 'All Services',
-                      actionLabel: 'See All →',
+                      title: 'All Services'.tr,
+                      actionLabel: 'See All →'.tr,
                       onAction: () => Get.toNamed('/search')),
                 ),
                 const SizedBox(height: 14),
@@ -60,24 +61,38 @@ class HomeView extends GetView<HomeController> {
                   ),
                 ),
                 // ── Popular services ──────────────────────────────
-                if (con.popular.isNotEmpty) ...[
+                if (con.loadingPopular || con.popular.isNotEmpty) ...[
                   const SizedBox(height: 24),
-                  const Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 16),
-                    child: SectionHeader(title: 'Popular Services'),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: SectionHeader(title: 'Popular Services'.tr),
                   ),
                   const SizedBox(height: 12),
-                  _ServiceStrip(services: con.popular),
+                  if (con.popular.isEmpty)
+                    const SnStripSkeleton(height: 120, itemWidth: 156)
+                  else
+                    FadeInUp(
+                      from: 18,
+                      duration: const Duration(milliseconds: 350),
+                      child: _ServiceStrip(services: con.popular),
+                    ),
                 ],
                 // ── Recent services ───────────────────────────────
-                if (con.recent.isNotEmpty) ...[
+                if (con.loadingRecent || con.recent.isNotEmpty) ...[
                   const SizedBox(height: 24),
-                  const Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 16),
-                    child: SectionHeader(title: 'Recent Services'),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: SectionHeader(title: 'Recent Services'.tr),
                   ),
                   const SizedBox(height: 12),
-                  _ServiceStrip(services: con.recent),
+                  if (con.recent.isEmpty)
+                    const SnStripSkeleton(height: 120, itemWidth: 156)
+                  else
+                    FadeInUp(
+                      from: 18,
+                      duration: const Duration(milliseconds: 350),
+                      child: _ServiceStrip(services: con.recent),
+                    ),
                 ],
               ],
             ),
@@ -302,7 +317,7 @@ class _ServiceCard extends StatelessWidget {
               child: Icon(service.iconData, color: service.color, size: 21),
             ),
             const SizedBox(height: 10),
-            Text(service.name,
+            Text(service.name.tr,
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
                 style: const TextStyle(

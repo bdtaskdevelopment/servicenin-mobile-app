@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
 const _green = Color(0xFF0F7A52);
 
@@ -42,7 +43,7 @@ class BookingStepper extends StatelessWidget {
                                   : const Color(0xFF94A3B8))),
                 ),
                 const SizedBox(width: 6),
-                Text(_labels[i],
+                Text(_labels[i].tr,
                     style: TextStyle(
                         fontSize: 12.5,
                         fontWeight: FontWeight.w700,

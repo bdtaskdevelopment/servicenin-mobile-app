@@ -1,3 +1,4 @@
+import 'package:animate_do/animate_do.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -29,28 +30,41 @@ class NagarikView extends GetView<NagarikController> {
                   IconButton(
                     splashRadius: 22,
                     onPressed: () => Get.back(),
-                    icon: const Icon(Icons.arrow_back_ios_new_rounded,
-                        size: 20, color: Color(0xFF1A1A1A)),
+                    icon: const Icon(
+                      Icons.arrow_back_ios_new_rounded,
+                      size: 20,
+                      color: Color(0xFF1A1A1A),
+                    ),
                   ),
-                  const Column(
+                  Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('Nagarik Sheba',
-                          style: TextStyle(
-                              fontSize: 19,
-                              fontWeight: FontWeight.w800,
-                              color: Color(0xFF0F172A))),
-                      SizedBox(height: 1),
-                      Text('Dhaka North City · DNCC',
-                          style: TextStyle(
-                              fontSize: 12, color: Color(0xFF94A3B8))),
+                      Text(
+                        'Nagarik Sheba'.tr,
+                        style: const TextStyle(
+                          fontSize: 19,
+                          fontWeight: FontWeight.w800,
+                          color: Color(0xFF0F172A),
+                        ),
+                      ),
+                      const SizedBox(height: 1),
+                      Text(
+                        'Dhaka North City · DNCC'.tr,
+                        style: const TextStyle(
+                          fontSize: 12,
+                          color: Color(0xFF94A3B8),
+                        ),
+                      ),
                     ],
                   ),
                   const Spacer(),
                   GestureDetector(
                     onTap: () => _openHotlinesSheet(con),
-                    child: const Icon(Icons.call_outlined,
-                        color: Color(0xFF1A1A1A), size: 22),
+                    child: const Icon(
+                      Icons.call_outlined,
+                      color: Color(0xFF1A1A1A),
+                      size: 22,
+                    ),
                   ),
                 ],
               ),
@@ -71,29 +85,38 @@ class NagarikView extends GetView<NagarikController> {
                       const SizedBox(height: 16),
                       _ActionCards(con: con),
                       const SizedBox(height: 22),
-                      const Text('Report by category',
-                          style: TextStyle(
-                              fontSize: 17,
-                              fontWeight: FontWeight.w800,
-                              color: Color(0xFF0F172A))),
+                      Text(
+                        'Report by category'.tr,
+                        style: const TextStyle(
+                          fontSize: 17,
+                          fontWeight: FontWeight.w800,
+                          color: Color(0xFF0F172A),
+                        ),
+                      ),
                       const SizedBox(height: 14),
                       _CategoryGrid(con: con),
                       const SizedBox(height: 22),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          const Text('My reports',
-                              style: TextStyle(
-                                  fontSize: 17,
-                                  fontWeight: FontWeight.w800,
-                                  color: Color(0xFF0F172A))),
+                          Text(
+                            'My reports'.tr,
+                            style: const TextStyle(
+                              fontSize: 17,
+                              fontWeight: FontWeight.w800,
+                              color: Color(0xFF0F172A),
+                            ),
+                          ),
                           GestureDetector(
                             onTap: con.openReports,
-                            child: const Text('See all →',
-                                style: TextStyle(
-                                    fontSize: 13,
-                                    fontWeight: FontWeight.w700,
-                                    color: _orange)),
+                            child: Text(
+                              'See all →'.tr,
+                              style: const TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w700,
+                                color: _orange,
+                              ),
+                            ),
                           ),
                         ],
                       ),
@@ -124,78 +147,102 @@ class _Banner extends StatelessWidget {
   final NagarikController con;
   @override
   Widget build(BuildContext context) {
-    final hotline =
-        con.hotlines?.dnccHotline.isNotEmpty == true
-            ? con.hotlines!.dnccHotline
-            : '16106';
-    return Container(
-      padding: const EdgeInsets.all(18),
-      decoration: BoxDecoration(
-        gradient: const LinearGradient(
+    final hotline = con.hotlines?.dnccHotline.isNotEmpty == true
+        ? con.hotlines!.dnccHotline
+        : '16106';
+    return FadeInDown(
+      duration: const Duration(milliseconds: 300),
+      child: Container(
+        padding: const EdgeInsets.all(18),
+        decoration: BoxDecoration(
+          gradient: const LinearGradient(
             colors: [_navy, Color(0xFF2D3E63)],
             begin: Alignment.topLeft,
-            end: Alignment.bottomRight),
-        borderRadius: BorderRadius.circular(18),
-      ),
-      child: Stack(
-        children: [
-          Positioned(
-            right: -6,
-            top: -8,
-            child: Icon(Icons.account_balance_rounded,
-                size: 80, color: Colors.white.withValues(alpha: 0.10)),
+            end: Alignment.bottomRight,
           ),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text('আপনার শহর, আপনার দায়িত্ব',
+          borderRadius: BorderRadius.circular(18),
+        ),
+        child: Stack(
+          children: [
+            Positioned(
+              right: -6,
+              top: -8,
+              child: Icon(
+                Icons.account_balance_rounded,
+                size: 80,
+                color: Colors.white.withValues(alpha: 0.10),
+              ),
+            ),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Your city, your responsibility'.tr,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 18,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'Report civic issues straight to DNCC officials · track to resolution'
+                      .tr,
                   style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 18,
-                      fontWeight: FontWeight.w800)),
-              const SizedBox(height: 8),
-              Text(
-                  'Report civic issues straight to DNCC officials · track to resolution',
-                  style: TextStyle(
-                      color: Colors.white.withValues(alpha: 0.9),
-                      fontSize: 12.5,
-                      height: 1.4)),
-              const SizedBox(height: 14),
-              Row(
-                children: [
-                  GestureDetector(
-                    onTap: () => con.callNumber(hotline),
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 12, vertical: 7),
-                      decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.9),
+                    fontSize: 12.5,
+                    height: 1.4,
+                  ),
+                ),
+                const SizedBox(height: 14),
+                Row(
+                  children: [
+                    GestureDetector(
+                      onTap: () => con.callNumber(hotline),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 7,
+                        ),
+                        decoration: BoxDecoration(
                           color: Colors.white.withValues(alpha: 0.14),
-                          borderRadius: BorderRadius.circular(20)),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          const Icon(Icons.call_rounded,
-                              size: 14, color: Colors.white),
-                          const SizedBox(width: 6),
-                          Text(hotline,
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Icon(
+                              Icons.call_rounded,
+                              size: 14,
+                              color: Colors.white,
+                            ),
+                            const SizedBox(width: 6),
+                            Text(
+                              hotline,
                               style: const TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 13,
-                                  fontWeight: FontWeight.w800)),
-                        ],
+                                color: Colors.white,
+                                fontSize: 13,
+                                fontWeight: FontWeight.w800,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
-                  ),
-                  const SizedBox(width: 10),
-                  Text('DNCC hotline',
+                    const SizedBox(width: 10),
+                    Text(
+                      'DNCC hotline'.tr,
                       style: TextStyle(
-                          color: Colors.white.withValues(alpha: 0.85),
-                          fontSize: 12.5)),
-                ],
-              ),
-            ],
-          ),
-        ],
+                        color: Colors.white.withValues(alpha: 0.85),
+                        fontSize: 12.5,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -217,9 +264,10 @@ class _ActionCards extends StatelessWidget {
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
                   gradient: const LinearGradient(
-                      colors: [_orange, Color(0xFFD2451A)],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight),
+                    colors: [_orange, Color(0xFFD2451A)],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
                   borderRadius: BorderRadius.circular(18),
                 ),
                 child: Column(
@@ -229,22 +277,32 @@ class _ActionCards extends StatelessWidget {
                       width: 42,
                       height: 42,
                       decoration: BoxDecoration(
-                          color: Colors.white.withValues(alpha: 0.2),
-                          borderRadius: BorderRadius.circular(12)),
-                      child: const Icon(Icons.photo_camera_outlined,
-                          color: Colors.white, size: 22),
+                        color: Colors.white.withValues(alpha: 0.2),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: const Icon(
+                        Icons.photo_camera_outlined,
+                        color: Colors.white,
+                        size: 22,
+                      ),
                     ),
                     const SizedBox(height: 32),
-                    const Text('Report an issue',
-                        style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 16,
-                            fontWeight: FontWeight.w800)),
+                    Text(
+                      'Report an issue'.tr,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
                     const SizedBox(height: 3),
-                    Text('রাস্তা · ড্রেন · আবর্জনা',
-                        style: TextStyle(
-                            color: Colors.white.withValues(alpha: 0.9),
-                            fontSize: 12)),
+                    Text(
+                      'Roads · drains · garbage'.tr,
+                      style: TextStyle(
+                        color: Colors.white.withValues(alpha: 0.9),
+                        fontSize: 12,
+                      ),
+                    ),
                   ],
                 ),
               ),
@@ -257,9 +315,10 @@ class _ActionCards extends StatelessWidget {
               child: Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                    color: AppColors.white,
-                    borderRadius: BorderRadius.circular(18),
-                    border: Border.all(color: const Color(0xFFEDEFF2))),
+                  color: AppColors.white,
+                  borderRadius: BorderRadius.circular(18),
+                  border: Border.all(color: const Color(0xFFEDEFF2)),
+                ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -267,21 +326,32 @@ class _ActionCards extends StatelessWidget {
                       width: 42,
                       height: 42,
                       decoration: BoxDecoration(
-                          color: _tile,
-                          borderRadius: BorderRadius.circular(12)),
-                      child: const Icon(Icons.chat_bubble_outline_rounded,
-                          color: _orange, size: 21),
+                        color: _tile,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: const Icon(
+                        Icons.chat_bubble_outline_rounded,
+                        color: _orange,
+                        size: 21,
+                      ),
                     ),
                     const SizedBox(height: 32),
-                    const Text('Support ticket',
-                        style: TextStyle(
-                            color: Color(0xFF0F172A),
-                            fontSize: 16,
-                            fontWeight: FontWeight.w800)),
+                    Text(
+                      'Support ticket'.tr,
+                      style: const TextStyle(
+                        color: Color(0xFF0F172A),
+                        fontSize: 16,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
                     const SizedBox(height: 3),
-                    const Text('কর · লাইসেন্স · সেবা',
-                        style: TextStyle(
-                            color: Color(0xFF94A3B8), fontSize: 12)),
+                    Text(
+                      'Tax · license · services'.tr,
+                      style: const TextStyle(
+                        color: Color(0xFF94A3B8),
+                        fontSize: 12,
+                      ),
+                    ),
                   ],
                 ),
               ),
@@ -302,19 +372,25 @@ class _CategoryGrid extends StatelessWidget {
       return const SnGridSkeleton(padding: EdgeInsets.zero, count: 6);
     }
     if (con.categories.isEmpty) return const SizedBox.shrink();
-    return GridView.count(
-      crossAxisCount: 3,
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      mainAxisSpacing: 12,
-      crossAxisSpacing: 12,
-      childAspectRatio: 1.0,
-      children: con.categories
-          .map((c) => GestureDetector(
+    return FadeInUp(
+      from: 18,
+      duration: const Duration(milliseconds: 350),
+      child: GridView.count(
+        crossAxisCount: 3,
+        shrinkWrap: true,
+        physics: const NeverScrollableScrollPhysics(),
+        mainAxisSpacing: 12,
+        crossAxisSpacing: 12,
+        childAspectRatio: 1.0,
+        children: con.categories
+            .map(
+              (c) => GestureDetector(
                 onTap: () => con.openCategory(c.key),
                 child: _CatTile(cat: c),
-              ))
-          .toList(),
+              ),
+            )
+            .toList(),
+      ),
     );
   }
 }
@@ -327,9 +403,10 @@ class _CatTile extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 6),
       decoration: BoxDecoration(
-          color: AppColors.white,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: const Color(0xFFEDEFF2))),
+        color: AppColors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: const Color(0xFFEDEFF2)),
+      ),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
@@ -337,19 +414,27 @@ class _CatTile extends StatelessWidget {
             width: 46,
             height: 46,
             decoration: BoxDecoration(
-                color: _tile, borderRadius: BorderRadius.circular(14)),
-            child: Icon(nagarikCategoryIcon(cat.icon),
-                color: _orange, size: 24),
+              color: _tile,
+              borderRadius: BorderRadius.circular(14),
+            ),
+            child: Icon(
+              nagarikCategoryIcon(cat.icon),
+              color: _orange,
+              size: 24,
+            ),
           ),
           const SizedBox(height: 10),
-          Text(cat.label,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              textAlign: TextAlign.center,
-              style: const TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w700,
-                  color: Color(0xFF334155))),
+          Text(
+            cat.label,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            textAlign: TextAlign.center,
+            style: const TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w700,
+              color: Color(0xFF334155),
+            ),
+          ),
         ],
       ),
     );
@@ -368,23 +453,36 @@ class _MyReportsPreview extends StatelessWidget {
       return Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-            color: AppColors.white,
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: const Color(0xFFEDEFF2))),
-        child: const Text('No reports yet — file your first issue above.',
-            style: TextStyle(fontSize: 13, color: Color(0xFF94A3B8))),
+          color: AppColors.white,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: const Color(0xFFEDEFF2)),
+        ),
+        child: Text(
+          'No reports yet — file your first issue above.'.tr,
+          style: const TextStyle(fontSize: 13, color: Color(0xFF94A3B8)),
+        ),
       );
     }
     return Column(
       children: con.grievances
           .take(2)
-          .map((r) => Padding(
+          .toList()
+          .asMap()
+          .entries
+          .map(
+            (e) => FadeInUp(
+              from: 18,
+              duration: const Duration(milliseconds: 350),
+              delay: Duration(milliseconds: 70 * e.key),
+              child: Padding(
                 padding: const EdgeInsets.only(bottom: 12),
                 child: GestureDetector(
-                  onTap: () => con.openGrievance(r),
-                  child: ReportCard(report: r),
+                  onTap: () => con.openGrievance(e.value),
+                  child: ReportCard(report: e.value),
                 ),
-              ))
+              ),
+            ),
+          )
           .toList(),
     );
   }
@@ -403,9 +501,10 @@ class ReportCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-              color: Colors.black.withValues(alpha: 0.03),
-              blurRadius: 10,
-              offset: const Offset(0, 3)),
+            color: Colors.black.withValues(alpha: 0.03),
+            blurRadius: 10,
+            offset: const Offset(0, 3),
+          ),
         ],
       ),
       child: Row(
@@ -414,26 +513,38 @@ class ReportCard extends StatelessWidget {
             width: 46,
             height: 46,
             decoration: BoxDecoration(
-                color: _tile, borderRadius: BorderRadius.circular(12)),
-            child: Icon(nagarikCategoryIcon(report.category),
-                color: _orange, size: 22),
+              color: _tile,
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Icon(
+              nagarikCategoryIcon(report.category),
+              color: _orange,
+              size: 22,
+            ),
           ),
           const SizedBox(width: 12),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(report.title,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                        fontSize: 14.5,
-                        fontWeight: FontWeight.w800,
-                        color: Color(0xFF0F172A))),
+                Text(
+                  report.title,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    fontSize: 14.5,
+                    fontWeight: FontWeight.w800,
+                    color: Color(0xFF0F172A),
+                  ),
+                ),
                 const SizedBox(height: 2),
-                Text(report.trackingCode,
-                    style: const TextStyle(
-                        fontSize: 12, color: Color(0xFF94A3B8))),
+                Text(
+                  report.trackingCode,
+                  style: const TextStyle(
+                    fontSize: 12,
+                    color: Color(0xFF94A3B8),
+                  ),
+                ),
               ],
             ),
           ),
@@ -454,26 +565,28 @@ class StatusPill extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       decoration: BoxDecoration(
-          color: resolved
-              ? const Color(0xFFDCFCE7)
-              : const Color(0xFFFEF3C7),
-          borderRadius: BorderRadius.circular(20)),
+        color: resolved ? const Color(0xFFDCFCE7) : const Color(0xFFFEF3C7),
+        borderRadius: BorderRadius.circular(20),
+      ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(Icons.circle,
-              size: 7,
-              color: resolved
-                  ? const Color(0xFF16A34A)
-                  : const Color(0xFFD97706)),
+          Icon(
+            Icons.circle,
+            size: 7,
+            color: resolved ? const Color(0xFF16A34A) : const Color(0xFFD97706),
+          ),
           const SizedBox(width: 5),
-          Text(label,
-              style: TextStyle(
-                  fontSize: 11,
-                  fontWeight: FontWeight.w700,
-                  color: resolved
-                      ? const Color(0xFF15803D)
-                      : const Color(0xFFB45309))),
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 11,
+              fontWeight: FontWeight.w700,
+              color: resolved
+                  ? const Color(0xFF15803D)
+                  : const Color(0xFFB45309),
+            ),
+          ),
         ],
       ),
     );
@@ -504,86 +617,114 @@ class _HotlinesSheet extends StatelessWidget {
               height: 4,
               margin: const EdgeInsets.only(bottom: 14),
               decoration: BoxDecoration(
-                  color: const Color(0xFFE2E8F0),
-                  borderRadius: BorderRadius.circular(4)),
+                color: const Color(0xFFE2E8F0),
+                borderRadius: BorderRadius.circular(4),
+              ),
             ),
           ),
-          const Text('Emergency & city hotlines',
-              style: TextStyle(
-                  fontSize: 17,
-                  fontWeight: FontWeight.w800,
-                  color: Color(0xFF0F172A))),
+          Text(
+            'Emergency & city hotlines'.tr,
+            style: const TextStyle(
+              fontSize: 17,
+              fontWeight: FontWeight.w800,
+              color: Color(0xFF0F172A),
+            ),
+          ),
           const SizedBox(height: 12),
-          if (list.isEmpty)
-            const Padding(
-              padding: EdgeInsets.symmetric(vertical: 24),
+          if (con.loadingHotlines && list.isEmpty)
+            const SnListSkeleton(padding: EdgeInsets.zero, count: 5)
+          else if (list.isEmpty)
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 24),
               child: Center(
-                child: Text('No hotlines available.',
-                    style: TextStyle(
-                        fontSize: 13, color: Color(0xFF94A3B8))),
+                child: Text(
+                  'No hotlines available.'.tr,
+                  style: const TextStyle(
+                    fontSize: 13,
+                    color: Color(0xFF94A3B8),
+                  ),
+                ),
               ),
             )
           else
             Flexible(
-              child: ListView.separated(
-                shrinkWrap: true,
-                itemCount: list.length,
-                separatorBuilder: (_, _) => const SizedBox(height: 10),
-                itemBuilder: (_, i) {
-                  final h = list[i];
-                  return GestureDetector(
-                    onTap: () => con.callNumber(h.number),
-                    child: Container(
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
+              child: FadeInUp(
+                from: 18,
+                duration: const Duration(milliseconds: 350),
+                child: ListView.separated(
+                  shrinkWrap: true,
+                  itemCount: list.length,
+                  separatorBuilder: (_, _) => const SizedBox(height: 10),
+                  itemBuilder: (_, i) {
+                    final h = list[i];
+                    return GestureDetector(
+                      onTap: () => con.callNumber(h.number),
+                      child: Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
                           color: AppColors.white,
                           borderRadius: BorderRadius.circular(14),
-                          border: Border.all(
-                              color: const Color(0xFFEDEFF2))),
-                      child: Row(
-                        children: [
-                          Container(
-                            width: 44,
-                            height: 44,
-                            decoration: BoxDecoration(
+                          border: Border.all(color: const Color(0xFFEDEFF2)),
+                        ),
+                        child: Row(
+                          children: [
+                            Container(
+                              width: 44,
+                              height: 44,
+                              decoration: BoxDecoration(
                                 color: _tile,
-                                borderRadius: BorderRadius.circular(12)),
-                            child: const Icon(Icons.call_rounded,
-                                color: _orange, size: 20),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(h.label,
-                                    style: const TextStyle(
-                                        fontSize: 14.5,
-                                        fontWeight: FontWeight.w700,
-                                        color: Color(0xFF0F172A))),
-                                const SizedBox(height: 2),
-                                Text(h.number,
-                                    style: const TextStyle(
-                                        fontSize: 13,
-                                        fontWeight: FontWeight.w600,
-                                        color: Color(0xFFE07A1F))),
-                              ],
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: const Icon(
+                                Icons.call_rounded,
+                                color: _orange,
+                                size: 20,
+                              ),
                             ),
-                          ),
-                          Container(
-                            width: 40,
-                            height: 40,
-                            decoration: const BoxDecoration(
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    h.label,
+                                    style: const TextStyle(
+                                      fontSize: 14.5,
+                                      fontWeight: FontWeight.w700,
+                                      color: Color(0xFF0F172A),
+                                    ),
+                                  ),
+                                  const SizedBox(height: 2),
+                                  Text(
+                                    h.number,
+                                    style: const TextStyle(
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.w600,
+                                      color: Color(0xFFE07A1F),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            Container(
+                              width: 40,
+                              height: 40,
+                              decoration: const BoxDecoration(
                                 color: Color(0xFFD9F7E6),
-                                shape: BoxShape.circle),
-                            child: const Icon(Icons.call_rounded,
-                                color: Color(0xFF16A34A), size: 19),
-                          ),
-                        ],
+                                shape: BoxShape.circle,
+                              ),
+                              child: const Icon(
+                                Icons.call_rounded,
+                                color: Color(0xFF16A34A),
+                                size: 19,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
-                    ),
-                  );
-                },
+                    );
+                  },
+                ),
               ),
             ),
         ],

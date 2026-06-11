@@ -1,3 +1,4 @@
+import 'package:animate_do/animate_do.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -17,7 +18,7 @@ class AmbulanceView extends GetView<AmbulanceController> {
     return Scaffold(
       backgroundColor: const Color(0xFFF7F8FA),
       appBar: CustomAppBar(
-        title: 'Ambulance',
+        title: 'Ambulance'.tr,
         backgroundColor: AppColors.white,
         // Notification bell hidden for now.
         // actions: [
@@ -42,14 +43,14 @@ class AmbulanceView extends GetView<AmbulanceController> {
               padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
               children: [
                 _SectionHeader(
-                  title: 'Available ambulances',
+                  title: 'Available ambulances'.tr,
                   onSeeAll: con.openSeeAll,
                 ),
                 const SizedBox(height: 12),
                 _AvailableList(con: con),
                 const SizedBox(height: 22),
                 _SectionHeader(
-                  title: 'Recent bookings',
+                  title: 'Recent bookings'.tr,
                   onSeeAll: con.openBookings,
                 ),
                 const SizedBox(height: 12),
@@ -80,8 +81,8 @@ class _SectionHeader extends StatelessWidget {
         const Spacer(),
         GestureDetector(
           onTap: onSeeAll,
-          child: const Text('See all →',
-              style: TextStyle(
+          child: Text('See all →'.tr,
+              style: const TextStyle(
                   fontSize: 13,
                   fontWeight: FontWeight.w700,
                   color: AppColors.brandOrange)),
@@ -101,14 +102,22 @@ class _AvailableList extends StatelessWidget {
       return const _Loader();
     }
     if (con.available.isEmpty) {
-      return const _EmptyCard(text: 'No ambulances available right now.');
+      return _EmptyCard(text: 'No ambulances available right now.'.tr);
     }
     final shown = con.available.take(5).toList();
     return Column(
       children: shown
-          .map((a) => Padding(
-                padding: const EdgeInsets.only(bottom: 12),
-                child: AmbulanceCard(amb: a, onTap: () => con.openFareFor(a)),
+          .asMap()
+          .entries
+          .map((e) => FadeInUp(
+                from: 18,
+                duration: const Duration(milliseconds: 350),
+                delay: Duration(milliseconds: 70 * e.key),
+                child: Padding(
+                  padding: const EdgeInsets.only(bottom: 12),
+                  child: AmbulanceCard(
+                      amb: e.value, onTap: () => con.openFareFor(e.value)),
+                ),
               ))
           .toList(),
     );
@@ -125,15 +134,22 @@ class _BookingsList extends StatelessWidget {
       return const _Loader();
     }
     if (con.bookings.isEmpty) {
-      return const _EmptyCard(text: 'No bookings yet.');
+      return _EmptyCard(text: 'No bookings yet.'.tr);
     }
     final shown = con.bookings.take(2).toList();
     return Column(
       children: shown
-          .map((b) => Padding(
-                padding: const EdgeInsets.only(bottom: 12),
-                child: BookingCard(
-                    booking: b, onTap: () => con.trackBooking(b)),
+          .asMap()
+          .entries
+          .map((e) => FadeInUp(
+                from: 18,
+                duration: const Duration(milliseconds: 350),
+                delay: Duration(milliseconds: 70 * e.key),
+                child: Padding(
+                  padding: const EdgeInsets.only(bottom: 12),
+                  child: BookingCard(
+                      booking: e.value, onTap: () => con.trackBooking(e.value)),
+                ),
               ))
           .toList(),
     );

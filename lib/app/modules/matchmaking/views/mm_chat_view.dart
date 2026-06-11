@@ -77,8 +77,8 @@ class _MmChatViewState extends State<MmChatView> {
                                 fontWeight: FontWeight.w800,
                                 color: Color(0xFF0F172A))),
                         const SizedBox(height: 1),
-                        const Text('Matched · be respectful',
-                            style: TextStyle(
+                        Text('Matched · be respectful'.tr,
+                            style: const TextStyle(
                                 fontSize: 12, color: Color(0xFF94A3B8))),
                       ],
                     ),
@@ -94,9 +94,9 @@ class _MmChatViewState extends State<MmChatView> {
                   return const SnListSkeleton();
                 }
                 if (c.messages.isEmpty) {
-                  return const Center(
-                    child: Text('No messages yet — say salam 👋',
-                        style: TextStyle(color: Color(0xFF94A3B8))),
+                  return Center(
+                    child: Text('No messages yet — say salam 👋'.tr,
+                        style: const TextStyle(color: Color(0xFF94A3B8))),
                   );
                 }
                 _maybeScrollToEnd();
@@ -134,9 +134,9 @@ class _MmChatViewState extends State<MmChatView> {
                           maxLines: 4,
                           onSubmitted: (_) => con.send(),
                           textInputAction: TextInputAction.send,
-                          decoration: const InputDecoration(
-                            hintText: 'Type a message…',
-                            hintStyle: TextStyle(color: Color(0xFF94A3B8)),
+                          decoration: InputDecoration(
+                            hintText: 'Type a message…'.tr,
+                            hintStyle: const TextStyle(color: Color(0xFF94A3B8)),
                             border: InputBorder.none,
                             isCollapsed: true,
                           ),

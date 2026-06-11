@@ -122,14 +122,14 @@ class _BottomNav extends StatelessWidget {
           final pageIndex = item.$1;
           // Quick slot — just a label under the FAB notch.
           if (pageIndex == -1) {
-            return const Expanded(
+            return Expanded(
               child: Align(
                 alignment: Alignment.bottomCenter,
                 child: Padding(
-                  padding: EdgeInsets.only(bottom: 8),
+                  padding: const EdgeInsets.only(bottom: 8),
                   child: Text(
-                    'Quick',
-                    style: TextStyle(
+                    'Quick'.tr,
+                    style: const TextStyle(
                       fontSize: 11,
                       fontWeight: FontWeight.w600,
                       color: AppColors.brandOrange,
@@ -154,7 +154,7 @@ class _BottomNav extends StatelessWidget {
                   ),
                   const SizedBox(height: 3),
                   Text(
-                    item.$4,
+                    item.$4.tr,
                     style: TextStyle(
                       fontSize: 11,
                       fontWeight: FontWeight.w700,

@@ -1,3 +1,4 @@
+import 'package:animate_do/animate_do.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -27,17 +28,17 @@ class AllDonorsView extends GetView<BloodController> {
                       icon: const Icon(Icons.arrow_back_ios_new_rounded,
                           size: 20, color: Color(0xFF1A1A1A)),
                     ),
-                    const Column(
+                    Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('All donors',
-                            style: TextStyle(
+                        Text('All donors'.tr,
+                            style: const TextStyle(
                                 fontSize: 19,
                                 fontWeight: FontWeight.w800,
                                 color: Color(0xFF0F172A))),
-                        SizedBox(height: 1),
-                        Text('Registered blood donors · ServiceNin',
-                            style: TextStyle(
+                        const SizedBox(height: 1),
+                        Text('Registered blood donors · ServiceNin'.tr,
+                            style: const TextStyle(
                                 fontSize: 12, color: Color(0xFF94A3B8))),
                       ],
                     ),
@@ -77,9 +78,9 @@ class AllDonorsView extends GetView<BloodController> {
           Icon(Icons.groups_outlined,
               size: 56, color: Colors.black.withValues(alpha: 0.12)),
           const SizedBox(height: 12),
-          const Text('No donors found',
+          Text('No donors found'.tr,
               textAlign: TextAlign.center,
-              style: TextStyle(
+              style: const TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w700,
                   color: Color(0xFF94A3B8))),
@@ -89,12 +90,17 @@ class AllDonorsView extends GetView<BloodController> {
     return ListView(
       padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
       children: [
-        ...con.allDonors.map((d) => Padding(
-              padding: const EdgeInsets.only(bottom: 12),
-              child: DonorCard(
-                donor: d,
-                onView: () => con.viewDonor(d),
-                onCall: () => con.callPhone(d.phone),
+        ...con.allDonors.toList().asMap().entries.map((e) => FadeInUp(
+              from: 18,
+              duration: const Duration(milliseconds: 350),
+              delay: Duration(milliseconds: 70 * (e.key < 6 ? e.key : 6)),
+              child: Padding(
+                padding: const EdgeInsets.only(bottom: 12),
+                child: DonorCard(
+                  donor: e.value,
+                  onView: () => con.viewDonor(e.value),
+                  onCall: () => con.callPhone(e.value.phone),
+                ),
               ),
             )),
       ],

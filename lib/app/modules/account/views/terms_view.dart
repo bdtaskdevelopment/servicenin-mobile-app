@@ -22,8 +22,8 @@ class TermsView extends StatelessWidget {
                     icon: const Icon(Icons.arrow_back_ios_new_rounded,
                         size: 20, color: Color(0xFF1A1A1A)),
                   ),
-                  const Text('Terms of service',
-                      style: TextStyle(
+                  Text('Terms of service'.tr,
+                      style: const TextStyle(
                           fontSize: 19,
                           fontWeight: FontWeight.w800,
                           color: Color(0xFF0F172A))),
@@ -40,14 +40,14 @@ class TermsView extends StatelessWidget {
                         color: const Color(0xFFE3E7F5),
                         borderRadius: BorderRadius.circular(14)),
                     child: Row(
-                      children: const [
-                        Icon(Icons.description_outlined,
+                      children: [
+                        const Icon(Icons.description_outlined,
                             size: 18, color: Color(0xFF4F46E5)),
-                        SizedBox(width: 10),
+                        const SizedBox(width: 10),
                         Expanded(
                           child: Text(
-                              'By using ServiceNin you agree to these terms. Last updated 1 June 2026.',
-                              style: TextStyle(
+                              'By using ServiceNin you agree to these terms. Last updated 1 June 2026.'.tr,
+                              style: const TextStyle(
                                   fontSize: 12.5,
                                   height: 1.45,
                                   color: Color(0xFF475569))),
@@ -57,45 +57,45 @@ class TermsView extends StatelessWidget {
                   ),
                   const SizedBox(height: 20),
                   _Section(
-                    title: 'Using ServiceNin',
+                    title: 'Using ServiceNin'.tr,
                     body:
-                        'One verified ServiceNin ID lets you access all 12 modules. You agree to provide accurate information and to use the services lawfully.',
+                        'One verified ServiceNin ID lets you access all 12 modules. You agree to provide accurate information and to use the services lawfully.'.tr,
                   ),
                   _Section(
-                    title: 'Bookings & providers',
+                    title: 'Bookings & providers'.tr,
                     body:
-                        'ServiceNin connects you with independent providers (hospitals, technicians, coaching centers and more). Service quality, pricing and timing are the provider\'s responsibility.',
+                        'ServiceNin connects you with independent providers (hospitals, technicians, coaching centers and more). Service quality, pricing and timing are the provider\'s responsibility.'.tr,
                   ),
                   _Section(
-                    title: 'Payments',
+                    title: 'Payments'.tr,
                     body:
-                        'Most services are pay-after-service or paid directly to the provider. Any online payment fees and refund timelines are shown before you confirm.',
+                        'Most services are pay-after-service or paid directly to the provider. Any online payment fees and refund timelines are shown before you confirm.'.tr,
                   ),
                   _Section(
-                    title: 'Emergencies',
+                    title: 'Emergencies'.tr,
                     body:
-                        'For Blood, Ambulance and other emergency services we route your request as fast as possible, but cannot guarantee availability. In a life-threatening emergency, also call national hotlines.',
+                        'For Blood, Ambulance and other emergency services we route your request as fast as possible, but cannot guarantee availability. In a life-threatening emergency, also call national hotlines.'.tr,
                   ),
                   _Section(
-                    title: 'Account & termination',
+                    title: 'Account & termination'.tr,
                     body:
-                        'You can delete your account anytime from Settings → Account. We may suspend accounts that misuse the platform or violate these terms.',
+                        'You can delete your account anytime from Settings → Account. We may suspend accounts that misuse the platform or violate these terms.'.tr,
                   ),
                   const SizedBox(height: 8),
                   RichText(
-                    text: const TextSpan(
-                      style: TextStyle(
+                    text: TextSpan(
+                      style: const TextStyle(
                           fontSize: 12.5,
                           height: 1.5,
                           color: Color(0xFF94A3B8)),
                       children: [
-                        TextSpan(text: 'Questions? Email '),
-                        TextSpan(
+                        TextSpan(text: '${'Questions? Email'.tr} '),
+                        const TextSpan(
                             text: 'legal@servicenin.com',
                             style: TextStyle(
                                 fontWeight: FontWeight.w700,
                                 color: Color(0xFF4F46E5))),
-                        TextSpan(text: ' or call our Dhaka support line.'),
+                        TextSpan(text: ' ${'or call our Dhaka support line.'.tr}'),
                       ],
                     ),
                   ),

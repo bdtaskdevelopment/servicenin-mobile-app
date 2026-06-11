@@ -64,8 +64,8 @@ class HsTrackingView extends GetView<HomeServiceController> {
                             ]),
                         child: Text(
                             hasLoc
-                                ? 'Provider location · live'
-                                : 'Waiting for provider location',
+                                ? 'Provider location · live'.tr
+                                : 'Waiting for provider location'.tr,
                             style: const TextStyle(
                                 fontSize: 12.5,
                                 fontWeight: FontWeight.w700,
@@ -127,19 +127,19 @@ class HsTrackingView extends GetView<HomeServiceController> {
                               Expanded(
                                   child: _ActionBtn(
                                       icon: Icons.chat_bubble_outline_rounded,
-                                      label: 'Chat',
+                                      label: 'Chat'.tr,
                                       onTap: con.openChat)),
                               const SizedBox(width: 10),
                               Expanded(
                                   child: _ActionBtn(
                                       icon: Icons.bookmark_border_rounded,
-                                      label: 'Details',
+                                      label: 'Details'.tr,
                                       onTap: con.viewBookingDetails)),
                             ],
                           ),
                           const SizedBox(height: 16),
-                          const Text('STATUS TIMELINE',
-                              style: TextStyle(
+                          Text('STATUS TIMELINE'.tr,
+                              style: const TextStyle(
                                   fontSize: 11.5,
                                   fontWeight: FontWeight.w700,
                                   color: Color(0xFF94A3B8),
@@ -165,8 +165,8 @@ class HsTrackingView extends GetView<HomeServiceController> {
                                 shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(14)),
                               ),
-                              child: const Text('View booking details',
-                                  style: TextStyle(
+                              child: Text('View booking details'.tr,
+                                  style: const TextStyle(
                                       fontSize: 15,
                                       fontWeight: FontWeight.w700,
                                       color: Color(0xFF0F172A))),
@@ -209,8 +209,8 @@ class _Timeline extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (entries.isEmpty) {
-      return const Text('No updates yet.',
-          style: TextStyle(fontSize: 13, color: Color(0xFF94A3B8)));
+      return Text('No updates yet.'.tr,
+          style: const TextStyle(fontSize: 13, color: Color(0xFF94A3B8)));
     }
     return Container(
       padding: const EdgeInsets.fromLTRB(14, 14, 14, 2),

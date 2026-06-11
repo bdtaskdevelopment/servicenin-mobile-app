@@ -28,17 +28,17 @@ class ScheduleAmbulanceView extends GetView<ScheduleController> {
                     icon: const Icon(Icons.arrow_back_ios_new_rounded,
                         size: 20, color: Color(0xFF1A1A1A)),
                   ),
-                  const Column(
+                  Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('Schedule ambulance',
-                          style: TextStyle(
+                      Text('Schedule ambulance'.tr,
+                          style: const TextStyle(
                               fontSize: 19,
                               fontWeight: FontWeight.w800,
                               color: Color(0xFF0F172A))),
-                      SizedBox(height: 1),
-                      Text('Step 2 of 3 · Patient & schedule',
-                          style: TextStyle(
+                      const SizedBox(height: 1),
+                      Text('Step 2 of 3 · Patient & schedule'.tr,
+                          style: const TextStyle(
                               fontSize: 12, color: Color(0xFF94A3B8))),
                     ],
                   ),
@@ -52,17 +52,17 @@ class ScheduleAmbulanceView extends GetView<ScheduleController> {
               padding: const EdgeInsets.fromLTRB(16, 10, 16, 10),
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
-                children: const [
-                  Text('● v2',
+                children: [
+                  const Text('● v2',
                       style: TextStyle(
                           fontSize: 11,
                           fontWeight: FontWeight.w700,
                           color: Color(0xFFB45309))),
-                  SizedBox(width: 8),
+                  const SizedBox(width: 8),
                   Expanded(
                     child: Text(
-                      'Pre-scheduling (date/time) is a v2 feature — current bookings API dispatches immediately.',
-                      style: TextStyle(
+                      'Pre-scheduling (date/time) is a v2 feature — current bookings API dispatches immediately.'.tr,
+                      style: const TextStyle(
                           fontSize: 12, color: Color(0xFFB45309), height: 1.4),
                     ),
                   ),
@@ -76,11 +76,11 @@ class ScheduleAmbulanceView extends GetView<ScheduleController> {
                   return ListView(
                     padding: const EdgeInsets.fromLTRB(16, 4, 16, 16),
                     children: [
-                      const _Label('ROUTE'),
+                      _Label('ROUTE'.tr),
                       const SizedBox(height: 10),
                       _RouteCard(con: con),
                       const SizedBox(height: 18),
-                      const _Label('DATE & TIME'),
+                      _Label('DATE & TIME'.tr),
                       const SizedBox(height: 10),
                       Row(
                         children: List.generate(con.dates.length, (i) {
@@ -140,7 +140,7 @@ class ScheduleAmbulanceView extends GetView<ScheduleController> {
                         trailing: const _ChangeLink(),
                       ),
                       const SizedBox(height: 18),
-                      const _Label('AMBULANCE TYPE'),
+                      _Label('AMBULANCE TYPE'.tr),
                       const SizedBox(height: 10),
                       Container(
                         padding: const EdgeInsets.all(14),
@@ -176,11 +176,11 @@ class ScheduleAmbulanceView extends GetView<ScheduleController> {
                         ),
                       ),
                       const SizedBox(height: 18),
-                      const _Label('PATIENT'),
+                      _Label('PATIENT'.tr),
                       const SizedBox(height: 10),
                       _PatientCard(con: con),
                       const SizedBox(height: 18),
-                      const _Label('CONTACT PERSON'),
+                      _Label('CONTACT PERSON'.tr),
                       const SizedBox(height: 10),
                       _CardRow(
                         leading: const Icon(Icons.person_outline_rounded,
@@ -188,8 +188,8 @@ class ScheduleAmbulanceView extends GetView<ScheduleController> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Text('WILL TRAVEL WITH PATIENT',
-                                style: TextStyle(
+                            Text('WILL TRAVEL WITH PATIENT'.tr,
+                                style: const TextStyle(
                                     fontSize: 10.5,
                                     fontWeight: FontWeight.w700,
                                     color: Color(0xFF94A3B8),
@@ -211,7 +211,7 @@ class ScheduleAmbulanceView extends GetView<ScheduleController> {
               ),
             ),
             // Bottom
-            _BottomBar(label: 'Confirm schedule', onTap: controller.confirmSchedule),
+            _BottomBar(label: 'Confirm schedule'.tr, onTap: controller.confirmSchedule),
           ],
         ),
       ),
@@ -298,8 +298,8 @@ class _Label extends StatelessWidget {
 class _ChangeLink extends StatelessWidget {
   const _ChangeLink();
   @override
-  Widget build(BuildContext context) => const Text('Change',
-      style: TextStyle(
+  Widget build(BuildContext context) => Text('Change'.tr,
+      style: const TextStyle(
           fontSize: 13, fontWeight: FontWeight.w700, color: _orange));
 }
 
@@ -364,8 +364,8 @@ class _RouteCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text('PICKUP',
-                    style: TextStyle(
+                Text('PICKUP'.tr,
+                    style: const TextStyle(
                         fontSize: 10.5,
                         fontWeight: FontWeight.w700,
                         color: Color(0xFF94A3B8))),
@@ -376,8 +376,8 @@ class _RouteCard extends StatelessWidget {
                         fontWeight: FontWeight.w700,
                         color: Color(0xFF0F172A))),
                 const SizedBox(height: 14),
-                const Text('DESTINATION',
-                    style: TextStyle(
+                Text('DESTINATION'.tr,
+                    style: const TextStyle(
                         fontSize: 10.5,
                         fontWeight: FontWeight.w700,
                         color: Color(0xFF94A3B8))),
@@ -441,8 +441,8 @@ class _PatientCard extends StatelessWidget {
                   ],
                 ),
               ),
-              const Text('Switch',
-                  style: TextStyle(
+              Text('Switch'.tr,
+                  style: const TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.w700,
                       color: _orange)),
@@ -452,10 +452,10 @@ class _PatientCard extends StatelessWidget {
             padding: EdgeInsets.symmetric(vertical: 12),
             child: Divider(height: 1, color: Color(0xFFF1F5F9)),
           ),
-          const Align(
+          Align(
             alignment: Alignment.centerLeft,
-            child: Text('Medical note',
-                style: TextStyle(
+            child: Text('Medical note'.tr,
+                style: const TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.w700,
                     color: Color(0xFF64748B))),
@@ -504,7 +504,7 @@ class _FareCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                    'Estimated fare · ${con.fareDistance} · ${con.ambulanceType}',
+                    '${'Estimated fare'.tr} · ${con.fareDistance} · ${con.ambulanceType}',
                     style: TextStyle(
                         fontSize: 11.5,
                         color: Colors.white.withValues(alpha: 0.8))),
@@ -517,8 +517,8 @@ class _FareCard extends StatelessWidget {
               ],
             ),
           ),
-          const Text('Breakdown →',
-              style: TextStyle(
+          Text('Breakdown →'.tr,
+              style: const TextStyle(
                   fontSize: 12.5,
                   fontWeight: FontWeight.w700,
                   color: _orange)),

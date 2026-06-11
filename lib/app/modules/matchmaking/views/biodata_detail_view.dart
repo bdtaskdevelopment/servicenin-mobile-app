@@ -1,9 +1,11 @@
+import 'package:animate_do/animate_do.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../../core/values/app_colors.dart';
 import '../../../data/models/response/matchmaking_response.dart';
+import '../../../global_widget/sn_shimmer.dart';
 import '../controllers/matchmaking_controller.dart';
 
 const _maroon = Color(0xFFB11D5C);
@@ -38,8 +40,8 @@ class BiodataDetailView extends GetView<MatchmakingController> {
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text('Biodata',
-                              style: TextStyle(
+                          Text('Biodata'.tr,
+                              style: const TextStyle(
                                   fontSize: 19,
                                   fontWeight: FontWeight.w800,
                                   color: Color(0xFF0F172A))),
@@ -52,7 +54,12 @@ class BiodataDetailView extends GetView<MatchmakingController> {
                   ),
                 ),
                 Expanded(
-                  child: ListView(
+                  child: con.loadingSelected
+                      ? const _BiodataDetailSkeleton()
+                      : FadeInUp(
+                    from: 18,
+                    duration: const Duration(milliseconds: 350),
+                    child: ListView(
                     padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
                     children: [
                       Center(
@@ -85,9 +92,9 @@ class BiodataDetailView extends GetView<MatchmakingController> {
                                     color: Color(0xFF0F172A))),
                             if (!p.photoVisible) ...[
                               const SizedBox(height: 3),
-                              const Text(
-                                  'Photos shared after mutual interest',
-                                  style: TextStyle(
+                              Text(
+                                  'Photos shared after mutual interest'.tr,
+                                  style: const TextStyle(
                                       fontSize: 12.5,
                                       color: Color(0xFF94A3B8))),
                             ],
@@ -107,9 +114,9 @@ class BiodataDetailView extends GetView<MatchmakingController> {
                               style: const TextStyle(
                                   fontSize: 13.5, color: _maroon),
                               children: [
-                                const TextSpan(
-                                    text: 'About: ',
-                                    style: TextStyle(
+                                TextSpan(
+                                    text: '${'About'.tr}: ',
+                                    style: const TextStyle(
                                         fontWeight: FontWeight.w800)),
                                 TextSpan(text: p.bio),
                               ],
@@ -136,6 +143,7 @@ class BiodataDetailView extends GetView<MatchmakingController> {
                         ),
                       ),
                     ],
+                  ),
                   ),
                 ),
                 Padding(
@@ -182,8 +190,8 @@ class BiodataDetailView extends GetView<MatchmakingController> {
                                         strokeWidth: 2.4,
                                         color: Colors.white),
                                   )
-                                : const Text('Express interest',
-                                    style: TextStyle(
+                                : Text('Express interest'.tr,
+                                    style: const TextStyle(
                                         fontSize: 16,
                                         fontWeight: FontWeight.w800)),
                           ),
@@ -206,21 +214,21 @@ class BiodataDetailView extends GetView<MatchmakingController> {
       if (value.isNotEmpty && value != '0') out.add((label, value));
     }
 
-    add('Age', p.age > 0 ? '${p.age} years' : '');
-    add('Height', p.heightCm > 0 ? '${p.heightCm} cm' : '');
-    add('Gender', mmHumanize(p.gender));
-    add('Marital status', mmHumanize(p.maritalStatus));
-    add('Religion', p.religion);
-    add('Profession', p.profession);
-    add('Education', p.education);
-    add('Income', mmHumanize(p.incomeRange));
-    add('Location', p.location);
-    add('Birth place', p.birthPlace);
-    add('Date of birth', p.dateOfBirth);
-    add('Family type', mmHumanize(p.familyType));
-    add('Language', p.language);
-    add('Lifestyle', p.lifestyle);
-    add('Nationality', p.nationality);
+    add('Age'.tr, p.age > 0 ? '${p.age} ${'years'.tr}' : '');
+    add('Height'.tr, p.heightCm > 0 ? '${p.heightCm} cm' : '');
+    add('Gender'.tr, mmHumanize(p.gender));
+    add('Marital status'.tr, mmHumanize(p.maritalStatus));
+    add('Religion'.tr, p.religion);
+    add('Profession'.tr, p.profession);
+    add('Education'.tr, p.education);
+    add('Income'.tr, mmHumanize(p.incomeRange));
+    add('Location'.tr, p.location);
+    add('Birth place'.tr, p.birthPlace);
+    add('Date of birth'.tr, p.dateOfBirth);
+    add('Family type'.tr, mmHumanize(p.familyType));
+    add('Language'.tr, p.language);
+    add('Lifestyle'.tr, p.lifestyle);
+    add('Nationality'.tr, p.nationality);
     return out;
   }
 
@@ -248,6 +256,57 @@ class BiodataDetailView extends GetView<MatchmakingController> {
           ],
         ),
       );
+}
+
+class _BiodataDetailSkeleton extends StatelessWidget {
+  const _BiodataDetailSkeleton();
+  @override
+  Widget build(BuildContext context) {
+    return SnShimmer(
+      child: ListView(
+        padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
+        physics: const NeverScrollableScrollPhysics(),
+        children: [
+          const Center(
+            child: Column(
+              children: [
+                SnBone(width: 84, height: 84, radius: 22),
+                SizedBox(height: 12),
+                SnBone(width: 120, height: 14),
+                SizedBox(height: 8),
+                SnBone(width: 180, height: 11),
+              ],
+            ),
+          ),
+          const SizedBox(height: 18),
+          const SnBone(width: double.infinity, height: 72, radius: 14),
+          const SizedBox(height: 14),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+            decoration: BoxDecoration(
+                color: Colors.transparent,
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: const Color(0xFFEDEFF2))),
+            child: Column(
+              children: List.generate(
+                7,
+                (_) => const Padding(
+                  padding: EdgeInsets.symmetric(vertical: 12),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      SnBone(width: 90, height: 12),
+                      SnBone(width: 110, height: 12),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 }
 
 class _DashedDivider extends StatelessWidget {

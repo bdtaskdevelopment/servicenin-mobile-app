@@ -26,79 +26,79 @@ class NeedBloodView extends GetView<NeedBloodController> {
                   return ListView(
                     padding: const EdgeInsets.fromLTRB(16, 12, 16, 20),
                     children: [
-                      const _SectionLabel('BLOOD GROUP NEEDED'),
+                      _SectionLabel('BLOOD GROUP NEEDED'.tr),
                       const SizedBox(height: 12),
                       _GroupGrid(con: con),
                       const SizedBox(height: 22),
-                      const _SectionLabel('UNITS NEEDED'),
+                      _SectionLabel('UNITS NEEDED'.tr),
                       const SizedBox(height: 12),
                       _UnitsCard(con: con),
                       const SizedBox(height: 22),
-                      const _SectionLabel('URGENCY'),
+                      _SectionLabel('URGENCY'.tr),
                       const SizedBox(height: 12),
                       _UrgencyRow(con: con),
                       const SizedBox(height: 22),
-                      const _SectionLabel('WHEN NEEDED'),
+                      _SectionLabel('WHEN NEEDED'.tr),
                       const SizedBox(height: 12),
                       _TapCard(
                         icon: Icons.calendar_today_outlined,
-                        label: 'DATE & TIME',
+                        label: 'DATE & TIME'.tr,
                         value: con.neededDate,
                         onTap: () => _pickDate(context, con),
                       ),
                       const SizedBox(height: 22),
-                      const _SectionLabel('HOSPITAL'),
+                      _SectionLabel('HOSPITAL'.tr),
                       const SizedBox(height: 12),
                       _LabeledInput(
-                        label: 'HOSPITAL NAME',
+                        label: 'HOSPITAL NAME'.tr,
                         controller: con.hospitalName,
-                        hint: 'e.g. Dhaka Medical College Hospital',
+                        hint: 'e.g. Dhaka Medical College Hospital'.tr,
                       ),
                       const SizedBox(height: 12),
                       _LabeledInput(
-                        label: 'HOSPITAL ADDRESS',
+                        label: 'HOSPITAL ADDRESS'.tr,
                         controller: con.hospitalAddress,
-                        hint: 'Area, city, postcode',
+                        hint: 'Area, city, postcode'.tr,
                         maxLines: 2,
                       ),
                       const SizedBox(height: 12),
                       _LocationCard(con: con),
                       const SizedBox(height: 22),
-                      const _SectionLabel('CONTACT DETAILS'),
+                      _SectionLabel('CONTACT DETAILS'.tr),
                       const SizedBox(height: 12),
                       _LabeledInput(
-                        label: 'NAME',
+                        label: 'NAME'.tr,
                         controller: con.name,
-                        hint: 'Full name',
+                        hint: 'Full name'.tr,
                       ),
                       const SizedBox(height: 12),
                       _LabeledInput(
-                        label: 'EMAIL',
+                        label: 'EMAIL'.tr,
                         controller: con.email,
                         hint: 'you@example.com',
                         keyboard: TextInputType.emailAddress,
                       ),
                       const SizedBox(height: 12),
                       _LabeledInput(
-                        label: 'PHONE NUMBER',
+                        label: 'PHONE NUMBER'.tr,
                         controller: con.phone,
                         hint: '01XXXXXXXXX',
                         keyboard: TextInputType.phone,
                       ),
                       const SizedBox(height: 12),
                       _LabeledInput(
-                        label: 'ADDRESS',
+                        label: 'ADDRESS'.tr,
                         controller: con.address,
-                        hint: 'House, road, area, city',
+                        hint: 'House, road, area, city'.tr,
                         maxLines: 2,
                       ),
                       const SizedBox(height: 22),
-                      const _SectionLabel('DESCRIPTION'),
+                      _SectionLabel('DESCRIPTION'.tr),
                       const SizedBox(height: 12),
                       _InputCard(
                         controller: con.description,
                         hint:
-                            'Patient condition, donor instructions, anything else…',
+                            'Patient condition, donor instructions, anything else…'.tr,
                         maxLines: 4,
                       ),
                     ],
@@ -122,8 +122,8 @@ class NeedBloodView extends GetView<NeedBloodController> {
                     shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(14)),
                   ),
-                  child: const Text('Broadcast request →',
-                      style: TextStyle(
+                  child: Text('Broadcast request →'.tr,
+                      style: const TextStyle(
                           fontSize: 16, fontWeight: FontWeight.w700)),
                 ),
               ),
@@ -152,15 +152,15 @@ class _Header extends StatelessWidget {
           ),
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
-            children: const [
-              Text('Request blood',
-                  style: TextStyle(
+            children: [
+              Text('Request blood'.tr,
+                  style: const TextStyle(
                       fontSize: 19,
                       fontWeight: FontWeight.w800,
                       color: Color(0xFF0F172A))),
-              SizedBox(height: 1),
-              Text('Broadcast to nearby donors',
-                  style: TextStyle(fontSize: 12, color: Color(0xFF94A3B8))),
+              const SizedBox(height: 1),
+              Text('Broadcast to nearby donors'.tr,
+                  style: const TextStyle(fontSize: 12, color: Color(0xFF94A3B8))),
             ],
           ),
         ],
@@ -242,9 +242,9 @@ class _UnitsCard extends StatelessWidget {
       ),
       child: Row(
         children: [
-          const Expanded(
-            child: Text('Bags of blood',
-                style: TextStyle(
+          Expanded(
+            child: Text('Bags of blood'.tr,
+                style: const TextStyle(
                     fontSize: 15,
                     fontWeight: FontWeight.w600,
                     color: Color(0xFF0F172A))),
@@ -404,8 +404,8 @@ class _LocationCard extends StatelessWidget {
                         color: Color(0xFF64748B)),
                   ),
                 ),
-                const Text('Auto-detected',
-                    style: TextStyle(
+                Text('Auto-detected'.tr,
+                    style: const TextStyle(
                         fontSize: 11,
                         fontWeight: FontWeight.w700,
                         color: Color(0xFF16A34A))),

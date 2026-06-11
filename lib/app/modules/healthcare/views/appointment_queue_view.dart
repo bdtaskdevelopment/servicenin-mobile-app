@@ -1,3 +1,4 @@
+import 'package:animate_do/animate_do.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -34,17 +35,17 @@ class AppointmentQueueView extends GetView<AppointmentsController> {
                         icon: const Icon(Icons.arrow_back_ios_new_rounded,
                             size: 20, color: Color(0xFF1A1A1A)),
                       ),
-                      const Column(
+                      Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text('Appointment status',
-                              style: TextStyle(
+                          Text('Appointment status'.tr,
+                              style: const TextStyle(
                                   fontSize: 19,
                                   fontWeight: FontWeight.w800,
                                   color: Color(0xFF0F172A))),
-                          SizedBox(height: 1),
-                          Text('Live serial & queue',
-                              style: TextStyle(
+                          const SizedBox(height: 1),
+                          Text('Live serial & queue'.tr,
+                              style: const TextStyle(
                                   fontSize: 12, color: Color(0xFF94A3B8))),
                         ],
                       ),
@@ -114,8 +115,8 @@ class AppointmentQueueView extends GetView<AppointmentsController> {
                         ),
                         child: Column(
                           children: [
-                            const Text('YOUR SERIAL',
-                                style: TextStyle(
+                            Text('YOUR SERIAL'.tr,
+                                style: const TextStyle(
                                     color: Color(0xFFCDEDE0),
                                     fontSize: 11,
                                     fontWeight: FontWeight.w700,
@@ -131,7 +132,7 @@ class AppointmentQueueView extends GetView<AppointmentsController> {
                               Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
-                                  _heroStat('Now serving', con.nowServingLabel),
+                                  _heroStat('Now serving'.tr, con.nowServingLabel),
                                   Container(
                                     width: 1,
                                     height: 30,
@@ -140,11 +141,11 @@ class AppointmentQueueView extends GetView<AppointmentsController> {
                                     margin: const EdgeInsets.symmetric(
                                         horizontal: 18),
                                   ),
-                                  _heroStat('Ahead of you', '${con.aheadCount}'),
+                                  _heroStat('Ahead of you'.tr, '${con.aheadCount}'),
                                 ],
                               )
                             else
-                              Text('Visit completed',
+                              Text('Visit completed'.tr,
                                   style: TextStyle(
                                       color:
                                           Colors.white.withValues(alpha: 0.9),
@@ -166,8 +167,8 @@ class AppointmentQueueView extends GetView<AppointmentsController> {
                             children: [
                               Row(
                                 children: [
-                                  const Text('Queue progress',
-                                      style: TextStyle(
+                                  Text('Queue progress'.tr,
+                                      style: const TextStyle(
                                           fontSize: 15,
                                           fontWeight: FontWeight.w800,
                                           color: Color(0xFF0F172A))),
@@ -194,8 +195,8 @@ class AppointmentQueueView extends GetView<AppointmentsController> {
                               const SizedBox(height: 10),
                               Text(
                                   con.aheadCount == 0
-                                      ? 'You are next — please be ready.'
-                                      : 'Now serving serial ${con.nowServingLabel} · you are ${con.aheadCount} away.',
+                                      ? 'You are next — please be ready.'.tr
+                                      : '${'Now serving serial'.tr} ${con.nowServingLabel} · ${'you are'.tr} ${con.aheadCount} ${'away.'.tr}',
                                   style: const TextStyle(
                                       fontSize: 12.5,
                                       color: Color(0xFF64748B))),
@@ -213,17 +214,17 @@ class AppointmentQueueView extends GetView<AppointmentsController> {
                                   Border.all(color: const Color(0xFFEDEFF2))),
                           child: Column(
                             children: [
-                              _row(Icons.calendar_today_outlined, 'When',
+                              _row(Icons.calendar_today_outlined, 'When'.tr,
                                   a.whenLabel),
                               const _Div(),
                               _row(
                                   a.isVideo
                                       ? Icons.videocam_outlined
                                       : Icons.location_on_outlined,
-                                  'Venue',
+                                  'Venue'.tr,
                                   a.venueName.isNotEmpty ? a.venueName : '—'),
                               const _Div(),
-                              _row(Icons.person_outline_rounded, 'Patient',
+                              _row(Icons.person_outline_rounded, 'Patient'.tr,
                                   a.patientName.isNotEmpty ? a.patientName : '—'),
                             ],
                           ),
@@ -247,8 +248,8 @@ class AppointmentQueueView extends GetView<AppointmentsController> {
                               onPressed: () => _pickAndReschedule(context, con),
                               icon: const Icon(Icons.event_repeat_outlined,
                                   size: 18),
-                              label: const Text('Reschedule',
-                                  style: TextStyle(
+                              label: Text('Reschedule'.tr,
+                                  style: const TextStyle(
                                       fontSize: 15,
                                       fontWeight: FontWeight.w800)),
                               style: OutlinedButton.styleFrom(
@@ -269,8 +270,8 @@ class AppointmentQueueView extends GetView<AppointmentsController> {
                               onPressed: con.openPrescription,
                               icon: const Icon(Icons.description_outlined,
                                   size: 18),
-                              label: const Text('Latest Rx',
-                                  style: TextStyle(
+                              label: Text('Latest Rx'.tr,
+                                  style: const TextStyle(
                                       fontSize: 15,
                                       fontWeight: FontWeight.w800)),
                               style: ElevatedButton.styleFrom(
@@ -378,11 +379,11 @@ class _StatusPill extends StatelessWidget {
             color: _tile, borderRadius: BorderRadius.circular(20)),
         child: Row(
           mainAxisSize: MainAxisSize.min,
-          children: const [
-            Icon(Icons.circle, size: 7, color: _green),
-            SizedBox(width: 4),
-            Text('Upcoming',
-                style: TextStyle(
+          children: [
+            const Icon(Icons.circle, size: 7, color: _green),
+            const SizedBox(width: 4),
+            Text('Upcoming'.tr,
+                style: const TextStyle(
                     fontSize: 11,
                     fontWeight: FontWeight.w700,
                     color: Color(0xFF15803D))),
@@ -395,8 +396,8 @@ class _StatusPill extends StatelessWidget {
       decoration: BoxDecoration(
           color: const Color(0xFFEDF1EE),
           borderRadius: BorderRadius.circular(20)),
-      child: const Text('Completed',
-          style: TextStyle(
+      child: Text('Completed'.tr,
+          style: const TextStyle(
               fontSize: 11,
               fontWeight: FontWeight.w700,
               color: Color(0xFF475569))),
@@ -421,8 +422,8 @@ class _PrescriptionsSection extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text('Prescriptions from this doctor',
-            style: TextStyle(
+        Text('Prescriptions from this doctor'.tr,
+            style: const TextStyle(
                 fontSize: 17,
                 fontWeight: FontWeight.w800,
                 color: Color(0xFF0F172A))),
@@ -436,11 +437,18 @@ class _PrescriptionsSection extends StatelessWidget {
                 color: AppColors.white,
                 borderRadius: BorderRadius.circular(16),
                 border: Border.all(color: const Color(0xFFEDEFF2))),
-            child: const Text('No prescriptions yet.',
-                style: TextStyle(fontSize: 13, color: Color(0xFF94A3B8))),
+            child: Text('No prescriptions yet.'.tr,
+                style: const TextStyle(fontSize: 13, color: Color(0xFF94A3B8))),
           )
         else
-          ...con.doctorPrescriptions.map((p) => Padding(
+          ...con.doctorPrescriptions.toList().asMap().entries.map((entry) {
+            final p = entry.value;
+            return FadeInUp(
+              from: 18,
+              duration: const Duration(milliseconds: 350),
+              delay: Duration(
+                  milliseconds: 70 * (entry.key < 6 ? entry.key : 6)),
+              child: Padding(
                 padding: const EdgeInsets.only(bottom: 12),
                 child: Container(
                   padding: const EdgeInsets.all(14),
@@ -470,7 +478,7 @@ class _PrescriptionsSection extends StatelessWidget {
                                   child: Text(
                                       p.diagnosis.isNotEmpty
                                           ? p.diagnosis
-                                          : 'Prescription',
+                                          : 'Prescription'.tr,
                                       style: const TextStyle(
                                           fontSize: 14,
                                           fontWeight: FontWeight.w800,
@@ -483,7 +491,7 @@ class _PrescriptionsSection extends StatelessWidget {
                               ],
                             ),
                             const SizedBox(height: 3),
-                            Text('${p.items.length} medicines',
+                            Text('${p.items.length} ${'medicines'.tr}',
                                 style: const TextStyle(
                                     fontSize: 12.5, color: Color(0xFF64748B))),
                           ],
@@ -498,7 +506,9 @@ class _PrescriptionsSection extends StatelessWidget {
                     ],
                   ),
                 ),
-              )),
+              ),
+            );
+          }),
       ],
     );
   }

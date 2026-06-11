@@ -29,8 +29,8 @@ class GuideDetailView extends GetView<InformationController> {
                     icon: const Icon(Icons.arrow_back_ios_new_rounded,
                         size: 20, color: Color(0xFF1A1A1A)),
                   ),
-                  const Text('Guide',
-                      style: TextStyle(
+                  Text('Guide'.tr,
+                      style: const TextStyle(
                           fontSize: 19,
                           fontWeight: FontWeight.w800,
                           color: Color(0xFF0F172A))),
@@ -142,8 +142,8 @@ class GuideDetailView extends GetView<InformationController> {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                const Text('Need help?',
-                                    style: TextStyle(
+                                Text('Need help?'.tr,
+                                    style: const TextStyle(
                                         fontSize: 14,
                                         fontWeight: FontWeight.w700,
                                         color: Color(0xFF0F172A))),
@@ -168,8 +168,8 @@ class GuideDetailView extends GetView<InformationController> {
                                 shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(10)),
                               ),
-                              child: const Text('Call',
-                                  style: TextStyle(
+                              child: Text('Call'.tr,
+                                  style: const TextStyle(
                                       fontSize: 14,
                                       fontWeight: FontWeight.w800)),
                             ),

@@ -89,11 +89,11 @@ class _DobPickerSheetState extends State<DobPickerSheet> {
             ),
           ),
           const SizedBox(height: 16),
-          const Align(
+          Align(
             alignment: Alignment.centerLeft,
             child: Text(
-              'জন্ম তারিখ নির্বাচন করুন',
-              style: TextStyle(
+              'Select date of birth'.tr,
+              style: const TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.w800,
                 color: Color(0xFF0F172A),
@@ -131,7 +131,7 @@ class _DobPickerSheetState extends State<DobPickerSheet> {
           ),
           const SizedBox(height: 16),
           PrimaryButton(
-            label: 'নিশ্চিত করুন',
+            label: 'Confirm'.tr,
             onPressed: () {
               final safeDay = _day.clamp(1, _daysInMonth);
               Get.back(result: DateTime(_year, _monthIndex + 1, safeDay));

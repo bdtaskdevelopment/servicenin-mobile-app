@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
 import '../../../core/values/app_colors.dart';
 import '../controllers/healthcare_controller.dart';
@@ -86,8 +87,8 @@ class HcDoctorCard extends StatelessWidget {
                         decoration: BoxDecoration(
                             color: const Color(0xFFEDE9FE),
                             borderRadius: BorderRadius.circular(6)),
-                        child: const Text('Video',
-                            style: TextStyle(
+                        child: Text('Video'.tr,
+                            style: const TextStyle(
                                 fontSize: 10.5,
                                 fontWeight: FontWeight.w700,
                                 color: Color(0xFF7C3AED))),

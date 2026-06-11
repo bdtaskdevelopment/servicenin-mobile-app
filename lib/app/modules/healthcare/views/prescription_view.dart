@@ -1,7 +1,9 @@
+import 'package:animate_do/animate_do.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../../core/values/app_colors.dart';
+import '../../../global_widget/sn_shimmer.dart';
 import '../controllers/prescription_controller.dart';
 
 const _green = Color(0xFF0F7A52);
@@ -32,8 +34,8 @@ class PrescriptionView extends GetView<PrescriptionController> {
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text('Prescription',
-                          style: TextStyle(
+                      Text('Prescription'.tr,
+                          style: const TextStyle(
                               fontSize: 19,
                               fontWeight: FontWeight.w800,
                               color: Color(0xFF0F172A))),
@@ -50,7 +52,12 @@ class PrescriptionView extends GetView<PrescriptionController> {
               ),
             ),
             Expanded(
-              child: ListView(
+              child: con.loading && con.rx == null
+                  ? const _RxSkeleton()
+                  : FadeInUp(
+                      from: 18,
+                      duration: const Duration(milliseconds: 350),
+                      child: ListView(
                 padding: const EdgeInsets.fromLTRB(16, 14, 16, 16),
                 children: [
                   // Rx card
@@ -103,12 +110,12 @@ class PrescriptionView extends GetView<PrescriptionController> {
                                   borderRadius: BorderRadius.circular(20)),
                               child: Row(
                                 mainAxisSize: MainAxisSize.min,
-                                children: const [
-                                  Icon(Icons.circle,
+                                children: [
+                                  const Icon(Icons.circle,
                                       size: 7, color: Color(0xFF16A34A)),
-                                  SizedBox(width: 4),
-                                  Text('Digital · signed',
-                                      style: TextStyle(
+                                  const SizedBox(width: 4),
+                                  Text('Digital · signed'.tr,
+                                      style: const TextStyle(
                                           fontSize: 10.5,
                                           fontWeight: FontWeight.w700,
                                           color: Color(0xFF15803D))),
@@ -128,8 +135,8 @@ class PrescriptionView extends GetView<PrescriptionController> {
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  const Text('Patient',
-                                      style: TextStyle(
+                                  Text('Patient'.tr,
+                                      style: const TextStyle(
                                           fontSize: 11.5,
                                           color: Color(0xFF94A3B8))),
                                   const SizedBox(height: 2),
@@ -144,8 +151,8 @@ class PrescriptionView extends GetView<PrescriptionController> {
                             Column(
                               crossAxisAlignment: CrossAxisAlignment.end,
                               children: [
-                                const Text('Diagnosis',
-                                    style: TextStyle(
+                                Text('Diagnosis'.tr,
+                                    style: const TextStyle(
                                         fontSize: 11.5,
                                         color: Color(0xFF94A3B8))),
                                 const SizedBox(height: 2),
@@ -223,10 +230,10 @@ class PrescriptionView extends GetView<PrescriptionController> {
                     ),
                   ),
                   const SizedBox(height: 16),
-                  const Padding(
-                    padding: EdgeInsets.only(left: 4, bottom: 8),
-                    child: Text('ADVICE',
-                        style: TextStyle(
+                  Padding(
+                    padding: const EdgeInsets.only(left: 4, bottom: 8),
+                    child: Text('ADVICE'.tr,
+                        style: const TextStyle(
                             fontSize: 12,
                             fontWeight: FontWeight.w700,
                             color: Color(0xFF94A3B8),
@@ -242,6 +249,7 @@ class PrescriptionView extends GetView<PrescriptionController> {
                   ),
                 ],
               ),
+              ),
             ),
             // Bottom
             Container(
@@ -253,9 +261,9 @@ class PrescriptionView extends GetView<PrescriptionController> {
                 child: ElevatedButton.icon(
                   onPressed: con.downloading ? null : con.download,
                   icon: const Icon(Icons.download_rounded, size: 20),
-                  label: Text(con.downloading ? 'Downloading…' : 'Download PDF',
+                  label: Text(con.downloading ? 'Downloading…'.tr : 'Download PDF'.tr,
                       style:
-                          TextStyle(fontSize: 16, fontWeight: FontWeight.w800)),
+                          const TextStyle(fontSize: 16, fontWeight: FontWeight.w800)),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: _green,
                     foregroundColor: Colors.white,
@@ -269,6 +277,88 @@ class PrescriptionView extends GetView<PrescriptionController> {
           ],
           ),
         ),
+      ),
+    );
+  }
+}
+
+// ── Loading skeleton for the prescription detail ────────────────────
+class _RxSkeleton extends StatelessWidget {
+  const _RxSkeleton();
+  @override
+  Widget build(BuildContext context) {
+    return SnShimmer(
+      child: ListView(
+        padding: const EdgeInsets.fromLTRB(16, 14, 16, 16),
+        physics: const NeverScrollableScrollPhysics(),
+        children: [
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Colors.transparent,
+              borderRadius: BorderRadius.circular(18),
+              border: Border.all(color: const Color(0xFFE8ECF1)),
+            ),
+            child: Column(
+              children: [
+                Row(
+                  children: const [
+                    SnBone(width: 46, height: 46, radius: 12),
+                    SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          SnBone(width: 150, height: 14),
+                          SizedBox(height: 8),
+                          SnBone(width: 100, height: 11),
+                        ],
+                      ),
+                    ),
+                    SnBone(width: 80, height: 22, radius: 20),
+                  ],
+                ),
+                const SizedBox(height: 18),
+                Row(
+                  children: const [
+                    Expanded(child: SnBone(width: 90, height: 12)),
+                    Expanded(child: SnBone(width: 90, height: 12)),
+                  ],
+                ),
+                const SizedBox(height: 18),
+                ...List.generate(
+                  3,
+                  (_) => const Padding(
+                    padding: EdgeInsets.only(bottom: 14),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        SnBone(width: 26, height: 26, radius: 8),
+                        SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              SnBone(width: 160, height: 13),
+                              SizedBox(height: 6),
+                              SnBone(width: 200, height: 11),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 20),
+          const SnBone(width: 80, height: 12),
+          const SizedBox(height: 10),
+          const SnBone(height: 12),
+          const SizedBox(height: 8),
+          const SnBone(width: 240, height: 12),
+        ],
       ),
     );
   }

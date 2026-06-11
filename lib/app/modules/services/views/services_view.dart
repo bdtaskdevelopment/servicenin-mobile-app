@@ -15,8 +15,9 @@ class ServicesView extends GetView<ServicesController> {
     return Scaffold(
       backgroundColor: AppColors.white,
       appBar: ServiceAppBar(
-        title: 'All Services',
-        subtitle: '${controller.services.length}টি সেবা · এক অ্যাকাউন্টে',
+        title: 'All Services'.tr,
+        subtitle:
+            '${controller.services.length} ${'services · one account'.tr}',
       ),
       body: ListView(
         padding: const EdgeInsets.fromLTRB(16, 12, 16, 100),

@@ -28,17 +28,17 @@ class EmployerRegisterView extends GetView<JobsController> {
                       icon: const Icon(Icons.arrow_back_ios_new_rounded,
                           size: 20, color: Color(0xFF1A1A1A)),
                     ),
-                    const Column(
+                    Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('Employer registration',
-                            style: TextStyle(
+                        Text('Employer registration'.tr,
+                            style: const TextStyle(
                                 fontSize: 19,
                                 fontWeight: FontWeight.w800,
                                 color: Color(0xFF0F172A))),
-                        SizedBox(height: 1),
-                        Text('Register your company to post jobs',
-                            style: TextStyle(
+                        const SizedBox(height: 1),
+                        Text('Register your company to post jobs'.tr,
+                            style: const TextStyle(
                                 fontSize: 12, color: Color(0xFF94A3B8))),
                       ],
                     ),
@@ -70,10 +70,10 @@ class EmployerRegisterView extends GetView<JobsController> {
                                 color: Colors.white, size: 24),
                           ),
                           const SizedBox(width: 14),
-                          const Expanded(
+                          Expanded(
                             child: Text(
-                                'Reach thousands of verified candidates on ServiceNin',
-                                style: TextStyle(
+                                'Reach thousands of verified candidates on ServiceNin'.tr,
+                                style: const TextStyle(
                                     color: Colors.white,
                                     fontSize: 14,
                                     fontWeight: FontWeight.w700,
@@ -83,25 +83,25 @@ class EmployerRegisterView extends GetView<JobsController> {
                       ),
                     ),
                     const SizedBox(height: 18),
-                    const _Label('COMPANY NAME'),
-                    _Input(con.empCompany, 'e.g. Tanzil Tech Ltd'),
+                    _Label('COMPANY NAME'.tr),
+                    _Input(con.empCompany, 'e.g. Tanzil Tech Ltd'.tr),
                     const SizedBox(height: 14),
-                    const _Label('CONTACT PERSON'),
-                    _Input(con.empContact, 'Full name'),
+                    _Label('CONTACT PERSON'.tr),
+                    _Input(con.empContact, 'Full name'.tr),
                     const SizedBox(height: 14),
-                    const _Label('PHONE'),
+                    _Label('PHONE'.tr),
                     _Input(con.empPhone, '+8801XXXXXXXXX',
                         kb: TextInputType.phone),
                     const SizedBox(height: 14),
-                    const _Label('EMAIL'),
+                    _Label('EMAIL'.tr),
                     _Input(con.empEmail, 'hr@company.com',
                         kb: TextInputType.emailAddress),
                     const SizedBox(height: 14),
-                    const _Label('ADDRESS'),
-                    _Input(con.empAddress, 'e.g. Gulshan, Dhaka'),
+                    _Label('ADDRESS'.tr),
+                    _Input(con.empAddress, 'e.g. Gulshan, Dhaka'.tr),
                     const SizedBox(height: 14),
-                    const _Label('INDUSTRY'),
-                    _Input(con.empIndustry, 'e.g. Technology'),
+                    _Label('INDUSTRY'.tr),
+                    _Input(con.empIndustry, 'e.g. Technology'.tr),
                   ],
                 ),
               ),
@@ -127,8 +127,8 @@ class EmployerRegisterView extends GetView<JobsController> {
                             child: CircularProgressIndicator(
                                 strokeWidth: 2.4, color: Colors.white),
                           )
-                        : const Text('Register company',
-                            style: TextStyle(
+                        : Text('Register company'.tr,
+                            style: const TextStyle(
                                 fontSize: 16, fontWeight: FontWeight.w800)),
                   ),
                 ),

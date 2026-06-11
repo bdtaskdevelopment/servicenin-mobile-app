@@ -30,20 +30,20 @@ class DonorRegisterView extends GetView<DonorRegisterController> {
                     children: [
                       const _Intro(),
                       const SizedBox(height: 22),
-                      const _SectionLabel('YOUR BLOOD GROUP'),
+                      _SectionLabel('YOUR BLOOD GROUP'.tr),
                       const SizedBox(height: 12),
                       _GroupGrid(con: con),
                       const SizedBox(height: 22),
-                      const _SectionLabel('YOUR LOCATION'),
+                      _SectionLabel('YOUR LOCATION'.tr),
                       const SizedBox(height: 12),
                       _LocationCard(con: con),
                       const SizedBox(height: 22),
-                      const _SectionLabel('NOTES (OPTIONAL)'),
+                      _SectionLabel('NOTES (OPTIONAL)'.tr),
                       const SizedBox(height: 12),
                       _InputCard(
                         controller: con.notes,
                         hint:
-                            'Anything donors should know — availability, conditions…',
+                            'Anything donors should know — availability, conditions…'.tr,
                         maxLines: 4,
                       ),
                     ],
@@ -70,8 +70,8 @@ class DonorRegisterView extends GetView<DonorRegisterController> {
                       shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(14)),
                     ),
-                    child: const Text('Register as donor →',
-                        style: TextStyle(
+                    child: Text('Register as donor →'.tr,
+                        style: const TextStyle(
                             fontSize: 16, fontWeight: FontWeight.w700)),
                   ),
                 ),
@@ -101,15 +101,15 @@ class _Header extends StatelessWidget {
           ),
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
-            children: const [
-              Text('Become a donor',
-                  style: TextStyle(
+            children: [
+              Text('Become a donor'.tr,
+                  style: const TextStyle(
                       fontSize: 19,
                       fontWeight: FontWeight.w800,
                       color: Color(0xFF0F172A))),
-              SizedBox(height: 1),
-              Text('Join the donor network',
-                  style: TextStyle(fontSize: 12, color: Color(0xFF94A3B8))),
+              const SizedBox(height: 1),
+              Text('Join the donor network'.tr,
+                  style: const TextStyle(fontSize: 12, color: Color(0xFF94A3B8))),
             ],
           ),
         ],
@@ -146,19 +146,19 @@ class _Intro extends StatelessWidget {
                 color: Colors.white, size: 24),
           ),
           const SizedBox(width: 14),
-          const Expanded(
+          Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Save lives near you',
-                    style: TextStyle(
+                Text('Save lives near you'.tr,
+                    style: const TextStyle(
                         color: Colors.white,
                         fontSize: 16,
                         fontWeight: FontWeight.w800)),
-                SizedBox(height: 3),
+                const SizedBox(height: 3),
                 Text(
-                  'We\'ll send a one-time code to verify your account.',
-                  style: TextStyle(
+                  'We\'ll send a one-time code to verify your account.'.tr,
+                  style: const TextStyle(
                       color: Color(0xFFFFE0E2), fontSize: 12.5, height: 1.35),
                 ),
               ],
@@ -274,8 +274,8 @@ class _LocationCard extends StatelessWidget {
                         color: Color(0xFF64748B)),
                   ),
                 ),
-                const Text('Auto-detected',
-                    style: TextStyle(
+                Text('Auto-detected'.tr,
+                    style: const TextStyle(
                         fontSize: 11,
                         fontWeight: FontWeight.w700,
                         color: Color(0xFF16A34A))),

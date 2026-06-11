@@ -1,3 +1,4 @@
+import 'package:animate_do/animate_do.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -23,8 +24,8 @@ class JobsView extends GetView<JobsController> {
         foregroundColor: Colors.white,
         elevation: 2,
         icon: const Icon(Icons.add_rounded, size: 22),
-        label: const Text('Post a job',
-            style: TextStyle(fontSize: 15, fontWeight: FontWeight.w800)),
+        label: Text('Post a job'.tr,
+            style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w800)),
       ),
       body: SafeArea(
         child: Column(
@@ -39,17 +40,17 @@ class JobsView extends GetView<JobsController> {
                     icon: const Icon(Icons.arrow_back_ios_new_rounded,
                         size: 20, color: Color(0xFF1A1A1A)),
                   ),
-                  const Column(
+                  Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('Jobs',
-                          style: TextStyle(
+                      Text('Jobs'.tr,
+                          style: const TextStyle(
                               fontSize: 19,
                               fontWeight: FontWeight.w800,
                               color: Color(0xFF0F172A))),
-                      SizedBox(height: 1),
-                      Text('Find your next role',
-                          style: TextStyle(
+                      const SizedBox(height: 1),
+                      Text('Find your next role'.tr,
+                          style: const TextStyle(
                               fontSize: 12, color: Color(0xFF94A3B8))),
                     ],
                   ),
@@ -86,9 +87,9 @@ class JobsView extends GetView<JobsController> {
                         controller: con.searchCtrl,
                         onSubmitted: con.onSearchSubmitted,
                         textInputAction: TextInputAction.search,
-                        decoration: const InputDecoration(
-                          hintText: 'Search title, company, skill',
-                          hintStyle: TextStyle(
+                        decoration: InputDecoration(
+                          hintText: 'Search title, company, skill'.tr,
+                          hintStyle: const TextStyle(
                               color: Color(0xFF94A3B8), fontSize: 13.5),
                           border: InputBorder.none,
                           isCollapsed: true,
@@ -103,7 +104,17 @@ class JobsView extends GetView<JobsController> {
             ),
             // Categories
             GetBuilder<JobsController>(
-              builder: (con) => SizedBox(
+              builder: (con) {
+                if (con.loadingCategories && con.categories.length <= 1) {
+                  return const Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 16),
+                    child: Align(
+                      alignment: Alignment.centerLeft,
+                      child: SnChipsSkeleton(count: 5),
+                    ),
+                  );
+                }
+                return SizedBox(
                 height: 36,
                 child: ListView.separated(
                   scrollDirection: Axis.horizontal,
@@ -135,7 +146,8 @@ class JobsView extends GetView<JobsController> {
                     );
                   },
                 ),
-              ),
+              );
+              },
             ),
             const SizedBox(height: 12),
             Expanded(
@@ -164,20 +176,25 @@ class JobsView extends GetView<JobsController> {
                           ),
                           const SizedBox(height: 12),
                           if (con.jobs.isEmpty)
-                            const Padding(
-                              padding: EdgeInsets.symmetric(vertical: 40),
+                            Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 40),
                               child: Center(
-                                  child: Text('No jobs found.',
-                                      style: TextStyle(
+                                  child: Text('No jobs found.'.tr,
+                                      style: const TextStyle(
                                           color: Color(0xFF94A3B8)))),
                             )
                           else ...[
-                            ...con.jobs.map((j) => Padding(
-                                  padding:
-                                      const EdgeInsets.only(bottom: 12),
-                                  child: GestureDetector(
-                                    onTap: () => con.openJob(j),
-                                    child: _JobCard(job: j),
+                            ...con.jobs.toList().asMap().entries.map((e) => FadeInUp(
+                                  from: 18,
+                                  duration: const Duration(milliseconds: 350),
+                                  delay: Duration(milliseconds: 70 * e.key),
+                                  child: Padding(
+                                    padding:
+                                        const EdgeInsets.only(bottom: 12),
+                                    child: GestureDetector(
+                                      onTap: () => con.openJob(e.value),
+                                      child: _JobCard(job: e.value),
+                                    ),
                                   ),
                                 )),
                             if (con.loadingMore)
@@ -223,19 +240,19 @@ class _EmployerCard extends StatelessWidget {
                 color: _orange, size: 22),
           ),
           const SizedBox(width: 12),
-          const Expanded(
+          Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('For employers',
-                    style: TextStyle(
+                Text('For employers'.tr,
+                    style: const TextStyle(
                         fontSize: 14.5,
                         fontWeight: FontWeight.w800,
                         color: Color(0xFF0F172A))),
-                SizedBox(height: 2),
-                Text('Register your company to post jobs',
-                    style:
-                        TextStyle(fontSize: 12, color: Color(0xFF94A3B8))),
+                const SizedBox(height: 2),
+                Text('Register your company to post jobs'.tr,
+                    style: const TextStyle(
+                        fontSize: 12, color: Color(0xFF94A3B8))),
               ],
             ),
           ),
@@ -307,7 +324,7 @@ class _JobCard extends StatelessWidget {
             children: [
               if (job.jobTypeLabel.isNotEmpty) _Tag(job.jobTypeLabel, neutral: true),
               if (job.location.isNotEmpty) _Tag(job.location, neutral: true),
-              if (job.isRemote) _Tag('Remote OK'),
+              if (job.isRemote) _Tag('Remote OK'.tr),
             ],
           ),
           const Padding(

@@ -30,8 +30,8 @@ class ReviewConfirmView extends GetView<BookingController> {
                         icon: const Icon(Icons.arrow_back_ios_new_rounded,
                             size: 20, color: Color(0xFF1A1A1A)),
                       ),
-                      const Text('Review & confirm',
-                          style: TextStyle(
+                      Text('Review & confirm'.tr,
+                          style: const TextStyle(
                               fontSize: 19,
                               fontWeight: FontWeight.w800,
                               color: Color(0xFF0F172A))),
@@ -98,12 +98,12 @@ class ReviewConfirmView extends GetView<BookingController> {
                                 con.whenSummary),
                             const SizedBox(height: 10),
                             _line(Icons.person_outline_rounded,
-                                '${con.patientName} · General consultation'),
+                                '${con.patientName} · ${'General consultation'.tr}'),
                           ],
                         ),
                       ),
                       const SizedBox(height: 18),
-                      const _Label('FEE BREAKDOWN'),
+                      _Label('FEE BREAKDOWN'.tr),
                       const SizedBox(height: 10),
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -112,11 +112,11 @@ class ReviewConfirmView extends GetView<BookingController> {
                             borderRadius: BorderRadius.circular(14)),
                         child: Column(
                           children: [
-                            _fee('Consultation fee', con.consultationFee, false),
+                            _fee('Consultation fee'.tr, con.consultationFee, false),
                             const Divider(height: 1, color: Color(0xFFF1F5F9)),
-                            _fee('Platform fee', con.platformFee, false),
+                            _fee('Platform fee'.tr, con.platformFee, false),
                             const Divider(height: 1, color: Color(0xFFF1F5F9)),
-                            _fee('First-visit discount',
+                            _fee('First-visit discount'.tr,
                                 con.firstVisitDiscount, true),
                           ],
                         ),
@@ -132,8 +132,8 @@ class ReviewConfirmView extends GetView<BookingController> {
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            const Text('TOTAL PAYABLE',
-                                style: TextStyle(
+                            Text('TOTAL PAYABLE'.tr,
+                                style: const TextStyle(
                                     fontSize: 13,
                                     fontWeight: FontWeight.w800,
                                     color: Color(0xFF0F172A))),
@@ -147,16 +147,16 @@ class ReviewConfirmView extends GetView<BookingController> {
                       ),
                       const SizedBox(height: 18),
                       Row(
-                        children: const [
-                          _Label('PAYMENT METHOD'),
-                          SizedBox(width: 8),
-                          _V2Badge(),
+                        children: [
+                          _Label('PAYMENT METHOD'.tr),
+                          const SizedBox(width: 8),
+                          const _V2Badge(),
                         ],
                       ),
                       const SizedBox(height: 6),
-                      const Text(
-                          'Current API books directly (no payment field) — pay at chamber. Online payment is planned for v2.',
-                          style: TextStyle(
+                      Text(
+                          'Current API books directly (no payment field) — pay at chamber. Online payment is planned for v2.'.tr,
+                          style: const TextStyle(
                               fontSize: 12,
                               color: Color(0xFF94A3B8),
                               height: 1.4)),
@@ -166,7 +166,7 @@ class ReviewConfirmView extends GetView<BookingController> {
                           Expanded(
                               child: _PayCard(
                                   icon: Icons.bolt_rounded,
-                                  label: 'Cash at chamber',
+                                  label: 'Cash at chamber'.tr,
                                   selected: con.selectedPay == 0,
                                   onTap: () => con.selectPay(0))),
                           const SizedBox(width: 12),
@@ -190,8 +190,8 @@ class ReviewConfirmView extends GetView<BookingController> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          const Text('Total',
-                              style: TextStyle(
+                          Text('Total'.tr,
+                              style: const TextStyle(
                                   fontSize: 11.5, color: Color(0xFF94A3B8))),
                           Text(con.totalPayable,
                               style: const TextStyle(
@@ -213,8 +213,8 @@ class ReviewConfirmView extends GetView<BookingController> {
                               shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(14)),
                             ),
-                            child: const Text('Confirm booking',
-                                style: TextStyle(
+                            child: Text('Confirm booking'.tr,
+                                style: const TextStyle(
                                     fontSize: 16,
                                     fontWeight: FontWeight.w800)),
                           ),

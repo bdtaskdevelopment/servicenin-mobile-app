@@ -1,3 +1,4 @@
+import 'package:animate_do/animate_do.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -30,17 +31,17 @@ class HomeServiceView extends GetView<HomeServiceController> {
                     icon: const Icon(Icons.arrow_back_ios_new_rounded,
                         size: 20, color: Color(0xFF1A1A1A)),
                   ),
-                  const Column(
+                  Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('Home Service',
-                          style: TextStyle(
+                      Text('Home Service'.tr,
+                          style: const TextStyle(
                               fontSize: 19,
                               fontWeight: FontWeight.w800,
                               color: Color(0xFF0F172A))),
-                      SizedBox(height: 1),
-                      Text('Trusted pros · pay after service',
-                          style: TextStyle(
+                      const SizedBox(height: 1),
+                      Text('Trusted pros · pay after service'.tr,
+                          style: const TextStyle(
                               fontSize: 12, color: Color(0xFF94A3B8))),
                     ],
                   ),
@@ -60,7 +61,10 @@ class HomeServiceView extends GetView<HomeServiceController> {
                   return ListView(
                     padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
                     children: [
-                      _Hero(),
+                      FadeInDown(
+                        duration: const Duration(milliseconds: 300),
+                        child: _Hero(),
+                      ),
                       const SizedBox(height: 14),
                       GestureDetector(
                         onTap: con.openMyBookings,
@@ -70,23 +74,35 @@ class HomeServiceView extends GetView<HomeServiceController> {
                       GestureDetector(
                         onTap: con.openAll,
                         child: _SectionHeader(
-                            title: 'What do you need?', action: 'All →'),
+                            title: 'What do you need?'.tr, action: 'All →'.tr),
                       ),
                       const SizedBox(height: 14),
-                      GridView.count(
-                        crossAxisCount: 4,
-                        shrinkWrap: true,
-                        physics: const NeverScrollableScrollPhysics(),
-                        mainAxisSpacing: 14,
-                        crossAxisSpacing: 12,
-                        childAspectRatio: 0.92,
-                        children: con.categories
-                            .map((c) => GestureDetector(
-                                  onTap: () => con.openCategory(c),
-                                  child: _CatTile(cat: c),
-                                ))
-                            .toList(),
-                      ),
+                      if (con.loadingCategories && con.categories.isEmpty)
+                        const SnGridSkeleton(
+                          count: 8,
+                          crossAxisCount: 4,
+                          padding: EdgeInsets.zero,
+                          childAspectRatio: 0.92,
+                        )
+                      else
+                        FadeInUp(
+                          from: 18,
+                          duration: const Duration(milliseconds: 350),
+                          child: GridView.count(
+                            crossAxisCount: 4,
+                            shrinkWrap: true,
+                            physics: const NeverScrollableScrollPhysics(),
+                            mainAxisSpacing: 14,
+                            crossAxisSpacing: 12,
+                            childAspectRatio: 0.92,
+                            children: con.categories
+                                .map((c) => GestureDetector(
+                                      onTap: () => con.openCategory(c),
+                                      child: _CatTile(cat: c),
+                                    ))
+                                .toList(),
+                          ),
+                        ),
                       const SizedBox(height: 20),
                       // Subscriptions section hidden for now.
                       // GestureDetector(
@@ -94,8 +110,8 @@ class HomeServiceView extends GetView<HomeServiceController> {
                       //   child: const _SubscriptionCard(),
                       // ),
                       // const SizedBox(height: 22),
-                      const Text('Popular this week',
-                          style: TextStyle(
+                      Text('Popular this week'.tr,
+                          style: const TextStyle(
                               fontSize: 17,
                               fontWeight: FontWeight.w800,
                               color: Color(0xFF0F172A))),
@@ -106,12 +122,18 @@ class HomeServiceView extends GetView<HomeServiceController> {
                           padding: EdgeInsets.zero,
                         )
                       else
-                        ...con.popular.map((s) => Padding(
-                              padding: const EdgeInsets.only(bottom: 12),
-                              child: GestureDetector(
-                                onTap: () =>
-                                    con.openCategoryById(s.id, s.name),
-                                child: _ServiceCard(service: s),
+                        ...con.popular.toList().asMap().entries.map((e) =>
+                            FadeInUp(
+                              from: 18,
+                              duration: const Duration(milliseconds: 350),
+                              delay: Duration(milliseconds: 70 * e.key),
+                              child: Padding(
+                                padding: const EdgeInsets.only(bottom: 12),
+                                child: GestureDetector(
+                                  onTap: () => con.openCategoryById(
+                                      e.value.id, e.value.name),
+                                  child: _ServiceCard(service: e.value),
+                                ),
                               ),
                             )),
                     ],
@@ -149,13 +171,13 @@ class _Hero extends StatelessWidget {
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text('ঘরের সব সেবা, এক জায়গায়',
-                  style: TextStyle(
+              Text('All home services, in one place'.tr,
+                  style: const TextStyle(
                       color: Colors.white,
                       fontSize: 20,
                       fontWeight: FontWeight.w800)),
               const SizedBox(height: 6),
-              Text('Verified technicians · 7-day warranty · cash or online',
+              Text('Verified technicians · 7-day warranty · cash or online'.tr,
                   style: TextStyle(
                       color: Colors.white.withValues(alpha: 0.9),
                       fontSize: 12.5)),
@@ -169,11 +191,11 @@ class _Hero extends StatelessWidget {
                       color: Colors.white,
                       borderRadius: BorderRadius.circular(12)),
                   child: Row(
-                    children: const [
-                      Icon(Icons.search_rounded, color: Color(0xFF94A3B8)),
-                      SizedBox(width: 10),
-                      Text('Search AC service, cleaning, plumber…',
-                          style: TextStyle(
+                    children: [
+                      const Icon(Icons.search_rounded, color: Color(0xFF94A3B8)),
+                      const SizedBox(width: 10),
+                      Text('Search AC service, cleaning, plumber…'.tr,
+                          style: const TextStyle(
                               color: Color(0xFF94A3B8), fontSize: 13)),
                     ],
                   ),
@@ -208,18 +230,18 @@ class _ActiveCard extends StatelessWidget {
                 color: _teal, size: 22),
           ),
           const SizedBox(width: 12),
-          const Expanded(
+          Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('My bookings',
-                    style: TextStyle(
+                Text('My bookings'.tr,
+                    style: const TextStyle(
                         fontSize: 14.5,
                         fontWeight: FontWeight.w700,
                         color: Color(0xFF0F172A))),
-                SizedBox(height: 2),
-                Text('Track your service bookings',
-                    style: TextStyle(fontSize: 12, color: Color(0xFF94A3B8))),
+                const SizedBox(height: 2),
+                Text('Track your service bookings'.tr,
+                    style: const TextStyle(fontSize: 12, color: Color(0xFF94A3B8))),
               ],
             ),
           ),

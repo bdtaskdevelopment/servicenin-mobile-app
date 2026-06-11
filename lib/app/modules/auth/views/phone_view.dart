@@ -23,23 +23,23 @@ class PhoneView extends GetView<AuthController> {
               return Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
-                    'আপনার ফোন নম্বর দিন',
-                    style: TextStyle(
+                  Text(
+                    'Enter your phone number'.tr,
+                    style: const TextStyle(
                       fontSize: 26,
                       fontWeight: FontWeight.w800,
                       color: Color(0xFF0F172A),
                     ),
                   ),
                   const SizedBox(height: 8),
-                  const Text(
-                    'আমরা একটি OTP পাঠাব যাচাইয়ের জন্য।',
-                    style: TextStyle(fontSize: 14, color: Color(0xFF64748B)),
+                  Text(
+                    'We\'ll send you an OTP to verify.'.tr,
+                    style: const TextStyle(fontSize: 14, color: Color(0xFF64748B)),
                   ),
                   const SizedBox(height: 28),
-                  const Text(
-                    'মোবাইল নম্বর',
-                    style: TextStyle(
+                  Text(
+                    'Mobile number'.tr,
+                    style: const TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.w700,
                       color: AppColors.brandOrange,
@@ -48,13 +48,13 @@ class PhoneView extends GetView<AuthController> {
                   const SizedBox(height: 8),
                   _PhoneInput(con: con),
                   const SizedBox(height: 8),
-                  const Text(
-                    'শুধুমাত্র বাংলাদেশী নম্বর সমর্থিত।',
-                    style: TextStyle(fontSize: 12, color: Color(0xFF94A3B8)),
+                  Text(
+                    'Only Bangladeshi numbers are supported.'.tr,
+                    style: const TextStyle(fontSize: 12, color: Color(0xFF94A3B8)),
                   ),
                   const Spacer(),
                   PrimaryButton(
-                    label: 'লগইন করুন',
+                    label: 'Log in'.tr,
                     enabled: con.isPhoneValid,
                     onPressed: con.login,
                   ),
@@ -62,24 +62,24 @@ class PhoneView extends GetView<AuthController> {
                   Center(
                     child: Text.rich(
                       TextSpan(
-                        text: 'চালিয়ে গেলে আপনি ',
+                        text: 'By continuing you agree to the '.tr,
                         style: const TextStyle(
                             fontSize: 12, color: Color(0xFF94A3B8)),
-                        children: const [
+                        children: [
                           TextSpan(
-                            text: 'শর্তাবলী',
-                            style: TextStyle(
+                            text: 'Terms'.tr,
+                            style: const TextStyle(
                                 color: AppColors.brandOrange,
                                 fontWeight: FontWeight.w600),
                           ),
-                          TextSpan(text: ' ও '),
+                          TextSpan(text: ' and '.tr),
                           TextSpan(
-                            text: 'গোপনীয়তা নীতি',
-                            style: TextStyle(
+                            text: 'Privacy Policy'.tr,
+                            style: const TextStyle(
                                 color: AppColors.brandOrange,
                                 fontWeight: FontWeight.w600),
                           ),
-                          TextSpan(text: '-তে সম্মত হচ্ছেন।'),
+                          TextSpan(text: '.'.tr),
                         ],
                       ),
                       textAlign: TextAlign.center,
@@ -91,16 +91,16 @@ class PhoneView extends GetView<AuthController> {
                       onTap: con.goToRegister,
                       child: Text.rich(
                         TextSpan(
-                          text: 'নতুন ব্যবহারকারী? ',
+                          text: 'New user? '.tr,
                           style: const TextStyle(
                             fontSize: 14,
                             color: Color(0xFF0F172A),
                             fontWeight: FontWeight.w600,
                           ),
-                          children: const [
+                          children: [
                             TextSpan(
-                              text: 'অ্যাকাউন্ট তৈরি করুন',
-                              style: TextStyle(
+                              text: 'Create an account'.tr,
+                              style: const TextStyle(
                                 color: AppColors.brandOrange,
                                 fontWeight: FontWeight.w700,
                               ),

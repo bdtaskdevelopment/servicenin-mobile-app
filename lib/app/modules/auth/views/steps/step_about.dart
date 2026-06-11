@@ -19,29 +19,29 @@ class StepAbout extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
-                'আপনার সম্পর্কে লিখুন',
-                style: TextStyle(
+              Text(
+                'Tell us about yourself'.tr,
+                style: const TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.w800,
                   color: Color(0xFF0F172A),
                 ),
               ),
               const SizedBox(height: 8),
-              const Text(
-                'এটি একবারই করতে হবে।',
-                style: TextStyle(fontSize: 14, color: Color(0xFF64748B)),
+              Text(
+                'You only need to do this once.'.tr,
+                style: const TextStyle(fontSize: 14, color: Color(0xFF64748B)),
               ),
               const SizedBox(height: 24),
               AppTextField(
-                label: 'আপনার সম্পূর্ণ নাম লিখুন',
+                label: 'Enter your full name'.tr,
                 required: true,
                 controller: con.nameController,
                 onChanged: con.onNameChanged,
               ),
               const SizedBox(height: 14),
               SelectField(
-                label: 'জন্ম তারিখ',
+                label: 'Date of birth'.tr,
                 required: true,
                 value: con.dobLabel,
                 placeholder: '',
@@ -52,15 +52,15 @@ class StepAbout extends StatelessWidget {
                 },
               ),
               const SizedBox(height: 20),
-              const Text.rich(
+              Text.rich(
                 TextSpan(
-                  text: 'লিঙ্গ',
-                  style: TextStyle(
+                  text: 'Gender'.tr,
+                  style: const TextStyle(
                     fontSize: 13,
                     fontWeight: FontWeight.w600,
                     color: Color(0xFF475569),
                   ),
-                  children: [
+                  children: const [
                     TextSpan(
                       text: ' *',
                       style: TextStyle(color: Color(0xFFE53E3E)),

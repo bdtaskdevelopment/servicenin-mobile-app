@@ -28,8 +28,8 @@ class DeleteAccountView extends GetView<AccountController> {
                       icon: const Icon(Icons.arrow_back_ios_new_rounded,
                           size: 20, color: Color(0xFF1A1A1A)),
                     ),
-                    const Text('Delete account',
-                        style: TextStyle(
+                    Text('Delete account'.tr,
+                        style: const TextStyle(
                             fontSize: 19,
                             fontWeight: FontWeight.w800,
                             color: Color(0xFF0F172A))),
@@ -52,19 +52,19 @@ class DeleteAccountView extends GetView<AccountController> {
                       ),
                     ),
                     const SizedBox(height: 16),
-                    const Center(
-                      child: Text('Delete your ServiceNin ID?',
-                          style: TextStyle(
+                    Center(
+                      child: Text('Delete your ServiceNin ID?'.tr,
+                          style: const TextStyle(
                               fontSize: 20,
                               fontWeight: FontWeight.w800,
                               color: Color(0xFF0F172A))),
                     ),
                     const SizedBox(height: 6),
-                    const Center(
+                    Center(
                       child: Text(
-                          'Deleting is permanent. You\'ll lose access to every service tied to this account.',
+                          'Deleting is permanent. You\'ll lose access to every service tied to this account.'.tr,
                           textAlign: TextAlign.center,
-                          style: TextStyle(
+                          style: const TextStyle(
                               fontSize: 13.5,
                               height: 1.45,
                               color: Color(0xFF64748B))),
@@ -77,20 +77,20 @@ class DeleteAccountView extends GetView<AccountController> {
                           color: AppColors.white,
                           borderRadius: BorderRadius.circular(16)),
                       child: Column(
-                        children: const [
-                          _LossRow('Your profile, NID link & blood group'),
-                          _LossDivider(),
-                          _LossRow('All bookings & activity across 12 modules'),
-                          _LossDivider(),
-                          _LossRow('Saved family members & addresses'),
-                          _LossDivider(),
-                          _LossRow('This action cannot be undone'),
+                        children: [
+                          _LossRow('Your profile, NID link & blood group'.tr),
+                          const _LossDivider(),
+                          _LossRow('All bookings & activity across 12 modules'.tr),
+                          const _LossDivider(),
+                          _LossRow('Saved family members & addresses'.tr),
+                          const _LossDivider(),
+                          _LossRow('This action cannot be undone'.tr),
                         ],
                       ),
                     ),
                     const SizedBox(height: 22),
-                    const Text('TYPE DELETE TO CONFIRM',
-                        style: TextStyle(
+                    Text('TYPE DELETE TO CONFIRM'.tr,
+                        style: const TextStyle(
                             fontSize: 12,
                             fontWeight: FontWeight.w700,
                             color: Color(0xFF94A3B8),
@@ -141,8 +141,8 @@ class DeleteAccountView extends GetView<AccountController> {
                             shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(14)),
                           ),
-                          child: const Text('Cancel',
-                              style: TextStyle(
+                          child: Text('Cancel'.tr,
+                              style: const TextStyle(
                                   fontSize: 15,
                                   fontWeight: FontWeight.w800,
                                   color: Color(0xFF334155))),
@@ -164,8 +164,8 @@ class DeleteAccountView extends GetView<AccountController> {
                             shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(14)),
                           ),
-                          child: const Text('Delete account',
-                              style: TextStyle(
+                          child: Text('Delete account'.tr,
+                              style: const TextStyle(
                                   fontSize: 15, fontWeight: FontWeight.w800)),
                         ),
                       ),

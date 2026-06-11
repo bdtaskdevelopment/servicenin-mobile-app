@@ -33,17 +33,17 @@ class AppointmentConfirmedView extends GetView<BookingController> {
                     ),
                   ),
                   const SizedBox(height: 18),
-                  const Center(
-                    child: Text('Appointment confirmed',
-                        style: TextStyle(
+                  Center(
+                    child: Text('Appointment confirmed'.tr,
+                        style: const TextStyle(
                             fontSize: 23,
                             fontWeight: FontWeight.w800,
                             color: Color(0xFF0F172A))),
                   ),
                   const SizedBox(height: 6),
-                  const Center(
-                    child: Text('আপনার আপয়েন্টমেন্ট নিশ্চিত রয়েছে',
-                        style:
+                  Center(
+                    child: Text('Your appointment is confirmed'.tr,
+                        style: const
                             TextStyle(fontSize: 13.5, color: Color(0xFF64748B))),
                   ),
                   const SizedBox(height: 24),
@@ -89,8 +89,8 @@ class AppointmentConfirmedView extends GetView<BookingController> {
                             ),
                             Column(
                               children: [
-                                const Text('SERIAL',
-                                    style: TextStyle(
+                                Text('SERIAL'.tr,
+                                    style: const TextStyle(
                                         fontSize: 9,
                                         fontWeight: FontWeight.w700,
                                         color: Color(0xFF94A3B8))),
@@ -107,12 +107,12 @@ class AppointmentConfirmedView extends GetView<BookingController> {
                           padding: EdgeInsets.symmetric(vertical: 12),
                           child: Divider(height: 1, color: Color(0xFFF1F5F9)),
                         ),
-                        _row(Icons.calendar_today_outlined, 'Date & time',
+                        _row(Icons.calendar_today_outlined, 'Date & time'.tr,
                             con.whenSummary),
                         const SizedBox(height: 12),
-                        _row(Icons.location_on_outlined, 'Venue', con.venueName),
+                        _row(Icons.location_on_outlined, 'Venue'.tr, con.venueName),
                         const SizedBox(height: 12),
-                        _row(Icons.person_outline_rounded, 'Patient',
+                        _row(Icons.person_outline_rounded, 'Patient'.tr,
                             con.patientName),
                       ],
                     ),
@@ -136,16 +136,16 @@ class AppointmentConfirmedView extends GetView<BookingController> {
                         shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(14)),
                       ),
-                      child: const Text('View appointment',
-                          style: TextStyle(
+                      child: Text('View appointment'.tr,
+                          style: const TextStyle(
                               fontSize: 16, fontWeight: FontWeight.w800)),
                     ),
                   ),
                   const SizedBox(height: 10),
                   TextButton(
                     onPressed: con.backToHealthcareHome,
-                    child: const Text('Back to Healthcare home',
-                        style: TextStyle(
+                    child: Text('Back to Healthcare home'.tr,
+                        style: const TextStyle(
                             fontSize: 14,
                             fontWeight: FontWeight.w600,
                             color: Color(0xFF64748B))),

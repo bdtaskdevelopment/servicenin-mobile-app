@@ -1,7 +1,9 @@
+import 'package:animate_do/animate_do.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../../core/values/app_colors.dart';
+import '../../../global_widget/sn_shimmer.dart';
 import '../controllers/doctors_controller.dart';
 import '../controllers/healthcare_controller.dart';
 
@@ -31,17 +33,17 @@ class FindDoctorView extends GetView<DoctorsController> {
                         icon: const Icon(Icons.arrow_back_ios_new_rounded,
                             size: 20, color: Color(0xFF1A1A1A)),
                       ),
-                      const Column(
+                      Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text('Find a doctor',
-                              style: TextStyle(
+                          Text('Find a doctor'.tr,
+                              style: const TextStyle(
                                   fontSize: 19,
                                   fontWeight: FontWeight.w800,
                                   color: Color(0xFF0F172A))),
-                          SizedBox(height: 1),
-                          Text('4 available near you',
-                              style: TextStyle(
+                          const SizedBox(height: 1),
+                          Text('4 available near you'.tr,
+                              style: const TextStyle(
                                   fontSize: 12, color: Color(0xFF94A3B8))),
                         ],
                       ),
@@ -61,11 +63,11 @@ class FindDoctorView extends GetView<DoctorsController> {
                         color: const Color(0xFFEFF1F4),
                         borderRadius: BorderRadius.circular(12)),
                     child: Row(
-                      children: const [
-                        Icon(Icons.search_rounded, color: Color(0xFF94A3B8)),
-                        SizedBox(width: 10),
-                        Text('Doctor, specialty or symptom',
-                            style: TextStyle(
+                      children: [
+                        const Icon(Icons.search_rounded, color: Color(0xFF94A3B8)),
+                        const SizedBox(width: 10),
+                        Text('Doctor, specialty or symptom'.tr,
+                            style: const TextStyle(
                                 color: Color(0xFF94A3B8), fontSize: 13.5)),
                       ],
                     ),
@@ -117,12 +119,12 @@ class FindDoctorView extends GetView<DoctorsController> {
                           style: const TextStyle(
                               fontSize: 13, color: Color(0xFF94A3B8))),
                       Row(
-                        children: const [
-                          Icon(Icons.filter_alt_outlined,
+                        children: [
+                          const Icon(Icons.filter_alt_outlined,
                               size: 16, color: Color(0xFF64748B)),
-                          SizedBox(width: 4),
-                          Text('Sort: Soonest',
-                              style: TextStyle(
+                          const SizedBox(width: 4),
+                          Text('Sort: Soonest'.tr,
+                              style: const TextStyle(
                                   fontSize: 12.5,
                                   fontWeight: FontWeight.w600,
                                   color: Color(0xFF64748B))),
@@ -133,16 +135,45 @@ class FindDoctorView extends GetView<DoctorsController> {
                 ),
                 const SizedBox(height: 10),
                 Expanded(
-                  child: ListView(
-                    padding: const EdgeInsets.fromLTRB(16, 0, 16, 20),
-                    children: con.filtered
-                        .map((d) => Padding(
-                              padding: const EdgeInsets.only(bottom: 12),
-                              child: _DoctorCard(
-                                  doctor: d, onTap: () => con.openDoctor(d)),
-                            ))
-                        .toList(),
-                  ),
+                  child: con.loading && con.filtered.isEmpty
+                      ? const SnListSkeleton(
+                          padding: EdgeInsets.fromLTRB(16, 0, 16, 20))
+                      : con.filtered.isEmpty
+                          ? ListView(
+                              children: [
+                                const SizedBox(height: 120),
+                                Center(
+                                  child: Text('No doctors found'.tr,
+                                      style: const TextStyle(
+                                          color: Color(0xFF94A3B8))),
+                                ),
+                              ],
+                            )
+                          : ListView(
+                              padding:
+                                  const EdgeInsets.fromLTRB(16, 0, 16, 20),
+                              children: con.filtered
+                                  .toList()
+                                  .asMap()
+                                  .entries
+                                  .map((e) => FadeInUp(
+                                        from: 18,
+                                        duration: const Duration(
+                                            milliseconds: 350),
+                                        delay: Duration(
+                                            milliseconds: 70 *
+                                                (e.key < 6 ? e.key : 6)),
+                                        child: Padding(
+                                          padding: const EdgeInsets.only(
+                                              bottom: 12),
+                                          child: _DoctorCard(
+                                              doctor: e.value,
+                                              onTap: () =>
+                                                  con.openDoctor(e.value)),
+                                        ),
+                                      ))
+                                  .toList(),
+                            ),
                 ),
               ],
             );
@@ -239,8 +270,8 @@ class _DoctorCard extends StatelessWidget {
                           decoration: BoxDecoration(
                               color: const Color(0xFFEDE9FE),
                               borderRadius: BorderRadius.circular(6)),
-                          child: const Text('Video',
-                              style: TextStyle(
+                          child: Text('Video'.tr,
+                              style: const TextStyle(
                                   fontSize: 10.5,
                                   fontWeight: FontWeight.w700,
                                   color: Color(0xFF7C3AED))),

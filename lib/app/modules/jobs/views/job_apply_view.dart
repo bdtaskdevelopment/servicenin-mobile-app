@@ -30,8 +30,8 @@ class JobApplyView extends GetView<JobsController> {
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text('Apply',
-                            style: TextStyle(
+                        Text('Apply'.tr,
+                            style: const TextStyle(
                                 fontSize: 19,
                                 fontWeight: FontWeight.w800,
                                 color: Color(0xFF0F172A))),
@@ -61,18 +61,18 @@ class JobApplyView extends GetView<JobsController> {
                             const Icon(Icons.person_outline_rounded,
                                 color: _orange, size: 22),
                             const SizedBox(width: 12),
-                            const Expanded(
+                            Expanded(
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text('Your job profile',
-                                      style: TextStyle(
+                                  Text('Your job profile'.tr,
+                                      style: const TextStyle(
                                           fontSize: 14.5,
                                           fontWeight: FontWeight.w800,
                                           color: Color(0xFF0F172A))),
-                                  SizedBox(height: 2),
-                                  Text('Set up name, skills & experience',
-                                      style: TextStyle(
+                                  const SizedBox(height: 2),
+                                  Text('Set up name, skills & experience'.tr,
+                                      style: const TextStyle(
                                           fontSize: 12,
                                           color: Color(0xFF94A3B8))),
                                 ],
@@ -85,7 +85,7 @@ class JobApplyView extends GetView<JobsController> {
                       ),
                     ),
                     const SizedBox(height: 18),
-                    const _Label('RESUME'),
+                    _Label('RESUME'.tr),
                     const SizedBox(height: 10),
                     GestureDetector(
                       onTap: con.uploadingResume
@@ -118,7 +118,7 @@ class JobApplyView extends GetView<JobsController> {
                                   Text(
                                       con.resumeName.isNotEmpty
                                           ? con.resumeName
-                                          : 'Upload your resume',
+                                          : 'Upload your resume'.tr,
                                       maxLines: 1,
                                       overflow: TextOverflow.ellipsis,
                                       style: const TextStyle(
@@ -128,8 +128,8 @@ class JobApplyView extends GetView<JobsController> {
                                   const SizedBox(height: 2),
                                   Text(
                                       con.resumeName.isNotEmpty
-                                          ? 'Tap to replace'
-                                          : 'Image of CV (jpg/png)',
+                                          ? 'Tap to replace'.tr
+                                          : 'Image of CV (jpg/png)'.tr,
                                       style: const TextStyle(
                                           fontSize: 12,
                                           color: Color(0xFF94A3B8))),
@@ -156,17 +156,17 @@ class JobApplyView extends GetView<JobsController> {
                       ),
                     ),
                     const SizedBox(height: 18),
-                    const _Label('EXPECTED SALARY'),
+                    _Label('EXPECTED SALARY'.tr),
                     const SizedBox(height: 10),
-                    _Field(con.expectedSalary, 'e.g. 70000',
+                    _Field(con.expectedSalary, 'e.g. 70000'.tr,
                         kb: TextInputType.number, boxed: true),
                     const SizedBox(height: 14),
-                    const _Label('AVAILABILITY'),
+                    _Label('AVAILABILITY'.tr),
                     const SizedBox(height: 10),
-                    _Field(con.availability, 'e.g. Immediate / 1 month',
+                    _Field(con.availability, 'e.g. Immediate / 1 month'.tr,
                         boxed: true),
                     const SizedBox(height: 14),
-                    const _Label('COVER LETTER'),
+                    _Label('COVER LETTER'.tr),
                     const SizedBox(height: 10),
                     Container(
                       padding: const EdgeInsets.all(16),
@@ -182,12 +182,12 @@ class JobApplyView extends GetView<JobsController> {
                             fontSize: 13.5,
                             height: 1.5,
                             color: Color(0xFF475569)),
-                        decoration: const InputDecoration(
+                        decoration: InputDecoration(
                           isCollapsed: true,
                           border: InputBorder.none,
                           hintText:
-                              'Tell the employer why you are a great fit…',
-                          hintStyle: TextStyle(color: Color(0xFF94A3B8)),
+                              'Tell the employer why you are a great fit…'.tr,
+                          hintStyle: const TextStyle(color: Color(0xFF94A3B8)),
                         ),
                       ),
                     ),
@@ -216,8 +216,8 @@ class JobApplyView extends GetView<JobsController> {
                             child: CircularProgressIndicator(
                                 strokeWidth: 2.4, color: Colors.white),
                           )
-                        : const Text('Submit application',
-                            style: TextStyle(
+                        : Text('Submit application'.tr,
+                            style: const TextStyle(
                                 fontSize: 16, fontWeight: FontWeight.w800)),
                   ),
                 ),

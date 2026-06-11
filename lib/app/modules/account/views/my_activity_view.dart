@@ -1,3 +1,4 @@
+import 'package:animate_do/animate_do.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -28,17 +29,17 @@ class MyActivityView extends GetView<AccountController> {
                       icon: const Icon(Icons.arrow_back_ios_new_rounded,
                           size: 20, color: Color(0xFF1A1A1A)),
                     ),
-                    const Column(
+                    Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('My activity',
-                            style: TextStyle(
+                        Text('My activity'.tr,
+                            style: const TextStyle(
                                 fontSize: 19,
                                 fontWeight: FontWeight.w800,
                                 color: Color(0xFF0F172A))),
-                        SizedBox(height: 1),
-                        Text('Across all ServiceNin services',
-                            style: TextStyle(
+                        const SizedBox(height: 1),
+                        Text('Across all ServiceNin services'.tr,
+                            style: const TextStyle(
                                 fontSize: 12, color: Color(0xFF94A3B8))),
                       ],
                     ),
@@ -80,7 +81,7 @@ class MyActivityView extends GetView<AccountController> {
           Icon(Icons.history_rounded,
               size: 56, color: Colors.black.withValues(alpha: 0.12)),
           const SizedBox(height: 12),
-          Text('No activity in the last ${con.activityDays} days',
+          Text('${'No activity in the last'.tr} ${con.activityDays} ${'days'.tr}',
               textAlign: TextAlign.center,
               style: const TextStyle(
                   fontSize: 14,
@@ -95,9 +96,14 @@ class MyActivityView extends GetView<AccountController> {
       children: [
         _banner(),
         const SizedBox(height: 16),
-        ...con.activities.map((a) => Padding(
-              padding: const EdgeInsets.only(bottom: 12),
-              child: _ActivityCard(entry: a),
+        ...con.activities.toList().asMap().entries.map((e) => FadeInUp(
+              from: 18,
+              duration: const Duration(milliseconds: 350),
+              delay: Duration(milliseconds: 70 * e.key),
+              child: Padding(
+                padding: const EdgeInsets.only(bottom: 12),
+                child: _ActivityCard(entry: e.value),
+              ),
             )),
       ],
     );
@@ -108,9 +114,9 @@ class MyActivityView extends GetView<AccountController> {
         decoration: BoxDecoration(
             color: const Color(0xFFE3E7F5),
             borderRadius: BorderRadius.circular(14)),
-        child: const Text(
-            'Everything you do across the 12 modules shows here — one history, one identity.',
-            style: TextStyle(
+        child: Text(
+            'Everything you do across the 12 modules shows here — one history, one identity.'.tr,
+            style: const TextStyle(
                 fontSize: 12.5, height: 1.45, color: Color(0xFF475569))),
       );
 }

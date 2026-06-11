@@ -35,17 +35,17 @@ class DonationConfirmedView extends GetView<DonationFlowController> {
                     ),
                   ),
                   const SizedBox(height: 18),
-                  const Center(
-                    child: Text('Donation confirmed',
-                        style: TextStyle(
+                  Center(
+                    child: Text('Donation confirmed'.tr,
+                        style: const TextStyle(
                             fontSize: 24,
                             fontWeight: FontWeight.w800,
                             color: Color(0xFF0F172A))),
                   ),
                   const SizedBox(height: 6),
-                  const Center(
-                    child: Text('আপনি একটি জীবন বাঁচাতে সাহায্য করলেন 🩸',
-                        style:
+                  Center(
+                    child: Text('You helped save a life 🩸'.tr,
+                        style: const
                             TextStyle(fontSize: 13.5, color: Color(0xFF64748B))),
                   ),
                   const SizedBox(height: 24),
@@ -136,16 +136,16 @@ class DonationConfirmedView extends GetView<DonationFlowController> {
                         shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(14)),
                       ),
-                      child: const Text('View leaderboard',
-                          style: TextStyle(
+                      child: Text('View leaderboard'.tr,
+                          style: const TextStyle(
                               fontSize: 16, fontWeight: FontWeight.w700)),
                     ),
                   ),
                   const SizedBox(height: 10),
                   TextButton(
                     onPressed: con.backToBloodHome,
-                    child: const Text('Back to Blood home',
-                        style: TextStyle(
+                    child: Text('Back to Blood home'.tr,
+                        style: const TextStyle(
                             fontSize: 14,
                             fontWeight: FontWeight.w600,
                             color: Color(0xFF64748B))),

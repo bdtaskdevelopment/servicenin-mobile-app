@@ -34,71 +34,71 @@ class StepLocation extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
-                'আপনি কোথায় থাকেন?',
-                style: TextStyle(
+              Text(
+                'Where do you live?'.tr,
+                style: const TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.w800,
                   color: Color(0xFF0F172A),
                 ),
               ),
               const SizedBox(height: 8),
-              const Text(
-                'এই তথ্য আপনার এলাকায় সেবা পেতে দরকার।',
-                style: TextStyle(fontSize: 14, color: Color(0xFF64748B)),
+              Text(
+                'We need this to bring services to your area.'.tr,
+                style: const TextStyle(fontSize: 14, color: Color(0xFF64748B)),
               ),
               const SizedBox(height: 20),
               SelectField(
-                label: 'বিভাগ',
+                label: 'Division'.tr,
                 leadingIcon: Icons.location_on_outlined,
                 centerText: true,
                 value: con.division,
-                placeholder: 'Select division',
+                placeholder: 'Select division'.tr,
                 onTap: () async {
                   final v = await SelectionBottomSheet.show(
-                      'বিভাগ নির্বাচন করুন', divisions,
+                      'Select division'.tr, divisions,
                       selected: con.division);
                   if (v != null) con.setDivision(v);
                 },
               ),
               const SizedBox(height: 12),
               SelectField(
-                label: 'জেলা',
+                label: 'District'.tr,
                 leadingIcon: Icons.location_on_outlined,
                 centerText: true,
                 value: con.district,
-                placeholder: 'Select district',
+                placeholder: 'Select district'.tr,
                 onTap: () async {
                   final v = await SelectionBottomSheet.show(
-                      'জেলা নির্বাচন করুন', districts,
+                      'Select district'.tr, districts,
                       selected: con.district);
                   if (v != null) con.setDistrict(v);
                 },
               ),
               const SizedBox(height: 12),
               SelectField(
-                label: 'উপজেলা / থানা',
+                label: 'Upazila / Thana'.tr,
                 leadingIcon: Icons.location_on_outlined,
                 centerText: true,
                 value: con.thana,
-                placeholder: 'Select thana',
+                placeholder: 'Select thana'.tr,
                 onTap: () async {
                   final v = await SelectionBottomSheet.show(
-                      'থানা নির্বাচন করুন', thanas,
+                      'Select thana'.tr, thanas,
                       selected: con.thana);
                   if (v != null) con.setThana(v);
                 },
               ),
               const SizedBox(height: 12),
               SelectField(
-                label: 'ইউনিয়ন / এরিয়া',
+                label: 'Union / Area'.tr,
                 leadingIcon: Icons.location_on_outlined,
                 centerText: true,
                 value: con.area,
-                placeholder: 'Select area',
+                placeholder: 'Select area'.tr,
                 onTap: () async {
                   final v = await SelectionBottomSheet.show(
-                      'এরিয়া নির্বাচন করুন', areas,
+                      'Select area'.tr, areas,
                       selected: con.area);
                   if (v != null) con.setArea(v);
                 },
@@ -109,13 +109,13 @@ class StepLocation extends StatelessWidget {
                   onTap: con.useCurrentLocation,
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
-                    children: const [
-                      Icon(Icons.my_location_rounded,
+                    children: [
+                      const Icon(Icons.my_location_rounded,
                           size: 18, color: AppColors.brandOrange),
-                      SizedBox(width: 6),
+                      const SizedBox(width: 6),
                       Text(
-                        'আমার বর্তমান অবস্থান ব্যবহার করুন',
-                        style: TextStyle(
+                        'Use my current location'.tr,
+                        style: const TextStyle(
                           fontSize: 13.5,
                           color: AppColors.brandOrange,
                           fontWeight: FontWeight.w700,
@@ -132,7 +132,7 @@ class StepLocation extends StatelessWidget {
                   Expanded(
                     flex: 3,
                     child: AppTextField(
-                      label: 'ঠিকানা (ঐচ্ছিক)',
+                      label: 'Address (optional)'.tr,
                       controller: con.addressController,
                     ),
                   ),
@@ -140,7 +140,7 @@ class StepLocation extends StatelessWidget {
                   Expanded(
                     flex: 2,
                     child: AppTextField(
-                      label: 'পোস্টকোড',
+                      label: 'Postcode'.tr,
                       controller: con.postcodeController,
                       keyboardType: TextInputType.number,
                     ),

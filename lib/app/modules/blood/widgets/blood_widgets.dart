@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
 import '../../../core/values/app_colors.dart';
 import '../../../data/models/response/blood_request_response.dart';
@@ -71,7 +72,7 @@ class BloodRequestApiCard extends StatelessWidget {
                         ],
                       ),
                       const SizedBox(height: 3),
-                      Text(hospital.isNotEmpty ? hospital : 'Hospital not set',
+                      Text(hospital.isNotEmpty ? hospital : 'Hospital not set'.tr,
                           style: const TextStyle(
                               fontSize: 12.5, color: Color(0xFF94A3B8))),
                     ],
@@ -101,8 +102,8 @@ class BloodRequestApiCard extends StatelessWidget {
                           fontSize: 12.5, color: Color(0xFF64748B))),
                 ),
                 const SizedBox(width: 8),
-                const Text('View →',
-                    style: TextStyle(
+                Text('View →'.tr,
+                    style: const TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.w700,
                         color: Color(0xFFE11D48))),
@@ -198,7 +199,7 @@ class DonorCard extends StatelessWidget {
                     Text(
                         donor.address.isNotEmpty
                             ? donor.address
-                            : 'Location not shared',
+                            : 'Location not shared'.tr,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: const TextStyle(
@@ -239,11 +240,11 @@ class DonorCard extends StatelessWidget {
               if (donor.isAvailable)
                 Row(
                   mainAxisSize: MainAxisSize.min,
-                  children: const [
-                    Icon(Icons.circle, size: 7, color: Color(0xFF16A34A)),
-                    SizedBox(width: 4),
-                    Text('Available',
-                        style: TextStyle(
+                  children: [
+                    const Icon(Icons.circle, size: 7, color: Color(0xFF16A34A)),
+                    const SizedBox(width: 4),
+                    Text('Available'.tr,
+                        style: const TextStyle(
                             fontSize: 11,
                             fontWeight: FontWeight.w700,
                             color: Color(0xFF15803D))),
@@ -261,16 +262,16 @@ class DonorCard extends StatelessWidget {
                 child: Text(
                     donor.lastDonatedLabel.isNotEmpty
                         ? donor.lastDonatedLabel
-                        : 'New donor',
+                        : 'New donor'.tr,
                     style: const TextStyle(
                         fontSize: 12, color: Color(0xFF94A3B8))),
               ),
               GestureDetector(
                 onTap: onView,
-                child: const Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 6, vertical: 4),
-                  child: Text('View →',
-                      style: TextStyle(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
+                  child: Text('View →'.tr,
+                      style: const TextStyle(
                           fontSize: 13,
                           fontWeight: FontWeight.w800,
                           color: Color(0xFF334155))),
@@ -286,11 +287,11 @@ class DonorCard extends StatelessWidget {
                       color: _red, borderRadius: BorderRadius.circular(20)),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
-                    children: const [
-                      Icon(Icons.call_rounded, size: 14, color: Colors.white),
-                      SizedBox(width: 6),
-                      Text('Call',
-                          style: TextStyle(
+                    children: [
+                      const Icon(Icons.call_rounded, size: 14, color: Colors.white),
+                      const SizedBox(width: 6),
+                      Text('Call'.tr,
+                          style: const TextStyle(
                               fontSize: 12.5,
                               fontWeight: FontWeight.w800,
                               color: Colors.white)),
@@ -457,8 +458,8 @@ class BloodRequestCard extends StatelessWidget {
               const Spacer(),
               GestureDetector(
                 onTap: onView,
-                child: const Text('View →',
-                    style: TextStyle(
+                child: Text('View →'.tr,
+                    style: const TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.w700,
                         color: Color(0xFFE11D48))),

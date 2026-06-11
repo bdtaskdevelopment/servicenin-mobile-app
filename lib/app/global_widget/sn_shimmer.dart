@@ -1,77 +1,30 @@
 import 'package:flutter/material.dart';
+import 'package:shimmer_animation/shimmer_animation.dart' as sa;
 
-/// Lightweight, dependency-free shimmer used for loading skeletons across the
-/// app. Wrap a tree of [SnBone]s in [SnShimmer]; a light band sweeps across the
-/// grey placeholder shapes continuously.
+/// Facebook-style shimmer for loading skeletons across the app. Wrap a tree of
+/// grey [SnBone]s in [SnShimmer]; a soft highlight sweeps across them.
 ///
-/// Important: skeleton card backgrounds are kept transparent so that `srcATop`
-/// only tints the opaque [SnBone]s — this keeps the individual shapes visible
-/// (a solid card fill would flatten everything into one grey block).
+/// Built on the `shimmer_animation` package (a `CustomPaint` overlay — robust
+/// across render backends). Skeleton card backgrounds are kept transparent so
+/// the individual bone shapes stay distinct.
 ///
 /// Usage:
 ///   const SnListSkeleton()                              // generic list
 ///   SnShimmer(child: Column(children: [ SnBone(...) ])) // custom skeleton
-class SnShimmer extends StatefulWidget {
-  const SnShimmer({
-    super.key,
-    required this.child,
-    this.baseColor = const Color(0xFFD9DFE6),
-    this.highlightColor = const Color(0xFFF3F6F9),
-  });
+class SnShimmer extends StatelessWidget {
+  const SnShimmer({super.key, required this.child});
 
   final Widget child;
-  final Color baseColor;
-  final Color highlightColor;
-
-  @override
-  State<SnShimmer> createState() => _SnShimmerState();
-}
-
-class _SnShimmerState extends State<SnShimmer>
-    with SingleTickerProviderStateMixin {
-  late final AnimationController _controller;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 1100),
-    )..repeat();
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
 
   @override
   Widget build(BuildContext context) {
-    return AnimatedBuilder(
-      animation: _controller,
-      builder: (context, child) {
-        // Sweep the highlight band continuously from left to right.
-        final slide = (_controller.value * 2.0) - 1.0; // -1 → 1
-        return ShaderMask(
-          blendMode: BlendMode.srcATop,
-          shaderCallback: (bounds) {
-            return LinearGradient(
-              begin: Alignment(slide - 1.0, -0.25),
-              end: Alignment(slide + 1.0, 0.25),
-              colors: [
-                widget.baseColor,
-                widget.highlightColor,
-                widget.baseColor,
-              ],
-              stops: const [0.25, 0.5, 0.75],
-              tileMode: TileMode.clamp,
-            ).createShader(bounds);
-          },
-          child: child,
-        );
-      },
-      child: widget.child,
+    return sa.Shimmer(
+      duration: const Duration(milliseconds: 1300),
+      interval: Duration.zero,
+      color: Colors.white,
+      colorOpacity: 0.65,
+      direction: const sa.ShimmerDirection.fromLeftToRight(),
+      child: child,
     );
   }
 }
@@ -165,10 +118,69 @@ class SnListSkeleton extends StatelessWidget {
     return SnShimmer(
       child: ListView.separated(
         padding: padding,
+        shrinkWrap: true,
         physics: const NeverScrollableScrollPhysics(),
         itemCount: count,
         separatorBuilder: (_, _) => const SizedBox(height: 12),
         itemBuilder: (_, _) => SnCardRowSkeleton(showTrailing: showTrailing),
+      ),
+    );
+  }
+}
+
+/// A horizontal strip of card placeholders (for horizontal ListViews:
+/// service shortcuts, date pickers, doctor/center rails, etc.).
+class SnStripSkeleton extends StatelessWidget {
+  const SnStripSkeleton({
+    super.key,
+    this.count = 5,
+    this.itemWidth = 150,
+    this.height = 110,
+    this.padding = const EdgeInsets.symmetric(horizontal: 16),
+  });
+
+  final int count;
+  final double itemWidth;
+  final double height;
+  final EdgeInsets padding;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: height,
+      child: SnShimmer(
+        child: ListView.separated(
+          scrollDirection: Axis.horizontal,
+          padding: padding,
+          physics: const NeverScrollableScrollPhysics(),
+          itemCount: count,
+          separatorBuilder: (_, _) => const SizedBox(width: 12),
+          itemBuilder: (_, _) => SnBone(
+            width: itemWidth,
+            height: height,
+            radius: 16,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// A wrapping row of small pill placeholders (for chip/filter rows).
+class SnChipsSkeleton extends StatelessWidget {
+  const SnChipsSkeleton({super.key, this.count = 6});
+  final int count;
+
+  @override
+  Widget build(BuildContext context) {
+    return SnShimmer(
+      child: Wrap(
+        spacing: 10,
+        runSpacing: 10,
+        children: List.generate(
+          count,
+          (i) => SnBone(width: 78.0 + (i % 3) * 22, height: 34, radius: 20),
+        ),
       ),
     );
   }

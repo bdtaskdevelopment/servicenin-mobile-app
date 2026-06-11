@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 
 dynamic hcDecode(dynamic src) => src is String ? jsonDecode(src) : src;
@@ -83,7 +84,7 @@ class Doctor {
   final String gender;
 
   String get displayName => fullName.isNotEmpty ? fullName : 'Doctor';
-  String get feeLabel => '৳$consultationFee';
+  String get feeLabel => consultationFee > 0 ? '৳$consultationFee' : 'Free'.tr;
   String get ratingLabel => rating.toStringAsFixed(1);
 
   String get initials {
@@ -437,7 +438,7 @@ class HcAppointment {
   String get doctorInitials => doctor?.initials ?? 'D';
   String get specialty => doctor?.specialization ?? '';
   String get venueName => venue?.venueName ?? '';
-  String get feeLabel => '৳$fee';
+  String get feeLabel => fee > 0 ? '৳$fee' : 'Free'.tr;
   String get statusLabel =>
       status.isEmpty ? '' : status[0].toUpperCase() + status.substring(1);
 

@@ -1,3 +1,4 @@
+import 'package:animate_do/animate_do.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -33,8 +34,8 @@ class BloodRequestsView extends GetView<BloodController> {
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text('Requests near you',
-                              style: TextStyle(
+                          Text('Requests near you'.tr,
+                              style: const TextStyle(
                                   fontSize: 19,
                                   fontWeight: FontWeight.w800,
                                   color: Color(0xFF0F172A))),
@@ -103,19 +104,24 @@ class _RequestsList extends StatelessWidget {
       child: ListView(
         padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
         children: [
-          ...items.map((r) => Padding(
-                padding: const EdgeInsets.only(bottom: 12),
-                child: BloodRequestApiCard(
-                  req: r,
-                  onView: () => con.viewRequest(r),
+          ...items.toList().asMap().entries.map((e) => FadeInUp(
+                from: 18,
+                duration: const Duration(milliseconds: 350),
+                delay: Duration(milliseconds: 70 * (e.key < 6 ? e.key : 6)),
+                child: Padding(
+                  padding: const EdgeInsets.only(bottom: 12),
+                  child: BloodRequestApiCard(
+                    req: e.value,
+                    onView: () => con.viewRequest(e.value),
+                  ),
                 ),
               )),
           if (items.isEmpty)
-            const Padding(
-              padding: EdgeInsets.only(top: 60),
+            Padding(
+              padding: const EdgeInsets.only(top: 60),
               child: Center(
-                child: Text('কাছাকাছি কোন অনুরোধ নেই',
-                    style: TextStyle(color: Color(0xFF94A3B8))),
+                child: Text('No requests nearby'.tr,
+                    style: const TextStyle(color: Color(0xFF94A3B8))),
               ),
             ),
         ],

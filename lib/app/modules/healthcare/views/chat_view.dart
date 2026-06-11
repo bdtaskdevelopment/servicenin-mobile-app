@@ -59,17 +59,17 @@ class ChatView extends GetView<ChatController> {
             padding: const EdgeInsets.fromLTRB(16, 10, 16, 10),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
-              children: const [
-                Text('● v2',
+              children: [
+                const Text('● v2',
                     style: TextStyle(
                         fontSize: 11,
                         fontWeight: FontWeight.w700,
                         color: Color(0xFFB45309))),
-                SizedBox(width: 8),
+                const SizedBox(width: 8),
                 Expanded(
                   child: Text(
-                    'In-app doctor chat is planned for v2 — not in the current API.',
-                    style: TextStyle(
+                    'In-app doctor chat is planned for v2 — not in the current API.'.tr,
+                    style: const TextStyle(
                         fontSize: 12, color: Color(0xFFB45309), height: 1.4),
                   ),
                 ),
@@ -83,7 +83,7 @@ class ChatView extends GetView<ChatController> {
                 return ListView(
                   padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
                   children: [
-                    const Center(child: _DayChip('Today')),
+                    Center(child: _DayChip('Today'.tr)),
                     const SizedBox(height: 12),
                     ...con.messages.map((m) => _Bubble(msg: m)),
                   ],
@@ -111,9 +111,9 @@ class ChatView extends GetView<ChatController> {
                         alignment: Alignment.centerLeft,
                         child: TextField(
                           controller: controller.input,
-                          decoration: const InputDecoration(
-                            hintText: 'Type a message…',
-                            hintStyle: TextStyle(color: Color(0xFF94A3B8)),
+                          decoration: InputDecoration(
+                            hintText: 'Type a message…'.tr,
+                            hintStyle: const TextStyle(color: Color(0xFF94A3B8)),
                             border: InputBorder.none,
                             isCollapsed: true,
                           ),

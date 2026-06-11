@@ -1,3 +1,4 @@
+import 'package:animate_do/animate_do.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -29,22 +30,22 @@ class AppointmentsView extends GetView<AppointmentsController> {
             icon: const Icon(Icons.arrow_back_ios_new_rounded,
                 size: 20, color: Color(0xFF1A1A1A)),
           ),
-          title: const Text('My appointments',
-              style: TextStyle(
+          title: Text('My appointments'.tr,
+              style: const TextStyle(
                   fontSize: 19,
                   fontWeight: FontWeight.w800,
                   color: Color(0xFF0F172A))),
-          bottom: const TabBar(
+          bottom: TabBar(
             indicatorColor: _green,
             indicatorWeight: 2.5,
             labelColor: _green,
-            unselectedLabelColor: Color(0xFF94A3B8),
-            labelStyle: TextStyle(fontSize: 14.5, fontWeight: FontWeight.w700),
+            unselectedLabelColor: const Color(0xFF94A3B8),
+            labelStyle: const TextStyle(fontSize: 14.5, fontWeight: FontWeight.w700),
             unselectedLabelStyle:
-                TextStyle(fontSize: 14.5, fontWeight: FontWeight.w600),
+                const TextStyle(fontSize: 14.5, fontWeight: FontWeight.w600),
             tabs: [
-              Tab(text: 'Upcoming'),
-              Tab(text: 'Completed'),
+              Tab(text: 'Upcoming'.tr),
+              Tab(text: 'Completed'.tr),
             ],
           ),
         ),
@@ -77,11 +78,11 @@ class _List extends StatelessWidget {
         color: _green,
         onRefresh: Get.find<AppointmentsController>().fetchMine,
         child: ListView(
-          children: const [
-            SizedBox(height: 140),
+          children: [
+            const SizedBox(height: 140),
             Center(
-              child: Text('No appointments',
-                  style: TextStyle(color: Color(0xFF94A3B8))),
+              child: Text('No appointments'.tr,
+                  style: const TextStyle(color: Color(0xFF94A3B8))),
             ),
           ],
         ),
@@ -93,12 +94,21 @@ class _List extends StatelessWidget {
       child: ListView(
         padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
         children: items
-            .map((a) => Padding(
-                  padding: const EdgeInsets.only(bottom: 12),
-                  child: GestureDetector(
-                    onTap: () => Get.find<AppointmentsController>()
-                        .openAppointment(a),
-                    child: _ApptCard(appt: a),
+            .toList()
+            .asMap()
+            .entries
+            .map((e) => FadeInUp(
+                  from: 18,
+                  duration: const Duration(milliseconds: 350),
+                  delay: Duration(
+                      milliseconds: 70 * (e.key < 6 ? e.key : 6)),
+                  child: Padding(
+                    padding: const EdgeInsets.only(bottom: 12),
+                    child: GestureDetector(
+                      onTap: () => Get.find<AppointmentsController>()
+                          .openAppointment(e.value),
+                      child: _ApptCard(appt: e.value),
+                    ),
                   ),
                 ))
             .toList(),
@@ -188,8 +198,8 @@ class _ApptCard extends StatelessWidget {
               if (appt.serialNo > 0)
                 Row(
                   children: [
-                    const Text('Serial ',
-                        style: TextStyle(
+                    Text('Serial '.tr,
+                        style: const TextStyle(
                             fontSize: 12.5, color: Color(0xFF94A3B8))),
                     Text('${appt.serialNo}',
                         style: const TextStyle(
@@ -220,11 +230,11 @@ class _StatusPill extends StatelessWidget {
             borderRadius: BorderRadius.circular(20)),
         child: Row(
           mainAxisSize: MainAxisSize.min,
-          children: const [
-            Icon(Icons.circle, size: 7, color: Color(0xFF16A34A)),
-            SizedBox(width: 4),
-            Text('Upcoming',
-                style: TextStyle(
+          children: [
+            const Icon(Icons.circle, size: 7, color: Color(0xFF16A34A)),
+            const SizedBox(width: 4),
+            Text('Upcoming'.tr,
+                style: const TextStyle(
                     fontSize: 11, fontWeight: FontWeight.w700, color: _green)),
           ],
         ),
@@ -235,8 +245,8 @@ class _StatusPill extends StatelessWidget {
       decoration: BoxDecoration(
           color: const Color(0xFFEDF1EE),
           borderRadius: BorderRadius.circular(20)),
-      child: const Text('Completed',
-          style: TextStyle(
+      child: Text('Completed'.tr,
+          style: const TextStyle(
               fontSize: 11,
               fontWeight: FontWeight.w700,
               color: Color(0xFF475569))),

@@ -27,17 +27,17 @@ class JobSeekerProfileView extends GetView<JobsController> {
                       icon: const Icon(Icons.arrow_back_ios_new_rounded,
                           size: 20, color: Color(0xFF1A1A1A)),
                     ),
-                    const Column(
+                    Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('Job profile',
-                            style: TextStyle(
+                        Text('Job profile'.tr,
+                            style: const TextStyle(
                                 fontSize: 19,
                                 fontWeight: FontWeight.w800,
                                 color: Color(0xFF0F172A))),
-                        SizedBox(height: 1),
-                        Text('Employers see this when you apply',
-                            style: TextStyle(
+                        const SizedBox(height: 1),
+                        Text('Employers see this when you apply'.tr,
+                            style: const TextStyle(
                                 fontSize: 12, color: Color(0xFF94A3B8))),
                       ],
                     ),
@@ -48,28 +48,28 @@ class JobSeekerProfileView extends GetView<JobsController> {
                 child: ListView(
                   padding: const EdgeInsets.fromLTRB(16, 10, 16, 16),
                   children: [
-                    const _Label('FULL NAME'),
-                    _Input(con.seekerName, 'Your full name'),
+                    _Label('FULL NAME'.tr),
+                    _Input(con.seekerName, 'Your full name'.tr),
                     const SizedBox(height: 14),
-                    const _Label('PHONE'),
+                    _Label('PHONE'.tr),
                     _Input(con.seekerPhone, '+8801XXXXXXXXX',
                         kb: TextInputType.phone),
                     const SizedBox(height: 14),
-                    const _Label('EMAIL'),
+                    _Label('EMAIL'.tr),
                     _Input(con.seekerEmail, 'you@email.com',
                         kb: TextInputType.emailAddress),
                     const SizedBox(height: 14),
-                    const _Label('ADDRESS'),
-                    _Input(con.seekerAddress, 'e.g. Dhanmondi, Dhaka'),
+                    _Label('ADDRESS'.tr),
+                    _Input(con.seekerAddress, 'e.g. Dhanmondi, Dhaka'.tr),
                     const SizedBox(height: 14),
-                    const _Label('DISTRICT'),
-                    _Input(con.seekerDistrict, 'e.g. Dhaka'),
+                    _Label('DISTRICT'.tr),
+                    _Input(con.seekerDistrict, 'e.g. Dhaka'.tr),
                     const SizedBox(height: 14),
-                    const _Label('SKILLS'),
-                    _Input(con.seekerSkills, 'e.g. Go, Flutter, SQL'),
+                    _Label('SKILLS'.tr),
+                    _Input(con.seekerSkills, 'e.g. Go, Flutter, SQL'.tr),
                     const SizedBox(height: 14),
-                    const _Label('EXPERIENCE (YEARS)'),
-                    _Input(con.seekerExp, 'e.g. 4',
+                    _Label('EXPERIENCE (YEARS)'.tr),
+                    _Input(con.seekerExp, 'e.g. 4'.tr,
                         kb: TextInputType.number),
                   ],
                 ),
@@ -96,8 +96,8 @@ class JobSeekerProfileView extends GetView<JobsController> {
                             child: CircularProgressIndicator(
                                 strokeWidth: 2.4, color: Colors.white),
                           )
-                        : const Text('Save job profile',
-                            style: TextStyle(
+                        : Text('Save job profile'.tr,
+                            style: const TextStyle(
                                 fontSize: 16, fontWeight: FontWeight.w800)),
                   ),
                 ),

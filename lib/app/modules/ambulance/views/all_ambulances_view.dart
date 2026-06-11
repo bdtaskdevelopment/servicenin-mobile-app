@@ -1,3 +1,4 @@
+import 'package:animate_do/animate_do.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -28,17 +29,17 @@ class AllAmbulancesView extends GetView<AmbulanceController> {
                     icon: const Icon(Icons.arrow_back_ios_new_rounded,
                         size: 20, color: Color(0xFF1A1A1A)),
                   ),
-                  const Column(
+                  Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('Available ambulances',
-                          style: TextStyle(
+                      Text('Available ambulances'.tr,
+                          style: const TextStyle(
                               fontSize: 19,
                               fontWeight: FontWeight.w800,
                               color: Color(0xFF0F172A))),
-                      SizedBox(height: 1),
-                      Text('Tap one to estimate the fare',
-                          style: TextStyle(
+                      const SizedBox(height: 1),
+                      Text('Tap one to estimate the fare'.tr,
+                          style: const TextStyle(
                               fontSize: 12, color: Color(0xFF94A3B8))),
                     ],
                   ),
@@ -56,24 +57,28 @@ class AllAmbulancesView extends GetView<AmbulanceController> {
                     }
                     if (con.available.isEmpty) {
                       return ListView(
-                        children: const [
-                          SizedBox(height: 120),
+                        children: [
+                          const SizedBox(height: 120),
                           Center(
-                            child: Text('No ambulances available right now.',
-                                style: TextStyle(color: Color(0xFF94A3B8))),
+                            child: Text('No ambulances available right now.'.tr,
+                                style: const TextStyle(color: Color(0xFF94A3B8))),
                           ),
                         ],
                       );
                     }
-                    return ListView(
-                      padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
-                      children: con.available
-                          .map((a) => Padding(
-                                padding: const EdgeInsets.only(bottom: 12),
-                                child: AmbulanceCard(
-                                    amb: a, onTap: () => con.openFareFor(a)),
-                              ))
-                          .toList(),
+                    return FadeInUp(
+                      from: 18,
+                      duration: const Duration(milliseconds: 350),
+                      child: ListView(
+                        padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+                        children: con.available
+                            .map((a) => Padding(
+                                  padding: const EdgeInsets.only(bottom: 12),
+                                  child: AmbulanceCard(
+                                      amb: a, onTap: () => con.openFareFor(a)),
+                                ))
+                            .toList(),
+                      ),
                     );
                   },
                 ),

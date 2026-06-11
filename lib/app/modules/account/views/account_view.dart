@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../../core/values/app_colors.dart';
+import '../../../global_widget/sn_shimmer.dart';
 import '../../../routes/app_pages.dart';
 import '../controllers/account_controller.dart';
 import '../widgets/profile_avatar.dart';
@@ -30,29 +31,29 @@ class AccountView extends GetView<AccountController> {
                   children: [
                     _MenuItem(
                       icon: Icons.person_outline_rounded,
-                      title: 'View profile',
-                      subtitle: 'Name, gender, blood group, address',
+                      title: 'View profile'.tr,
+                      subtitle: 'Name, gender, blood group, address'.tr,
                       onTap: con.openProfile,
                     ),
                     const SizedBox(height: 14),
                     _MenuItem(
                       icon: Icons.access_time_rounded,
-                      title: 'My activity',
-                      subtitle: 'Bookings & requests across all services',
+                      title: 'My activity'.tr,
+                      subtitle: 'Bookings & requests across all services'.tr,
                       onTap: con.openActivity,
                     ),
                     const SizedBox(height: 14),
                     _MenuItem(
                       icon: Icons.notifications_none_rounded,
-                      title: 'Language & settings',
+                      title: 'Language & settings'.tr,
                       subtitle: 'বাংলা / English · notifications',
                       onTap: con.openSettings,
                     ),
                     const SizedBox(height: 14),
                     _MenuItem(
                       icon: Icons.chat_bubble_outline_rounded,
-                      title: 'Help & support',
-                      subtitle: 'FAQ · contact us',
+                      title: 'Help & support'.tr,
+                      subtitle: 'FAQ · contact us'.tr,
                       onTap: () => Get.toNamed(Routes.INFORMATION),
                     ),
                   ],
@@ -78,9 +79,9 @@ class AccountView extends GetView<AccountController> {
                         ),
                       ],
                     ),
-                    child: const Text(
-                      'Log out',
-                      style: TextStyle(
+                    child: Text(
+                      'Log out'.tr,
+                      style: const TextStyle(
                         color: Color(0xFFDC2626),
                         fontSize: 16,
                         fontWeight: FontWeight.w800,
@@ -138,7 +139,20 @@ class _ProfileHeader extends StatelessWidget {
                   ),
                   const SizedBox(width: 14),
                   Expanded(
-                    child: Column(
+                    child: (con.loading && con.profile == null)
+                        ? SnShimmer(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: const [
+                                SnBone(width: 150, height: 18, radius: 6),
+                                SizedBox(height: 8),
+                                SnBone(width: 110, height: 12, radius: 6),
+                                SizedBox(height: 12),
+                                SnBone(width: 70, height: 22, radius: 20),
+                              ],
+                            ),
+                          )
+                        : Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
@@ -178,7 +192,7 @@ class _ProfileHeader extends StatelessWidget {
                     const SizedBox(width: 10),
                     Expanded(
                       child: Text(
-                        'One ServiceNin ID powers all 12 services — no separate logins.',
+                        'One ServiceNin ID powers all 12 services — no separate logins.'.tr,
                         style: TextStyle(
                             fontSize: 12.5,
                             height: 1.4,
@@ -207,7 +221,7 @@ class _BloodPill extends StatelessWidget {
         color: Colors.white.withValues(alpha: 0.16),
         borderRadius: BorderRadius.circular(20),
       ),
-      child: Text('Blood $group',
+      child: Text('${'Blood'.tr} $group',
           style: const TextStyle(
               fontSize: 11,
               fontWeight: FontWeight.w700,

@@ -1,3 +1,4 @@
+import 'package:animate_do/animate_do.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -31,17 +32,17 @@ class PhysioView extends GetView<PhysioController> {
                     icon: const Icon(Icons.arrow_back_ios_new_rounded,
                         size: 20, color: Color(0xFF1A1A1A)),
                   ),
-                  const Column(
+                  Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('Physiotherapy',
-                          style: TextStyle(
+                      Text('Physiotherapy'.tr,
+                          style: const TextStyle(
                               fontSize: 19,
                               fontWeight: FontWeight.w800,
                               color: Color(0xFF0F172A))),
-                      SizedBox(height: 1),
-                      Text('Centers & therapists near you',
-                          style: TextStyle(
+                      const SizedBox(height: 1),
+                      Text('Centers & therapists near you'.tr,
+                          style: const TextStyle(
                               fontSize: 12, color: Color(0xFF94A3B8))),
                     ],
                   ),
@@ -81,14 +82,14 @@ class PhysioView extends GetView<PhysioController> {
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Text('ব্যথামুক্ত জীবন শুরু করুন',
-                                style: TextStyle(
+                            Text('Start a pain-free life'.tr,
+                                style: const TextStyle(
                                     color: Colors.white,
                                     fontSize: 20,
                                     fontWeight: FontWeight.w800)),
                             const SizedBox(height: 8),
                             Text(
-                                'Certified physiotherapists · home & in-center sessions',
+                                'Certified physiotherapists · home & in-center sessions'.tr,
                                 style: TextStyle(
                                     color: Colors.white.withValues(alpha: 0.9),
                                     fontSize: 12.5)),
@@ -98,38 +99,50 @@ class PhysioView extends GetView<PhysioController> {
                     ),
                   ),
                   const SizedBox(height: 22),
-                  const Text("What's bothering you?",
-                      style: TextStyle(
+                  Text("What's bothering you?".tr,
+                      style: const TextStyle(
                           fontSize: 17,
                           fontWeight: FontWeight.w800,
                           color: Color(0xFF0F172A))),
                   const SizedBox(height: 14),
-                  SizedBox(
-                    height: 96,
-                    child: ListView.separated(
-                      scrollDirection: Axis.horizontal,
-                      itemCount: con.concerns.length,
-                      separatorBuilder: (_, _) => const SizedBox(width: 12),
-                      itemBuilder: (_, i) {
-                        final c = con.concerns[i];
-                        return GestureDetector(
-                          onTap: () => con.selectConcern(c),
-                          child: _ConcernTile(concern: c),
-                        );
-                      },
+                  if (con.loadingConcerns && con.concerns.isEmpty)
+                    const SnStripSkeleton(
+                      count: 5,
+                      itemWidth: 88,
+                      height: 96,
+                      padding: EdgeInsets.zero,
+                    )
+                  else
+                    FadeInUp(
+                      from: 18,
+                      duration: const Duration(milliseconds: 350),
+                      child: SizedBox(
+                        height: 96,
+                        child: ListView.separated(
+                          scrollDirection: Axis.horizontal,
+                          itemCount: con.concerns.length,
+                          separatorBuilder: (_, _) => const SizedBox(width: 12),
+                          itemBuilder: (_, i) {
+                            final c = con.concerns[i];
+                            return GestureDetector(
+                              onTap: () => con.selectConcern(c),
+                              child: _ConcernTile(concern: c),
+                            );
+                          },
+                        ),
+                      ),
                     ),
-                  ),
                   const SizedBox(height: 24),
-                  const Text('Physio centers',
-                      style: TextStyle(
+                  Text('Physio centers'.tr,
+                      style: const TextStyle(
                           fontSize: 17,
                           fontWeight: FontWeight.w800,
                           color: Color(0xFF0F172A))),
                   const SizedBox(height: 2),
                   Text(
                       con.selectedConcernLabel.isNotEmpty
-                          ? '${con.centers.length} centers for ${con.selectedConcernLabel}'
-                          : '${con.centers.length} centers near you',
+                          ? '${con.centers.length} ${'centers for'.tr} ${con.selectedConcernLabel}'
+                          : '${con.centers.length} ${'centers near you'.tr}',
                       style: const TextStyle(fontSize: 12.5, color: _orange)),
                   const SizedBox(height: 14),
                   if (con.loadingCenters && con.centers.isEmpty)
@@ -138,18 +151,23 @@ class PhysioView extends GetView<PhysioController> {
                       padding: EdgeInsets.zero,
                     )
                   else if (con.centers.isEmpty)
-                    const Padding(
-                      padding: EdgeInsets.symmetric(vertical: 8),
-                      child: Text('No centers found.',
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 8),
+                      child: Text('No centers found.'.tr,
                           style:
-                              TextStyle(fontSize: 13, color: Color(0xFF94A3B8))),
+                              const TextStyle(fontSize: 13, color: Color(0xFF94A3B8))),
                     )
                   else
-                    ...con.centers.map((c) => Padding(
-                          padding: const EdgeInsets.only(bottom: 12),
-                          child: GestureDetector(
-                            onTap: () => con.openCenter(c),
-                            child: _CenterCard(center: c),
+                    ...con.centers.toList().asMap().entries.map((e) => FadeInUp(
+                          from: 18,
+                          duration: const Duration(milliseconds: 350),
+                          delay: Duration(milliseconds: 70 * e.key),
+                          child: Padding(
+                            padding: const EdgeInsets.only(bottom: 12),
+                            child: GestureDetector(
+                              onTap: () => con.openCenter(e.value),
+                              child: _CenterCard(center: e.value),
+                            ),
                           ),
                         )),
                 ],

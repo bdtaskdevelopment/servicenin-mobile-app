@@ -42,18 +42,18 @@ class QuickActionsSheet extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 20),
-          const Text(
-            'Quick Actions',
-            style: TextStyle(
+          Text(
+            'Quick Actions'.tr,
+            style: const TextStyle(
               fontSize: 20,
               fontWeight: FontWeight.w800,
               color: Color(0xFF0F172A),
             ),
           ),
           const SizedBox(height: 4),
-          const Text(
-            'Reachable in two taps from anywhere.',
-            style: TextStyle(fontSize: 13, color: Color(0xFF64748B)),
+          Text(
+            'Reachable in two taps from anywhere.'.tr,
+            style: const TextStyle(fontSize: 13, color: Color(0xFF64748B)),
           ),
           const SizedBox(height: 20),
           Row(
@@ -110,7 +110,7 @@ class _QuickItem extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           Text(
-            action.name,
+            action.name.tr,
             textAlign: TextAlign.center,
             style: const TextStyle(
               fontSize: 11,

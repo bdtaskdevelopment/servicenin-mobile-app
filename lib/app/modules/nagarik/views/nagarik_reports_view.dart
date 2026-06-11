@@ -1,3 +1,4 @@
+import 'package:animate_do/animate_do.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -27,26 +28,36 @@ class NagarikReportsView extends GetView<NagarikController> {
           titleSpacing: 0,
           leading: IconButton(
             onPressed: () => Get.back(),
-            icon: const Icon(Icons.arrow_back_ios_new_rounded,
-                size: 20, color: Color(0xFF1A1A1A)),
+            icon: const Icon(
+              Icons.arrow_back_ios_new_rounded,
+              size: 20,
+              color: Color(0xFF1A1A1A),
+            ),
           ),
-          title: const Text('My reports',
-              style: TextStyle(
-                  fontSize: 19,
-                  fontWeight: FontWeight.w800,
-                  color: Color(0xFF0F172A))),
-          bottom: const TabBar(
+          title: Text(
+            'My reports'.tr,
+            style: const TextStyle(
+              fontSize: 19,
+              fontWeight: FontWeight.w800,
+              color: Color(0xFF0F172A),
+            ),
+          ),
+          bottom: TabBar(
             indicatorColor: _orange,
             indicatorWeight: 2.5,
             labelColor: _orange,
-            unselectedLabelColor: Color(0xFF94A3B8),
-            labelStyle:
-                TextStyle(fontSize: 14.5, fontWeight: FontWeight.w800),
-            unselectedLabelStyle:
-                TextStyle(fontSize: 14.5, fontWeight: FontWeight.w600),
+            unselectedLabelColor: const Color(0xFF94A3B8),
+            labelStyle: const TextStyle(
+              fontSize: 14.5,
+              fontWeight: FontWeight.w800,
+            ),
+            unselectedLabelStyle: const TextStyle(
+              fontSize: 14.5,
+              fontWeight: FontWeight.w600,
+            ),
             tabs: [
-              Tab(text: 'Grievances'),
-              Tab(text: 'Tickets'),
+              Tab(text: 'Grievances'.tr),
+              Tab(text: 'Tickets'.tr),
             ],
           ),
         ),
@@ -72,22 +83,28 @@ class _GrievanceTab extends StatelessWidget {
       return const SnListSkeleton(padding: EdgeInsets.fromLTRB(16, 16, 16, 24));
     }
     if (con.grievances.isEmpty) {
-      return const _Empty('No grievances filed yet.');
+      return _Empty('No grievances filed yet.'.tr);
     }
     return RefreshIndicator(
       color: _orange,
       onRefresh: con.fetchGrievances,
-      child: ListView(
-        padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
-        children: con.grievances
-            .map((g) => Padding(
+      child: FadeInUp(
+        from: 18,
+        duration: const Duration(milliseconds: 350),
+        child: ListView(
+          padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
+          children: con.grievances
+              .map(
+                (g) => Padding(
                   padding: const EdgeInsets.only(bottom: 12),
                   child: GestureDetector(
                     onTap: () => con.openGrievance(g),
                     child: ReportCard(report: g),
                   ),
-                ))
-            .toList(),
+                ),
+              )
+              .toList(),
+        ),
       ),
     );
   }
@@ -103,22 +120,28 @@ class _TicketTab extends StatelessWidget {
         if (con.loadingTickets && con.tickets.isEmpty)
           const SnListSkeleton(padding: EdgeInsets.fromLTRB(16, 16, 16, 90))
         else if (con.tickets.isEmpty)
-          const _Empty('No support tickets yet.')
+          _Empty('No support tickets yet.'.tr)
         else
           RefreshIndicator(
             color: _orange,
             onRefresh: con.fetchTickets,
-            child: ListView(
-              padding: const EdgeInsets.fromLTRB(16, 16, 16, 90),
-              children: con.tickets
-                  .map((t) => Padding(
+            child: FadeInUp(
+              from: 18,
+              duration: const Duration(milliseconds: 350),
+              child: ListView(
+                padding: const EdgeInsets.fromLTRB(16, 16, 16, 90),
+                children: con.tickets
+                    .map(
+                      (t) => Padding(
                         padding: const EdgeInsets.only(bottom: 12),
                         child: GestureDetector(
                           onTap: () => con.openTicket(t),
                           child: _TicketCard(t: t),
                         ),
-                      ))
-                  .toList(),
+                      ),
+                    )
+                    .toList(),
+              ),
             ),
           ),
         Positioned(
@@ -130,8 +153,10 @@ class _TicketTab extends StatelessWidget {
             foregroundColor: Colors.white,
             elevation: 2,
             icon: const Icon(Icons.add_rounded, size: 20),
-            label: const Text('New ticket',
-                style: TextStyle(fontWeight: FontWeight.w800)),
+            label: Text(
+              'New ticket'.tr,
+              style: const TextStyle(fontWeight: FontWeight.w800),
+            ),
           ),
         ),
       ],
@@ -148,11 +173,14 @@ class _Empty extends StatelessWidget {
       children: [
         const SizedBox(height: 140),
         Center(
-          child: Text(text,
-              style: const TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600,
-                  color: Color(0xFF94A3B8))),
+          child: Text(
+            text,
+            style: const TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
+              color: Color(0xFF94A3B8),
+            ),
+          ),
         ),
       ],
     );
@@ -167,43 +195,57 @@ class _TicketCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-          color: AppColors.white,
-          borderRadius: BorderRadius.circular(16),
-          boxShadow: [
-            BoxShadow(
-                color: Colors.black.withValues(alpha: 0.03),
-                blurRadius: 10,
-                offset: const Offset(0, 3)),
-          ]),
+        color: AppColors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.03),
+            blurRadius: 10,
+            offset: const Offset(0, 3),
+          ),
+        ],
+      ),
       child: Row(
         children: [
           Container(
             width: 46,
             height: 46,
             decoration: BoxDecoration(
-                color: _tile, borderRadius: BorderRadius.circular(12)),
-            child: const Icon(Icons.chat_bubble_outline_rounded,
-                color: _orange, size: 21),
+              color: _tile,
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: const Icon(
+              Icons.chat_bubble_outline_rounded,
+              color: _orange,
+              size: 21,
+            ),
           ),
           const SizedBox(width: 12),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(t.subject.isNotEmpty ? t.subject : t.categoryLabel,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                        fontSize: 14.5,
-                        fontWeight: FontWeight.w800,
-                        color: Color(0xFF0F172A))),
+                Text(
+                  t.subject.isNotEmpty ? t.subject : t.categoryLabel,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    fontSize: 14.5,
+                    fontWeight: FontWeight.w800,
+                    color: Color(0xFF0F172A),
+                  ),
+                ),
                 const SizedBox(height: 2),
                 Text(
-                    [t.categoryLabel, t.createdLabel]
-                        .where((s) => s.isNotEmpty)
-                        .join('  ·  '),
-                    style: const TextStyle(
-                        fontSize: 12, color: Color(0xFF94A3B8))),
+                  [
+                    t.categoryLabel,
+                    t.createdLabel,
+                  ].where((s) => s.isNotEmpty).join('  ·  '),
+                  style: const TextStyle(
+                    fontSize: 12,
+                    color: Color(0xFF94A3B8),
+                  ),
+                ),
               ],
             ),
           ),

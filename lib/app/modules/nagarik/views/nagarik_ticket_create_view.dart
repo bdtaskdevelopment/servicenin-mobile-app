@@ -29,17 +29,17 @@ class NagarikTicketCreateView extends GetView<NagarikController> {
                       icon: const Icon(Icons.arrow_back_ios_new_rounded,
                           size: 20, color: Color(0xFF1A1A1A)),
                     ),
-                    const Column(
+                    Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('New support ticket',
-                            style: TextStyle(
+                        Text('New support ticket'.tr,
+                            style: const TextStyle(
                                 fontSize: 19,
                                 fontWeight: FontWeight.w800,
                                 color: Color(0xFF0F172A))),
-                        SizedBox(height: 1),
-                        Text('DNCC support will reply in chat',
-                            style: TextStyle(
+                        const SizedBox(height: 1),
+                        Text('DNCC support will reply in chat'.tr,
+                            style: const TextStyle(
                                 fontSize: 12, color: Color(0xFF94A3B8))),
                       ],
                     ),
@@ -50,7 +50,7 @@ class NagarikTicketCreateView extends GetView<NagarikController> {
                 child: ListView(
                   padding: const EdgeInsets.fromLTRB(16, 6, 16, 16),
                   children: [
-                    const _Label('CATEGORY'),
+                    _Label('CATEGORY'.tr),
                     const SizedBox(height: 10),
                     Wrap(
                       spacing: 10,
@@ -83,20 +83,21 @@ class NagarikTicketCreateView extends GetView<NagarikController> {
                       }).toList(),
                     ),
                     const SizedBox(height: 18),
-                    const _Label('SUBJECT'),
+                    _Label('SUBJECT'.tr),
                     const SizedBox(height: 10),
                     _Input(
                         controller: con.ticketSubject,
-                        hint: 'e.g. Holding tax payment failed'),
+                        hint: 'e.g. Holding tax payment failed'.tr),
                     const SizedBox(height: 18),
-                    const _Label('DESCRIPTION'),
+                    _Label('DESCRIPTION'.tr),
                     const SizedBox(height: 10),
                     _Input(
                         controller: con.ticketDescription,
-                        hint: 'Explain your issue, include any reference IDs…',
+                        hint: 'Explain your issue, include any reference IDs…'
+                            .tr,
                         maxLines: 5),
                     const SizedBox(height: 18),
-                    const _Label('PRIORITY'),
+                    _Label('PRIORITY'.tr),
                     const SizedBox(height: 10),
                     Row(
                       children: List.generate(con.priorities.length, (i) {
@@ -160,8 +161,8 @@ class NagarikTicketCreateView extends GetView<NagarikController> {
                             child: CircularProgressIndicator(
                                 strokeWidth: 2.4, color: Colors.white),
                           )
-                        : const Text('Create ticket',
-                            style: TextStyle(
+                        : Text('Create ticket'.tr,
+                            style: const TextStyle(
                                 fontSize: 16, fontWeight: FontWeight.w800)),
                   ),
                 ),

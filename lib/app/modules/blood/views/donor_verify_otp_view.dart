@@ -36,15 +36,15 @@ class DonorVerifyOtpView extends GetView<DonorRegisterController> {
                         color: _red, size: 30),
                   ),
                   const SizedBox(height: 18),
-                  const Text('Verify your account',
-                      style: TextStyle(
+                  Text('Verify your account'.tr,
+                      style: const TextStyle(
                           fontSize: 22,
                           fontWeight: FontWeight.w800,
                           color: Color(0xFF0F172A))),
                   const SizedBox(height: 6),
-                  const Text(
-                    'Enter the 6-digit code we sent to verify your donor registration.',
-                    style: TextStyle(
+                  Text(
+                    'Enter the 6-digit code we sent to verify your donor registration.'.tr,
+                    style: const TextStyle(
                         fontSize: 13.5, color: Color(0xFF64748B), height: 1.4),
                   ),
                   const SizedBox(height: 28),
@@ -79,8 +79,8 @@ class DonorVerifyOtpView extends GetView<DonorRegisterController> {
                         shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(14)),
                       ),
-                      child: const Text('Verify & finish',
-                          style: TextStyle(
+                      child: Text('Verify & finish'.tr,
+                          style: const TextStyle(
                               fontSize: 16, fontWeight: FontWeight.w700)),
                     ),
                   ),
@@ -109,8 +109,8 @@ class _Header extends StatelessWidget {
             icon: const Icon(Icons.arrow_back_ios_new_rounded,
                 size: 20, color: Color(0xFF1A1A1A)),
           ),
-          const Text('Verify OTP',
-              style: TextStyle(
+          Text('Verify OTP'.tr,
+              style: const TextStyle(
                   fontSize: 19,
                   fontWeight: FontWeight.w800,
                   color: Color(0xFF0F172A))),

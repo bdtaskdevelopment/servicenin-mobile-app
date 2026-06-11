@@ -21,10 +21,10 @@ class BloodRequestDetailView extends GetView<BloodController> {
           child: Column(
             children: [
               _DetailHeader(subtitle: ''),
-              const Expanded(
+              Expanded(
                 child: Center(
-                  child: Text('Request not found',
-                      style: TextStyle(color: Color(0xFF94A3B8))),
+                  child: Text('Request not found'.tr,
+                      style: const TextStyle(color: Color(0xFF94A3B8))),
                 ),
               ),
             ],
@@ -90,20 +90,20 @@ class BloodRequestDetailView extends GetView<BloodController> {
                         ),
                         _InfoRow(
                           icon: Icons.local_hospital_outlined,
-                          label: 'Hospital',
-                          value: hospital.isNotEmpty ? hospital : 'Not set',
+                          label: 'Hospital'.tr,
+                          value: hospital.isNotEmpty ? hospital : 'Not set'.tr,
                         ),
                         const SizedBox(height: 16),
                         _InfoRow(
                           icon: Icons.person_outline_rounded,
-                          label: 'Contact',
-                          value: contact.isNotEmpty ? contact : 'Not provided',
+                          label: 'Contact'.tr,
+                          value: contact.isNotEmpty ? contact : 'Not provided'.tr,
                         ),
                         if (req.timeAgo.isNotEmpty) ...[
                           const SizedBox(height: 16),
                           _InfoRow(
                             icon: Icons.access_time_rounded,
-                            label: 'Posted',
+                            label: 'Posted'.tr,
                             value: req.timeAgo,
                           ),
                         ],
@@ -136,14 +136,14 @@ class BloodRequestDetailView extends GetView<BloodController> {
                     ),
                     child: Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
-                      children: const [
-                        Icon(Icons.check_circle_rounded,
+                      children: [
+                        const Icon(Icons.check_circle_rounded,
                             color: Color(0xFF16A34A), size: 20),
-                        SizedBox(width: 10),
+                        const SizedBox(width: 10),
                         Expanded(
                           child: Text(
-                            'If you are eligible and your group is compatible, reach out to the contact above.',
-                            style: TextStyle(
+                            'If you are eligible and your group is compatible, reach out to the contact above.'.tr,
+                            style: const TextStyle(
                                 fontSize: 13,
                                 fontWeight: FontWeight.w600,
                                 color: Color(0xFF166534),
@@ -202,8 +202,8 @@ class BloodRequestDetailView extends GetView<BloodController> {
                                   child: CircularProgressIndicator(
                                       strokeWidth: 2.5, color: Colors.white),
                                 )
-                              : const Text('Respond — I can donate',
-                                  style: TextStyle(
+                              : Text('Respond — I can donate'.tr,
+                                  style: const TextStyle(
                                       fontSize: 15.5,
                                       fontWeight: FontWeight.w700)),
                         ),
@@ -239,8 +239,8 @@ class _DetailHeader extends StatelessWidget {
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text('Blood request',
-                  style: TextStyle(
+              Text('Blood request'.tr,
+                  style: const TextStyle(
                       fontSize: 19,
                       fontWeight: FontWeight.w800,
                       color: Color(0xFF0F172A))),

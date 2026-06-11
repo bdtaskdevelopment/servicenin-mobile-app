@@ -45,31 +45,31 @@ class RegistrationView extends GetView<RegistrationController> {
                   child: ListView(
                     padding: const EdgeInsets.fromLTRB(20, 4, 20, 16),
                     children: [
-                      const Text(
-                        'অ্যাকাউন্ট তৈরি করুন',
-                        style: TextStyle(
+                      Text(
+                        'Create your account'.tr,
+                        style: const TextStyle(
                           fontSize: 26,
                           fontWeight: FontWeight.w800,
                           color: Color(0xFF0F172A),
                         ),
                       ),
                       const SizedBox(height: 6),
-                      const Text(
-                        'আপনার তথ্য দিয়ে অ্যাকাউন্ট তৈরি করুন।',
-                        style:
-                            TextStyle(fontSize: 14, color: Color(0xFF64748B)),
+                      Text(
+                        'Create an account with your details.'.tr,
+                        style: const TextStyle(
+                            fontSize: 14, color: Color(0xFF64748B)),
                       ),
                       const SizedBox(height: 28),
                       _Field(
-                        label: 'নাম',
-                        hint: 'আপনার পূর্ণ নাম',
+                        label: 'Name'.tr,
+                        hint: 'Your full name'.tr,
                         controller: con.nameController,
                         onChanged: con.onInfoChanged,
                         keyboard: TextInputType.name,
                       ),
                       const SizedBox(height: 18),
                       _Field(
-                        label: 'ফোন নম্বর',
+                        label: 'Phone number'.tr,
                         hint: '+8801XXXXXXXXX',
                         controller: con.phoneController,
                         onChanged: con.onInfoChanged,
@@ -80,7 +80,7 @@ class RegistrationView extends GetView<RegistrationController> {
                       ),
                       const SizedBox(height: 18),
                       _Field(
-                        label: 'ইমেইল',
+                        label: 'Email'.tr,
                         hint: 'you@example.com',
                         controller: con.emailController,
                         onChanged: con.onInfoChanged,
@@ -93,7 +93,7 @@ class RegistrationView extends GetView<RegistrationController> {
                 Padding(
                   padding: const EdgeInsets.fromLTRB(20, 8, 20, 16),
                   child: PrimaryButton(
-                    label: 'অ্যাকাউন্ট তৈরি করুন',
+                    label: 'Create your account'.tr,
                     enabled: con.isInfoValid,
                     onPressed: con.register,
                   ),

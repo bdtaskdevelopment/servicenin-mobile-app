@@ -55,13 +55,13 @@ class _DispatchingViewState extends State<DispatchingView> {
               ),
             ),
             const SizedBox(height: 28),
-            const Text('Dispatching ambulance',
-                style: TextStyle(
+            Text('Dispatching ambulance'.tr,
+                style: const TextStyle(
                     color: Colors.white,
                     fontSize: 22,
                     fontWeight: FontWeight.w800)),
             const SizedBox(height: 6),
-            Text('নিকটতম আম্বুলেন্সের খোঁজা হচ্ছে…',
+            Text('Finding the nearest ambulance…'.tr,
                 style: TextStyle(
                     color: Colors.white.withValues(alpha: 0.7), fontSize: 13)),
             const SizedBox(height: 36),
@@ -71,10 +71,10 @@ class _DispatchingViewState extends State<DispatchingView> {
                 padding: const EdgeInsets.symmetric(horizontal: 40),
                 child: Column(
                   children: [
-                    _step('Request received', done: true, active: false),
-                    _step('Finding nearest ICU ambulance',
+                    _step('Request received'.tr, done: true, active: false),
+                    _step('Finding nearest ICU ambulance'.tr,
                         done: c.dispatchStep > 1, active: c.dispatchStep == 1),
-                    _step('Driver assigned',
+                    _step('Driver assigned'.tr,
                         done: c.dispatchStep >= 2, active: false),
                   ],
                 ),
@@ -94,8 +94,8 @@ class _DispatchingViewState extends State<DispatchingView> {
                     shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(14)),
                   ),
-                  child: const Text('Cancel request',
-                      style: TextStyle(
+                  child: Text('Cancel request'.tr,
+                      style: const TextStyle(
                           color: Colors.white,
                           fontSize: 15,
                           fontWeight: FontWeight.w700)),

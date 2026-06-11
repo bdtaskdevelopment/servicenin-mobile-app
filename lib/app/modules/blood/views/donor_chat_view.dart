@@ -23,11 +23,11 @@ class DonorChatView extends StatefulWidget {
 class _DonorChatViewState extends State<DonorChatView> {
   final TextEditingController _input = TextEditingController();
   final List<_Msg> _messages = [
-    const _Msg('Assalamu alaikum, thank you for donating last time!', true,
+    _Msg('Assalamu alaikum, thank you for donating last time!'.tr, true,
         '10:02'),
-    const _Msg('Walaikum salam. Happy to help anytime.', false, '10:05'),
-    const _Msg('We may need O+ again next month for my father.', true, '10:06'),
-    const _Msg('Sure, just message me a few days before. I\'m usually free on weekends.',
+    _Msg('Walaikum salam. Happy to help anytime.'.tr, false, '10:05'),
+    _Msg('We may need O+ again next month for my father.'.tr, true, '10:06'),
+    _Msg('Sure, just message me a few days before. I\'m usually free on weekends.'.tr,
         false, '10:08'),
   ];
 
@@ -135,9 +135,9 @@ class _DonorChatViewState extends State<DonorChatView> {
                         child: TextField(
                           controller: _input,
                           onSubmitted: (_) => _send(),
-                          decoration: const InputDecoration(
-                            hintText: 'Message donor…',
-                            hintStyle: TextStyle(color: Color(0xFF94A3B8)),
+                          decoration: InputDecoration(
+                            hintText: 'Message donor…'.tr,
+                            hintStyle: const TextStyle(color: Color(0xFF94A3B8)),
                             border: InputBorder.none,
                             isCollapsed: true,
                           ),

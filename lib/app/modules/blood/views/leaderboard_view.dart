@@ -1,3 +1,4 @@
+import 'package:animate_do/animate_do.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -19,7 +20,7 @@ const List<Color> _palette = [
 ];
 
 String _displayName(DonorEntry d) =>
-    d.fullName.isNotEmpty ? d.fullName : 'Donor';
+    d.fullName.isNotEmpty ? d.fullName : 'Donor'.tr;
 
 class LeaderboardView extends GetView<DonationFlowController> {
   const LeaderboardView({super.key});
@@ -50,17 +51,17 @@ class LeaderboardView extends GetView<DonationFlowController> {
                           icon: const Icon(Icons.arrow_back_ios_new_rounded,
                               size: 20, color: Colors.white),
                         ),
-                        const Column(
+                        Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text('Donor leaderboard',
-                                style: TextStyle(
+                            Text('Donor leaderboard'.tr,
+                                style: const TextStyle(
                                     fontSize: 19,
                                     fontWeight: FontWeight.w800,
                                     color: Colors.white)),
-                            SizedBox(height: 1),
-                            Text('Top donors · ServiceNin',
-                                style: TextStyle(
+                            const SizedBox(height: 1),
+                            Text('Top donors · ServiceNin'.tr,
+                                style: const TextStyle(
                                     fontSize: 12, color: Color(0xFFFFD9DC))),
                           ],
                         ),
@@ -82,15 +83,17 @@ class LeaderboardView extends GetView<DonationFlowController> {
                   child: SnListSkeleton(),
                 )
               else if (list.isEmpty)
-                const Expanded(
+                Expanded(
                   child: Center(
-                    child: Text('No donors on the leaderboard yet',
-                        style: TextStyle(color: Color(0xFF94A3B8))),
+                    child: Text('No donors on the leaderboard yet'.tr,
+                        style: const TextStyle(color: Color(0xFF94A3B8))),
                   ),
                 )
               else ...[
                 // Navy podium (top 3)
-                Container(
+                FadeInDown(
+                  duration: const Duration(milliseconds: 300),
+                  child: Container(
                   width: double.infinity,
                   color: _navy,
                   padding: const EdgeInsets.fromLTRB(20, 16, 20, 22),
@@ -116,6 +119,7 @@ class LeaderboardView extends GetView<DonationFlowController> {
                     ],
                   ),
                 ),
+                ),
                 // Ranking list (rank 4+)
                 Expanded(
                   child: RefreshIndicator(
@@ -125,9 +129,16 @@ class LeaderboardView extends GetView<DonationFlowController> {
                       padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
                       children: [
                         for (var i = 3; i < list.length; i++)
-                          Padding(
-                            padding: const EdgeInsets.only(bottom: 12),
-                            child: _RankRow(donor: list[i], rank: i + 1),
+                          FadeInUp(
+                            from: 18,
+                            duration: const Duration(milliseconds: 350),
+                            delay: Duration(
+                                milliseconds: 70 *
+                                    ((i - 3) < 6 ? (i - 3) : 6)),
+                            child: Padding(
+                              padding: const EdgeInsets.only(bottom: 12),
+                              child: _RankRow(donor: list[i], rank: i + 1),
+                            ),
                           ),
                       ],
                     ),
@@ -218,7 +229,7 @@ class _RankRow extends StatelessWidget {
     final color = _palette[rank % _palette.length];
     final subtitle = donor.bloodGroup.isNotEmpty
         ? '${donor.bloodGroup} donor'
-        : 'Donor';
+        : 'Donor'.tr;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
       decoration: BoxDecoration(

@@ -65,7 +65,7 @@ class CustomPhoneFilterSearch extends StatelessWidget {
                     // ),
                   ),
                 ),
-                hintText: title ?? "Search here",
+                hintText: title ?? "Search here".tr,
               ),
               onChanged: onChanged,
             ),

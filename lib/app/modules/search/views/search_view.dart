@@ -42,10 +42,10 @@ class SearchView extends GetView<SnSearchController> {
                               controller: controller.textController,
                               onChanged: controller.onQueryChanged,
                               autofocus: true,
-                              decoration: const InputDecoration(
-                                hintText: 'Search services...',
-                                hintStyle:
-                                    TextStyle(color: Color(0xFF94A3B8)),
+                              decoration: InputDecoration(
+                                hintText: 'Search services...'.tr,
+                                hintStyle: const TextStyle(
+                                    color: Color(0xFF94A3B8)),
                                 border: InputBorder.none,
                                 isCollapsed: true,
                               ),
@@ -71,7 +71,7 @@ class SearchView extends GetView<SnSearchController> {
                     children: [
                       if (con.query.trim().isEmpty &&
                           con.trending.isNotEmpty) ...[
-                        const _SectionLabel('TRENDING'),
+                        _SectionLabel('TRENDING'.tr),
                         const SizedBox(height: 12),
                         Wrap(
                           spacing: 10,
@@ -86,8 +86,8 @@ class SearchView extends GetView<SnSearchController> {
                         const SizedBox(height: 22),
                       ],
                       _SectionLabel(con.query.trim().isEmpty
-                          ? 'ALL SERVICES'
-                          : 'RESULTS'),
+                          ? 'ALL SERVICES'.tr
+                          : 'RESULTS'.tr),
                       const SizedBox(height: 12),
                       if ((con.searching && con.searchResults.isEmpty) ||
                           (con.query.trim().isEmpty &&
@@ -104,11 +104,12 @@ class SearchView extends GetView<SnSearchController> {
                               child: _ServiceRow(service: s),
                             )),
                         if (con.results.isEmpty)
-                          const Padding(
-                            padding: EdgeInsets.only(top: 40),
+                          Padding(
+                            padding: const EdgeInsets.only(top: 40),
                             child: Center(
-                              child: Text('কোন সেবা পাওয়া যায়নি',
-                                  style: TextStyle(color: Color(0xFF94A3B8))),
+                              child: Text('No services found'.tr,
+                                  style: const TextStyle(
+                                      color: Color(0xFF94A3B8))),
                             ),
                           ),
                       ],

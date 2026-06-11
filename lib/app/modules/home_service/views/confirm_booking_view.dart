@@ -1,3 +1,4 @@
+import 'package:animate_do/animate_do.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -31,8 +32,8 @@ class ConfirmBookingView extends GetView<HomeServiceController> {
                         icon: const Icon(Icons.arrow_back_ios_new_rounded,
                             size: 20, color: Color(0xFF1A1A1A)),
                       ),
-                      const Text('Confirm booking',
-                          style: TextStyle(
+                      Text('Confirm booking'.tr,
+                          style: const TextStyle(
                               fontSize: 19,
                               fontWeight: FontWeight.w800,
                               color: Color(0xFF0F172A))),
@@ -69,7 +70,7 @@ class ConfirmBookingView extends GetView<HomeServiceController> {
                             ),
                           )),
                       const SizedBox(height: 10),
-                      const _Label('SERVICE ADDRESS'),
+                      _Label('SERVICE ADDRESS'.tr),
                       const SizedBox(height: 8),
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 14),
@@ -93,14 +94,14 @@ class ConfirmBookingView extends GetView<HomeServiceController> {
                                 controller: con.addressCtrl,
                                 minLines: 1,
                                 maxLines: 2,
-                                decoration: const InputDecoration(
-                                  hintText: 'Enter your service address',
+                                decoration: InputDecoration(
+                                  hintText: 'Enter your service address'.tr,
                                   hintStyle:
-                                      TextStyle(color: Color(0xFF94A3B8)),
+                                      const TextStyle(color: Color(0xFF94A3B8)),
                                   border: InputBorder.none,
                                   isCollapsed: true,
                                   contentPadding:
-                                      EdgeInsets.symmetric(vertical: 14),
+                                      const EdgeInsets.symmetric(vertical: 14),
                                 ),
                                 style: const TextStyle(
                                     fontSize: 14,
@@ -112,7 +113,7 @@ class ConfirmBookingView extends GetView<HomeServiceController> {
                         ),
                       ),
                       const SizedBox(height: 18),
-                      const _Label('WHEN?'),
+                      _Label('WHEN?'.tr),
                       const SizedBox(height: 10),
                       if (con.loadingDates && con.scheduleDates.isEmpty)
                         SnShimmer(
@@ -130,7 +131,10 @@ class ConfirmBookingView extends GetView<HomeServiceController> {
                           ),
                         )
                       else
-                        SizedBox(
+                        FadeInUp(
+                          from: 18,
+                          duration: const Duration(milliseconds: 350),
+                          child: SizedBox(
                           height: 64,
                           child: ListView.separated(
                             scrollDirection: Axis.horizontal,
@@ -183,8 +187,9 @@ class ConfirmBookingView extends GetView<HomeServiceController> {
                             },
                           ),
                         ),
+                        ),
                       const SizedBox(height: 14),
-                      const _Label('TIME SLOT'),
+                      _Label('TIME SLOT'.tr),
                       const SizedBox(height: 10),
                       if (con.loadingSlots && con.slots.isEmpty)
                         const SnListSkeleton(
@@ -193,7 +198,10 @@ class ConfirmBookingView extends GetView<HomeServiceController> {
                           showTrailing: false,
                         )
                       else
-                        Column(
+                        FadeInUp(
+                          from: 18,
+                          duration: const Duration(milliseconds: 350),
+                          child: Column(
                           children: con.slots.map((s) {
                             final sel = con.selectedSlotKey == s.key;
                             final disabled = !s.available;
@@ -238,8 +246,8 @@ class ConfirmBookingView extends GetView<HomeServiceController> {
                                                           0xFF0F172A))),
                                         ),
                                         if (disabled)
-                                          const Text('Full',
-                                              style: TextStyle(
+                                          Text('Full'.tr,
+                                              style: const TextStyle(
                                                   fontSize: 11.5,
                                                   fontWeight: FontWeight.w700,
                                                   color: Color(0xFF94A3B8))),
@@ -251,10 +259,21 @@ class ConfirmBookingView extends GetView<HomeServiceController> {
                             );
                           }).toList(),
                         ),
+                        ),
                       const SizedBox(height: 18),
-                      const _Label('PAYMENT'),
+                      _Label('PAYMENT'.tr),
                       const SizedBox(height: 10),
-                      Column(
+                      if (con.loadingMethods && con.methods.isEmpty)
+                        const SnListSkeleton(
+                          count: 3,
+                          padding: EdgeInsets.zero,
+                          showTrailing: false,
+                        )
+                      else
+                      FadeInUp(
+                        from: 18,
+                        duration: const Duration(milliseconds: 350),
+                        child: Column(
                         children: con.methods.map((m) {
                           final sel = con.selectedMethodKey == m.key;
                           final disabled = !m.enabled;
@@ -313,8 +332,8 @@ class ConfirmBookingView extends GetView<HomeServiceController> {
                                               color: const Color(0xFFF1F5F9),
                                               borderRadius:
                                                   BorderRadius.circular(20)),
-                                          child: const Text('Soon',
-                                              style: TextStyle(
+                                          child: Text('Soon'.tr,
+                                              style: const TextStyle(
                                                   fontSize: 10.5,
                                                   fontWeight: FontWeight.w700,
                                                   color: Color(0xFF94A3B8))),
@@ -326,6 +345,7 @@ class ConfirmBookingView extends GetView<HomeServiceController> {
                             ),
                           );
                         }).toList(),
+                      ),
                       ),
                     ],
                   ),
@@ -340,8 +360,8 @@ class ConfirmBookingView extends GetView<HomeServiceController> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          const Text('Total - pay after',
-                              style: TextStyle(
+                          Text('Total - pay after'.tr,
+                              style: const TextStyle(
                                   fontSize: 11.5, color: Color(0xFF94A3B8))),
                           Text('৳${con.totalPrice}',
                               style: const TextStyle(
@@ -370,8 +390,8 @@ class ConfirmBookingView extends GetView<HomeServiceController> {
                                     child: CircularProgressIndicator(
                                         strokeWidth: 2.4, color: Colors.white),
                                   )
-                                : const Text('Place booking',
-                                    style: TextStyle(
+                                : Text('Place booking'.tr,
+                                    style: const TextStyle(
                                         fontSize: 16,
                                         fontWeight: FontWeight.w800)),
                           ),
@@ -437,7 +457,7 @@ class _Stepper extends StatelessWidget {
                                   : const Color(0xFF94A3B8))),
                 ),
                 const SizedBox(width: 6),
-                Text(_labels[i],
+                Text(_labels[i].tr,
                     style: TextStyle(
                         fontSize: 12.5,
                         fontWeight: FontWeight.w700,

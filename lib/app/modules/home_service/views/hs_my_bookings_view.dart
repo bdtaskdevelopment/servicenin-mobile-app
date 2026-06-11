@@ -1,3 +1,4 @@
+import 'package:animate_do/animate_do.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -30,17 +31,17 @@ class HsMyBookingsView extends GetView<HomeServiceController> {
                     icon: const Icon(Icons.arrow_back_ios_new_rounded,
                         size: 20, color: Color(0xFF1A1A1A)),
                   ),
-                  const Column(
+                  Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('My bookings',
-                          style: TextStyle(
+                      Text('My bookings'.tr,
+                          style: const TextStyle(
                               fontSize: 19,
                               fontWeight: FontWeight.w800,
                               color: Color(0xFF0F172A))),
-                      SizedBox(height: 1),
-                      Text('Tap a booking to track it',
-                          style: TextStyle(
+                      const SizedBox(height: 1),
+                      Text('Tap a booking to track it'.tr,
+                          style: const TextStyle(
                               fontSize: 12, color: Color(0xFF94A3B8))),
                     ],
                   ),
@@ -58,26 +59,30 @@ class HsMyBookingsView extends GetView<HomeServiceController> {
                     }
                     if (con.myBookings.isEmpty) {
                       return ListView(
-                        children: const [
-                          SizedBox(height: 140),
+                        children: [
+                          const SizedBox(height: 140),
                           Center(
-                            child: Text('No bookings yet.',
-                                style: TextStyle(color: Color(0xFF94A3B8))),
+                            child: Text('No bookings yet.'.tr,
+                                style: const TextStyle(color: Color(0xFF94A3B8))),
                           ),
                         ],
                       );
                     }
-                    return ListView(
-                      padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
-                      children: con.myBookings
-                          .map((b) => Padding(
-                                padding: const EdgeInsets.only(bottom: 12),
-                                child: GestureDetector(
-                                  onTap: () => con.openBooking(b),
-                                  child: _BookingCard(b: b),
-                                ),
-                              ))
-                          .toList(),
+                    return FadeInUp(
+                      from: 18,
+                      duration: const Duration(milliseconds: 350),
+                      child: ListView(
+                        padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+                        children: con.myBookings
+                            .map((b) => Padding(
+                                  padding: const EdgeInsets.only(bottom: 12),
+                                  child: GestureDetector(
+                                    onTap: () => con.openBooking(b),
+                                    child: _BookingCard(b: b),
+                                  ),
+                                ))
+                            .toList(),
+                      ),
                     );
                   },
                 ),

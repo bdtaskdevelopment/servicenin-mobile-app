@@ -1,3 +1,4 @@
+import 'package:animate_do/animate_do.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -31,8 +32,8 @@ class JobDetailView extends GetView<JobsController> {
                         icon: const Icon(Icons.arrow_back_ios_new_rounded,
                             size: 20, color: Color(0xFF1A1A1A)),
                       ),
-                      const Text('Job detail',
-                          style: TextStyle(
+                      Text('Job detail'.tr,
+                          style: const TextStyle(
                               fontSize: 19,
                               fontWeight: FontWeight.w800,
                               color: Color(0xFF0F172A))),
@@ -40,7 +41,10 @@ class JobDetailView extends GetView<JobsController> {
                   ),
                 ),
                 Expanded(
-                  child: ListView(
+                  child: FadeInUp(
+                    from: 18,
+                    duration: const Duration(milliseconds: 350),
+                    child: ListView(
                     padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
                     children: [
                       Row(
@@ -84,31 +88,31 @@ class JobDetailView extends GetView<JobsController> {
                       const SizedBox(height: 16),
                       Row(
                         children: [
-                          _Stat(value: j.salaryLabel, label: 'Salary'),
+                          _Stat(value: j.salaryLabel, label: 'Salary'.tr),
                           const SizedBox(width: 12),
                           _Stat(
                               value: j.experienceRequired.isNotEmpty
                                   ? j.experienceRequired
                                   : '—',
-                              label: 'Experience'),
+                              label: 'Experience'.tr),
                           const SizedBox(width: 12),
-                          _Stat(value: j.jobTypeLabel, label: 'Type'),
+                          _Stat(value: j.jobTypeLabel, label: 'Type'.tr),
                         ],
                       ),
                       const SizedBox(height: 22),
-                      const _Head('About the role'),
+                      _Head('About the role'.tr),
                       const SizedBox(height: 8),
                       Text(
                           j.description.isNotEmpty
                               ? j.description
-                              : 'No description provided.',
+                              : 'No description provided.'.tr,
                           style: const TextStyle(
                               fontSize: 13.5,
                               height: 1.5,
                               color: Color(0xFF475569))),
                       if (j.skills.isNotEmpty) ...[
                         const SizedBox(height: 20),
-                        const _Head('Requirements'),
+                        _Head('Requirements'.tr),
                         const SizedBox(height: 10),
                         Wrap(
                           spacing: 8,
@@ -132,7 +136,7 @@ class JobDetailView extends GetView<JobsController> {
                       ],
                       if (j.education.isNotEmpty) ...[
                         const SizedBox(height: 18),
-                        const _Head('Education'),
+                        _Head('Education'.tr),
                         const SizedBox(height: 8),
                         Text(j.education,
                             style: const TextStyle(
@@ -156,8 +160,8 @@ class JobDetailView extends GetView<JobsController> {
                               children: [
                                 Text(
                                     j.deadline.isNotEmpty
-                                        ? 'Apply by ${j.deadline}'
-                                        : 'Open until filled',
+                                        ? '${'Apply by'.tr} ${j.deadline}'
+                                        : 'Open until filled'.tr,
                                     style: const TextStyle(
                                         fontSize: 14.5,
                                         fontWeight: FontWeight.w800,
@@ -175,6 +179,7 @@ class JobDetailView extends GetView<JobsController> {
                       ),
                     ],
                   ),
+                  ),
                 ),
                 Padding(
                   padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
@@ -190,8 +195,8 @@ class JobDetailView extends GetView<JobsController> {
                         shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(14)),
                       ),
-                      child: const Text('Apply now',
-                          style: TextStyle(
+                      child: Text('Apply now'.tr,
+                          style: const TextStyle(
                               fontSize: 16, fontWeight: FontWeight.w800)),
                     ),
                   ),

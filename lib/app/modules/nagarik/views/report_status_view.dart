@@ -20,7 +20,7 @@ class ReportStatusView extends GetView<NagarikController> {
           builder: (con) {
             final g = con.selectedGrievance;
             if (g == null) {
-              return const Center(child: Text('No report selected'));
+              return Center(child: Text('No report selected'.tr));
             }
             return Column(
               children: [
@@ -39,8 +39,8 @@ class ReportStatusView extends GetView<NagarikController> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Text('Report status',
-                                style: TextStyle(
+                            Text('Report status'.tr,
+                                style: const TextStyle(
                                     fontSize: 19,
                                     fontWeight: FontWeight.w800,
                                     color: Color(0xFF0F172A))),
@@ -134,8 +134,8 @@ class ReportStatusView extends GetView<NagarikController> {
                         ],
                       ),
                       const SizedBox(height: 22),
-                      const Text('Progress',
-                          style: TextStyle(
+                      Text('Progress'.tr,
+                          style: const TextStyle(
                               fontSize: 17,
                               fontWeight: FontWeight.w800,
                               color: Color(0xFF0F172A))),
@@ -274,10 +274,10 @@ class _Timeline extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const titles = [
-      'Submitted to DNCC',
-      'Acknowledged & in progress',
-      'Resolved & verified',
+    final titles = [
+      'Submitted to DNCC'.tr,
+      'Acknowledged & in progress'.tr,
+      'Resolved & verified'.tr,
     ];
     final idx = _index;
     return Column(

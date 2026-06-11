@@ -1,3 +1,4 @@
+import 'package:animate_do/animate_do.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -35,8 +36,8 @@ class PhysioBookView extends GetView<PhysioController> {
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text('Book a session',
-                              style: TextStyle(
+                          Text('Book a session'.tr,
+                              style: const TextStyle(
                                   fontSize: 19,
                                   fontWeight: FontWeight.w800,
                                   color: Color(0xFF0F172A))),
@@ -53,14 +54,14 @@ class PhysioBookView extends GetView<PhysioController> {
                   child: ListView(
                     padding: const EdgeInsets.fromLTRB(16, 6, 16, 16),
                     children: [
-                      const _Label('SESSION TYPE'),
+                      _Label('SESSION TYPE'.tr),
                       const SizedBox(height: 10),
                       Row(
                         children: [
                           Expanded(
                             child: _TypeCard(
                               icon: Icons.meeting_room_outlined,
-                              label: 'At center',
+                              label: 'At center'.tr,
                               selected: con.sessionType == 0,
                               onTap: () => con.setSessionType(0),
                             ),
@@ -69,7 +70,7 @@ class PhysioBookView extends GetView<PhysioController> {
                           Expanded(
                             child: _TypeCard(
                               icon: Icons.home_outlined,
-                              label: 'Home visit',
+                              label: 'Home visit'.tr,
                               selected: con.sessionType == 1,
                               onTap: () => con.setSessionType(1),
                             ),
@@ -78,7 +79,7 @@ class PhysioBookView extends GetView<PhysioController> {
                       ),
                       if (con.sessionType == 1) ...[
                         const SizedBox(height: 18),
-                        const _Label('HOME ADDRESS'),
+                        _Label('HOME ADDRESS'.tr),
                         const SizedBox(height: 10),
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 14),
@@ -90,19 +91,19 @@ class PhysioBookView extends GetView<PhysioController> {
                           ),
                           child: TextField(
                             controller: con.homeAddressCtrl,
-                            decoration: const InputDecoration(
-                              hintText: 'Where should the therapist visit?',
-                              hintStyle: TextStyle(color: Color(0xFF94A3B8)),
+                            decoration: InputDecoration(
+                              hintText: 'Where should the therapist visit?'.tr,
+                              hintStyle: const TextStyle(color: Color(0xFF94A3B8)),
                               border: InputBorder.none,
                               isCollapsed: true,
                               contentPadding:
-                                  EdgeInsets.symmetric(vertical: 14),
+                                  const EdgeInsets.symmetric(vertical: 14),
                             ),
                           ),
                         ),
                       ],
                       const SizedBox(height: 18),
-                      const _Label('DATE'),
+                      _Label('DATE'.tr),
                       const SizedBox(height: 10),
                       if (con.loadingDates && con.scheduleDates.isEmpty)
                         SnShimmer(
@@ -120,7 +121,10 @@ class PhysioBookView extends GetView<PhysioController> {
                           ),
                         )
                       else
-                        SizedBox(
+                        FadeInUp(
+                          from: 18,
+                          duration: const Duration(milliseconds: 350),
+                          child: SizedBox(
                           height: 64,
                           child: ListView.separated(
                             scrollDirection: Axis.horizontal,
@@ -168,8 +172,9 @@ class PhysioBookView extends GetView<PhysioController> {
                             },
                           ),
                         ),
+                        ),
                       const SizedBox(height: 18),
-                      const _Label('TIME'),
+                      _Label('TIME'.tr),
                       const SizedBox(height: 12),
                       if (con.loadingSlots && con.slots.isEmpty)
                         const SnGridSkeleton(
@@ -179,11 +184,14 @@ class PhysioBookView extends GetView<PhysioController> {
                           childAspectRatio: 2.4,
                         )
                       else if (con.slots.isEmpty)
-                        const Text('No slots for this date.',
-                            style: TextStyle(
+                        Text('No slots for this date.'.tr,
+                            style: const TextStyle(
                                 fontSize: 13, color: Color(0xFF94A3B8)))
                       else
-                        GridView.count(
+                        FadeInUp(
+                          from: 18,
+                          duration: const Duration(milliseconds: 350),
+                          child: GridView.count(
                           crossAxisCount: 3,
                           shrinkWrap: true,
                           physics: const NeverScrollableScrollPhysics(),
@@ -228,8 +236,9 @@ class PhysioBookView extends GetView<PhysioController> {
                             );
                           }).toList(),
                         ),
+                        ),
                       const SizedBox(height: 18),
-                      const _Label('NOTES (OPTIONAL)'),
+                      _Label('NOTES (OPTIONAL)'.tr),
                       const SizedBox(height: 10),
                       Container(
                         padding: const EdgeInsets.all(14),
@@ -241,18 +250,28 @@ class PhysioBookView extends GetView<PhysioController> {
                         child: TextField(
                           controller: con.notesCtrl,
                           maxLines: 2,
-                          decoration: const InputDecoration(
-                            hintText: 'Describe your concern (optional)…',
-                            hintStyle: TextStyle(color: Color(0xFF94A3B8)),
+                          decoration: InputDecoration(
+                            hintText: 'Describe your concern (optional)…'.tr,
+                            hintStyle: const TextStyle(color: Color(0xFF94A3B8)),
                             border: InputBorder.none,
                             isCollapsed: true,
                           ),
                         ),
                       ),
                       const SizedBox(height: 18),
-                      const _Label('PAYMENT'),
+                      _Label('PAYMENT'.tr),
                       const SizedBox(height: 10),
-                      Column(
+                      if (con.loadingPayments && con.paymentMethods.isEmpty)
+                        const SnListSkeleton(
+                          count: 3,
+                          padding: EdgeInsets.zero,
+                          showTrailing: false,
+                        )
+                      else
+                      FadeInUp(
+                        from: 18,
+                        duration: const Duration(milliseconds: 350),
+                        child: Column(
                         children: con.paymentMethods.map((m) {
                           final sel = con.selectedPaymentKey == m.key;
                           final disabled = !m.enabled;
@@ -294,8 +313,8 @@ class PhysioBookView extends GetView<PhysioController> {
                                                 color: Color(0xFF0F172A))),
                                       ),
                                       if (disabled)
-                                        const Text('Soon',
-                                            style: TextStyle(
+                                        Text('Soon'.tr,
+                                            style: const TextStyle(
                                                 fontSize: 11,
                                                 color: Color(0xFF94A3B8))),
                                     ],
@@ -306,11 +325,12 @@ class PhysioBookView extends GetView<PhysioController> {
                           );
                         }).toList(),
                       ),
+                      ),
                     ],
                   ),
                 ),
                 _BottomBar(
-                  left: 'When',
+                  left: 'When'.tr,
                   price:
                       '${con.selectedDateLabel} · ${con.selectedTime}',
                   loading: con.booking,
@@ -334,11 +354,11 @@ class _Stepper extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(16, 10, 16, 14),
       child: Row(
         children: [
-          _node(0, 'Mode'),
+          _node(0, 'Mode'.tr),
           _line(current >= 1),
-          _node(1, 'Slot'),
+          _node(1, 'Slot'.tr),
           _line(current >= 2),
-          _node(2, 'Confirm'),
+          _node(2, 'Confirm'.tr),
         ],
       ),
     );
@@ -494,8 +514,8 @@ class _BottomBar extends StatelessWidget {
                         child: CircularProgressIndicator(
                             strokeWidth: 2.4, color: Colors.white),
                       )
-                    : const Text('Confirm booking',
-                        style: TextStyle(
+                    : Text('Confirm booking'.tr,
+                        style: const TextStyle(
                             fontSize: 16, fontWeight: FontWeight.w800)),
               ),
             ),

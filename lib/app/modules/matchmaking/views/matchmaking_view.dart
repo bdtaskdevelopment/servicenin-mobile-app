@@ -1,3 +1,4 @@
+import 'package:animate_do/animate_do.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -32,17 +33,17 @@ class MatchmakingView extends GetView<MatchmakingController> {
                     icon: const Icon(Icons.arrow_back_ios_new_rounded,
                         size: 20, color: Color(0xFF1A1A1A)),
                   ),
-                  const Column(
+                  Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('Marriage',
-                          style: TextStyle(
+                      Text('Marriage'.tr,
+                          style: const TextStyle(
                               fontSize: 19,
                               fontWeight: FontWeight.w800,
                               color: Color(0xFF0F172A))),
-                      SizedBox(height: 1),
-                      Text('Verified biodata · privacy-first',
-                          style: TextStyle(
+                      const SizedBox(height: 1),
+                      Text('Verified biodata · privacy-first'.tr,
+                          style: const TextStyle(
                               fontSize: 12, color: Color(0xFF94A3B8))),
                     ],
                   ),
@@ -88,14 +89,14 @@ class MatchmakingView extends GetView<MatchmakingController> {
                             Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                const Text('সম্মানজনক পরিচয়, পরিবারের সম্মতিতে',
-                                    style: TextStyle(
+                                Text('Respectful introductions, with family consent'.tr,
+                                    style: const TextStyle(
                                         color: Colors.white,
                                         fontSize: 18,
                                         fontWeight: FontWeight.w800)),
                                 const SizedBox(height: 8),
                                 Text(
-                                    'Verified profiles · guardian-aware · your data stays private',
+                                    'Verified profiles · guardian-aware · your data stays private'.tr,
                                     style: TextStyle(
                                         color: Colors.white
                                             .withValues(alpha: 0.9),
@@ -131,8 +132,8 @@ class MatchmakingView extends GetView<MatchmakingController> {
                                   children: [
                                     Text(
                                         con.hasProfile
-                                            ? 'My biodata'
-                                            : 'Complete your biodata',
+                                            ? 'My biodata'.tr
+                                            : 'Complete your biodata'.tr,
                                         style: const TextStyle(
                                             fontSize: 14.5,
                                             fontWeight: FontWeight.w800,
@@ -140,8 +141,8 @@ class MatchmakingView extends GetView<MatchmakingController> {
                                     const SizedBox(height: 2),
                                     Text(
                                         con.hasProfile
-                                            ? '${con.completion}% complete · tap to edit'
-                                            : 'Create one to send interests',
+                                            ? '${con.completion}% ${'complete · tap to edit'.tr}'
+                                            : 'Create one to send interests'.tr,
                                         style: const TextStyle(
                                             fontSize: 12,
                                             color: Color(0xFF94A3B8))),
@@ -155,34 +156,42 @@ class MatchmakingView extends GetView<MatchmakingController> {
                         ),
                       ),
                       const SizedBox(height: 20),
-                      const Text('Suggested matches',
-                          style: TextStyle(
+                      Text('Suggested matches'.tr,
+                          style: const TextStyle(
                               fontSize: 17,
                               fontWeight: FontWeight.w800,
                               color: Color(0xFF0F172A))),
                       const SizedBox(height: 2),
-                      const Text('Based on your preferences',
-                          style: TextStyle(
+                      Text('Based on your preferences'.tr,
+                          style: const TextStyle(
                               fontSize: 12.5, color: Color(0xFF94A3B8))),
                       const SizedBox(height: 14),
                       if (con.loadingSuggestions && con.suggestions.isEmpty)
                         const SnListSkeleton(
                             count: 3, padding: EdgeInsets.zero)
                       else if (con.suggestions.isEmpty)
-                        const Padding(
-                          padding: EdgeInsets.symmetric(vertical: 8),
-                          child: Text('No suggestions yet.',
-                              style: TextStyle(
+                        Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 8),
+                          child: Text('No suggestions yet.'.tr,
+                              style: const TextStyle(
                                   fontSize: 13, color: Color(0xFF94A3B8))),
                         )
                       else
-                        ...con.suggestions.map((s) => Padding(
-                              padding: const EdgeInsets.only(bottom: 12),
-                              child: GestureDetector(
-                                onTap: () => con.openProfile(s.profile),
-                                child: _MatchCard(suggestion: s),
-                              ),
-                            )),
+                        ...con.suggestions.toList().asMap().entries.map(
+                            (e) => FadeInUp(
+                                  from: 18,
+                                  duration: const Duration(milliseconds: 350),
+                                  delay: Duration(milliseconds: 70 * e.key),
+                                  child: Padding(
+                                    padding:
+                                        const EdgeInsets.only(bottom: 12),
+                                    child: GestureDetector(
+                                      onTap: () =>
+                                          con.openProfile(e.value.profile),
+                                      child: _MatchCard(suggestion: e.value),
+                                    ),
+                                  ),
+                                )),
                     ],
                   ),
                 ),
@@ -274,7 +283,7 @@ class _MatchCard extends StatelessWidget {
                         decoration: BoxDecoration(
                             color: const Color(0xFFDCFCE7),
                             borderRadius: BorderRadius.circular(6)),
-                        child: Text('Match ${suggestion.score}',
+                        child: Text('${'Match'.tr} ${suggestion.score}',
                             style: const TextStyle(
                                 fontSize: 10.5,
                                 fontWeight: FontWeight.w700,

@@ -1,7 +1,9 @@
+import 'package:animate_do/animate_do.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../../core/values/app_colors.dart';
+import '../../../global_widget/sn_shimmer.dart';
 import '../controllers/booking_controller.dart';
 import '../widgets/booking_stepper.dart';
 
@@ -34,8 +36,8 @@ class ChooseSlotView extends GetView<BookingController> {
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text('Choose a slot',
-                              style: TextStyle(
+                          Text('Choose a slot'.tr,
+                              style: const TextStyle(
                                   fontSize: 19,
                                   fontWeight: FontWeight.w800,
                                   color: Color(0xFF0F172A))),
@@ -52,8 +54,13 @@ class ChooseSlotView extends GetView<BookingController> {
                   child: ListView(
                     padding: const EdgeInsets.fromLTRB(16, 6, 16, 16),
                     children: [
-                      const _Label('CHAMBER / VENUE'),
+                      _Label('CHAMBER / VENUE'.tr),
                       const SizedBox(height: 10),
+                      if (con.loadingProfile && con.venues.isEmpty)
+                        const SnListSkeleton(
+                            count: 2,
+                            showTrailing: false,
+                            padding: EdgeInsets.zero),
                       ...List.generate(con.venues.length, (i) {
                         final v = con.venues[i];
                         final sel = con.selectedVenue == i;
@@ -113,9 +120,20 @@ class ChooseSlotView extends GetView<BookingController> {
                         );
                       }),
                       const SizedBox(height: 8),
-                      const _Label('DATE'),
+                      _Label('DATE'.tr),
                       const SizedBox(height: 10),
-                      SizedBox(
+                      if (con.loadingDates && con.dates.isEmpty)
+                        const SnStripSkeleton(
+                          count: 5,
+                          itemWidth: 74,
+                          height: 64,
+                          padding: EdgeInsets.zero,
+                        )
+                      else
+                      FadeInUp(
+                        from: 18,
+                        duration: const Duration(milliseconds: 350),
+                        child: SizedBox(
                         height: 64,
                         child: ListView.separated(
                           scrollDirection: Axis.horizontal,
@@ -161,20 +179,32 @@ class ChooseSlotView extends GetView<BookingController> {
                           },
                         ),
                       ),
+                      ),
                       const SizedBox(height: 18),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: const [
-                          _Label('TIME'),
-                          Text('Serial assigned at booking',
-                              style: TextStyle(
+                        children: [
+                          _Label('TIME'.tr),
+                          Text('Serial assigned at booking'.tr,
+                              style: const TextStyle(
                                   fontSize: 11.5,
                                   fontWeight: FontWeight.w600,
                                   color: _green)),
                         ],
                       ),
                       const SizedBox(height: 12),
-                      GridView.count(
+                      if (con.loadingSlots && con.times.isEmpty)
+                        const SnGridSkeleton(
+                          count: 8,
+                          crossAxisCount: 4,
+                          childAspectRatio: 1.9,
+                          padding: EdgeInsets.zero,
+                        )
+                      else
+                      FadeInUp(
+                        from: 18,
+                        duration: const Duration(milliseconds: 350),
+                        child: GridView.count(
                         crossAxisCount: 4,
                         shrinkWrap: true,
                         physics: const NeverScrollableScrollPhysics(),
@@ -216,10 +246,11 @@ class ChooseSlotView extends GetView<BookingController> {
                           );
                         }).toList(),
                       ),
+                      ),
                       const SizedBox(height: 14),
-                      const Text(
-                          'Serial, not a fixed time — arrive 15 min early.',
-                          style: TextStyle(
+                      Text(
+                          'Serial, not a fixed time — arrive 15 min early.'.tr,
+                          style: const TextStyle(
                               fontSize: 12, color: Color(0xFFE07A1F))),
                     ],
                   ),
@@ -227,7 +258,7 @@ class ChooseSlotView extends GetView<BookingController> {
                 _BottomBar(
                   left: con.slotSummary,
                   price: con.doctorFee,
-                  label: 'Continue →',
+                  label: 'Continue →'.tr,
                   onTap: con.slotContinue,
                 ),
               ],

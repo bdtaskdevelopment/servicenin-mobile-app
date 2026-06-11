@@ -1,4 +1,5 @@
-﻿import 'package:flutter/material.dart';
+﻿import 'package:animate_do/animate_do.dart';
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../../core/values/app_colors.dart';
@@ -33,17 +34,17 @@ class HealthcareView extends GetView<HealthcareController> {
                     icon: const Icon(Icons.arrow_back_ios_new_rounded,
                         size: 20, color: Color(0xFF1A1A1A)),
                   ),
-                  const Column(
+                  Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('PRAC Healthcare',
-                          style: TextStyle(
+                      Text('PRAC Healthcare'.tr,
+                          style: const TextStyle(
                               fontSize: 19,
                               fontWeight: FontWeight.w800,
                               color: Color(0xFF0F172A))),
-                      SizedBox(height: 1),
-                      Text('Verified BMDC doctors · Dhaka',
-                          style: TextStyle(
+                      const SizedBox(height: 1),
+                      Text('Verified BMDC doctors · Dhaka'.tr,
+                          style: const TextStyle(
                               fontSize: 12, color: Color(0xFF94A3B8))),
                     ],
                   ),
@@ -79,29 +80,41 @@ class HealthcareView extends GetView<HealthcareController> {
                       GestureDetector(
                         onTap: () => Get.toNamed(Routes.HC_DOCTORS),
                         child: _SectionHeader(
-                            title: 'Departments', action: 'See all →'),
+                            title: 'Departments'.tr, action: 'See all →'.tr),
                       ),
                       const SizedBox(height: 12),
-                      GridView.count(
-                        crossAxisCount: 4,
-                        shrinkWrap: true,
-                        physics: const NeverScrollableScrollPhysics(),
-                        mainAxisSpacing: 12,
-                        crossAxisSpacing: 12,
-                        childAspectRatio: 0.86,
-                        children: con.departments
-                            .map((d) => GestureDetector(
-                                  onTap: () => con.openDepartment(d),
-                                  child: _DeptTile(dept: d),
-                                ))
-                            .toList(),
-                      ),
+                      if (con.loadingDepartments && con.departments.isEmpty)
+                        const SnGridSkeleton(
+                          count: 8,
+                          crossAxisCount: 4,
+                          childAspectRatio: 0.86,
+                          padding: EdgeInsets.zero,
+                        )
+                      else
+                        FadeInUp(
+                          from: 18,
+                          duration: const Duration(milliseconds: 350),
+                          child: GridView.count(
+                            crossAxisCount: 4,
+                            shrinkWrap: true,
+                            physics: const NeverScrollableScrollPhysics(),
+                            mainAxisSpacing: 12,
+                            crossAxisSpacing: 12,
+                            childAspectRatio: 0.86,
+                            children: con.departments
+                                .map((d) => GestureDetector(
+                                      onTap: () => con.openDepartment(d),
+                                      child: _DeptTile(dept: d),
+                                    ))
+                                .toList(),
+                          ),
+                        ),
                       const SizedBox(height: 22),
                       GestureDetector(
                         onTap: () =>
                             Get.toNamed(Routes.HC_AVAILABLE_TODAY),
                         child: _SectionHeader(
-                            title: 'Available today', action: 'All →'),
+                            title: 'Available today'.tr, action: 'All →'.tr),
                       ),
                       const SizedBox(height: 12),
                       if (con.loadingDoctors && con.doctors.isEmpty)
@@ -110,23 +123,31 @@ class HealthcareView extends GetView<HealthcareController> {
                           padding: EdgeInsets.zero,
                         )
                       else if (con.doctors.isEmpty)
-                        const Padding(
-                          padding: EdgeInsets.symmetric(vertical: 8),
-                          child: Text('No doctors available today.',
-                              style: TextStyle(
+                        Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 8),
+                          child: Text('No doctors available today.'.tr,
+                              style: const TextStyle(
                                   fontSize: 13, color: Color(0xFF94A3B8))),
                         )
                       else
-                        ...con.doctors.take(4).map((d) => Padding(
-                              padding: const EdgeInsets.only(bottom: 12),
-                              child: GestureDetector(
-                                onTap: () {
-                                  Get.find<BookingController>().setDoctor(d);
-                                  Get.toNamed(Routes.HC_DOCTOR_PROFILE);
-                                },
-                                child: HcDoctorCard(doctor: d),
+                        ...con.doctors.take(4).toList().asMap().entries.map(
+                              (e) => FadeInUp(
+                                from: 18,
+                                duration: const Duration(milliseconds: 350),
+                                delay: Duration(milliseconds: 70 * e.key),
+                                child: Padding(
+                                  padding: const EdgeInsets.only(bottom: 12),
+                                  child: GestureDetector(
+                                    onTap: () {
+                                      Get.find<BookingController>()
+                                          .setDoctor(e.value);
+                                      Get.toNamed(Routes.HC_DOCTOR_PROFILE);
+                                    },
+                                    child: HcDoctorCard(doctor: e.value),
+                                  ),
+                                ),
                               ),
-                            )),
+                            ),
                     ],
                   );
                 },
@@ -164,13 +185,13 @@ class _Hero extends StatelessWidget {
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text('ডাক্তার খুঁজুন, বুক করুন',
-                  style: TextStyle(
+              Text('Find a doctor, book a visit'.tr,
+                  style: const TextStyle(
                       color: Colors.white,
                       fontSize: 22,
                       fontWeight: FontWeight.w800)),
               const SizedBox(height: 6),
-              Text('In-person & video consults · transparent fees · BMDC-verified',
+              Text('In-person & video consults · transparent fees · BMDC-verified'.tr,
                   style: TextStyle(
                       color: Colors.white.withValues(alpha: 0.9),
                       fontSize: 12.5,
@@ -185,11 +206,11 @@ class _Hero extends StatelessWidget {
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(12)),
                 child: Row(
-                  children: const [
-                    Icon(Icons.search_rounded, color: Color(0xFF94A3B8)),
-                    SizedBox(width: 10),
-                    Text('Search doctor, specialty, symptom…',
-                        style: TextStyle(
+                  children: [
+                    const Icon(Icons.search_rounded, color: Color(0xFF94A3B8)),
+                    const SizedBox(width: 10),
+                    Text('Search doctor, specialty, symptom…'.tr,
+                        style: const TextStyle(
                             color: Color(0xFF94A3B8), fontSize: 13.5)),
                   ],
                 ),
@@ -246,8 +267,8 @@ class _ModeToggle extends StatelessWidget {
 
     return Row(
       children: [
-        seg(0, Icons.location_on_outlined, 'In-person'),
-        seg(1, Icons.videocam_outlined, 'Video consult'),
+        seg(0, Icons.location_on_outlined, 'In-person'.tr),
+        seg(1, Icons.videocam_outlined, 'Video consult'.tr),
       ],
     );
   }
@@ -303,7 +324,7 @@ class _QuickGrid extends StatelessWidget {
                     ],
                   ),
                   const SizedBox(height: 8),
-                  Text(it.$2,
+                  Text(it.$2.tr,
                       style: const TextStyle(
                           fontSize: 12,
                           fontWeight: FontWeight.w700,
