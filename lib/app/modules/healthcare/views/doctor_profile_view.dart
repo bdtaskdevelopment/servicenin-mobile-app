@@ -38,8 +38,6 @@ class DoctorProfileView extends GetView<BookingController> {
                           fontWeight: FontWeight.w800,
                           color: Color(0xFF0F172A))),
                   const Spacer(),
-                  const Icon(Icons.share_outlined,
-                      color: Color(0xFF1A1A1A), size: 22),
                 ],
               ),
             ),
