@@ -23,8 +23,15 @@ class BookingController extends GetxController {
   String get doctorSpecialty => _doctor?.specialty ?? '';
   String get doctorFee => profile?.doctor.feeLabel ?? _doctor?.fee ?? '৳0';
 
-  /// Whether this doctor charges a fee. Paid → payment step; free → book now.
-  bool get isPaid => profile?.doctor.isPaid ?? _doctor?.isPaid ?? true;
+  /// Whether this doctor charges a fee. A fee > 0 → show the payment step;
+  /// a free (0) doctor → skip payment and book directly.
+  /// Driven by the actual consultation fee (the profile is loaded by the time
+  /// the user reaches the booking steps); falls back to the `is_paid` flag.
+  bool get isPaid {
+    final fee = profile?.doctor.consultationFee;
+    if (fee != null) return fee > 0;
+    return profile?.doctor.isPaid ?? _doctor?.isPaid ?? true;
+  }
 
   void setDoctor(HcDoctor d) {
     _doctor = d;

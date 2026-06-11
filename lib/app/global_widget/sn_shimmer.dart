@@ -221,13 +221,29 @@ class SnGridSkeleton extends StatelessWidget {
             borderRadius: BorderRadius.circular(16),
             border: Border.all(color: const Color(0xFFE8ECF1)),
           ),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: const [
-              SnBone(width: 46, height: 46, radius: 14),
-              SizedBox(height: 10),
-              SnBone(width: 54, height: 10),
-            ],
+          // Adapt to the tile shape: tall square-ish tiles (categories /
+          // departments) show an icon + label; short wide tiles (e.g. time
+          // slots) show a single chip-like bone so nothing overflows.
+          child: LayoutBuilder(
+            builder: (context, c) {
+              if (c.maxHeight.isFinite && c.maxHeight < 70) {
+                return Center(
+                  child: SnBone(
+                    width: c.maxWidth.isFinite ? c.maxWidth * 0.55 : 40,
+                    height: 12,
+                    radius: 6,
+                  ),
+                );
+              }
+              return Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: const [
+                  SnBone(width: 46, height: 46, radius: 14),
+                  SizedBox(height: 10),
+                  SnBone(width: 54, height: 10),
+                ],
+              );
+            },
           ),
         ),
       ),
