@@ -115,9 +115,27 @@ class HealthcareController extends GetxController {
   List<HcDepartment> departments = [];
   bool loadingDepartments = false;
 
-  // ── Available-today doctors ─────────────────────────────────────────
+  /// How many doctors each home-page preview section shows.
+  static const int kPreviewCount = 5;
+
+  /// Page size for the paginated "see all" screens.
+  static const int kPageSize = 10;
+
+  // ── Available-today doctors (home preview) ──────────────────────────
   List<HcDoctor> doctors = [];
   bool loadingDoctors = false;
+
+  // ── Available-today doctors (paginated "see all" screen) ────────────
+  List<HcDoctor> availableDoctors = [];
+  bool loadingAvailable = false;
+  bool loadingMoreAvailable = false;
+  bool availableHasMore = true;
+  int _availablePage = 1;
+  final ScrollController availableScrollCtrl = ScrollController();
+
+  // ── All doctors (home preview) ──────────────────────────────────────
+  List<HcDoctor> allDoctors = [];
+  bool loadingAllDoctors = false;
 
   // ── Family ──────────────────────────────────────────────────────────
   List<HcFamilyMember> family = [];
@@ -129,7 +147,30 @@ class HealthcareController extends GetxController {
     super.onInit();
     fetchDepartments();
     fetchAvailableToday();
+    fetchAllDoctors();
     fetchFamily();
+    availableScrollCtrl.addListener(_onAvailableScroll);
+  }
+
+  @override
+  void onClose() {
+    availableScrollCtrl.removeListener(_onAvailableScroll);
+    availableScrollCtrl.dispose();
+    super.onClose();
+  }
+
+  Future<void> fetchAllDoctors() async {
+    loadingAllDoctors = true;
+    update();
+    try {
+      final list = await _repo.fetchDoctors(limit: kPreviewCount);
+      allDoctors = list.map(HcDoctor.fromApi).toList();
+    } catch (e) {
+      SnackHelper.error(e.toString().replaceFirst('Exception: ', ''));
+    } finally {
+      loadingAllDoctors = false;
+      update();
+    }
   }
 
   Future<void> fetchDepartments() async {
@@ -150,12 +191,58 @@ class HealthcareController extends GetxController {
     loadingDoctors = true;
     update();
     try {
-      final list = await _repo.fetchAvailableToday();
+      final list = await _repo.fetchAvailableToday(limit: kPreviewCount);
       doctors = list.map(HcDoctor.fromApi).toList();
     } catch (e) {
       SnackHelper.error(e.toString().replaceFirst('Exception: ', ''));
     } finally {
       loadingDoctors = false;
+      update();
+    }
+  }
+
+  // ── Available-today (paginated full list) ───────────────────────────
+  void _onAvailableScroll() {
+    final pos = availableScrollCtrl.position;
+    if (pos.pixels >= pos.maxScrollExtent - 300) loadMoreAvailable();
+  }
+
+  /// First page for the "Available today" see-all screen. Safe to call on
+  /// every screen open — only refetches when the list is empty.
+  Future<void> initAvailableList({bool force = false}) async {
+    if (!force && availableDoctors.isNotEmpty) return;
+    loadingAvailable = true;
+    _availablePage = 1;
+    availableHasMore = true;
+    update();
+    try {
+      final list = await _repo.fetchAvailableToday(
+          page: _availablePage, limit: kPageSize);
+      availableDoctors = list.map(HcDoctor.fromApi).toList();
+      availableHasMore = list.length >= kPageSize;
+    } catch (e) {
+      SnackHelper.error(e.toString().replaceFirst('Exception: ', ''));
+    } finally {
+      loadingAvailable = false;
+      update();
+    }
+  }
+
+  Future<void> loadMoreAvailable() async {
+    if (loadingMoreAvailable || loadingAvailable || !availableHasMore) return;
+    loadingMoreAvailable = true;
+    update();
+    try {
+      final next = _availablePage + 1;
+      final list =
+          await _repo.fetchAvailableToday(page: next, limit: kPageSize);
+      availableDoctors.addAll(list.map(HcDoctor.fromApi));
+      _availablePage = next;
+      availableHasMore = list.length >= kPageSize;
+    } catch (e) {
+      SnackHelper.error(e.toString().replaceFirst('Exception: ', ''));
+    } finally {
+      loadingMoreAvailable = false;
       update();
     }
   }

@@ -47,9 +47,6 @@ class FindDoctorView extends GetView<DoctorsController> {
                                   fontSize: 12, color: Color(0xFF94A3B8))),
                         ],
                       ),
-                      const Spacer(),
-                      const Icon(Icons.search_rounded,
-                          color: Color(0xFF1A1A1A), size: 22),
                     ],
                   ),
                 ),
@@ -64,11 +61,34 @@ class FindDoctorView extends GetView<DoctorsController> {
                         borderRadius: BorderRadius.circular(12)),
                     child: Row(
                       children: [
-                        const Icon(Icons.search_rounded, color: Color(0xFF94A3B8)),
+                        const Icon(Icons.search_rounded,
+                            color: Color(0xFF94A3B8)),
                         const SizedBox(width: 10),
-                        Text('Doctor, specialty or symptom'.tr,
+                        Expanded(
+                          child: TextField(
+                            controller: con.searchCtrl,
+                            onChanged: con.onSearchChanged,
+                            textInputAction: TextInputAction.search,
+                            decoration: InputDecoration(
+                              isCollapsed: true,
+                              border: InputBorder.none,
+                              hintText: 'Doctor, specialty or symptom'.tr,
+                              hintStyle: const TextStyle(
+                                  color: Color(0xFF94A3B8), fontSize: 13.5),
+                            ),
                             style: const TextStyle(
-                                color: Color(0xFF94A3B8), fontSize: 13.5)),
+                                fontSize: 14, color: Color(0xFF0F172A)),
+                          ),
+                        ),
+                        if (con.query.isNotEmpty)
+                          GestureDetector(
+                            onTap: () {
+                              con.searchCtrl.clear();
+                              con.onSearchChanged('');
+                            },
+                            child: const Icon(Icons.close_rounded,
+                                size: 18, color: Color(0xFF94A3B8)),
+                          ),
                       ],
                     ),
                   ),
@@ -112,25 +132,11 @@ class FindDoctorView extends GetView<DoctorsController> {
                 const SizedBox(height: 14),
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text('${con.filtered.length} doctors',
-                          style: const TextStyle(
-                              fontSize: 13, color: Color(0xFF94A3B8))),
-                      Row(
-                        children: [
-                          const Icon(Icons.filter_alt_outlined,
-                              size: 16, color: Color(0xFF64748B)),
-                          const SizedBox(width: 4),
-                          Text('Sort: Soonest'.tr,
-                              style: const TextStyle(
-                                  fontSize: 12.5,
-                                  fontWeight: FontWeight.w600,
-                                  color: Color(0xFF64748B))),
-                        ],
-                      ),
-                    ],
+                  child: Align(
+                    alignment: Alignment.centerLeft,
+                    child: Text('${con.filtered.length} doctors',
+                        style: const TextStyle(
+                            fontSize: 13, color: Color(0xFF94A3B8))),
                   ),
                 ),
                 const SizedBox(height: 10),
@@ -150,29 +156,43 @@ class FindDoctorView extends GetView<DoctorsController> {
                               ],
                             )
                           : ListView(
+                              controller: con.scrollCtrl,
                               padding:
                                   const EdgeInsets.fromLTRB(16, 0, 16, 20),
-                              children: con.filtered
-                                  .toList()
-                                  .asMap()
-                                  .entries
-                                  .map((e) => FadeInUp(
-                                        from: 18,
-                                        duration: const Duration(
-                                            milliseconds: 350),
-                                        delay: Duration(
-                                            milliseconds: 70 *
-                                                (e.key < 6 ? e.key : 6)),
-                                        child: Padding(
-                                          padding: const EdgeInsets.only(
-                                              bottom: 12),
-                                          child: _DoctorCard(
-                                              doctor: e.value,
-                                              onTap: () =>
-                                                  con.openDoctor(e.value)),
-                                        ),
-                                      ))
-                                  .toList(),
+                              children: [
+                                ...con.filtered
+                                    .toList()
+                                    .asMap()
+                                    .entries
+                                    .map((e) => FadeInUp(
+                                          from: 18,
+                                          duration: const Duration(
+                                              milliseconds: 350),
+                                          delay: Duration(
+                                              milliseconds: 70 *
+                                                  (e.key < 6 ? e.key : 6)),
+                                          child: Padding(
+                                            padding: const EdgeInsets.only(
+                                                bottom: 12),
+                                            child: _DoctorCard(
+                                                doctor: e.value,
+                                                onTap: () =>
+                                                    con.openDoctor(e.value)),
+                                          ),
+                                        )),
+                                if (con.loadingMore)
+                                  const Padding(
+                                    padding: EdgeInsets.symmetric(vertical: 8),
+                                    child: Center(
+                                      child: SizedBox(
+                                        width: 22,
+                                        height: 22,
+                                        child: CircularProgressIndicator(
+                                            strokeWidth: 2.4, color: _green),
+                                      ),
+                                    ),
+                                  ),
+                              ],
                             ),
                 ),
               ],

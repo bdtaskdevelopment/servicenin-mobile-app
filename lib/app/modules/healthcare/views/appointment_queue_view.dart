@@ -1,8 +1,10 @@
 import 'package:animate_do/animate_do.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:intl/intl.dart';
 
 import '../../../core/values/app_colors.dart';
+import '../../../data/models/response/healthcare_response.dart';
 import '../../../global_widget/sn_shimmer.dart';
 import '../controllers/appointments_controller.dart';
 
@@ -73,7 +75,7 @@ class AppointmentQueueView extends GetView<AppointmentsController> {
                                   color: _tile,
                                   borderRadius: BorderRadius.circular(14)),
                               alignment: Alignment.center,
-                              child: Text(a.doctorInitials,
+                              child: Text(con.doctorInitialsFor(a),
                                   style: const TextStyle(
                                       color: _green,
                                       fontSize: 16,
@@ -84,7 +86,7 @@ class AppointmentQueueView extends GetView<AppointmentsController> {
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text(a.doctorName,
+                                  Text(con.doctorNameFor(a),
                                       style: const TextStyle(
                                           fontSize: 15.5,
                                           fontWeight: FontWeight.w800,
@@ -232,6 +234,11 @@ class AppointmentQueueView extends GetView<AppointmentsController> {
                       ],
                       const SizedBox(height: 22),
                       _PrescriptionsSection(con: con),
+                      if (!upcoming) ...[
+                        const SizedBox(height: 22),
+                        _ReviewSection(
+                            con: con, doctorName: con.doctorNameFor(a)),
+                      ],
                     ],
                   ),
                 ),
@@ -245,7 +252,9 @@ class AppointmentQueueView extends GetView<AppointmentsController> {
                           child: SizedBox(
                             height: 52,
                             child: OutlinedButton.icon(
-                              onPressed: () => _pickAndReschedule(context, con),
+                              onPressed: con.hasPrescriptionForSelected
+                                  ? null
+                                  : () => _pickAndReschedule(context, con),
                               icon: const Icon(Icons.event_repeat_outlined,
                                   size: 18),
                               label: Text('Reschedule'.tr,
@@ -499,6 +508,17 @@ class _PrescriptionsSection extends StatelessWidget {
                       ),
                       const SizedBox(width: 6),
                       IconButton(
+                        tooltip: 'View'.tr,
+                        onPressed: () => Get.bottomSheet(
+                          _PrescriptionSheet(rx: p, con: con),
+                          isScrollControlled: true,
+                          backgroundColor: Colors.transparent,
+                        ),
+                        icon: const Icon(Icons.visibility_outlined,
+                            color: Color(0xFF334155), size: 22),
+                      ),
+                      IconButton(
+                        tooltip: 'Download'.tr,
                         onPressed: () => con.downloadPrescription(p.id),
                         icon: const Icon(Icons.download_rounded,
                             color: _green, size: 22),
@@ -510,6 +530,325 @@ class _PrescriptionsSection extends StatelessWidget {
             );
           }),
       ],
+    );
+  }
+}
+
+// ── Review section (shown on a completed appointment) ────────────────
+class _ReviewSection extends StatefulWidget {
+  const _ReviewSection({required this.con, required this.doctorName});
+  final AppointmentsController con;
+  final String doctorName;
+
+  @override
+  State<_ReviewSection> createState() => _ReviewSectionState();
+}
+
+class _ReviewSectionState extends State<_ReviewSection> {
+  int _rating = 5;
+  final _commentCtrl = TextEditingController();
+
+  @override
+  void dispose() {
+    _commentCtrl.dispose();
+    super.dispose();
+  }
+
+  Future<void> _submit() async {
+    await widget.con.submitReview(_rating, _commentCtrl.text.trim());
+    _commentCtrl.clear();
+    setState(() => _rating = 5);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return GetBuilder<AppointmentsController>(
+      builder: (con) => Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+            color: AppColors.white,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: const Color(0xFFEDEFF2))),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('Rate your visit'.tr,
+                style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w800,
+                    color: Color(0xFF0F172A))),
+            const SizedBox(height: 2),
+            Text(
+                widget.doctorName.isNotEmpty
+                    ? '${'How was your appointment with'.tr} ${widget.doctorName}?'
+                    : 'How was your appointment?'.tr,
+                style: const TextStyle(
+                    fontSize: 12.5, color: Color(0xFF94A3B8))),
+            const SizedBox(height: 14),
+            Row(
+              children: List.generate(5, (i) {
+                final filled = i < _rating;
+                return GestureDetector(
+                  onTap: () => setState(() => _rating = i + 1),
+                  child: Padding(
+                    padding: const EdgeInsets.only(right: 6),
+                    child: Icon(
+                        filled
+                            ? Icons.star_rounded
+                            : Icons.star_border_rounded,
+                        size: 34,
+                        color: const Color(0xFFF59E0B)),
+                  ),
+                );
+              }),
+            ),
+            const SizedBox(height: 14),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
+              decoration: BoxDecoration(
+                  color: const Color(0xFFF7F8FA),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: const Color(0xFFEDEFF2))),
+              child: TextField(
+                controller: _commentCtrl,
+                maxLines: 3,
+                decoration: InputDecoration(
+                  border: InputBorder.none,
+                  hintText: 'Share your experience…'.tr,
+                  hintStyle: const TextStyle(color: Color(0xFFB8C0CC)),
+                ),
+                style: const TextStyle(
+                    fontSize: 14.5, color: Color(0xFF0F172A)),
+              ),
+            ),
+            const SizedBox(height: 14),
+            SizedBox(
+              width: double.infinity,
+              height: 50,
+              child: ElevatedButton(
+                onPressed: con.submittingReview ? null : _submit,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: _green,
+                  foregroundColor: Colors.white,
+                  elevation: 0,
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(14)),
+                ),
+                child: con.submittingReview
+                    ? const SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(
+                            strokeWidth: 2.2, color: Colors.white))
+                    : Text('Submit review'.tr,
+                        style: const TextStyle(
+                            fontSize: 15.5, fontWeight: FontWeight.w800)),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// ── Prescription detail bottom sheet (view + download) ───────────────
+class _PrescriptionSheet extends StatelessWidget {
+  const _PrescriptionSheet({required this.rx, required this.con});
+  final Prescription rx;
+  final AppointmentsController con;
+
+  @override
+  Widget build(BuildContext context) {
+    final vitals = <String>[
+      if (rx.bloodPressure.isNotEmpty) 'BP ${rx.bloodPressure}',
+      if (rx.pulse.isNotEmpty) 'Pulse ${rx.pulse}',
+      if (rx.temperature.isNotEmpty) 'Temp ${rx.temperature}',
+      if (rx.weight.isNotEmpty) 'Wt ${rx.weight}',
+    ].join('  ·  ');
+
+    return Container(
+      constraints: BoxConstraints(maxHeight: Get.height * 0.88),
+      decoration: const BoxDecoration(
+        color: Color(0xFFF7F8FA),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const SizedBox(height: 12),
+          Container(
+            width: 42,
+            height: 4,
+            decoration: BoxDecoration(
+                color: const Color(0xFFE2E8F0),
+                borderRadius: BorderRadius.circular(4)),
+          ),
+          Expanded(
+            child: ListView(
+              padding: const EdgeInsets.fromLTRB(20, 16, 20, 16),
+              children: [
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                          rx.doctorName.isNotEmpty
+                              ? rx.doctorName
+                              : 'Prescription'.tr,
+                          style: const TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.w800,
+                              color: Color(0xFF0F172A))),
+                    ),
+                    if (rx.dateLabel.isNotEmpty)
+                      Text(rx.dateLabel,
+                          style: const TextStyle(
+                              fontSize: 12.5, color: Color(0xFF94A3B8))),
+                  ],
+                ),
+                if (rx.doctorSpecialty.isNotEmpty ||
+                    rx.patientName.isNotEmpty) ...[
+                  const SizedBox(height: 2),
+                  Text(
+                      [rx.doctorSpecialty, if (rx.patientName.isNotEmpty) 'Patient: ${rx.patientName}']
+                          .where((s) => s.isNotEmpty)
+                          .join('  ·  '),
+                      style: const TextStyle(
+                          fontSize: 12.5, color: Color(0xFF64748B))),
+                ],
+                if (vitals.isNotEmpty) ...[
+                  const SizedBox(height: 12),
+                  Text(vitals,
+                      style: const TextStyle(
+                          fontSize: 13, color: Color(0xFF334155))),
+                ],
+                _block('Chief complaint'.tr, rx.chiefComplaint),
+                _block('Diagnosis'.tr, rx.diagnosis),
+                _block('Investigations'.tr, rx.investigations),
+                if (rx.items.isNotEmpty) ...[
+                  const SizedBox(height: 16),
+                  Text('Rx'.tr,
+                      style: const TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w800,
+                          color: _green)),
+                  const SizedBox(height: 8),
+                  ...rx.items.asMap().entries.map((e) => _MedRow(
+                        index: e.key + 1,
+                        item: e.value,
+                      )),
+                ],
+                _block('Advice'.tr, rx.advice),
+                if (rx.followUpDate != null) ...[
+                  const SizedBox(height: 12),
+                  Text(
+                      '${'Follow-up'.tr}: ${DateFormat('d MMM yyyy').format(rx.followUpDate!.toLocal())}',
+                      style: const TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w700,
+                          color: Color(0xFF0F172A))),
+                ],
+              ],
+            ),
+          ),
+          // Download action
+          Container(
+            color: AppColors.white,
+            padding: EdgeInsets.fromLTRB(
+                16, 12, 16, 12 + MediaQuery.of(context).padding.bottom),
+            child: SizedBox(
+              width: double.infinity,
+              height: 52,
+              child: GetBuilder<AppointmentsController>(
+                builder: (c) => ElevatedButton.icon(
+                  onPressed: c.downloading
+                      ? null
+                      : () => c.downloadPrescription(rx.id),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: _green,
+                    foregroundColor: Colors.white,
+                    elevation: 0,
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(14)),
+                  ),
+                  icon: c.downloading
+                      ? const SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(
+                              strokeWidth: 2.2, color: Colors.white))
+                      : const Icon(Icons.download_rounded, size: 20),
+                  label: Text('Download PDF'.tr,
+                      style: const TextStyle(
+                          fontSize: 15.5, fontWeight: FontWeight.w800)),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _block(String label, String value) {
+    if (value.trim().isEmpty) return const SizedBox.shrink();
+    return Padding(
+      padding: const EdgeInsets.only(top: 14),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(label,
+              style: const TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w800,
+                  color: Color(0xFF94A3B8),
+                  letterSpacing: 0.4)),
+          const SizedBox(height: 3),
+          Text(value,
+              style: const TextStyle(
+                  fontSize: 14, height: 1.45, color: Color(0xFF334155))),
+        ],
+      ),
+    );
+  }
+}
+
+class _MedRow extends StatelessWidget {
+  const _MedRow({required this.index, required this.item});
+  final int index;
+  final PrescriptionItem item;
+
+  @override
+  Widget build(BuildContext context) {
+    final name = item.tradeName.isNotEmpty ? item.tradeName : item.genericName;
+    final subtitle = [item.strength, item.form]
+        .where((s) => s.isNotEmpty)
+        .join(' ');
+    final schedule = [item.dosage, item.frequency, item.duration]
+        .where((s) => s.isNotEmpty)
+        .join('  ·  ');
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 10),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text('$index. ${name.isNotEmpty ? name : 'Medicine'}'
+              '${subtitle.isNotEmpty ? '  ($subtitle)' : ''}',
+              style: const TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w800,
+                  color: Color(0xFF0F172A))),
+          if (schedule.isNotEmpty) ...[
+            const SizedBox(height: 2),
+            Padding(
+              padding: const EdgeInsets.only(left: 16),
+              child: Text(schedule,
+                  style: const TextStyle(
+                      fontSize: 12.5, color: Color(0xFF64748B))),
+            ),
+          ],
+        ],
+      ),
     );
   }
 }

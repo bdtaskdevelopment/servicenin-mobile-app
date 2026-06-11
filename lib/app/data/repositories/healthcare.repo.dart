@@ -30,16 +30,16 @@ class HealthcareRepository {
     return Department.listFromResponse(_payload(res));
   }
 
-  Future<List<Doctor>> fetchDoctors({String? specialization}) async {
-    final url = (specialization == null || specialization.isEmpty)
-        ? ApiURL.hcDoctors
-        : ApiURL.hcDoctorsBySpecialization(specialization);
-    final res = await provider.getData(url);
+  Future<List<Doctor>> fetchDoctors(
+      {String? specialization, int page = 1, int limit = 10}) async {
+    final res = await provider.getData(ApiURL.hcDoctorsPaged(
+        page: page, limit: limit, specialization: specialization));
     return Doctor.listFromResponse(_payload(res));
   }
 
-  Future<List<Doctor>> fetchAvailableToday() async {
-    final res = await provider.getData(ApiURL.hcDoctorsAvailableToday);
+  Future<List<Doctor>> fetchAvailableToday({int page = 1, int limit = 10}) async {
+    final res = await provider
+        .getData(ApiURL.hcDoctorsAvailableTodayPaged(page: page, limit: limit));
     return Doctor.listFromResponse(_payload(res));
   }
 

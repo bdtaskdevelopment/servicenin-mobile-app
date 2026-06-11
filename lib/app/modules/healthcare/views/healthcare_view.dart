@@ -130,7 +130,46 @@ class HealthcareView extends GetView<HealthcareController> {
                                   fontSize: 13, color: Color(0xFF94A3B8))),
                         )
                       else
-                        ...con.doctors.take(4).toList().asMap().entries.map(
+                        ...con.doctors.take(5).toList().asMap().entries.map(
+                              (e) => FadeInUp(
+                                from: 18,
+                                duration: const Duration(milliseconds: 350),
+                                delay: Duration(milliseconds: 70 * e.key),
+                                child: Padding(
+                                  padding: const EdgeInsets.only(bottom: 12),
+                                  child: GestureDetector(
+                                    onTap: () {
+                                      Get.find<BookingController>()
+                                          .setDoctor(e.value);
+                                      Get.toNamed(Routes.HC_DOCTOR_PROFILE);
+                                    },
+                                    child: HcDoctorCard(doctor: e.value),
+                                  ),
+                                ),
+                              ),
+                            ),
+                      // ── All doctors ──────────────────────────────
+                      const SizedBox(height: 22),
+                      GestureDetector(
+                        onTap: () => Get.toNamed(Routes.HC_DOCTORS),
+                        child: _SectionHeader(
+                            title: 'All doctors'.tr, action: 'See all →'.tr),
+                      ),
+                      const SizedBox(height: 12),
+                      if (con.loadingAllDoctors && con.allDoctors.isEmpty)
+                        const SnListSkeleton(
+                          count: 4,
+                          padding: EdgeInsets.zero,
+                        )
+                      else if (con.allDoctors.isEmpty)
+                        Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 8),
+                          child: Text('No doctors found.'.tr,
+                              style: const TextStyle(
+                                  fontSize: 13, color: Color(0xFF94A3B8))),
+                        )
+                      else
+                        ...con.allDoctors.take(5).toList().asMap().entries.map(
                               (e) => FadeInUp(
                                 from: 18,
                                 duration: const Duration(milliseconds: 350),

@@ -100,6 +100,18 @@ class Doctor {
   factory Doctor.fromMap(Map<String, dynamic> j) {
     final user = j['user'] is Map ? j['user'] as Map : const {};
     final profile = user['profile'] is Map ? user['profile'] as Map : const {};
+    // The doctor's profile can sit at user.profile (doctors list) or directly
+    // at doctor.profile (e.g. nested inside an appointment), and the name may
+    // also come as a flat field. Pick the first non-empty.
+    final directProfile = j['profile'] is Map ? j['profile'] as Map : const {};
+    String pickName(List<dynamic> candidates) {
+      for (final c in candidates) {
+        final s = _str(c);
+        if (s.isNotEmpty) return s;
+      }
+      return '';
+    }
+
     return Doctor(
       id: _str(j['id']),
       userId: _str(j['user_id']),
@@ -117,9 +129,19 @@ class Doctor {
       designation: _str(j['designation']),
       currentHospital: _str(j['current_hospital']),
       isPaid: j['is_paid'] == true,
-      fullName: _str(profile['full_name']),
-      fullNameBn: _str(profile['full_name_bn']),
-      gender: _str(profile['gender']),
+      fullName: pickName([
+        profile['full_name'],
+        directProfile['full_name'],
+        j['full_name'],
+        j['name'],
+        j['doctor_name'],
+      ]),
+      fullNameBn: pickName([
+        profile['full_name_bn'],
+        directProfile['full_name_bn'],
+        j['full_name_bn'],
+      ]),
+      gender: pickName([profile['gender'], directProfile['gender']]),
     );
   }
 
@@ -549,6 +571,7 @@ class PrescriptionItem {
 class Prescription {
   Prescription({
     required this.id,
+    required this.appointmentId,
     required this.diagnosis,
     required this.chiefComplaint,
     required this.advice,
@@ -566,6 +589,7 @@ class Prescription {
   });
 
   final String id;
+  final String appointmentId;
   final String diagnosis;
   final String chiefComplaint;
   final String advice;
@@ -600,6 +624,7 @@ class Prescription {
     final followUp = _str(j['follow_up_date']);
     return Prescription(
       id: _str(j['id']),
+      appointmentId: _str(j['appointment_id']),
       diagnosis: _str(j['diagnosis']),
       chiefComplaint: _str(j['chief_complaint']),
       advice: _str(j['advice']),

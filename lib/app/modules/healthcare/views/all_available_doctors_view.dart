@@ -10,8 +10,24 @@ import '../widgets/hc_doctor_card.dart';
 
 const _green = Color(0xFF15803D);
 
-class AllAvailableDoctorsView extends GetView<HealthcareController> {
+class AllAvailableDoctorsView extends StatefulWidget {
   const AllAvailableDoctorsView({super.key});
+
+  @override
+  State<AllAvailableDoctorsView> createState() =>
+      _AllAvailableDoctorsViewState();
+}
+
+class _AllAvailableDoctorsViewState extends State<AllAvailableDoctorsView> {
+  final HealthcareController controller = Get.find<HealthcareController>();
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      controller.initAvailableList();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -51,14 +67,14 @@ class AllAvailableDoctorsView extends GetView<HealthcareController> {
             Expanded(
               child: RefreshIndicator(
                 color: _green,
-                onRefresh: controller.fetchAvailableToday,
+                onRefresh: () => controller.initAvailableList(force: true),
                 child: GetBuilder<HealthcareController>(
                   builder: (con) {
-                    if (con.loadingDoctors && con.doctors.isEmpty) {
+                    if (con.loadingAvailable && con.availableDoctors.isEmpty) {
                       return const SnListSkeleton(
                           padding: EdgeInsets.fromLTRB(16, 8, 16, 24));
                     }
-                    if (con.doctors.isEmpty) {
+                    if (con.availableDoctors.isEmpty) {
                       return ListView(
                         children: [
                           const SizedBox(height: 140),
@@ -70,30 +86,44 @@ class AllAvailableDoctorsView extends GetView<HealthcareController> {
                       );
                     }
                     return ListView(
+                      controller: con.availableScrollCtrl,
                       padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
-                      children: con.doctors
-                          .toList()
-                          .asMap()
-                          .entries
-                          .map((e) => FadeInUp(
-                                from: 18,
-                                duration: const Duration(milliseconds: 350),
-                                delay: Duration(
-                                    milliseconds:
-                                        70 * (e.key < 6 ? e.key : 6)),
-                                child: Padding(
-                                  padding: const EdgeInsets.only(bottom: 12),
-                                  child: GestureDetector(
-                                    onTap: () {
-                                      Get.find<BookingController>()
-                                          .setDoctor(e.value);
-                                      Get.toNamed(Routes.HC_DOCTOR_PROFILE);
-                                    },
-                                    child: HcDoctorCard(doctor: e.value),
+                      children: [
+                        ...con.availableDoctors
+                            .toList()
+                            .asMap()
+                            .entries
+                            .map((e) => FadeInUp(
+                                  from: 18,
+                                  duration: const Duration(milliseconds: 350),
+                                  delay: Duration(
+                                      milliseconds:
+                                          70 * (e.key < 6 ? e.key : 6)),
+                                  child: Padding(
+                                    padding: const EdgeInsets.only(bottom: 12),
+                                    child: GestureDetector(
+                                      onTap: () {
+                                        Get.find<BookingController>()
+                                            .setDoctor(e.value);
+                                        Get.toNamed(Routes.HC_DOCTOR_PROFILE);
+                                      },
+                                      child: HcDoctorCard(doctor: e.value),
+                                    ),
                                   ),
-                                ),
-                              ))
-                          .toList(),
+                                )),
+                        if (con.loadingMoreAvailable)
+                          const Padding(
+                            padding: EdgeInsets.symmetric(vertical: 8),
+                            child: Center(
+                              child: SizedBox(
+                                width: 22,
+                                height: 22,
+                                child: CircularProgressIndicator(
+                                    strokeWidth: 2.4, color: _green),
+                              ),
+                            ),
+                          ),
+                      ],
                     );
                   },
                 ),

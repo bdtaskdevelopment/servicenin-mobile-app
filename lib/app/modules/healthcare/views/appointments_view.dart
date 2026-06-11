@@ -107,7 +107,13 @@ class _List extends StatelessWidget {
                     child: GestureDetector(
                       onTap: () => Get.find<AppointmentsController>()
                           .openAppointment(e.value),
-                      child: _ApptCard(appt: e.value),
+                      child: _ApptCard(
+                        appt: e.value,
+                        doctorName: Get.find<AppointmentsController>()
+                            .doctorNameFor(e.value),
+                        doctorInitials: Get.find<AppointmentsController>()
+                            .doctorInitialsFor(e.value),
+                      ),
                     ),
                   ),
                 ))
@@ -118,8 +124,14 @@ class _List extends StatelessWidget {
 }
 
 class _ApptCard extends StatelessWidget {
-  const _ApptCard({required this.appt});
+  const _ApptCard({
+    required this.appt,
+    required this.doctorName,
+    required this.doctorInitials,
+  });
   final HcAppointment appt;
+  final String doctorName;
+  final String doctorInitials;
 
   @override
   Widget build(BuildContext context) {
@@ -149,7 +161,7 @@ class _ApptCard extends StatelessWidget {
                 decoration: BoxDecoration(
                     color: _tile, borderRadius: BorderRadius.circular(12)),
                 alignment: Alignment.center,
-                child: Text(appt.doctorInitials,
+                child: Text(doctorInitials,
                     style: const TextStyle(
                         color: _green,
                         fontSize: 15,
@@ -160,7 +172,7 @@ class _ApptCard extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(appt.doctorName,
+                    Text(doctorName,
                         style: const TextStyle(
                             fontSize: 15,
                             fontWeight: FontWeight.w800,

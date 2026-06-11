@@ -48,6 +48,20 @@ class ApiURL {
       'api/v1/healthcare/doctors?specialization=$spec';
   static final String hcDoctorsAvailableToday =
       'api/v1/healthcare/doctors/available-today';
+
+  /// Paginated doctors list, optionally filtered by specialization.
+  static String hcDoctorsPaged(
+      {int page = 1, int limit = 10, String? specialization}) {
+    final q = StringBuffer('$hcDoctors?page=$page&limit=$limit');
+    if (specialization != null && specialization.isNotEmpty) {
+      q.write('&specialization=${Uri.encodeQueryComponent(specialization)}');
+    }
+    return q.toString();
+  }
+
+  /// Paginated "available today" doctors list.
+  static String hcDoctorsAvailableTodayPaged({int page = 1, int limit = 10}) =>
+      '$hcDoctorsAvailableToday?page=$page&limit=$limit';
   static String hcDoctorProfile(String id) =>
       'api/v1/healthcare/doctors/$id/profile';
   static String hcDoctorReviews(String id) =>
