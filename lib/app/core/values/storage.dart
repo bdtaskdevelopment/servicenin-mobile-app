@@ -11,6 +11,8 @@ class StorageConstants {
   static const String phoneCode = 'PHONE_CODE';
   static const String phoneNumber = 'PHONE_NUMBER';
   static const String currencySymbol = 'currency_symbol';
+  static const String latitude = 'latitude';
+  static const String longitude = 'longitude';
 
   static const String refreshToken = 'refreshToken';
   static const String customerId = "customer_id";
