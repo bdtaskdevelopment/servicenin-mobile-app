@@ -1,5 +1,5 @@
 import 'package:get/get.dart';
-import 'package:url_launcher/url_launcher.dart';
+import 'package:open_filex/open_filex.dart';
 
 import '../../../core/helpers/snack_helper.dart';
 import '../../../data/models/response/healthcare_response.dart';
@@ -118,7 +118,12 @@ class AppointmentsController extends GetxController {
     try {
       SnackHelper.success('প্রেসক্রিপশন ডাউনলোড হচ্ছে…');
       final path = await _repo.downloadPrescription(id);
-      await launchUrl(Uri.file(path), mode: LaunchMode.externalApplication);
+      final result = await OpenFilex.open(path);
+      if (result.type != ResultType.done) {
+        SnackHelper.error(result.type == ResultType.noAppToOpen
+            ? 'PDF খোলার কোনো অ্যাপ পাওয়া যায়নি'
+            : 'ফাইলটি খোলা যায়নি');
+      }
     } catch (e) {
       SnackHelper.error(e.toString().replaceFirst('Exception: ', ''));
     } finally {
