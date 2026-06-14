@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import '../../core/values/app_url.dart';
+import '../models/response/auth_response.dart';
 import '../models/response/nagarik_response.dart';
 import '../providers/nagarik.provider.dart';
 
@@ -46,6 +47,17 @@ class NagarikRepository {
   Future<NagarikGrievance> fetchGrievance(String id) async {
     final res = await provider.getData(ApiURL.nagarikGrievanceById(id));
     return NagarikGrievance.fromResponse(_payload(res));
+  }
+
+  /// Citizen verification of a resolved grievance (common response).
+  Future<AuthSimpleResponse> verifyGrievance(
+    String id,
+    Map<String, dynamic> payload, {
+    File? proofPhoto,
+  }) async {
+    final res = await provider.postVerifyMultipart(
+        ApiURL.nagarikGrievanceVerify(id), payload, proofPhoto);
+    return AuthSimpleResponse.fromMap(_payload(res));
   }
 
   // ── Tickets ───────────────────────────────────────────────────────

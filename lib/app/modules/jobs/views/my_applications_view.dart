@@ -65,7 +65,10 @@ class MyApplicationsView extends GetView<JobsController> {
                         delay: Duration(milliseconds: 70 * e.key),
                         child: Padding(
                           padding: const EdgeInsets.only(bottom: 12),
-                          child: _AppCard(app: e.value),
+                          child: GestureDetector(
+                            onTap: () => con.openApplicationJob(e.value),
+                            child: _AppCard(app: e.value),
+                          ),
                         ),
                       ))
                   .toList(),

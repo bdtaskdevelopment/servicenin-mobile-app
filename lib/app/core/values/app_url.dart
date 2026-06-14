@@ -138,6 +138,9 @@ class ApiURL {
   static final String mmBiodataFields = 'api/v1/matchmaking/biodata-fields';
   static final String mmProfiles = 'api/v1/matchmaking/profiles';
   static final String mmProfileMe = 'api/v1/matchmaking/profiles/me';
+  static final String mmPreference =
+      'api/v1/matchmaking/profiles/me/preference';
+  static final String mmDocuments = 'api/v1/matchmaking/profiles/me/documents';
   static String mmProfile(String id) => 'api/v1/matchmaking/profiles/$id';
   static final String mmSuggestions = 'api/v1/matchmaking/suggestions';
   static String mmInterest(String profileId) =>
@@ -163,10 +166,14 @@ class ApiURL {
   }) {
     final params = <String>['page=$page', 'limit=$limit'];
     if (category.isNotEmpty && category != 'All') {
-      params.add('category=$category');
+      params.add('category=${Uri.encodeQueryComponent(category)}');
     }
-    if (jobType.isNotEmpty) params.add('job_type=$jobType');
-    if (search.isNotEmpty) params.add('search=$search');
+    if (jobType.isNotEmpty) {
+      params.add('job_type=${Uri.encodeQueryComponent(jobType)}');
+    }
+    if (search.isNotEmpty) {
+      params.add('search=${Uri.encodeQueryComponent(search)}');
+    }
     return 'api/v1/jobs?${params.join('&')}';
   }
 
@@ -227,6 +234,8 @@ class ApiURL {
   static final String nagarikGrievances = 'api/v1/nagarik/grievances';
   static String nagarikGrievanceById(String id) =>
       'api/v1/nagarik/grievances/$id';
+  static String nagarikGrievanceVerify(String id) =>
+      'api/v1/nagarik/grievances/$id/verify';
   static final String nagarikTickets = 'api/v1/nagarik/tickets';
   static String nagarikTicketById(String id) =>
       'api/v1/nagarik/tickets/$id';

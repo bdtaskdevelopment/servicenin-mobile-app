@@ -152,14 +152,15 @@ class DoctorProfileView extends GetView<BookingController> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       _Head('Patient reviews'.tr),
-                      GestureDetector(
-                        onTap: () => _showReviewDialog(context, con),
-                        child: Text('Write a review →'.tr,
-                            style: const TextStyle(
-                                fontSize: 13,
-                                fontWeight: FontWeight.w700,
-                                color: AppColors.brandOrange)),
-                      ),
+                      // Write-review action hidden for now.
+                      // GestureDetector(
+                      //   onTap: () => _showReviewDialog(context, con),
+                      //   child: Text('Write a review →'.tr,
+                      //       style: const TextStyle(
+                      //           fontSize: 13,
+                      //           fontWeight: FontWeight.w700,
+                      //           color: AppColors.brandOrange)),
+                      // ),
                     ],
                   ),
                   const SizedBox(height: 12),
@@ -263,6 +264,8 @@ class DoctorProfileView extends GetView<BookingController> {
       );
 }
 
+// Kept for when the write-review action is re-enabled.
+// ignore: unused_element
 void _showReviewDialog(BuildContext context, BookingController con) {
   int rating = 5;
   final commentCtrl = TextEditingController();

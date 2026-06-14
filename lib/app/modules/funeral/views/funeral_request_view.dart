@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../../core/values/app_colors.dart';
+import '../../../global_widget/sn_date_field.dart';
 import '../controllers/funeral_controller.dart';
 
 const _charcoal = Color(0xFF332F2C);
@@ -122,8 +123,11 @@ class FuneralRequestView extends GetView<FuneralController> {
                       ],
                     ),
                     const SizedBox(height: 12),
-                    _Field(con.deathTime, 'TIME OF DEATH'.tr,
-                        'YYYY-MM-DD HH:MM'),
+                    SnDateField(
+                        controller: con.deathTime,
+                        label: 'TIME OF DEATH'.tr,
+                        withTime: true,
+                        lastDate: DateTime.now()),
                     const SizedBox(height: 12),
                     _Field(con.placeOfDeath, 'PLACE OF DEATH'.tr,
                         'e.g. Dhaka Medical College'.tr),
@@ -138,8 +142,10 @@ class FuneralRequestView extends GetView<FuneralController> {
                     const SizedBox(height: 12),
                     _Field(con.wardNo, 'WARD NO (OPTIONAL)'.tr, 'e.g. 10'.tr),
                     const SizedBox(height: 12),
-                    _Field(con.scheduledAt, 'PREFERRED TIME (OPTIONAL)'.tr,
-                        'YYYY-MM-DD HH:MM'),
+                    SnDateField(
+                        controller: con.scheduledAt,
+                        label: 'PREFERRED TIME (OPTIONAL)'.tr,
+                        withTime: true),
                     const SizedBox(height: 16),
                     _Label('YOUR CONTACT'.tr),
                     const SizedBox(height: 10),

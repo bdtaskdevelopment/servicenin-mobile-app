@@ -18,15 +18,16 @@ class JobsView extends GetView<JobsController> {
     final con = controller;
     return Scaffold(
       backgroundColor: const Color(0xFFF7F8FA),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: con.openPostJob,
-        backgroundColor: _orange,
-        foregroundColor: Colors.white,
-        elevation: 2,
-        icon: const Icon(Icons.add_rounded, size: 22),
-        label: Text('Post a job'.tr,
-            style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w800)),
-      ),
+      // "Post a job" hidden for now.
+      // floatingActionButton: FloatingActionButton.extended(
+      //   onPressed: con.openPostJob,
+      //   backgroundColor: _orange,
+      //   foregroundColor: Colors.white,
+      //   elevation: 2,
+      //   icon: const Icon(Icons.add_rounded, size: 22),
+      //   label: Text('Post a job'.tr,
+      //       style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w800)),
+      // ),
       body: SafeArea(
         child: Column(
           children: [
@@ -55,12 +56,13 @@ class JobsView extends GetView<JobsController> {
                     ],
                   ),
                   const Spacer(),
-                  GestureDetector(
-                    onTap: con.openSeekerProfile,
-                    child: const Icon(Icons.person_outline_rounded,
-                        color: Color(0xFF1A1A1A), size: 22),
-                  ),
-                  const SizedBox(width: 16),
+                  // User (seeker profile) icon hidden for now.
+                  // GestureDetector(
+                  //   onTap: con.openSeekerProfile,
+                  //   child: const Icon(Icons.person_outline_rounded,
+                  //       color: Color(0xFF1A1A1A), size: 22),
+                  // ),
+                  // const SizedBox(width: 16),
                   GestureDetector(
                     onTap: con.openApplications,
                     child: const Icon(Icons.business_center_outlined,
@@ -85,6 +87,7 @@ class JobsView extends GetView<JobsController> {
                     Expanded(
                       child: TextField(
                         controller: con.searchCtrl,
+                        onChanged: con.onSearchChanged,
                         onSubmitted: con.onSearchSubmitted,
                         textInputAction: TextInputAction.search,
                         decoration: InputDecoration(
@@ -97,6 +100,15 @@ class JobsView extends GetView<JobsController> {
                         style: const TextStyle(
                             fontSize: 13.5, color: Color(0xFF0F172A)),
                       ),
+                    ),
+                    GetBuilder<JobsController>(
+                      builder: (con) => con.search.isEmpty
+                          ? const SizedBox.shrink()
+                          : GestureDetector(
+                              onTap: con.clearSearch,
+                              child: const Icon(Icons.close_rounded,
+                                  size: 18, color: Color(0xFF94A3B8)),
+                            ),
                     ),
                   ],
                 ),
@@ -170,11 +182,12 @@ class JobsView extends GetView<JobsController> {
                       child: ListView(
                         padding: const EdgeInsets.fromLTRB(16, 0, 16, 90),
                         children: [
-                          GestureDetector(
-                            onTap: con.openEmployerRegister,
-                            child: _EmployerCard(),
-                          ),
-                          const SizedBox(height: 12),
+                          // "For employers" registration card hidden for now.
+                          // GestureDetector(
+                          //   onTap: con.openEmployerRegister,
+                          //   child: _EmployerCard(),
+                          // ),
+                          // const SizedBox(height: 12),
                           if (con.jobs.isEmpty)
                             Padding(
                               padding: const EdgeInsets.symmetric(vertical: 40),
@@ -219,6 +232,8 @@ class JobsView extends GetView<JobsController> {
   }
 }
 
+// Kept for when the employer/post-job feature is re-enabled.
+// ignore: unused_element
 class _EmployerCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {

@@ -46,6 +46,9 @@ class AuthController extends GetxController {
   String _otp = '';
   bool get isOtpComplete => _otp.length == otpLength;
 
+  /// Bumped to clear the OTP boxes (e.g. after a wrong code).
+  int otpClearToken = 0;
+
   void onOtpChanged(String value) {
     _otp = value;
     update();
@@ -157,10 +160,14 @@ class AuthController extends GetxController {
       await StorageService.save(
           StorageConstants.phoneNumber, phoneController.text.trim());
       _timer?.cancel();
-      SnackHelper.success(res.message);
+      // No success message on login — go straight home.
       Get.offAllNamed(Routes.HOME);
     } else {
-      // user_exist == false or verification failed.
+      // user_exist == false or verification failed: clear the OTP boxes so the
+      // user can re-enter, then surface the error.
+      _otp = '';
+      otpClearToken++;
+      update();
       SnackHelper.error(res.message);
     }
   }

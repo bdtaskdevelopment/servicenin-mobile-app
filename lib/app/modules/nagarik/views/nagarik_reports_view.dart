@@ -135,8 +135,8 @@ class _TicketTab extends StatelessWidget {
                       (t) => Padding(
                         padding: const EdgeInsets.only(bottom: 12),
                         child: GestureDetector(
-                          onTap: () => con.openTicket(t),
-                          child: _TicketCard(t: t),
+                          onTap: () => con.viewTicket(t),
+                          child: _TicketCard(t: t, con: con),
                         ),
                       ),
                     )
@@ -188,8 +188,9 @@ class _Empty extends StatelessWidget {
 }
 
 class _TicketCard extends StatelessWidget {
-  const _TicketCard({required this.t});
+  const _TicketCard({required this.t, required this.con});
   final NagarikTicket t;
+  final NagarikController con;
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -205,53 +206,117 @@ class _TicketCard extends StatelessWidget {
           ),
         ],
       ),
-      child: Row(
+      child: Column(
         children: [
-          Container(
-            width: 46,
-            height: 46,
-            decoration: BoxDecoration(
-              color: _tile,
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: const Icon(
-              Icons.chat_bubble_outline_rounded,
-              color: _orange,
-              size: 21,
-            ),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  t.subject.isNotEmpty ? t.subject : t.categoryLabel,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
-                    fontSize: 14.5,
-                    fontWeight: FontWeight.w800,
-                    color: Color(0xFF0F172A),
-                  ),
+          Row(
+            children: [
+              Container(
+                width: 46,
+                height: 46,
+                decoration: BoxDecoration(
+                  color: _tile,
+                  borderRadius: BorderRadius.circular(12),
                 ),
-                const SizedBox(height: 2),
-                Text(
-                  [
-                    t.categoryLabel,
-                    t.createdLabel,
-                  ].where((s) => s.isNotEmpty).join('  ·  '),
-                  style: const TextStyle(
-                    fontSize: 12,
-                    color: Color(0xFF94A3B8),
-                  ),
+                child: const Icon(
+                  Icons.confirmation_number_outlined,
+                  color: _orange,
+                  size: 21,
                 ),
-              ],
-            ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      t.subject.isNotEmpty ? t.subject : t.categoryLabel,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        fontSize: 14.5,
+                        fontWeight: FontWeight.w800,
+                        color: Color(0xFF0F172A),
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      [
+                        t.categoryLabel,
+                        t.createdLabel,
+                      ].where((s) => s.isNotEmpty).join('  ·  '),
+                      style: const TextStyle(
+                        fontSize: 12,
+                        color: Color(0xFF94A3B8),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 8),
+              StatusPill(label: t.statusLabel, resolved: t.isResolved),
+            ],
           ),
-          const SizedBox(width: 8),
-          StatusPill(label: t.statusLabel, resolved: t.isResolved),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              Expanded(
+                child: _ActionButton(
+                  icon: Icons.chat_bubble_outline_rounded,
+                  label: 'Chat'.tr,
+                  filled: false,
+                  onTap: () => con.openTicket(t),
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: _ActionButton(
+                  icon: Icons.visibility_outlined,
+                  label: 'View'.tr,
+                  filled: true,
+                  onTap: () => con.viewTicket(t),
+                ),
+              ),
+            ],
+          ),
         ],
+      ),
+    );
+  }
+}
+
+class _ActionButton extends StatelessWidget {
+  const _ActionButton({
+    required this.icon,
+    required this.label,
+    required this.filled,
+    required this.onTap,
+  });
+  final IconData icon;
+  final String label;
+  final bool filled;
+  final VoidCallback onTap;
+  @override
+  Widget build(BuildContext context) {
+    final fg = filled ? Colors.white : _orange;
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        height: 40,
+        alignment: Alignment.center,
+        decoration: BoxDecoration(
+          color: filled ? _orange : _tile,
+          borderRadius: BorderRadius.circular(10),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon, size: 17, color: fg),
+            const SizedBox(width: 6),
+            Text(label,
+                style: TextStyle(
+                    fontSize: 13.5, fontWeight: FontWeight.w800, color: fg)),
+          ],
+        ),
       ),
     );
   }

@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -31,6 +32,7 @@ class JobsController extends GetxController {
   static const _limit = 20;
   final TextEditingController searchCtrl = TextEditingController();
   String get search => searchCtrl.text.trim();
+  Timer? _searchDebounce;
 
   Job? selected;
   bool loadingDetail = false;
@@ -133,7 +135,24 @@ class JobsController extends GetxController {
     fetchJobs(reset: true);
   }
 
-  void onSearchSubmitted(String _) => fetchJobs(reset: true);
+  void onSearchSubmitted(String _) {
+    _searchDebounce?.cancel();
+    fetchJobs(reset: true);
+  }
+
+  /// Debounced live search as the user types.
+  void onSearchChanged(String _) {
+    update(); // refresh the clear (×) affordance
+    _searchDebounce?.cancel();
+    _searchDebounce =
+        Timer(const Duration(milliseconds: 400), () => fetchJobs(reset: true));
+  }
+
+  void clearSearch() {
+    searchCtrl.clear();
+    _searchDebounce?.cancel();
+    fetchJobs(reset: true);
+  }
 
   Future<void> fetchJobs({bool reset = false}) async {
     if (reset) {
@@ -200,6 +219,24 @@ class JobsController extends GetxController {
   void openApplications() {
     fetchMyApplications();
     Get.toNamed(Routes.JOBS_APPLICATIONS);
+  }
+
+  /// Open the job details for one of my applications.
+  void openApplicationJob(JobApplicationModel app) {
+    final job = app.job ?? Job({'id': app.jobId});
+    if (job.id.isEmpty) return;
+    openJob(job);
+  }
+
+  /// Whether the currently-open job is one I've already applied to (so the
+  /// detail screen shows "Already applied" instead of the Apply button).
+  /// Primary source is the job-details `has_applied` flag; falls back to the
+  /// applications list so the state is right before the full detail loads.
+  bool get selectedAlreadyApplied {
+    final j = selected;
+    if (j == null) return false;
+    if (j.hasApplied) return true;
+    return j.id.isNotEmpty && applications.any((a) => a.jobId == j.id);
   }
 
   Future<void> fetchMyApplications() async {
@@ -383,6 +420,7 @@ class JobsController extends GetxController {
 
   @override
   void onClose() {
+    _searchDebounce?.cancel();
     for (final c in [
       searchCtrl, seekerName, seekerPhone, seekerEmail, seekerAddress,
       seekerDistrict, seekerSkills, seekerExp, coverLetter, expectedSalary,

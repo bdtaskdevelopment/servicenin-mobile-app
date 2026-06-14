@@ -21,17 +21,23 @@ class BookingController extends GetxController {
   String get doctorName => _doctor?.name ?? 'Doctor';
   String get doctorInitials => _doctor?.initials ?? 'D';
   String get doctorSpecialty => _doctor?.specialty ?? '';
-  String get doctorFee => profile?.doctor.feeLabel ?? _doctor?.fee ?? '৳0';
-
-  /// Whether this doctor charges a fee. A fee > 0 → show the payment step;
-  /// a free (0) doctor → skip payment and book directly.
-  /// Driven by the actual consultation fee (the profile is loaded by the time
-  /// the user reaches the booking steps); falls back to the `is_paid` flag.
-  bool get isPaid {
-    final fee = profile?.doctor.consultationFee;
-    if (fee != null) return fee > 0;
-    return profile?.doctor.isPaid ?? _doctor?.isPaid ?? true;
+  /// Fee shown on the profile / booking. Free doctors (`is_paid == false`)
+  /// always show "Free"; paid doctors show their consultation fee.
+  String get doctorFee {
+    if (!isPaid) return 'Free'.tr;
+    return profile?.doctor.feeLabel ?? _doctor?.fee ?? '৳0';
   }
+
+  /// Whether this doctor charges for a visit. Source of truth is the API's
+  /// `is_paid` flag (NOT the fee amount): `true` → paid, show the fee and the
+  /// payment step; `false` → free, skip payment and book directly.
+  ///
+  /// The doctors-list value is reliable, while the profile endpoint may omit
+  /// the flag (parsing to `false`), so a doctor counts as paid when *either*
+  /// source reports paid — this prevents the profile response from wrongly
+  /// downgrading a paid doctor to free.
+  bool get isPaid =>
+      (_doctor?.isPaid ?? false) || (profile?.doctor.isPaid ?? false);
 
   void setDoctor(HcDoctor d) {
     _doctor = d;

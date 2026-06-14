@@ -19,6 +19,7 @@ class BoxedCodeInput extends StatefulWidget {
     this.onCompleted,
     this.autoFocus = false,
     this.accentColor,
+    this.clearToken = 0,
   });
 
   final int length;
@@ -29,6 +30,10 @@ class BoxedCodeInput extends StatefulWidget {
   final ValueChanged<String>? onCompleted;
   final bool autoFocus;
   final Color? accentColor;
+
+  /// Bump this value (from the parent) to clear all boxes — e.g. after a wrong
+  /// OTP. Any change vs the previous build resets the input.
+  final int clearToken;
 
   @override
   State<BoxedCodeInput> createState() => _BoxedCodeInputState();
@@ -44,6 +49,22 @@ class _BoxedCodeInputState extends State<BoxedCodeInput> {
     _controllers =
         List.generate(widget.length, (_) => TextEditingController());
     _focusNodes = List.generate(widget.length, (_) => FocusNode());
+  }
+
+  @override
+  void didUpdateWidget(BoxedCodeInput oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.clearToken != oldWidget.clearToken) {
+      for (final c in _controllers) {
+        c.clear();
+      }
+      if (mounted) {
+        setState(() {});
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) _focusNodes.first.requestFocus();
+        });
+      }
+    }
   }
 
   @override

@@ -63,10 +63,39 @@ class NagarikController extends GetxController {
   NagarikGrievance? selectedGrievance;
   bool loadingGrievanceDetail = false;
 
+  // ── Grievance verification (citizen confirms a resolution) ──────────
+  int verifyStars = 5;
+  final TextEditingController verifyComment = TextEditingController();
+  File? verifyPhoto;
+  bool verifying = false;
+
+  void setVerifyStars(int s) {
+    verifyStars = s;
+    update();
+  }
+
+  Future<void> pickVerifyPhoto() async {
+    try {
+      final x = await _picker.pickImage(source: ImageSource.gallery,
+          imageQuality: 70);
+      if (x == null) return;
+      verifyPhoto = File(x.path);
+      update();
+    } catch (_) {
+      SnackHelper.error('ছবি নির্বাচন করা যায়নি');
+    }
+  }
+
+  void removeVerifyPhoto() {
+    verifyPhoto = null;
+    update();
+  }
+
   // ── Tickets ─────────────────────────────────────────────────────────
   List<NagarikTicket> tickets = [];
   bool loadingTickets = false;
   NagarikTicket? selectedTicket;
+  bool loadingTicketDetail = false;
 
   // ── Report-an-issue form ────────────────────────────────────────────
   String selectedCategoryKey = '';
@@ -311,6 +340,10 @@ class NagarikController extends GetxController {
   // ── Grievance detail ────────────────────────────────────────────────
   void openGrievance(NagarikGrievance g) {
     selectedGrievance = g;
+    // Reset the verification form for the freshly-opened grievance.
+    verifyStars = 5;
+    verifyComment.clear();
+    verifyPhoto = null;
     update();
     Get.toNamed(Routes.NAGARIK_STATUS);
     _loadGrievanceDetail(g.id);
@@ -325,6 +358,42 @@ class NagarikController extends GetxController {
     } catch (_) {
     } finally {
       loadingGrievanceDetail = false;
+      update();
+    }
+  }
+
+  /// Reporter confirms (or rejects) a resolved grievance.
+  /// `confirmed: true` → fixed; `false` → not fixed.
+  Future<void> submitVerification({required bool confirmed}) async {
+    final g = selectedGrievance;
+    if (g == null || verifying) return;
+    verifying = true;
+    update();
+    try {
+      final payload = <String, dynamic>{
+        'confirmed': confirmed,
+        if (confirmed) 'stars': verifyStars,
+        if (verifyComment.text.trim().isNotEmpty)
+          'comment': verifyComment.text.trim(),
+      };
+      final res = await _repo.verifyGrievance(g.id, payload,
+          proofPhoto: verifyPhoto);
+      if (res.success) {
+        SnackHelper.success(res.message.isNotEmpty
+            ? res.message
+            : (confirmed ? 'Thanks for verifying' : 'Marked as not fixed'));
+        verifyComment.clear();
+        verifyPhoto = null;
+        verifyStars = 5;
+        await _loadGrievanceDetail(g.id); // refresh verified/can_verify flags
+        fetchGrievances(); // refresh list badges
+      } else {
+        SnackHelper.error(res.message);
+      }
+    } catch (e) {
+      SnackHelper.error(e.toString().replaceFirst('Exception: ', ''));
+    } finally {
+      verifying = false;
       update();
     }
   }
@@ -380,6 +449,27 @@ class NagarikController extends GetxController {
     update();
     Get.toNamed(Routes.NAGARIK_CHAT);
     _startChat(t.id);
+  }
+
+  // ── View ticket details (GET /tickets/:id) ──────────────────────────
+  void viewTicket(NagarikTicket t) {
+    selectedTicket = t;
+    update();
+    Get.toNamed(Routes.NAGARIK_TICKET_DETAIL);
+    _loadTicketDetail(t.id);
+  }
+
+  Future<void> _loadTicketDetail(String id) async {
+    if (id.isEmpty) return;
+    loadingTicketDetail = true;
+    update();
+    try {
+      selectedTicket = await _repo.fetchTicket(id);
+    } catch (_) {
+    } finally {
+      loadingTicketDetail = false;
+      update();
+    }
   }
 
   void _startChat(String ticketId) {
@@ -468,6 +558,7 @@ class NagarikController extends GetxController {
     ticketSubject.dispose();
     ticketDescription.dispose();
     chatInput.dispose();
+    verifyComment.dispose();
     super.onClose();
   }
 }

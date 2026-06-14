@@ -149,6 +149,8 @@ class ReportStatusView extends GetView<NagarikController> {
                                 Border.all(color: const Color(0xFFEDEFF2))),
                         child: _Timeline(g: g),
                       ),
+                      const SizedBox(height: 18),
+                      _VerificationSection(con: con, g: g),
                       if (g.createdLabel.isNotEmpty) ...[
                         const SizedBox(height: 12),
                         Text('Filed ${g.createdLabel}',
@@ -354,6 +356,242 @@ class _TimelineRow extends StatelessWidget {
         ],
       ),
     );
+  }
+}
+
+/// Citizen-verification section: confirm form when allowed, a confirmation
+/// badge once verified, or an info note while awaiting.
+class _VerificationSection extends StatelessWidget {
+  const _VerificationSection({required this.con, required this.g});
+  final NagarikController con;
+  final NagarikGrievance g;
+
+  @override
+  Widget build(BuildContext context) {
+    // Already verified by the reporter.
+    if (g.verified) {
+      return Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+            color: const Color(0xFFDCFCE7),
+            borderRadius: BorderRadius.circular(16)),
+        child: Row(
+          children: [
+            const Icon(Icons.verified_rounded,
+                color: Color(0xFF16A34A), size: 24),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('You verified this resolution'.tr,
+                      style: const TextStyle(
+                          fontSize: 14.5,
+                          fontWeight: FontWeight.w800,
+                          color: Color(0xFF15803D))),
+                  if (g.ratingAverage > 0)
+                    Text(
+                        '${g.ratingAverage.toStringAsFixed(1)} ★ '
+                        '(${g.ratingCount} ${'ratings'.tr})',
+                        style: const TextStyle(
+                            fontSize: 12.5, color: Color(0xFF15803D))),
+                ],
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    // Reporter can verify now.
+    if (g.canVerify) {
+      return Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+            color: AppColors.white,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: const Color(0xFFEDEFF2))),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('Verify resolution'.tr,
+                style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w800,
+                    color: Color(0xFF0F172A))),
+            const SizedBox(height: 4),
+            Text('The authority marked this resolved. Is it really fixed?'.tr,
+                style: const TextStyle(
+                    fontSize: 12.5, color: Color(0xFF94A3B8))),
+            const SizedBox(height: 14),
+            // Stars
+            Text('RATING'.tr,
+                style: const TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w700,
+                    color: Color(0xFF94A3B8),
+                    letterSpacing: 0.6)),
+            const SizedBox(height: 6),
+            Row(
+              children: List.generate(5, (i) {
+                final filled = i < con.verifyStars;
+                return GestureDetector(
+                  onTap: () => con.setVerifyStars(i + 1),
+                  child: Padding(
+                    padding: const EdgeInsets.only(right: 4),
+                    child: Icon(
+                        filled
+                            ? Icons.star_rounded
+                            : Icons.star_border_rounded,
+                        size: 34,
+                        color: const Color(0xFFF59E0B)),
+                  ),
+                );
+              }),
+            ),
+            const SizedBox(height: 14),
+            // Comment
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12),
+              decoration: BoxDecoration(
+                  color: const Color(0xFFF7F8FA),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: const Color(0xFFEDEFF2))),
+              child: TextField(
+                controller: con.verifyComment,
+                maxLines: 3,
+                decoration: InputDecoration(
+                  border: InputBorder.none,
+                  hintText: 'Add a comment (optional)'.tr,
+                  hintStyle: const TextStyle(
+                      fontSize: 13.5, color: Color(0xFF94A3B8)),
+                ),
+                style: const TextStyle(
+                    fontSize: 14, color: Color(0xFF0F172A)),
+              ),
+            ),
+            const SizedBox(height: 12),
+            // Proof photo
+            Row(
+              children: [
+                GestureDetector(
+                  onTap: con.pickVerifyPhoto,
+                  child: Container(
+                    width: 56,
+                    height: 56,
+                    decoration: BoxDecoration(
+                        color: _tile,
+                        borderRadius: BorderRadius.circular(12),
+                        image: con.verifyPhoto != null
+                            ? DecorationImage(
+                                image: FileImage(con.verifyPhoto!),
+                                fit: BoxFit.cover)
+                            : null),
+                    child: con.verifyPhoto == null
+                        ? const Icon(Icons.add_a_photo_outlined,
+                            color: _orange, size: 22)
+                        : null,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                      con.verifyPhoto != null
+                          ? 'Proof photo added · tap to change'.tr
+                          : 'Add a proof photo (optional)'.tr,
+                      style: const TextStyle(
+                          fontSize: 12.5, color: Color(0xFF64748B))),
+                ),
+                if (con.verifyPhoto != null)
+                  GestureDetector(
+                    onTap: con.removeVerifyPhoto,
+                    child: const Icon(Icons.close_rounded,
+                        size: 18, color: Color(0xFF94A3B8)),
+                  ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                Expanded(
+                  child: SizedBox(
+                    height: 48,
+                    child: ElevatedButton(
+                      onPressed: con.verifying
+                          ? null
+                          : () => con.submitVerification(confirmed: true),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF16A34A),
+                        foregroundColor: Colors.white,
+                        elevation: 0,
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12)),
+                      ),
+                      child: con.verifying
+                          ? const SizedBox(
+                              width: 20,
+                              height: 20,
+                              child: CircularProgressIndicator(
+                                  strokeWidth: 2.2, color: Colors.white))
+                          : Text('Confirm fixed'.tr,
+                              style: const TextStyle(
+                                  fontSize: 14.5,
+                                  fontWeight: FontWeight.w800)),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: SizedBox(
+                    height: 48,
+                    child: OutlinedButton(
+                      onPressed: con.verifying
+                          ? null
+                          : () => con.submitVerification(confirmed: false),
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: const Color(0xFFDC2626),
+                        side: const BorderSide(color: Color(0xFFFECACA)),
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12)),
+                      ),
+                      child: Text('Not fixed'.tr,
+                          style: const TextStyle(
+                              fontSize: 14.5, fontWeight: FontWeight.w800)),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      );
+    }
+
+    // Resolved but verification not open to this user.
+    if (g.awaitingCitizenVerification) {
+      return Container(
+        padding: const EdgeInsets.all(14),
+        decoration: BoxDecoration(
+            color: const Color(0xFFFEF3C7),
+            borderRadius: BorderRadius.circular(16)),
+        child: Row(
+          children: [
+            const Icon(Icons.hourglass_bottom_rounded,
+                color: Color(0xFFB45309), size: 20),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Text('Awaiting reporter verification.'.tr,
+                  style: const TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                      color: Color(0xFFB45309))),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return const SizedBox.shrink();
   }
 }
 

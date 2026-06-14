@@ -87,6 +87,9 @@ class Job {
   bool get isRemote => raw['is_remote'] == true;
   int get totalApplications => _int(raw['total_applications']);
 
+  /// True when the logged-in user has already applied (job-details endpoint).
+  bool get hasApplied => raw['has_applied'] == true;
+
   JobEmployer? get employer => raw['employer'] is Map
       ? JobEmployer.fromMap((raw['employer'] as Map).cast<String, dynamic>())
       : null;

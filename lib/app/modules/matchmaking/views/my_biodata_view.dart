@@ -5,6 +5,7 @@ import '../../../core/values/app_colors.dart';
 import '../controllers/matchmaking_controller.dart';
 
 const _maroon = Color(0xFFB11D5C);
+const _pink = Color(0xFFFBD9E8);
 
 class MyBiodataView extends GetView<MatchmakingController> {
   const MyBiodataView({super.key});
@@ -17,6 +18,7 @@ class MyBiodataView extends GetView<MatchmakingController> {
         child: GetBuilder<MatchmakingController>(
           builder: (con) => Column(
             children: [
+              // Header
               Padding(
                 padding: const EdgeInsets.fromLTRB(8, 6, 16, 4),
                 child: Row(
@@ -30,7 +32,10 @@ class MyBiodataView extends GetView<MatchmakingController> {
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('My biodata'.tr,
+                        Text(
+                            con.hasProfile
+                                ? 'My biodata'.tr
+                                : 'Register profile'.tr,
                             style: const TextStyle(
                                 fontSize: 19,
                                 fontWeight: FontWeight.w800,
@@ -38,7 +43,7 @@ class MyBiodataView extends GetView<MatchmakingController> {
                         Text(
                             con.hasProfile
                                 ? '${con.completion}% ${'complete'.tr}'
-                                : 'Create your profile'.tr,
+                                : 'Create your matchmaking profile'.tr,
                             style: const TextStyle(
                                 fontSize: 12, color: Color(0xFF94A3B8))),
                       ],
@@ -63,13 +68,23 @@ class MyBiodataView extends GetView<MatchmakingController> {
                 child: ListView(
                   padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
                   children: [
-                    ...con.bioFields.map((f) => Padding(
-                          padding: const EdgeInsets.only(bottom: 12),
-                          child: f.type == MmFieldType.dropdown
-                              ? _Dropdown(con: con, field: f)
-                              : _TextField(con: con, field: f),
-                        )),
-                    const SizedBox(height: 4),
+                    for (var i = 0; i < con.bioSections.length; i++) ...[
+                      _SectionHeader(
+                          index: i + 1, title: con.bioSections[i].tr),
+                      const SizedBox(height: 10),
+                      ...con
+                          .fieldsForSection(con.bioSections[i])
+                          .map((f) => Padding(
+                                padding: const EdgeInsets.only(bottom: 12),
+                                child: _fieldWidget(context, con, f),
+                              )),
+                      // The photo/bio section also carries the file controls.
+                      if (con.bioSections[i] ==
+                          MatchmakingController.secPhoto)
+                        _PhotoBioControls(con: con),
+                      const SizedBox(height: 8),
+                    ],
+                    const SizedBox(height: 2),
                     RichText(
                       text: TextSpan(
                         style: const TextStyle(
@@ -77,16 +92,19 @@ class MyBiodataView extends GetView<MatchmakingController> {
                         children: [
                           TextSpan(
                               text: '${'Privacy'.tr}: ',
-                              style: const TextStyle(fontWeight: FontWeight.w800)),
+                              style: const TextStyle(
+                                  fontWeight: FontWeight.w800)),
                           TextSpan(
                               text:
-                                  'Your name & photos stay hidden until you accept someone\'s interest.'.tr),
+                                  'Your name & photos stay hidden until you accept someone\'s interest.'
+                                      .tr),
                         ],
                       ),
                     ),
                   ],
                 ),
               ),
+              // Save button
               Padding(
                 padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
                 child: SizedBox(
@@ -108,7 +126,10 @@ class MyBiodataView extends GetView<MatchmakingController> {
                             child: CircularProgressIndicator(
                                 strokeWidth: 2.4, color: Colors.white),
                           )
-                        : Text(con.hasProfile ? 'Update biodata'.tr : 'Save biodata'.tr,
+                        : Text(
+                            con.hasProfile
+                                ? 'Update profile'.tr
+                                : 'Register profile'.tr,
                             style: const TextStyle(
                                 fontSize: 16, fontWeight: FontWeight.w800)),
                   ),
@@ -120,6 +141,47 @@ class MyBiodataView extends GetView<MatchmakingController> {
       ),
     );
   }
+
+  Widget _fieldWidget(
+      BuildContext context, MatchmakingController con, MmField f) {
+    switch (f.type) {
+      case MmFieldType.dropdown:
+        return _Dropdown(con: con, field: f);
+      case MmFieldType.date:
+        return _DateField(con: con, field: f);
+      default:
+        return _TextField(con: con, field: f);
+    }
+  }
+}
+
+class _SectionHeader extends StatelessWidget {
+  const _SectionHeader({required this.index, required this.title});
+  final int index;
+  final String title;
+  @override
+  Widget build(BuildContext context) => Row(
+        children: [
+          Container(
+            width: 22,
+            height: 22,
+            alignment: Alignment.center,
+            decoration: const BoxDecoration(color: _pink, shape: BoxShape.circle),
+            child: Text('$index',
+                style: const TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w800,
+                    color: _maroon)),
+          ),
+          const SizedBox(width: 8),
+          Text(title.toUpperCase(),
+              style: const TextStyle(
+                  fontSize: 12.5,
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: 0.5,
+                  color: Color(0xFF334155))),
+        ],
+      );
 }
 
 class _Label extends StatelessWidget {
@@ -145,18 +207,27 @@ class _Label extends StatelessWidget {
       );
 }
 
+class _Box extends StatelessWidget {
+  const _Box({required this.child});
+  final Widget child;
+  @override
+  Widget build(BuildContext context) => Container(
+        padding: const EdgeInsets.fromLTRB(16, 12, 16, 10),
+        decoration: BoxDecoration(
+            color: AppColors.white,
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(color: const Color(0xFFEDEFF2))),
+        child: child,
+      );
+}
+
 class _TextField extends StatelessWidget {
   const _TextField({required this.con, required this.field});
   final MatchmakingController con;
   final MmField field;
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
-      decoration: BoxDecoration(
-          color: AppColors.white,
-          borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: const Color(0xFFEDEFF2))),
+    return _Box(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -190,6 +261,61 @@ class _TextField extends StatelessWidget {
   }
 }
 
+class _DateField extends StatelessWidget {
+  const _DateField({required this.con, required this.field});
+  final MatchmakingController con;
+  final MmField field;
+  @override
+  Widget build(BuildContext context) {
+    final value = con.textCtrl(field.key).text;
+    return GestureDetector(
+      onTap: () async {
+        final now = DateTime.now();
+        final initial = DateTime.tryParse(value) ??
+            DateTime(now.year - 25, now.month, now.day);
+        final picked = await showDatePicker(
+          context: context,
+          initialDate: initial,
+          firstDate: DateTime(1940),
+          lastDate: now,
+        );
+        if (picked != null) {
+          con.textCtrl(field.key).text =
+              '${picked.year.toString().padLeft(4, '0')}-'
+              '${picked.month.toString().padLeft(2, '0')}-'
+              '${picked.day.toString().padLeft(2, '0')}';
+          con.update();
+        }
+      },
+      child: _Box(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _Label(field.label, required: field.required),
+            const SizedBox(height: 6),
+            Row(
+              children: [
+                Expanded(
+                  child: Text(value.isEmpty ? 'YYYY-MM-DD' : value,
+                      style: TextStyle(
+                          fontSize: 15.5,
+                          fontWeight: FontWeight.w700,
+                          color: value.isEmpty
+                              ? const Color(0xFFB8C0CC)
+                              : const Color(0xFF0F172A))),
+                ),
+                const Icon(Icons.calendar_today_outlined,
+                    size: 18, color: Color(0xFF94A3B8)),
+              ],
+            ),
+            const SizedBox(height: 2),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 class _Dropdown extends StatelessWidget {
   const _Dropdown({required this.con, required this.field});
   final MatchmakingController con;
@@ -198,12 +324,7 @@ class _Dropdown extends StatelessWidget {
   Widget build(BuildContext context) {
     final options = con.optionsFor(field.optionsKey);
     final value = con.choice[field.key];
-    return Container(
-      padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
-      decoration: BoxDecoration(
-          color: AppColors.white,
-          borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: const Color(0xFFEDEFF2))),
+    return _Box(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -234,6 +355,158 @@ class _Dropdown extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+/// Photo visibility toggle + photo picker + bio-data PDF picker + the list of
+/// already-uploaded documents.
+class _PhotoBioControls extends StatelessWidget {
+  const _PhotoBioControls({required this.con});
+  final MatchmakingController con;
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        const SizedBox(height: 4),
+        // Photo + visibility
+        _Box(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const _Label('Photo (optional)'),
+              const SizedBox(height: 8),
+              Row(
+                children: [
+                  GestureDetector(
+                    onTap: con.pickPhoto,
+                    child: Container(
+                      width: 56,
+                      height: 56,
+                      decoration: BoxDecoration(
+                          color: _pink,
+                          borderRadius: BorderRadius.circular(12),
+                          image: con.photoFile != null
+                              ? DecorationImage(
+                                  image: FileImage(con.photoFile!),
+                                  fit: BoxFit.cover)
+                              : null),
+                      child: con.photoFile == null
+                          ? const Icon(Icons.add_a_photo_outlined,
+                              color: _maroon, size: 22)
+                          : null,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                        con.photoFile != null
+                            ? 'Photo selected · tap to change'.tr
+                            : 'Tap to add a profile photo'.tr,
+                        style: const TextStyle(
+                            fontSize: 13, color: Color(0xFF64748B))),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 6),
+              SwitchListTile.adaptive(
+                contentPadding: EdgeInsets.zero,
+                activeThumbColor: _maroon,
+                value: con.photoVisible,
+                onChanged: con.setPhotoVisible,
+                title: Text('Make photo visible to other profiles'.tr,
+                    style: const TextStyle(
+                        fontSize: 13.5,
+                        fontWeight: FontWeight.w600,
+                        color: Color(0xFF334155))),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 12),
+        // Bio-data PDF
+        _Box(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const _Label('Bio-data PDF (optional)'),
+              const SizedBox(height: 8),
+              GestureDetector(
+                onTap: con.pickBioDataPdf,
+                child: Row(
+                  children: [
+                    const Icon(Icons.attach_file_rounded,
+                        size: 18, color: _maroon),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                          con.bioDataName.isNotEmpty
+                              ? con.bioDataName
+                              : 'Choose PDF file'.tr,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                              color: con.bioDataName.isNotEmpty
+                                  ? const Color(0xFF0F172A)
+                                  : const Color(0xFF94A3B8))),
+                    ),
+                  ],
+                ),
+              ),
+              Text('PDF only · uploaded for verification'.tr,
+                  style: const TextStyle(
+                      fontSize: 11.5, color: Color(0xFF94A3B8))),
+            ],
+          ),
+        ),
+        // Existing documents
+        if (con.documents.isNotEmpty) ...[
+          const SizedBox(height: 12),
+          ...con.documents.map((d) => Padding(
+                padding: const EdgeInsets.only(bottom: 8),
+                child: _Box(
+                  child: Row(
+                    children: [
+                      const Icon(Icons.description_outlined,
+                          size: 18, color: _maroon),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(d.kindLabel,
+                                style: const TextStyle(
+                                    fontSize: 13.5,
+                                    fontWeight: FontWeight.w700,
+                                    color: Color(0xFF0F172A))),
+                            if (d.remarks.isNotEmpty)
+                              Text(d.remarks,
+                                  style: const TextStyle(
+                                      fontSize: 11.5,
+                                      color: Color(0xFF94A3B8))),
+                          ],
+                        ),
+                      ),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 8, vertical: 3),
+                        decoration: BoxDecoration(
+                            color: const Color(0xFFE0F2FE),
+                            borderRadius: BorderRadius.circular(6)),
+                        child: Text(d.status,
+                            style: const TextStyle(
+                                fontSize: 10.5,
+                                fontWeight: FontWeight.w700,
+                                color: Color(0xFF0369A1))),
+                      ),
+                    ],
+                  ),
+                ),
+              )),
+        ],
+      ],
     );
   }
 }

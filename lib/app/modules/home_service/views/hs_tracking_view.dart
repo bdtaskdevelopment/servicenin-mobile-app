@@ -117,10 +117,11 @@ class HsTrackingView extends GetView<HomeServiceController> {
                                       'pending'),
                             ],
                           ),
-                          const SizedBox(height: 4),
-                          Text(con.whenSummary,
-                              style: const TextStyle(
-                                  fontSize: 12.5, color: Color(0xFF94A3B8))),
+                          // Subtitle under the status hidden for now.
+                          // const SizedBox(height: 4),
+                          // Text(con.whenSummary,
+                          //     style: const TextStyle(
+                          //         fontSize: 12.5, color: Color(0xFF94A3B8))),
                           const SizedBox(height: 14),
                           Row(
                             children: [
@@ -249,9 +250,9 @@ class _Timeline extends StatelessWidget {
                                 color: Color(0xFF0F172A))),
                         const SizedBox(height: 1),
                         if (e.note.isNotEmpty)
-                          Text(e.note,
-                              style: const TextStyle(
-                                  fontSize: 12, color: Color(0xFF64748B))),
+                          // Text(e.note,
+                          //     style: const TextStyle(
+                          //         fontSize: 12, color: Color(0xFF64748B))),
                         Text(e.timeLabel,
                             style: const TextStyle(
                                 fontSize: 11.5, color: Color(0xFFE07A1F))),

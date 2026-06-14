@@ -114,6 +114,24 @@ class MmProfile {
   String get gender => _str(raw['gender']);
   String get language => _str(raw['language']);
   String get lifestyle => _str(raw['lifestyle']);
+  int get weightKg => _int(raw['weight_kg']);
+  String get siblings => _str(raw['siblings']);
+  String get familyBackground => _str(raw['family_background']);
+  String get status => _str(raw['status']);
+  String get workflowStatus => _str(raw['workflow_status']);
+
+  /// Partner preference, if the API embedded it on the profile.
+  MmPreference? get preference => raw['preference'] is Map
+      ? MmPreference.fromMap((raw['preference'] as Map).cast<String, dynamic>())
+      : null;
+
+  /// Uploaded documents embedded on the profile (if any).
+  List<MmDocument> get documents => (raw['documents'] is List
+          ? raw['documents'] as List
+          : const [])
+      .whereType<Map>()
+      .map((e) => MmDocument.fromMap(e.cast<String, dynamic>()))
+      .toList();
 
   String dyn(String key) => _str(raw[key]);
 
@@ -142,6 +160,77 @@ class MmProfile {
     return list
         .whereType<Map>()
         .map((e) => MmProfile(e.cast<String, dynamic>()))
+        .toList();
+  }
+}
+
+// ── Partner preference ──────────────────────────────────────────────
+class MmPreference {
+  MmPreference(this.raw);
+  final Map<String, dynamic> raw;
+
+  int get ageMin => _int(raw['age_min']);
+  int get ageMax => _int(raw['age_max']);
+  int get heightMinCm => _int(raw['height_min_cm']);
+  int get heightMaxCm => _int(raw['height_max_cm']);
+  String get gender => _str(raw['gender']);
+  String get religion => _str(raw['religion']);
+  String get maritalStatus => _str(raw['marital_status']);
+  String get education => _str(raw['education']);
+  String get profession => _str(raw['profession']);
+  String get location => _str(raw['location']);
+  String get incomeRange => _str(raw['income_range']);
+  String get lifestyle => _str(raw['lifestyle']);
+  String get familyType => _str(raw['family_type']);
+  String get notes => _str(raw['notes']);
+
+  String dyn(String key) => _str(raw[key]);
+
+  factory MmPreference.fromMap(Map<String, dynamic> j) => MmPreference(j);
+
+  static MmPreference fromResponse(dynamic src) {
+    final d = _data(src);
+    return MmPreference(d is Map ? d.cast<String, dynamic>() : <String, dynamic>{});
+  }
+}
+
+// ── Document ────────────────────────────────────────────────────────
+class MmDocument {
+  MmDocument({
+    required this.id,
+    required this.kind,
+    required this.fileUrl,
+    required this.status,
+    required this.remarks,
+  });
+
+  final String id;
+  final String kind;
+  final String fileUrl;
+  final String status;
+  final String remarks;
+
+  /// "bio_data" → "Bio data".
+  String get kindLabel {
+    if (kind.isEmpty) return '';
+    final s = kind.replaceAll('_', ' ');
+    return s[0].toUpperCase() + s.substring(1);
+  }
+
+  factory MmDocument.fromMap(Map<String, dynamic> j) => MmDocument(
+        id: _str(j['id']),
+        kind: _str(j['kind']),
+        fileUrl: _str(j['file_url']),
+        status: _str(j['status']),
+        remarks: _str(j['remarks']),
+      );
+
+  static List<MmDocument> listFromResponse(dynamic src) {
+    final d = _data(src);
+    final list = d is List ? d : const [];
+    return list
+        .whereType<Map>()
+        .map((e) => MmDocument.fromMap(e.cast<String, dynamic>()))
         .toList();
   }
 }

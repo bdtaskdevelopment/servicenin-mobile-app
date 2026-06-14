@@ -1,9 +1,18 @@
 import 'dart:convert';
 
+import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 
 dynamic _dec(dynamic src) => src is String ? jsonDecode(src) : src;
 String _str(dynamic v) => v?.toString().trim() ?? '';
+
+/// Picks the Bangla text when the app language is Bangla (falling back to the
+/// English value), otherwise the English text.
+String _localized(String en, String bn) {
+  final isBn = Get.locale?.languageCode == 'bn';
+  if (isBn && bn.isNotEmpty) return bn;
+  return en.isNotEmpty ? en : bn;
+}
 int _int(dynamic v) =>
     v is int ? v : int.tryParse(_str(v)) ?? (v is num ? v.toInt() : 0);
 double? _dbl(dynamic v) =>
@@ -34,7 +43,7 @@ class ServiceCategory {
   final int basePrice;
   final int bookingCount;
 
-  String get displayName => name; // English name shown across the app
+  String get displayName => _localized(name, nameBn);
   String get priceLabel => '৳$basePrice';
 
   factory ServiceCategory.fromMap(Map<String, dynamic> j) => ServiceCategory(
@@ -89,6 +98,7 @@ class SubService {
   final int price;
   final int durationMin;
 
+  String get displayName => _localized(name, nameBn);
   String get durationLabel => durationMin > 0 ? '$durationMin min' : '';
 
   factory SubService.fromMap(Map<String, dynamic> j) => SubService(

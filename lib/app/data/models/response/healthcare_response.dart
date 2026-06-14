@@ -395,8 +395,19 @@ class DoctorProfile {
     final degreesRaw = d['degrees'] is List ? d['degrees'] as List : const [];
     final venuesRaw =
         doctorMap['venues'] is List ? doctorMap['venues'] as List : const [];
+    // `is_paid` / `consultation_fee` may sit at the top level of the profile
+    // payload rather than inside `doctor`. Fold them in so the parsed Doctor
+    // reports the correct free/paid status.
+    final mergedDoctor = <String, dynamic>{
+      ...doctorMap.cast<String, dynamic>(),
+      if (!doctorMap.containsKey('is_paid') && d.containsKey('is_paid'))
+        'is_paid': d['is_paid'],
+      if (!doctorMap.containsKey('consultation_fee') &&
+          d.containsKey('consultation_fee'))
+        'consultation_fee': d['consultation_fee'],
+    };
     return DoctorProfile(
-      doctor: Doctor.fromMap(doctorMap.cast<String, dynamic>()),
+      doctor: Doctor.fromMap(mergedDoctor),
       bio: _str(about['bio']),
       experienceYears: _int(about['experience_years']),
       totalPatients: _int(about['total_patients']),

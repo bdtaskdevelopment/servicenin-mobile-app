@@ -94,7 +94,9 @@ class HcDoctor {
         degree: d.qualifications,
         rating: d.ratingLabel,
         reviews: d.totalReviews,
-        fee: d.feeLabel,
+        // Free doctors (`is_paid == false`) always show "Free" — never a fee
+        // amount — so users can pick a free doctor at a glance.
+        fee: d.isPaid ? d.feeLabel : 'Free'.tr,
         slot: d.isAvailable ? 'Available today' : 'By schedule',
         color: const Color(0xFF16A34A),
         isPaid: d.isPaid,

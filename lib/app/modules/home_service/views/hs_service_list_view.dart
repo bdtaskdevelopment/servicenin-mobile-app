@@ -156,7 +156,7 @@ class _ServiceRow extends StatelessWidget {
                 Row(
                   children: [
                     Flexible(
-                      child: Text(service.name,
+                      child: Text(service.displayName,
                           style: const TextStyle(
                               fontSize: 15.5,
                               fontWeight: FontWeight.w800,

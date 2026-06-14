@@ -29,6 +29,7 @@ import '../modules/physio/views/physio_booked_view.dart';
 import '../modules/matchmaking/bindings/matchmaking_binding.dart';
 import '../modules/matchmaking/views/matchmaking_view.dart';
 import '../modules/matchmaking/views/my_biodata_view.dart';
+import '../modules/matchmaking/views/partner_preference_view.dart';
 import '../modules/matchmaking/views/biodata_detail_view.dart';
 import '../modules/matchmaking/views/interests_view.dart';
 import '../modules/matchmaking/views/mm_chat_view.dart';
@@ -58,6 +59,7 @@ import '../modules/nagarik/views/report_issue_view.dart';
 import '../modules/nagarik/views/report_status_view.dart';
 import '../modules/nagarik/views/nagarik_chat_view.dart';
 import '../modules/nagarik/views/nagarik_ticket_create_view.dart';
+import '../modules/nagarik/views/nagarik_ticket_detail_view.dart';
 import '../modules/account/bindings/account_binding.dart';
 import '../modules/account/views/profile_view.dart';
 import '../modules/account/views/edit_profile_view.dart';
@@ -277,6 +279,11 @@ class AppPages {
       binding: MatchmakingBinding(),
     ),
     GetPage(
+      name: _Paths.MATCHMAKING_PREFERENCE,
+      page: () => const PartnerPreferenceView(),
+      binding: MatchmakingBinding(),
+    ),
+    GetPage(
       name: _Paths.MATCHMAKING_PROFILE,
       page: () => const BiodataDetailView(),
       binding: MatchmakingBinding(),
@@ -399,6 +406,11 @@ class AppPages {
     GetPage(
       name: _Paths.NAGARIK_TICKET_CREATE,
       page: () => const NagarikTicketCreateView(),
+      binding: NagarikBinding(),
+    ),
+    GetPage(
+      name: _Paths.NAGARIK_TICKET_DETAIL,
+      page: () => const NagarikTicketDetailView(),
       binding: NagarikBinding(),
     ),
     GetPage(

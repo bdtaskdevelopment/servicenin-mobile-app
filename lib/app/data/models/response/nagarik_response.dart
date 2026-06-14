@@ -144,9 +144,31 @@ class NagarikGrievance {
   String get status => _str(raw['status']);
   int get upvoteCount => _int(raw['upvote_count']);
   double get ratingAverage => _dbl(raw['rating_average']);
+  int get ratingCount => _int(raw['rating_count']);
   String get reporterName => _fullName(raw['user']);
 
   bool get isResolved => status == 'resolved' || status == 'closed';
+
+  // ── Citizen verification flags ──────────────────────────────────────
+  /// Whether the authority has marked this grievance resolved.
+  bool get resolved => raw['resolved'] == true || isResolved;
+
+  /// Whether the reporter has confirmed the resolution.
+  bool get verified => raw['verified'] == true;
+
+  /// Resolved but waiting for the reporter to confirm.
+  bool get awaitingCitizenVerification =>
+      raw['awaiting_citizen_verification'] == true;
+
+  /// Whether the current user is allowed to verify right now.
+  bool get canVerify => raw['can_verify'] == true;
+
+  String get resolvedAtLabel {
+    final r = _str(raw['resolved_at']);
+    if (r.isEmpty) return '';
+    final dt = DateTime.tryParse(r)?.toLocal();
+    return dt == null ? r : DateFormat('d MMM yyyy, h:mm a').format(dt);
+  }
 
   String get statusLabel {
     final s = status.replaceAll('_', ' ');
@@ -208,6 +230,13 @@ class NagarikTicket {
     final c = _str(raw['created_at']);
     final dt = c.isEmpty ? null : DateTime.tryParse(c)?.toLocal();
     return dt == null ? '' : DateFormat('d MMM, h:mm a').format(dt);
+  }
+
+  /// Citizen's name from the embedded user.profile (detail endpoint).
+  String get userName {
+    final user = raw['user'] is Map ? raw['user'] as Map : const {};
+    final profile = user['profile'] is Map ? user['profile'] as Map : const {};
+    return _str(profile['full_name']);
   }
 
   List<NagarikMessage> get messages {

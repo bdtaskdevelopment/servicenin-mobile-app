@@ -30,7 +30,7 @@ class HsCategory {
   final String id;
 
   factory HsCategory.fromApi(ServiceCategory c) => HsCategory(
-        c.nameBn.isNotEmpty ? c.nameBn : c.name,
+        c.displayName, // Bangla in bn, English in en
         c.name,
         hsCatIcon(c.name),
         id: c.id,
@@ -47,7 +47,7 @@ class HsService {
   final String id; // category id (popular items are categories)
 
   factory HsService.fromApi(ServiceCategory c) => HsService(
-        c.name,
+        c.displayName, // Bangla in bn, English in en
         c.description.isNotEmpty
             ? c.description
             : '${c.bookingCount} booked this week',
@@ -79,6 +79,12 @@ class HsServiceItem {
   final int price;
   final String category;
   final IconData icon;
+
+  /// Bangla name in bn, English name in en.
+  String get displayName {
+    final isBn = Get.locale?.languageCode == 'bn';
+    return isBn && bnName.isNotEmpty ? bnName : name;
+  }
 
   factory HsServiceItem.fromApi(SubService s, {String categoryName = ''}) =>
       HsServiceItem(

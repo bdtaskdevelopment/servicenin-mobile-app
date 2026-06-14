@@ -186,19 +186,38 @@ class JobDetailView extends GetView<JobsController> {
                   child: SizedBox(
                     width: double.infinity,
                     height: 54,
-                    child: ElevatedButton(
-                      onPressed: con.applyToJob,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: _orange,
-                        foregroundColor: Colors.white,
-                        elevation: 0,
-                        shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(14)),
-                      ),
-                      child: Text('Apply now'.tr,
-                          style: const TextStyle(
-                              fontSize: 16, fontWeight: FontWeight.w800)),
-                    ),
+                    child: con.selectedAlreadyApplied
+                        ? OutlinedButton.icon(
+                            onPressed: null,
+                            icon: const Icon(Icons.check_circle_rounded,
+                                size: 20, color: Color(0xFF16A34A)),
+                            label: Text('Already applied'.tr,
+                                style: const TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w800,
+                                    color: Color(0xFF15803D))),
+                            style: OutlinedButton.styleFrom(
+                              disabledForegroundColor: const Color(0xFF15803D),
+                              backgroundColor: const Color(0xFFDCFCE7),
+                              side: const BorderSide(color: Color(0xFFBBF7D0)),
+                              shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(14)),
+                            ),
+                          )
+                        : ElevatedButton(
+                            onPressed: con.applyToJob,
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: _orange,
+                              foregroundColor: Colors.white,
+                              elevation: 0,
+                              shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(14)),
+                            ),
+                            child: Text('Apply now'.tr,
+                                style: const TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w800)),
+                          ),
                   ),
                 ),
               ],

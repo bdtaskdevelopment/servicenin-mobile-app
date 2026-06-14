@@ -29,12 +29,14 @@ class NeedBloodController extends GetxController {
   DateTime? neededAt;
   String neededDate = 'Today · ASAP';
 
-  /// API date, e.g. "2026-06-10" (defaults to today if not picked).
+  /// API timestamp in RFC3339, e.g. "2026-06-10T00:00:00Z" (defaults to today
+  /// if not picked). The backend rejects a bare date, so the calendar day is
+  /// kept and pinned to midnight UTC.
   String get neededAtIso {
     final d = neededAt ?? DateTime.now();
     return '${d.year.toString().padLeft(4, '0')}-'
         '${d.month.toString().padLeft(2, '0')}-'
-        '${d.day.toString().padLeft(2, '0')}';
+        '${d.day.toString().padLeft(2, '0')}T00:00:00Z';
   }
 
   void setNeeded(DateTime d) {
@@ -132,7 +134,11 @@ class NeedBloodController extends GetxController {
       update();
       if (res.success) {
         SnackHelper.success(res.message);
-        Get.toNamed(Routes.BLOOD_FINDING);
+        // Recall the "requests near you" API so the just-created request shows
+        // up, then redirect to that list (replacing the form) so the user can
+        // track it in realtime.
+        Get.find<BloodController>().fetchRequests();
+        Get.offNamed(Routes.BLOOD_REQUESTS);
       } else {
         SnackHelper.error(res.message);
       }

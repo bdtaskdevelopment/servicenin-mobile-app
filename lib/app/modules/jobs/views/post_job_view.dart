@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../../core/values/app_colors.dart';
+import '../../../global_widget/sn_date_field.dart';
 import '../controllers/jobs_controller.dart';
 
 const _orange = Color(0xFFC2410C);
@@ -185,8 +186,12 @@ class PostJobView extends GetView<JobsController> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              _FieldLabel('DEADLINE'.tr),
-                              _Input(con.postDeadline, '2026-07-15'),
+                              SnDateField(
+                                controller: con.postDeadline,
+                                label: 'DEADLINE'.tr,
+                                accent: _orange,
+                                firstDate: DateTime.now(),
+                              ),
                             ],
                           ),
                         ),

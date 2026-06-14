@@ -545,11 +545,56 @@ class ReportCard extends StatelessWidget {
                     color: Color(0xFF94A3B8),
                   ),
                 ),
+                const SizedBox(height: 6),
+                VerifiedBadge(report: report),
               ],
             ),
           ),
           const SizedBox(width: 8),
           StatusPill(label: report.statusLabel, resolved: resolved),
+        ],
+      ),
+    );
+  }
+}
+
+/// Small badge showing the citizen-verification state of a grievance.
+class VerifiedBadge extends StatelessWidget {
+  const VerifiedBadge({super.key, required this.report});
+  final NagarikGrievance report;
+  @override
+  Widget build(BuildContext context) {
+    late IconData icon;
+    late String label;
+    late Color bg, fg;
+    if (report.verified) {
+      icon = Icons.verified_rounded;
+      label = 'Verified'.tr;
+      bg = const Color(0xFFDCFCE7);
+      fg = const Color(0xFF15803D);
+    } else if (report.awaitingCitizenVerification) {
+      icon = Icons.hourglass_bottom_rounded;
+      label = 'Awaiting verification'.tr;
+      bg = const Color(0xFFFEF3C7);
+      fg = const Color(0xFFB45309);
+    } else {
+      icon = Icons.shield_outlined;
+      label = 'Not verified'.tr;
+      bg = const Color(0xFFF1F5F9);
+      fg = const Color(0xFF64748B);
+    }
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration:
+          BoxDecoration(color: bg, borderRadius: BorderRadius.circular(20)),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 13, color: fg),
+          const SizedBox(width: 4),
+          Text(label,
+              style: TextStyle(
+                  fontSize: 11, fontWeight: FontWeight.w700, color: fg)),
         ],
       ),
     );

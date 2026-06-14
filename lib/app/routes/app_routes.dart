@@ -30,6 +30,7 @@ abstract class Routes {
   static const PHYSIO_BOOKED = _Paths.PHYSIO_BOOKED;
   static const MATCHMAKING = _Paths.MATCHMAKING;
   static const MATCHMAKING_BIODATA = _Paths.MATCHMAKING_BIODATA;
+  static const MATCHMAKING_PREFERENCE = _Paths.MATCHMAKING_PREFERENCE;
   static const MATCHMAKING_PROFILE = _Paths.MATCHMAKING_PROFILE;
   static const MATCHMAKING_INTERESTS = _Paths.MATCHMAKING_INTERESTS;
   static const MATCHMAKING_MATCHES = _Paths.MATCHMAKING_MATCHES;
@@ -56,6 +57,7 @@ abstract class Routes {
   static const NAGARIK_STATUS = _Paths.NAGARIK_STATUS;
   static const NAGARIK_CHAT = _Paths.NAGARIK_CHAT;
   static const NAGARIK_TICKET_CREATE = _Paths.NAGARIK_TICKET_CREATE;
+  static const NAGARIK_TICKET_DETAIL = _Paths.NAGARIK_TICKET_DETAIL;
   static const ACCOUNT_PROFILE = _Paths.ACCOUNT_PROFILE;
   static const ACCOUNT_EDIT = _Paths.ACCOUNT_EDIT;
   static const ACCOUNT_ACTIVITY = _Paths.ACCOUNT_ACTIVITY;
@@ -163,6 +165,7 @@ abstract class _Paths {
   static const PHYSIO_BOOKED = '/physio-booked';
   static const MATCHMAKING = '/matchmaking';
   static const MATCHMAKING_BIODATA = '/matchmaking-biodata';
+  static const MATCHMAKING_PREFERENCE = '/matchmaking-preference';
   static const MATCHMAKING_PROFILE = '/matchmaking-profile';
   static const MATCHMAKING_INTERESTS = '/matchmaking-interests';
   static const MATCHMAKING_MATCHES = '/matchmaking-matches';
@@ -189,6 +192,7 @@ abstract class _Paths {
   static const NAGARIK_STATUS = '/nagarik-status';
   static const NAGARIK_CHAT = '/nagarik-chat';
   static const NAGARIK_TICKET_CREATE = '/nagarik-ticket-create';
+  static const NAGARIK_TICKET_DETAIL = '/nagarik-ticket-detail';
   static const ACCOUNT_PROFILE = '/account-profile';
   static const ACCOUNT_EDIT = '/account-edit';
   static const ACCOUNT_ACTIVITY = '/account-activity';

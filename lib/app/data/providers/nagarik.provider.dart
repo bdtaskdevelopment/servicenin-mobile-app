@@ -30,4 +30,22 @@ class NagarikProvider extends BaseProvider {
     });
     return post(path, form);
   }
+
+  /// Citizen verification of a resolved grievance: text fields + an optional
+  /// `proof_photo` file, as multipart/form-data.
+  Future<Response> postVerifyMultipart(
+    String path,
+    Map<String, dynamic> fields,
+    File? proofPhoto,
+  ) {
+    final form = FormData({
+      for (final e in fields.entries)
+        if (e.value != null && e.value.toString().isNotEmpty)
+          e.key: e.value.toString(),
+      if (proofPhoto != null)
+        'proof_photo':
+            MultipartFile(proofPhoto, filename: p.basename(proofPhoto.path)),
+    });
+    return post(path, form);
+  }
 }

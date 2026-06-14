@@ -63,6 +63,7 @@ class OtpView extends GetView<AuthController> {
                   BoxedCodeInput(
                     length: AuthController.otpLength,
                     autoFocus: true,
+                    clearToken: con.otpClearToken,
                     onChanged: con.onOtpChanged,
                     onCompleted: (_) => con.verifyOtp(),
                   ),

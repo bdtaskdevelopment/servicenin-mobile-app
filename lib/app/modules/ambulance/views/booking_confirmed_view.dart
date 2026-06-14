@@ -332,9 +332,10 @@ class _InfoRow extends StatelessWidget {
           const SizedBox(width: 10),
           Text(label,
               style: const TextStyle(fontSize: 13, color: Color(0xFF64748B))),
-          const Spacer(),
-          Flexible(
+          const SizedBox(width: 16),
+          Expanded(
             child: Text(value,
+                textAlign: TextAlign.right,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: const TextStyle(

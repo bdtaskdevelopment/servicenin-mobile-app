@@ -47,44 +47,45 @@ class JobApplyView extends GetView<JobsController> {
                 child: ListView(
                   padding: const EdgeInsets.fromLTRB(16, 10, 16, 16),
                   children: [
-                    GestureDetector(
-                      onTap: con.openSeekerProfile,
-                      child: Container(
-                        padding: const EdgeInsets.all(14),
-                        decoration: BoxDecoration(
-                            color: AppColors.white,
-                            borderRadius: BorderRadius.circular(14),
-                            border: Border.all(
-                                color: _orange.withValues(alpha: 0.4))),
-                        child: Row(
-                          children: [
-                            const Icon(Icons.person_outline_rounded,
-                                color: _orange, size: 22),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text('Your job profile'.tr,
-                                      style: const TextStyle(
-                                          fontSize: 14.5,
-                                          fontWeight: FontWeight.w800,
-                                          color: Color(0xFF0F172A))),
-                                  const SizedBox(height: 2),
-                                  Text('Set up name, skills & experience'.tr,
-                                      style: const TextStyle(
-                                          fontSize: 12,
-                                          color: Color(0xFF94A3B8))),
-                                ],
-                              ),
-                            ),
-                            const Icon(Icons.chevron_right_rounded,
-                                color: Color(0xFF94A3B8)),
-                          ],
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 18),
+                    // "Your job profile" entry hidden for now.
+                    // GestureDetector(
+                    //   onTap: con.openSeekerProfile,
+                    //   child: Container(
+                    //     padding: const EdgeInsets.all(14),
+                    //     decoration: BoxDecoration(
+                    //         color: AppColors.white,
+                    //         borderRadius: BorderRadius.circular(14),
+                    //         border: Border.all(
+                    //             color: _orange.withValues(alpha: 0.4))),
+                    //     child: Row(
+                    //       children: [
+                    //         const Icon(Icons.person_outline_rounded,
+                    //             color: _orange, size: 22),
+                    //         const SizedBox(width: 12),
+                    //         Expanded(
+                    //           child: Column(
+                    //             crossAxisAlignment: CrossAxisAlignment.start,
+                    //             children: [
+                    //               Text('Your job profile'.tr,
+                    //                   style: const TextStyle(
+                    //                       fontSize: 14.5,
+                    //                       fontWeight: FontWeight.w800,
+                    //                       color: Color(0xFF0F172A))),
+                    //               const SizedBox(height: 2),
+                    //               Text('Set up name, skills & experience'.tr,
+                    //                   style: const TextStyle(
+                    //                       fontSize: 12,
+                    //                       color: Color(0xFF94A3B8))),
+                    //             ],
+                    //           ),
+                    //         ),
+                    //         const Icon(Icons.chevron_right_rounded,
+                    //             color: Color(0xFF94A3B8)),
+                    //       ],
+                    //     ),
+                    //   ),
+                    // ),
+                    // const SizedBox(height: 18),
                     _Label('RESUME'.tr),
                     const SizedBox(height: 10),
                     GestureDetector(

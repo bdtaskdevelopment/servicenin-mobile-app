@@ -1,3 +1,6 @@
+import 'dart:convert';
+import 'dart:io';
+
 import '../../core/values/app_url.dart';
 import '../models/response/auth_response.dart';
 import '../models/response/matchmaking_response.dart';
@@ -14,6 +17,37 @@ class MatchmakingRepository {
     final raw = res.bodyString;
     if (raw != null && raw.toString().trim().isNotEmpty) return raw;
     throw Exception('সংযোগে সমস্যা — আবার চেষ্টা করুন');
+  }
+
+  /// Builds a simple response for mutation endpoints. Success is decided by the
+  /// HTTP status (any 2xx → success), and the message is taken from the common
+  /// `{ success, message }` envelope when present. Tolerates an empty /
+  /// non-JSON body (e.g. 204 No Content).
+  AuthSimpleResponse _simple(dynamic res, String okMessage) {
+    final code = res.statusCode;
+    final ok = (res.isOk == true) ||
+        (code is int && code >= 200 && code < 300);
+
+    Map? map;
+    final body = res.body;
+    if (body is Map) {
+      map = body;
+    } else {
+      final raw = res.bodyString;
+      if (raw != null && raw.toString().trim().startsWith('{')) {
+        try {
+          map = jsonDecode(raw) as Map;
+        } catch (_) {}
+      }
+    }
+    final apiMessage = map?['message']?.toString() ?? '';
+
+    return AuthSimpleResponse(
+      success: ok,
+      message: apiMessage.isNotEmpty
+          ? apiMessage
+          : (ok ? okMessage : 'সংযোগে সমস্যা — আবার চেষ্টা করুন'),
+    );
   }
 
   Future<MmCategories> fetchCategories() async {
@@ -59,6 +93,26 @@ class MatchmakingRepository {
       Map<String, dynamic> payload) async {
     final res = await provider.putData(ApiURL.mmProfileMe, payload);
     return AuthSimpleResponse.fromMap(_payload(res));
+  }
+
+  // ── Partner preference ──────────────────────────────────────────────
+  Future<AuthSimpleResponse> updatePreference(
+      Map<String, dynamic> payload) async {
+    final res = await provider.putData(ApiURL.mmPreference, payload);
+    return _simple(res, 'Preferences saved');
+  }
+
+  // ── Documents ───────────────────────────────────────────────────────
+  Future<List<MmDocument>> fetchDocuments() async {
+    final res = await provider.getData(ApiURL.mmDocuments);
+    return MmDocument.listFromResponse(_payload(res));
+  }
+
+  Future<AuthSimpleResponse> uploadDocument(File file,
+      {required String kind, String remarks = ''}) async {
+    final res = await provider.uploadDocument(ApiURL.mmDocuments, file,
+        kind: kind, remarks: remarks);
+    return _simple(res, 'Uploaded');
   }
 
   Future<AuthSimpleResponse> expressInterest(String profileId) async {

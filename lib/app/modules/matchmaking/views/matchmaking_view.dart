@@ -155,6 +155,48 @@ class MatchmakingView extends GetView<MatchmakingController> {
                           ),
                         ),
                       ),
+                      const SizedBox(height: 12),
+                      // Partner preference entry
+                      GestureDetector(
+                        onTap: con.openPreference,
+                        child: _DashedBox(
+                          child: Row(
+                            children: [
+                              Container(
+                                width: 42,
+                                height: 42,
+                                decoration: BoxDecoration(
+                                    color: _pink,
+                                    borderRadius: BorderRadius.circular(12)),
+                                child: const Icon(Icons.tune_rounded,
+                                    color: _maroon, size: 22),
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment:
+                                      CrossAxisAlignment.start,
+                                  children: [
+                                    Text('Partner preference'.tr,
+                                        style: const TextStyle(
+                                            fontSize: 14.5,
+                                            fontWeight: FontWeight.w800,
+                                            color: Color(0xFF0F172A))),
+                                    const SizedBox(height: 2),
+                                    Text(
+                                        'Set who you\'re looking for'.tr,
+                                        style: const TextStyle(
+                                            fontSize: 12,
+                                            color: Color(0xFF94A3B8))),
+                                  ],
+                                ),
+                              ),
+                              const Icon(Icons.chevron_right_rounded,
+                                  color: Color(0xFF94A3B8)),
+                            ],
+                          ),
+                        ),
+                      ),
                       const SizedBox(height: 20),
                       Text('Suggested matches'.tr,
                           style: const TextStyle(
@@ -165,11 +207,51 @@ class MatchmakingView extends GetView<MatchmakingController> {
                       Text('Based on your preferences'.tr,
                           style: const TextStyle(
                               fontSize: 12.5, color: Color(0xFF94A3B8))),
+                      const SizedBox(height: 12),
+                      // Category chips
+                      if (con.categoryChips.length > 1)
+                        SizedBox(
+                          height: 36,
+                          child: ListView.separated(
+                            scrollDirection: Axis.horizontal,
+                            padding: EdgeInsets.zero,
+                            itemCount: con.categoryChips.length,
+                            separatorBuilder: (_, _) =>
+                                const SizedBox(width: 8),
+                            itemBuilder: (_, i) {
+                              final label = con.categoryChips[i];
+                              final sel = con.activeCategory == label;
+                              return GestureDetector(
+                                onTap: () => con.selectCategory(label),
+                                child: Container(
+                                  alignment: Alignment.center,
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 16),
+                                  decoration: BoxDecoration(
+                                    color: sel ? _maroon : AppColors.white,
+                                    borderRadius: BorderRadius.circular(20),
+                                    border: Border.all(
+                                        color: sel
+                                            ? _maroon
+                                            : const Color(0xFFE2E8F0)),
+                                  ),
+                                  child: Text(label,
+                                      style: TextStyle(
+                                          fontSize: 13,
+                                          fontWeight: FontWeight.w700,
+                                          color: sel
+                                              ? Colors.white
+                                              : const Color(0xFF334155))),
+                                ),
+                              );
+                            },
+                          ),
+                        ),
                       const SizedBox(height: 14),
                       if (con.loadingSuggestions && con.suggestions.isEmpty)
                         const SnListSkeleton(
                             count: 3, padding: EdgeInsets.zero)
-                      else if (con.suggestions.isEmpty)
+                      else if (con.visibleSuggestions.isEmpty)
                         Padding(
                           padding: const EdgeInsets.symmetric(vertical: 8),
                           child: Text('No suggestions yet.'.tr,
@@ -177,7 +259,7 @@ class MatchmakingView extends GetView<MatchmakingController> {
                                   fontSize: 13, color: Color(0xFF94A3B8))),
                         )
                       else
-                        ...con.suggestions.toList().asMap().entries.map(
+                        ...con.visibleSuggestions.toList().asMap().entries.map(
                             (e) => FadeInUp(
                                   from: 18,
                                   duration: const Duration(milliseconds: 350),

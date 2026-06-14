@@ -86,26 +86,7 @@ class HsBookingDetailsView extends GetView<HomeServiceController> {
                             ],
                           ),
                         ),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 10, vertical: 5),
-                          decoration: BoxDecoration(
-                              color: const Color(0xFFFEF3C7),
-                              borderRadius: BorderRadius.circular(20)),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              const Icon(Icons.circle,
-                                  size: 7, color: Color(0xFFD97706)),
-                              const SizedBox(width: 4),
-                              Text('In progress'.tr,
-                                  style: const TextStyle(
-                                      fontSize: 11,
-                                      fontWeight: FontWeight.w700,
-                                      color: Color(0xFFB45309))),
-                            ],
-                          ),
-                        ),
+                        _StatusChip(status: con.trackedBooking?.status ?? ''),
                       ],
                     ),
                   ),
@@ -367,6 +348,40 @@ void _showDisputeDialog(BuildContext context, HomeServiceController con) {
       ],
     ),
   );
+}
+
+/// Status chip — same mapping as the bookings list and tracking sheet so the
+/// status shown here always matches.
+class _StatusChip extends StatelessWidget {
+  const _StatusChip({required this.status});
+  final String status;
+  @override
+  Widget build(BuildContext context) {
+    final s = status.toLowerCase();
+    final done = s == 'completed';
+    final bad = s == 'cancelled' || s == 'canceled';
+    final bg = bad
+        ? const Color(0xFFFEE2E2)
+        : done
+            ? const Color(0xFFDCFCE7)
+            : const Color(0xFFFEF3C7);
+    final fg = bad
+        ? const Color(0xFFDC2626)
+        : done
+            ? const Color(0xFF15803D)
+            : const Color(0xFFB45309);
+    final label = status.isEmpty
+        ? 'Pending'
+        : status[0].toUpperCase() + status.substring(1).replaceAll('_', ' ');
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      decoration:
+          BoxDecoration(color: bg, borderRadius: BorderRadius.circular(20)),
+      child: Text(label,
+          style: TextStyle(
+              fontSize: 11, fontWeight: FontWeight.w800, color: fg)),
+    );
+  }
 }
 
 class _Label extends StatelessWidget {
