@@ -115,6 +115,7 @@ const Map<String, String> groupDBn = {
   'Report an issue': 'সমস্যা জানান',
   'Roads · drains · garbage': 'রাস্তা · ড্রেন · আবর্জনা',
   'Support ticket': 'সাপোর্ট টিকিট',
+  'Support tickets': 'সাপোর্ট টিকিট',
   'Tax · license · services': 'কর · লাইসেন্স · সেবা',
   'Report by category': 'বিভাগ অনুযায়ী রিপোর্ট',
   'My reports': 'আমার রিপোর্ট',

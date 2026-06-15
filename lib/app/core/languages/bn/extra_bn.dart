@@ -9,6 +9,13 @@ const Map<String, String> extraBn = {
   'Only Bangladeshi numbers are supported.':
       'শুধুমাত্র বাংলাদেশি নাম্বার ইনপুট দিন',
   'Log in': 'লগইন করুন',
+  'Login': 'লগইন',
+
+  // ── Exit-app confirmation ───────────────────────────────────
+  'Are you sure?': 'আপনি কি নিশ্চিত?',
+  'Do you want to exit the app?': 'আপনি কি অ্যাপ থেকে বের হতে চান?',
+  'Yes': 'হ্যাঁ',
+  'No': 'না',
   'By continuing you agree to the ': 'আপনি কি আমাদের ',
   'Terms': 'শর্তাবলী',
   ' and ': ' ও ',

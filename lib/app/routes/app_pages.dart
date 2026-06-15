@@ -55,6 +55,7 @@ import '../modules/education/views/education_interests_view.dart';
 import '../modules/nagarik/bindings/nagarik_binding.dart';
 import '../modules/nagarik/views/nagarik_view.dart';
 import '../modules/nagarik/views/nagarik_reports_view.dart';
+import '../modules/nagarik/views/nagarik_tickets_view.dart';
 import '../modules/nagarik/views/report_issue_view.dart';
 import '../modules/nagarik/views/report_status_view.dart';
 import '../modules/nagarik/views/nagarik_chat_view.dart';
@@ -386,6 +387,11 @@ class AppPages {
     GetPage(
       name: _Paths.NAGARIK_REPORTS,
       page: () => const NagarikReportsView(),
+      binding: NagarikBinding(),
+    ),
+    GetPage(
+      name: _Paths.NAGARIK_TICKETS,
+      page: () => const NagarikTicketsView(),
       binding: NagarikBinding(),
     ),
     GetPage(

@@ -53,6 +53,7 @@ abstract class Routes {
   static const EDUCATION_INTERESTS = _Paths.EDUCATION_INTERESTS;
   static const NAGARIK = _Paths.NAGARIK;
   static const NAGARIK_REPORTS = _Paths.NAGARIK_REPORTS;
+  static const NAGARIK_TICKETS = _Paths.NAGARIK_TICKETS;
   static const NAGARIK_REPORT_ISSUE = _Paths.NAGARIK_REPORT_ISSUE;
   static const NAGARIK_STATUS = _Paths.NAGARIK_STATUS;
   static const NAGARIK_CHAT = _Paths.NAGARIK_CHAT;
@@ -188,6 +189,7 @@ abstract class _Paths {
   static const EDUCATION_INTERESTS = '/education-interests';
   static const NAGARIK = '/nagarik';
   static const NAGARIK_REPORTS = '/nagarik-reports';
+  static const NAGARIK_TICKETS = '/nagarik-tickets';
   static const NAGARIK_REPORT_ISSUE = '/nagarik-report-issue';
   static const NAGARIK_STATUS = '/nagarik-status';
   static const NAGARIK_CHAT = '/nagarik-chat';

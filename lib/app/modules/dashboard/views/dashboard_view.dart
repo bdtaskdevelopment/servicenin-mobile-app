@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 
 import '../../../core/values/app_colors.dart';
@@ -16,24 +17,74 @@ class DashboardView extends GetView<DashboardController> {
   Widget build(BuildContext context) {
     return GetBuilder<DashboardController>(
       builder: (con) {
-        return Scaffold(
-          backgroundColor: const Color(0xFFF7F8FA),
-          extendBody: true,
-          body: IndexedStack(
-            index: con.currentIndex,
-            children: const [
-              HomeView(),
-              ServicesView(),
-              OrdersView(),
-              AccountView(),
-            ],
+        return PopScope(
+          canPop: false,
+          onPopInvokedWithResult: (didPop, result) async {
+            if (didPop) return;
+            final shouldExit = await _confirmExit(context);
+            if (shouldExit) SystemNavigator.pop();
+          },
+          child: Scaffold(
+            backgroundColor: const Color(0xFFF7F8FA),
+            extendBody: true,
+            body: IndexedStack(
+              index: con.currentIndex,
+              children: const [
+                HomeView(),
+                ServicesView(),
+                OrdersView(),
+                AccountView(),
+              ],
+            ),
+            floatingActionButtonLocation:
+                FloatingActionButtonLocation.centerDocked,
+            floatingActionButton: _QuickButton(),
+            bottomNavigationBar: _BottomNav(con: con),
           ),
-          floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-          floatingActionButton: _QuickButton(),
-          bottomNavigationBar: _BottomNav(con: con),
         );
       },
     );
+  }
+
+  /// "Exit app?" confirmation shown when the back button is pressed on the
+  /// dashboard. Returns true when the user chooses Yes.
+  Future<bool> _confirmExit(BuildContext context) async {
+    final result = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: Colors.white,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+        title: Text('Are you sure?'.tr,
+            style: const TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w800,
+                color: Color(0xFF0F172A))),
+        content: Text('Do you want to exit the app?'.tr,
+            style: const TextStyle(fontSize: 14, color: Color(0xFF64748B))),
+        actionsPadding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: Text('No'.tr,
+                style: const TextStyle(
+                    color: Color(0xFF64748B), fontWeight: FontWeight.w700)),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.of(ctx).pop(true),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.appColor,
+              foregroundColor: Colors.white,
+              elevation: 0,
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10)),
+            ),
+            child: Text('Yes'.tr,
+                style: const TextStyle(fontWeight: FontWeight.w800)),
+          ),
+        ],
+      ),
+    );
+    return result ?? false;
   }
 }
 

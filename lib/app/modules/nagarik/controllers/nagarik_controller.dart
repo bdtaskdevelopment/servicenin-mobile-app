@@ -193,6 +193,7 @@ class NagarikController extends GetxController {
     fetchHotlines();
     fetchCategories();
     fetchGrievances();
+    fetchTickets();
   }
 
   // ── Loaders ─────────────────────────────────────────────────────────
@@ -265,8 +266,13 @@ class NagarikController extends GetxController {
   // ── Navigation ──────────────────────────────────────────────────────
   void openReports() {
     fetchGrievances();
-    fetchTickets();
     Get.toNamed(Routes.NAGARIK_REPORTS);
+  }
+
+  /// Open the standalone support-tickets list (surfaced like My reports).
+  void openTickets() {
+    fetchTickets();
+    Get.toNamed(Routes.NAGARIK_TICKETS);
   }
 
   void reportIssue() {

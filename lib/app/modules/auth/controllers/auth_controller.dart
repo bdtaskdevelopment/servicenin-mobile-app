@@ -100,7 +100,8 @@ class AuthController extends GetxController {
       if (Get.isDialogOpen ?? false) Get.back();
       busy = false;
       update();
-      SnackHelper.error(e.toString().replaceFirst('Exception: ', ''));
+      SnackHelper.error(e.toString().replaceFirst('Exception: ', ''),
+          title: 'Login'.tr);
       return null;
     }
   }
@@ -116,7 +117,7 @@ class AuthController extends GetxController {
       // Login success snackbar hidden — not needed.
       // SnackHelper.success(res.message);
     } else {
-      SnackHelper.error(res.message);
+      SnackHelper.error(res.message, title: 'Login'.tr);
     }
   }
 
@@ -169,7 +170,7 @@ class AuthController extends GetxController {
       _otp = '';
       otpClearToken++;
       update();
-      SnackHelper.error(res.message);
+      SnackHelper.error(res.message, title: 'Login'.tr);
     }
   }
 

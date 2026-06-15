@@ -122,6 +122,34 @@ class NagarikView extends GetView<NagarikController> {
                       ),
                       const SizedBox(height: 12),
                       _MyReportsPreview(con: con),
+                      const SizedBox(height: 22),
+                      // ── My support tickets (surfaced like My reports) ──
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            'Support tickets'.tr,
+                            style: const TextStyle(
+                              fontSize: 17,
+                              fontWeight: FontWeight.w800,
+                              color: Color(0xFF0F172A),
+                            ),
+                          ),
+                          GestureDetector(
+                            onTap: con.openTickets,
+                            child: Text(
+                              'See all →'.tr,
+                              style: const TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w700,
+                                color: _orange,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 12),
+                      _MyTicketsPreview(con: con),
                     ],
                   ),
                 ),
@@ -484,6 +512,91 @@ class _MyReportsPreview extends StatelessWidget {
             ),
           )
           .toList(),
+    );
+  }
+}
+
+class _MyTicketsPreview extends StatelessWidget {
+  const _MyTicketsPreview({required this.con});
+  final NagarikController con;
+  @override
+  Widget build(BuildContext context) {
+    if (con.loadingTickets && con.tickets.isEmpty) {
+      return const SnListSkeleton(padding: EdgeInsets.zero, count: 2);
+    }
+    if (con.tickets.isEmpty) {
+      return Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: AppColors.white,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: const Color(0xFFEDEFF2)),
+        ),
+        child: Text(
+          'No support tickets yet.'.tr,
+          style: const TextStyle(fontSize: 13, color: Color(0xFF94A3B8)),
+        ),
+      );
+    }
+    return Column(
+      children: con.tickets.take(2).toList().asMap().entries.map((e) {
+        final t = e.value;
+        return FadeInUp(
+          from: 18,
+          duration: const Duration(milliseconds: 350),
+          delay: Duration(milliseconds: 70 * e.key),
+          child: Padding(
+            padding: const EdgeInsets.only(bottom: 12),
+            child: GestureDetector(
+              onTap: () => con.viewTicket(t),
+              child: Container(
+                padding: const EdgeInsets.all(14),
+                decoration: BoxDecoration(
+                  color: AppColors.white,
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: const Color(0xFFEDEFF2)),
+                ),
+                child: Row(
+                  children: [
+                    Container(
+                      width: 42,
+                      height: 42,
+                      decoration: BoxDecoration(
+                          color: _tile,
+                          borderRadius: BorderRadius.circular(12)),
+                      child: const Icon(Icons.confirmation_number_outlined,
+                          color: _orange, size: 20),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            t.subject.isNotEmpty ? t.subject : t.categoryLabel,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w800,
+                                color: Color(0xFF0F172A)),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(t.createdLabel,
+                              style: const TextStyle(
+                                  fontSize: 12, color: Color(0xFF94A3B8))),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    StatusPill(label: t.statusLabel, resolved: t.isResolved),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        );
+      }).toList(),
     );
   }
 }

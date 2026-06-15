@@ -88,7 +88,8 @@ class _BoxedCodeInputState extends State<BoxedCodeInput> {
     if (_value.length == widget.length &&
         !_value.contains(RegExp(r'\s')) &&
         _controllers.every((c) => c.text.isNotEmpty)) {
-      FocusScope.of(context).unfocus();
+      // Keep focus on the field (don't unfocus) so that after a wrong OTP the
+      // user can immediately type or backspace to edit without tapping a box.
       widget.onCompleted?.call(_value);
     }
   }
