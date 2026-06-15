@@ -6,7 +6,7 @@ const Map<String, String> commonBn = {
   'Services': 'সেবা',
   'Orders': 'অর্ডার',
   'Account': 'অ্যাকাউন্ট',
-  'Quick': 'দ্রুত',
+  'Quick': 'কুইক',
 
   // ── App bar ──
   // NOTE: 'ServiceNin' is the brand name — intentionally NOT translated, so
@@ -50,7 +50,7 @@ const Map<String, String> commonBn = {
 
   // ── Common statuses ──
   'Pending': 'অপেক্ষমাণ',
-  'Completed': 'সম্পন্ন',
+  'Completed': 'কমপ্লিটেড',
   'In progress': 'চলমান',
   'Resolved': 'সমাধান হয়েছে',
   'Open': 'খোলা',
@@ -86,7 +86,7 @@ const Map<String, String> commonBn = {
   'Contact': 'যোগাযোগ',
 
   // ── Service names (static catalog grid) ──
-  'Blood': 'রক্ত',
+  'Blood': 'ব্লাড',
   'Ambulance': 'অ্যাম্বুলেন্স',
   'Healthcare': 'স্বাস্থ্যসেবা',
   'Information': 'তথ্য',
@@ -94,7 +94,7 @@ const Map<String, String> commonBn = {
   'Physio': 'ফিজিও',
   'Marriage': 'বিবাহ',
   'Jobs': 'চাকরি',
-  'Funeral': 'জানাজা',
+  'Funeral': 'ফিউনারেল',
   'Education': 'শিক্ষা',
   'Nagarik Sheba': 'নাগরিক সেবা',
   'More': 'আরও',
@@ -104,7 +104,7 @@ const Map<String, String> commonBn = {
   'Blood Donation': 'রক্তদান',
   'Home Services': 'হোম সার্ভিস',
   'Physiotherapy': 'ফিজিওথেরাপি',
-  'Funeral Services': 'জানাজা সেবা',
+  'Funeral Services': 'ফিউনারেল সেবা',
   'Matchmaking': 'ম্যাচমেকিং',
   'Information & Hotlines': 'তথ্য ও হটলাইন',
 

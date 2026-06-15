@@ -113,7 +113,8 @@ class AuthController extends GetxController {
     if (res == null) return;
     if (res.success) {
       proceedToOtp();
-      SnackHelper.success(res.message);
+      // Login success snackbar hidden — not needed.
+      // SnackHelper.success(res.message);
     } else {
       SnackHelper.error(res.message);
     }

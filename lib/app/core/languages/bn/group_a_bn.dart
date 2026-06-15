@@ -2,7 +2,7 @@
 // Keys are the English source text; English mode falls back to the key.
 const Map<String, String> groupABn = {
   // ── Blood: home ──────────────────────────────────────────────────
-  'Blood Bank': 'রক্ত ব্যাংক',
+  'Blood Bank': 'ব্লাড ব্যাংক',
   'Donors near you · ServiceNin': 'আপনার কাছাকাছি ডোনার · ServiceNin',
   'Need blood': 'রক্ত প্রয়োজন',
   'Send a blood request': 'রক্তের অনুরোধ পাঠান',
@@ -179,9 +179,9 @@ const Map<String, String> groupABn = {
   'PRAC Healthcare': 'PRAC হেলথকেয়ার',
   'Verified BMDC doctors · Dhaka': 'যাচাইকৃত BMDC ডাক্তার · ঢাকা',
   'Departments': 'বিভাগসমূহ',
-  'Available today': 'আজ উপলব্ধ',
+  'Available today': 'আজ অ্যাভেইলেবল',
   'All →': 'সব →',
-  'No doctors available today.': 'আজ কোনো ডাক্তার উপলব্ধ নেই।',
+  'No doctors available today.': 'আজ কোনো ডাক্তার অ্যাভেইলেবল নেই।',
   'Find a doctor, book a visit': 'ডাক্তার খুঁজুন, ভিজিট বুক করুন',
   'In-person & video consults · transparent fees · BMDC-verified':
       'সরাসরি ও ভিডিও পরামর্শ · স্বচ্ছ ফি · BMDC-যাচাইকৃত',
@@ -227,8 +227,8 @@ const Map<String, String> groupABn = {
   'Confirm booking': 'বুকিং নিশ্চিত করুন',
 
   // ── Healthcare: appointment confirmed ────────────────────────────
-  'Appointment confirmed': 'অ্যাপয়েন্টমেন্ট নিশ্চিত',
-  'Your appointment is confirmed': 'আপনার অ্যাপয়েন্টমেন্ট নিশ্চিত হয়েছে',
+  'Appointment confirmed': 'অ্যাপয়েন্টমেন্ট কনফার্ম হয়েছে',
+  'Your appointment is confirmed': 'আপনার অ্যাপয়েন্টমেন্ট কনফার্ম হয়েছে',
   'SERIAL': 'সিরিয়াল',
   'Date & time': 'তারিখ ও সময়',
   'Venue': 'স্থান',
@@ -302,8 +302,8 @@ const Map<String, String> groupABn = {
 
   // ── Healthcare: appointments ─────────────────────────────────────
   'My appointments': 'আমার অ্যাপয়েন্টমেন্ট',
-  'Upcoming': 'আসন্ন',
-  'Completed': 'সম্পন্ন',
+  'Upcoming': 'আপকামিং',
+  'Completed': 'কমপ্লিটেড',
   'No appointments': 'কোনো অ্যাপয়েন্টমেন্ট নেই',
   'Serial ': 'সিরিয়াল ',
   'Doctors taking patients today': 'আজ রোগী দেখছেন এমন ডাক্তার',

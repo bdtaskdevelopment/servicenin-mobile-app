@@ -364,6 +364,9 @@ class _QuickGrid extends StatelessWidget {
                   ),
                   const SizedBox(height: 8),
                   Text(it.$2.tr,
+                      textAlign: TextAlign.center,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                       style: const TextStyle(
                           fontSize: 12,
                           fontWeight: FontWeight.w700,
@@ -506,29 +509,29 @@ class _DeptTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
+      clipBehavior: Clip.antiAlias,
       decoration: BoxDecoration(
         color: AppColors.white,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: const Color(0xFFEDEFF2)),
       ),
+      padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 6),
       child: Column(
-        mainAxisSize: MainAxisSize.min,
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(dept.icon, color: dept.color, size: 28),
-          const SizedBox(height: 8),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 4),
+          Icon(dept.icon, color: dept.color, size: 26),
+          const SizedBox(height: 6),
+          Flexible(
             child: Text(
               dept.name,
               textAlign: TextAlign.center,
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
               style: const TextStyle(
-                fontSize: 12,
+                fontSize: 11.5,
                 fontWeight: FontWeight.w700,
                 color: Color(0xFF1E293B),
-                height: 1.15,
+                height: 1.1,
               ),
             ),
           ),

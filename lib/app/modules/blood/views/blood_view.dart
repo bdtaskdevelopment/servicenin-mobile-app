@@ -179,12 +179,16 @@ class _ActionCard extends StatelessWidget {
                 size: isPrimary ? 26 : 24),
             const Spacer(),
             Text(title,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
                 style: TextStyle(
                     color: isPrimary ? Colors.white : const Color(0xFF0F172A),
                     fontSize: 17,
                     fontWeight: FontWeight.w800)),
             const SizedBox(height: 2),
             Text(subtitle,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
                 style: TextStyle(
                     color: isPrimary
                         ? const Color(0xFFFFE0E2)

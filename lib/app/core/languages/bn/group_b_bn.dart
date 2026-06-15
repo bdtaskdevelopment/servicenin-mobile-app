@@ -6,8 +6,8 @@ const Map<String, String> groupBBn = {
   'Cancel': 'বাতিল',
   'Confirm': 'নিশ্চিত করুন',
   'Pending': 'অপেক্ষমাণ',
-  'Completed': 'সম্পন্ন',
-  'Upcoming': 'আসন্ন',
+  'Completed': 'কমপ্লিটেড',
+  'Upcoming': 'আপকামিং',
   'Change': 'পরিবর্তন',
   'Setup': 'সেটআপ',
   'Add': 'যোগ করুন',
@@ -37,7 +37,7 @@ const Map<String, String> groupBBn = {
 
   // ── Ambulance ──
   'Ambulance': 'অ্যাম্বুলেন্স',
-  'Available ambulances': 'উপলব্ধ অ্যাম্বুলেন্স',
+  'Available ambulances': 'অ্যাভেইলেবল অ্যাম্বুলেন্স',
   'Tap one to estimate the fare': 'ভাড়া হিসাব করতে একটিতে ট্যাপ করুন',
   'No ambulances available right now.': 'এই মুহূর্তে কোনো অ্যাম্বুলেন্স উপলব্ধ নেই।',
   'Recent bookings': 'সাম্প্রতিক বুকিং',

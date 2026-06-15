@@ -19,7 +19,7 @@ const Map<String, String> coreBn = {
 
   // ── Notifications ──
   'Notifications': 'নোটিফিকেশন',
-  'Mark all read': 'সব পঠিত হিসেবে চিহ্নিত করুন',
+  'Mark all read': 'সব পড়া হয়েছে',
   "You're all caught up": 'সব দেখা হয়ে গেছে',
   'New updates will appear here.': 'নতুন আপডেট এখানে দেখা যাবে।',
   'Could not load notifications': 'নোটিফিকেশন লোড করা যায়নি',

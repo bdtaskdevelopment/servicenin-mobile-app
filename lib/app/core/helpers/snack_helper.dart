@@ -14,7 +14,7 @@ class SnackHelper {
     Get.snackbar(
       title,
       message.trim().isEmpty ? 'সফল হয়েছে' : message,
-      snackPosition: SnackPosition.BOTTOM,
+      snackPosition: SnackPosition.TOP,
       backgroundColor: AppColors.brandOrange,
       colorText: Colors.white,
       margin: const EdgeInsets.all(12),
@@ -27,7 +27,7 @@ class SnackHelper {
     Get.snackbar(
       title,
       message.trim().isEmpty ? 'কিছু ভুল হয়েছে' : message,
-      snackPosition: SnackPosition.BOTTOM,
+      snackPosition: SnackPosition.TOP,
       backgroundColor: _errorBg,
       colorText: Colors.white,
       margin: const EdgeInsets.all(12),

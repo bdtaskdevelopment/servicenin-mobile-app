@@ -180,7 +180,7 @@ const Map<String, String> groupCBn = {
   'Log out': 'লগ আউট',
   'One ServiceNin ID powers all 12 services — no separate logins.':
       'একটি সার্ভিসনিন আইডি দিয়ে সব ১২টি সেবা — আলাদা লগইন নয়।',
-  'Blood': 'রক্ত',
+  'Blood': 'ব্লাড',
 
   // ── Account: profile ────────────────────────────────────────
   'Profile': 'প্রোফাইল',

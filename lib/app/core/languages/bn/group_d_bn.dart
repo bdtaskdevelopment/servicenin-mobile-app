@@ -3,7 +3,7 @@
 // Keys are the English source text; English mode falls back to the key.
 const Map<String, String> groupDBn = {
   // ── Funeral ───────────────────────────────────────────────────────
-  'Funeral Services': 'জানাজা ও দাফন সেবা',
+  'Funeral Services': 'ফিউনারেল সেবা',
   'Compassionate, dignified support': 'সহানুভূতিশীল ও মর্যাদাপূর্ণ সহায়তা',
   'Inna lillahi wa inna ilaihi raji\'un':
       'ইন্না লিল্লাহি ওয়া ইন্না ইলাইহি রাজিউন',
@@ -199,7 +199,7 @@ const Map<String, String> groupDBn = {
 
   // ── Notifications ─────────────────────────────────────────────────
   'Notifications': 'নোটিফিকেশন',
-  'Mark all read': 'সব পঠিত হিসেবে চিহ্নিত করুন',
+  'Mark all read': 'সব পড়া হয়েছে',
   'Could not load notifications': 'নোটিফিকেশন লোড করা যায়নি',
   "You're all caught up": 'আপনি সব দেখে ফেলেছেন',
   'New updates will appear here.': 'নতুন আপডেট এখানে দেখা যাবে।',

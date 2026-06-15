@@ -37,10 +37,17 @@ class RegistrationController extends GetxController {
     return r.hasMatch(e);
   }
 
+  /// Same phone rules as the login screen: 10 local digits after +880.
+  bool get isPhoneValid => phoneController.text.trim().length == 10;
+  String get fullPhone =>
+      '${AuthController.countryCode}${phoneController.text.trim()}';
+
   bool get isInfoValid =>
       nameController.text.trim().isNotEmpty &&
-      phoneController.text.trim().isNotEmpty &&
-      _emailOk(emailController.text.trim());
+      isPhoneValid &&
+      // Email is optional — only validate the format when something is entered.
+      (emailController.text.trim().isEmpty ||
+          _emailOk(emailController.text.trim()));
 
   /// Register the account (name · phone · email) then go to the login page,
   /// where the user signs in with phone + OTP. No OTP step here.
@@ -55,7 +62,7 @@ class RegistrationController extends GetxController {
     try {
       final res = await Get.find<AuthRepository>().register(
         name: nameController.text.trim(),
-        phone: phoneController.text.trim(),
+        phone: fullPhone,
         email: emailController.text.trim(),
       );
       if (Get.isDialogOpen ?? false) Get.back();

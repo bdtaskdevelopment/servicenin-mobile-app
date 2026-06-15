@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 
 import '../../../core/values/app_colors.dart';
 import '../../../global_widget/primary_button.dart';
+import '../controllers/auth_controller.dart';
 import '../controllers/registration_controller.dart';
 // ── Multi-step design (About · Location · PIN) — commented out for now,
 //    registration now collects only name · phone · email. ──────────────
@@ -68,19 +69,19 @@ class RegistrationView extends GetView<RegistrationController> {
                         keyboard: TextInputType.name,
                       ),
                       const SizedBox(height: 18),
-                      _Field(
-                        label: 'Phone number'.tr,
-                        hint: '+8801XXXXXXXXX',
-                        controller: con.phoneController,
-                        onChanged: con.onInfoChanged,
-                        keyboard: TextInputType.phone,
-                        formatters: [
-                          FilteringTextInputFormatter.allow(RegExp(r'[0-9+]')),
-                        ],
+                      Text(
+                        'Phone number'.tr,
+                        style: const TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w700,
+                          color: AppColors.brandOrange,
+                        ),
                       ),
+                      const SizedBox(height: 8),
+                      _RegPhoneInput(con: con),
                       const SizedBox(height: 18),
                       _Field(
-                        label: 'Email'.tr,
+                        label: 'Email (optional)'.tr,
                         hint: 'you@example.com',
                         controller: con.emailController,
                         onChanged: con.onInfoChanged,
@@ -115,7 +116,6 @@ class _Field extends StatelessWidget {
     required this.controller,
     required this.onChanged,
     this.keyboard,
-    this.formatters,
   });
 
   final String label;
@@ -123,7 +123,6 @@ class _Field extends StatelessWidget {
   final TextEditingController controller;
   final ValueChanged<String> onChanged;
   final TextInputType? keyboard;
-  final List<TextInputFormatter>? formatters;
 
   @override
   Widget build(BuildContext context) {
@@ -149,7 +148,6 @@ class _Field extends StatelessWidget {
             controller: controller,
             onChanged: onChanged,
             keyboardType: keyboard,
-            inputFormatters: formatters,
             style: const TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w600,
@@ -168,6 +166,84 @@ class _Field extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+// ── Phone input matching the login screen (country pill + 10 digits) ──
+class _RegPhoneInput extends StatelessWidget {
+  const _RegPhoneInput({required this.con});
+  final RegistrationController con;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        color: AppColors.white,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(
+          color: con.isPhoneValid
+              ? AppColors.brandOrange
+              : const Color(0xFFE2E8F0),
+          width: con.isPhoneValid ? 1.6 : 1.2,
+        ),
+      ),
+      child: Row(
+        children: [
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+            child: Row(
+              children: const [
+                Text(
+                  AuthController.countryIso,
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                    color: Color(0xFF64748B),
+                  ),
+                ),
+                SizedBox(width: 6),
+                Text(
+                  AuthController.countryCode,
+                  style: TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w800,
+                    color: Color(0xFF0F172A),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Container(width: 1, height: 28, color: const Color(0xFFE2E8F0)),
+          Expanded(
+            child: TextField(
+              controller: con.phoneController,
+              keyboardType: TextInputType.phone,
+              onChanged: con.onInfoChanged,
+              maxLength: 10,
+              inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+              style: const TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+                color: Color(0xFF0F172A),
+                letterSpacing: 1,
+              ),
+              decoration: const InputDecoration(
+                counterText: '',
+                hintText: '1XXXXXXXXX',
+                hintStyle: TextStyle(
+                  color: Color(0xFFB6C0CC),
+                  fontWeight: FontWeight.w500,
+                  letterSpacing: 1,
+                ),
+                border: InputBorder.none,
+                contentPadding:
+                    EdgeInsets.symmetric(horizontal: 12, vertical: 16),
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
