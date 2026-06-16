@@ -30,7 +30,7 @@ class EditProfileView extends GetView<AccountController> {
                       icon: const Icon(Icons.arrow_back_ios_new_rounded,
                           size: 20, color: Color(0xFF1A1A1A)),
                     ),
-                    Text('Edit profile'.tr,
+                    Text('Update profile'.tr,
                         style: const TextStyle(
                             fontSize: 19,
                             fontWeight: FontWeight.w800,
@@ -251,7 +251,7 @@ class EditProfileView extends GetView<AccountController> {
                             child: CircularProgressIndicator(
                                 strokeWidth: 2.5, color: Colors.white),
                           )
-                        : Text('Save changes'.tr,
+                        : Text('Update profile'.tr,
                             style: const TextStyle(
                                 fontSize: 16, fontWeight: FontWeight.w800)),
                   ),

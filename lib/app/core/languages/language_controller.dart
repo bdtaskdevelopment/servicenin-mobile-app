@@ -25,7 +25,8 @@ class LanguageController extends GetxController {
   }
 
   Future<void> setLanguage(String langCode) async {
-    if (code == langCode) return;
+    // Always re-apply (don't early-return on an equal code) so the rendered
+    // locale and the saved code can't drift out of sync.
     code = langCode;
     Get.updateLocale(Locale(langCode));
     await StorageService.save(StorageConstants.languageCode, langCode);

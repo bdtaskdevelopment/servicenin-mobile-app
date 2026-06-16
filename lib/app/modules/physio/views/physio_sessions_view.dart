@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../../core/values/app_colors.dart';
+import '../../../core/values/app_url.dart';
+import '../../../global_widget/invoice_actions.dart';
 import '../../../global_widget/sn_shimmer.dart';
 import '../controllers/physio_controller.dart';
 
@@ -155,6 +157,15 @@ class _SessionCard extends StatelessWidget {
                 ),
             ],
           ),
+          if (session.id.isNotEmpty) ...[
+            const SizedBox(height: 12),
+            InvoiceActions(
+              viewPath: ApiURL.physioInvoicePdf(session.id),
+              downloadPath: ApiURL.physioInvoicePdfDownload(session.id),
+              fileName: 'invoice-${session.id}',
+              accent: _orange,
+            ),
+          ],
         ],
       ),
     );

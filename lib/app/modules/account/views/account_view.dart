@@ -90,13 +90,6 @@ class AccountView extends GetView<AccountController> {
                   ),
                 ),
               ),
-              const SizedBox(height: 20),
-              const Center(
-                child: Text(
-                  'ServiceNin v3.0 · Bdtask Limited',
-                  style: TextStyle(fontSize: 12, color: Color(0xFFB6C0CC)),
-                ),
-              ),
               const SizedBox(height: 24),
             ],
           );

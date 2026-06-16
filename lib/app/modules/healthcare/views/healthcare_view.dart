@@ -529,24 +529,22 @@ class _DeptTile extends StatelessWidget {
           Icon(dept.icon, color: dept.color, size: 26),
           const SizedBox(height: 6),
           Flexible(
-            child: LayoutBuilder(
-              builder: (context, c) => FittedBox(
-                fit: BoxFit.scaleDown,
-                child: ConstrainedBox(
-                  constraints: BoxConstraints(maxWidth: c.maxWidth),
-                  child: Text(
-                    dept.name,
-                    textAlign: TextAlign.center,
-                    maxLines: 2,
-                    style: const TextStyle(
-                      fontSize: 11.5,
-                      fontWeight: FontWeight.w700,
-                      color: Color(0xFF1E293B),
-                      height: 1.1,
-                    ),
+            child: Builder(
+              builder: (_) {
+                final multiWord = dept.name.trim().contains(' ');
+                return Text(
+                  dept.name,
+                  textAlign: TextAlign.center,
+                  maxLines: multiWord ? 2 : 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    fontSize: 11.5,
+                    fontWeight: FontWeight.w700,
+                    color: Color(0xFF1E293B),
+                    height: 1.1,
                   ),
-                ),
-              ),
+                );
+              },
             ),
           ),
         ],

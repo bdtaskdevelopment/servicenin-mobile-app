@@ -187,7 +187,7 @@ const Map<String, String> groupCBn = {
   'PHONE (LOGIN)': 'ফোন (লগইন)',
   'GENDER': 'লিঙ্গ',
   'BLOOD GROUP': 'রক্তের গ্রুপ',
-  'Verified': 'যাচাইকৃত',
+  'Verified': 'ভেরিফাইড',
   'Edit profile': 'প্রোফাইল সম্পাদনা করুন',
 
   // ── Account: my activity ────────────────────────────────────

@@ -67,7 +67,7 @@ class AuthController extends GetxController {
 
   void _startTimer() {
     _timer?.cancel();
-    resendSeconds = 30;
+    resendSeconds = 60;
     update();
     _timer = Timer.periodic(const Duration(seconds: 1), (t) {
       if (resendSeconds <= 0) {

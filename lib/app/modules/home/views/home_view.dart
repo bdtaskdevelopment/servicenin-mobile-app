@@ -133,7 +133,10 @@ class _BannerCarousel extends StatelessWidget {
             onPageChanged: con.setPromo,
             itemBuilder: (_, i) => Padding(
               padding: const EdgeInsets.symmetric(horizontal: 6),
-              child: _BannerSlide(banner: con.banners[i]),
+              child: _BannerSlide(
+                banner: con.banners[i],
+                onTap: () => con.openBanner(con.banners[i]),
+              ),
             ),
           ),
         ),
@@ -184,8 +187,9 @@ String _bannerImageUrl(String path) {
 }
 
 class _BannerSlide extends StatelessWidget {
-  const _BannerSlide({required this.banner});
+  const _BannerSlide({required this.banner, required this.onTap});
   final HomeBanner banner;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -193,30 +197,34 @@ class _BannerSlide extends StatelessWidget {
         const [Color(0xFF0F7A52), Color(0xFF0B5E3F)];
     final img = _bannerImageUrl(banner.imageUrl);
     return GestureDetector(
-      onTap: () => ServiceNav.openByKey(banner.type),
+      onTap: onTap,
       child: ClipRRect(
         borderRadius: BorderRadius.circular(20),
         child: Stack(
           fit: StackFit.expand,
           children: [
-            DecoratedBox(
+            // Background — the banner image (full), with a brand gradient as
+            // the fallback while loading or on error.
+            if (img.isNotEmpty)
+              Image.network(
+                img,
+                fit: BoxFit.cover,
+                errorBuilder: (_, _, _) => _gradientBox(colors),
+                loadingBuilder: (_, child, progress) =>
+                    progress == null ? child : _gradientBox(colors),
+              )
+            else
+              _gradientBox(colors),
+            // Dark scrim so the white title/subtitle stay readable over photos.
+            const DecoratedBox(
               decoration: BoxDecoration(
                 gradient: LinearGradient(
-                  colors: colors,
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
+                  colors: [Color(0xB3000000), Color(0x40000000)],
+                  begin: Alignment.bottomLeft,
+                  end: Alignment.topRight,
                 ),
               ),
             ),
-            if (img.isNotEmpty)
-              Opacity(
-                opacity: 0.28,
-                child: Image.network(
-                  img,
-                  fit: BoxFit.cover,
-                  errorBuilder: (_, _, _) => const SizedBox.shrink(),
-                ),
-              ),
             Padding(
               padding: const EdgeInsets.fromLTRB(18, 16, 18, 16),
               child: Column(
@@ -266,6 +274,16 @@ class _BannerSlide extends StatelessWidget {
       ),
     );
   }
+
+  Widget _gradientBox(List<Color> colors) => DecoratedBox(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: colors,
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+        ),
+      );
 }
 
 // ── Horizontal service shortcut strip (popular / recent) ────────────

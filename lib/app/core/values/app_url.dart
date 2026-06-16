@@ -115,6 +115,24 @@ class ApiURL {
   static String serviceBookingChat(String id) =>
       'api/v1/services/bookings/$id/chat';
 
+  //===== Invoice PDFs — view (inline) + download (attachment)
+  static String hsInvoicePdf(String id) =>
+      'api/v1/services/bookings/$id/invoice/pdf';
+  static String hsInvoicePdfDownload(String id) =>
+      'api/v1/services/bookings/$id/invoice/pdf/download';
+  static String hcInvoicePdf(String id) =>
+      'api/v1/healthcare/appointments/$id/invoice/pdf';
+  static String hcInvoicePdfDownload(String id) =>
+      'api/v1/healthcare/appointments/$id/invoice/pdf/download';
+  static String ambInvoicePdf(String id) =>
+      'api/v1/ambulance/bookings/$id/invoice/pdf';
+  static String ambInvoicePdfDownload(String id) =>
+      'api/v1/ambulance/bookings/$id/invoice/pdf/download';
+  static String physioInvoicePdf(String id) =>
+      'api/v1/physio/appointments/$id/invoice/pdf';
+  static String physioInvoicePdfDownload(String id) =>
+      'api/v1/physio/appointments/$id/invoice/pdf/download';
+
   //===== Physiotherapy
   static final String physioConcerns = 'api/v1/physio/concerns';
   static String physioConcernCenters(String key) =>

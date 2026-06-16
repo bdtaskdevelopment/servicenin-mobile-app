@@ -2,6 +2,8 @@ import 'package:animate_do/animate_do.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import '../../../core/values/app_url.dart';
+import '../../../global_widget/invoice_actions.dart';
 import '../../../global_widget/sn_shimmer.dart';
 import '../controllers/ambulance_controller.dart';
 import '../widgets/ambulance_widgets.dart';
@@ -74,9 +76,24 @@ class AmbulanceBookingsView extends GetView<AmbulanceController> {
                         children: con.bookings
                             .map((b) => Padding(
                                   padding: const EdgeInsets.only(bottom: 12),
-                                  child: BookingCard(
-                                      booking: b,
-                                      onTap: () => con.trackBooking(b)),
+                                  child: Column(
+                                    children: [
+                                      BookingCard(
+                                          booking: b,
+                                          onTap: () => con.trackBooking(b)),
+                                      if (b.id.isNotEmpty) ...[
+                                        const SizedBox(height: 10),
+                                        InvoiceActions(
+                                          viewPath: ApiURL.ambInvoicePdf(b.id),
+                                          downloadPath:
+                                              ApiURL.ambInvoicePdfDownload(
+                                                  b.id),
+                                          fileName: 'invoice-${b.id}',
+                                          accent: const Color(0xFF1E2A4A),
+                                        ),
+                                      ],
+                                    ],
+                                  ),
                                 ))
                             .toList(),
                       ),

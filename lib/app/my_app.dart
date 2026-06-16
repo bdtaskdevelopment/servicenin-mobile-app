@@ -20,6 +20,31 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
+  /// Saved language code, or Bangla by default (only honour a valid choice).
+  late final String _langCode = _resolveLang();
+
+  static String _resolveLang() {
+    final saved = StorageService.read(StorageConstants.languageCode);
+    if (saved is String &&
+        (saved == AppConst.langCodeBn || saved == AppConst.langCodeEn)) {
+      return saved;
+    }
+    return AppConst.langCodeBn; // default → Bangla
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    // Force Get.locale on cold start so static text renders in the selected
+    // language (Bangla by default) from the first screen. The GetMaterialApp
+    // `locale` param alone doesn't always set Get.locale on launch.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (Get.locale?.languageCode != _langCode) {
+        Get.updateLocale(Locale(_langCode));
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
 
@@ -45,8 +70,7 @@ class _MyAppState extends State<MyApp> {
       initialRoute: AppPages.INITIAL,
       getPages: AppPages.routes,
       translationsKeys: AppTranslation.translationsKeys,
-      locale: Locale(StorageService.read(StorageConstants.languageCode) ??
-          AppConst.langCodeBn),
+      locale: Locale(_langCode),
       fallbackLocale: const Locale(AppConst.langCodeEn),
       popGesture: true,
       routingCallback: (routing) {},

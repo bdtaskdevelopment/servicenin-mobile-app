@@ -110,12 +110,14 @@ enum SessionStatus { upcoming, completed }
 
 class PhysioSession {
   const PhysioSession({
+    required this.id,
     required this.doctor,
     required this.center,
     required this.when,
     required this.status,
     this.progress,
   });
+  final String id;
   final String doctor;
   final String center;
   final String when;
@@ -123,6 +125,7 @@ class PhysioSession {
   final String? progress;
 
   factory PhysioSession.fromApi(PhysioAppointment a) => PhysioSession(
+        id: a.id,
         doctor: a.staffName.isNotEmpty ? a.staffName : 'Therapist',
         center: a.centerName,
         when: a.whenLabel,

@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../../core/values/app_colors.dart';
+import '../../../core/values/app_url.dart';
+import '../../../global_widget/invoice_actions.dart';
 import '../controllers/home_service_controller.dart';
 
 const _teal = Color(0xFF0E9F8E);
@@ -191,6 +193,16 @@ class HsBookingDetailsView extends GetView<HomeServiceController> {
                       ],
                     ),
                   ),
+                  if ((con.trackedBooking?.id ?? '').isNotEmpty) ...[
+                    const SizedBox(height: 14),
+                    InvoiceActions(
+                      viewPath: ApiURL.hsInvoicePdf(con.trackedBooking!.id),
+                      downloadPath:
+                          ApiURL.hsInvoicePdfDownload(con.trackedBooking!.id),
+                      fileName: 'invoice-${con.trackedBooking!.id}',
+                      accent: _darkTeal,
+                    ),
+                  ],
                 ],
               ),
             ),

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../../core/helpers/snack_helper.dart';
+import '../../../core/helpers/sslcommerz_helper.dart';
 import '../../../data/models/response/service_response.dart';
 import '../../../data/repositories/service.repo.dart';
 import '../../../routes/app_pages.dart';
@@ -278,17 +279,28 @@ class HomeServiceController extends GetxController {
   String selectedMethodKey = '';
   bool loadingMethods = false;
 
+  /// Only enabled gateways — disabled ones are never shown.
+  List<ServicePaymentMethod> get enabledMethods =>
+      methods.where((m) => m.enabled).toList();
+
   void selectMethod(String key) {
     selectedMethodKey = key;
     update();
   }
 
   // ── Booking summary getters (used by placed / details) ──────────────
+  /// Cart summary captured at booking time (the API response may omit items),
+  /// so the success page can still show `service ×count`.
+  String lastCartSummary = '';
+
   String get bookingSummary {
     final b = lastBooking;
-    if (b != null) return '${b.title} ×${b.items.fold(0, (a, i) => a + i.quantity)}';
+    if (b != null && b.items.isNotEmpty) {
+      return '${b.title} ×${b.items.fold(0, (a, i) => a + i.quantity)}';
+    }
+    if (lastCartSummary.isNotEmpty) return lastCartSummary;
     if (cartItems.isEmpty) return 'Service';
-    return '${cartItems.first.name} ×$totalItems';
+    return '${cartItems.first.displayName} ×$totalItems';
   }
 
   String get whenSummary {
@@ -358,6 +370,15 @@ class HomeServiceController extends GetxController {
     if (methods.isEmpty) await _loadMethods();
   }
 
+  /// Cart icon tap → open the cart (confirm) page, or notify when empty.
+  void openCart() {
+    if (totalItems == 0) {
+      SnackHelper.error('কার্টে কোনো সার্ভিস নেই');
+      return;
+    }
+    reviewBooking();
+  }
+
   Future<void> _loadDates() async {
     loadingDates = true;
     update();
@@ -408,25 +429,42 @@ class HomeServiceController extends GetxController {
     }
   }
 
+  // Error-snackbar title for this module.
+  static String get _moduleTitle => 'Home Service'.tr;
+
   Future<void> placeBooking() async {
     if (placing) return;
     if (cartItems.isEmpty) {
-      SnackHelper.error('No services selected');
+      SnackHelper.error('No services selected'.tr, title: _moduleTitle);
       return;
     }
     final d = _selectedDate;
     if (d == null || selectedSlotKey.isEmpty) {
-      SnackHelper.error('Select a date & time slot');
+      SnackHelper.error('Select a date & time slot'.tr, title: _moduleTitle);
       return;
     }
     if (addressCtrl.text.trim().isEmpty) {
-      SnackHelper.error('Enter a service address');
+      SnackHelper.error('Enter a service address'.tr, title: _moduleTitle);
       return;
     }
     placing = true;
     update();
     try {
       address = addressCtrl.text.trim();
+      // Online payment (SSLCommerz sandbox) must complete before booking.
+      if (SslcommerzPay.isOnline(selectedMethodKey)) {
+        final paid = await SslcommerzPay.pay(
+          amount: totalPaid.toDouble(),
+          tranId: 'HS-${DateTime.now().millisecondsSinceEpoch}',
+          category: 'home_service',
+        );
+        if (!paid) {
+          SnackHelper.error('পেমেন্ট সম্পন্ন হয়নি', title: _moduleTitle);
+          placing = false;
+          update();
+          return;
+        }
+      }
       final categoryId = cartItems.first.categoryId;
       final payload = {
         'category_id': categoryId,
@@ -439,11 +477,17 @@ class HomeServiceController extends GetxController {
             .map((s) => {'sub_service_id': s.id, 'quantity': qtyOf(s)})
             .toList(),
       };
+      // Capture the cart summary before clearing (the booking response may
+      // not echo the items back).
+      lastCartSummary = cartItems.isEmpty
+          ? ''
+          : '${cartItems.first.displayName} ×$totalItems';
       lastBooking = await _repo.book(payload);
       _cart.clear();
       Get.toNamed(Routes.HS_PLACED);
     } catch (e) {
-      SnackHelper.error(e.toString().replaceFirst('Exception: ', ''));
+      SnackHelper.error(e.toString().replaceFirst('Exception: ', ''),
+          title: _moduleTitle);
     } finally {
       placing = false;
       update();

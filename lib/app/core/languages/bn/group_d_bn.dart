@@ -174,7 +174,7 @@ const Map<String, String> groupDBn = {
   'All →': 'সব →',
   'Directory': 'ডিরেক্টরি',
   'Emergency': 'জরুরি',
-  'Verified': 'যাচাইকৃত',
+  'Verified': 'ভেরিফাইড',
   'Tap to call': 'কল করতে ট্যাপ করুন',
   'National Emergency · Police · Fire · Ambulance':
       'জাতীয় জরুরি · পুলিশ · ফায়ার · অ্যাম্বুলেন্স',

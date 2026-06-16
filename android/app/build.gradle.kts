@@ -7,7 +7,8 @@ plugins {
 
 android {
     namespace = "com.app.servicenin"
-    compileSdk = flutter.compileSdkVersion
+    // flutter_sslcommerz requires compileSdk 36.
+    compileSdk = 36
     ndkVersion = flutter.ndkVersion
 
     compileOptions {

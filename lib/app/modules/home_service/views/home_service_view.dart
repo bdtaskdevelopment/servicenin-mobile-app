@@ -46,12 +46,42 @@ class HomeServiceView extends GetView<HomeServiceController> {
                     ],
                   ),
                   const Spacer(),
-                  // Provider entry hidden for now.
-                  // GestureDetector(
-                  //   onTap: () => Get.toNamed(Routes.HS_PROVIDER),
-                  //   child: const Icon(Icons.work_outline_rounded,
-                  //       color: Color(0xFF1A1A1A), size: 22),
-                  // ),
+                  // Cart with item-count badge → opens the cart (confirm) page.
+                  GetBuilder<HomeServiceController>(
+                    builder: (con) => GestureDetector(
+                      onTap: con.openCart,
+                      behavior: HitTestBehavior.opaque,
+                      child: Padding(
+                        padding: const EdgeInsets.all(4),
+                        child: Stack(
+                          clipBehavior: Clip.none,
+                          children: [
+                            const Icon(Icons.shopping_cart_outlined,
+                                color: Color(0xFF1A1A1A), size: 24),
+                            if (con.totalItems > 0)
+                              Positioned(
+                                right: -7,
+                                top: -7,
+                                child: Container(
+                                  padding: const EdgeInsets.all(3),
+                                  constraints: const BoxConstraints(
+                                      minWidth: 18, minHeight: 18),
+                                  decoration: const BoxDecoration(
+                                      color: AppColors.brandOrange,
+                                      shape: BoxShape.circle),
+                                  alignment: Alignment.center,
+                                  child: Text('${con.totalItems}',
+                                      style: const TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 10,
+                                          fontWeight: FontWeight.w800)),
+                                ),
+                              ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -294,20 +324,18 @@ class _CatTile extends StatelessWidget {
           Icon(cat.icon, color: _teal, size: 26),
           const SizedBox(height: 6),
           Flexible(
-            child: LayoutBuilder(
-              builder: (context, c) => FittedBox(
-                fit: BoxFit.scaleDown,
-                child: ConstrainedBox(
-                  constraints: BoxConstraints(maxWidth: c.maxWidth),
-                  child: Text(cat.name,
-                      textAlign: TextAlign.center,
-                      maxLines: 2,
-                      style: const TextStyle(
-                          fontSize: 11,
-                          fontWeight: FontWeight.w600,
-                          color: Color(0xFF334155))),
-                ),
-              ),
+            child: Builder(
+              builder: (_) {
+                final multiWord = cat.name.trim().contains(' ');
+                return Text(cat.name,
+                    textAlign: TextAlign.center,
+                    maxLines: multiWord ? 2 : 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w600,
+                        color: Color(0xFF334155)));
+              },
             ),
           ),
         ],

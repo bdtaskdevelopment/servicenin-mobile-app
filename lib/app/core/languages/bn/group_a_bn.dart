@@ -164,7 +164,7 @@ const Map<String, String> groupABn = {
   'Requests you offered to donate': 'যে অনুরোধে রক্ত দিতে চেয়েছেন',
   "You haven't responded to any requests yet":
       'আপনি এখনও কোনো অনুরোধে সাড়া দেননি',
-  'Verified': 'যাচাইকৃত',
+  'Verified': 'ভেরিফাইড',
   'Awaiting verification': 'যাচাইয়ের অপেক্ষায়',
   'All donors': 'সব ডোনার',
   'Registered blood donors · ServiceNin': 'নিবন্ধিত রক্তদাতা · ServiceNin',

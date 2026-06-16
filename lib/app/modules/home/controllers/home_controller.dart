@@ -2,12 +2,45 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:url_launcher/url_launcher.dart';
 
+import '../../../core/helpers/snack_helper.dart';
+import '../../../core/utils/service_nav.dart';
 import '../../../data/models/response/home_response.dart';
 import '../../../data/repositories/home.repo.dart';
 
 class HomeController extends GetxController {
   HomeRepository get _repo => Get.find<HomeRepository>();
+
+  /// Banner tap: navigate to an in-app module (route), open an external URL,
+  /// or launch the dialer — based on the banner's `action`.
+  Future<void> openBanner(HomeBanner b) async {
+    switch (b.action) {
+      case 'url':
+        await _launch(b.url);
+        break;
+      case 'call':
+        if (b.phone.trim().isNotEmpty) await _launch('tel:${b.phone.trim()}');
+        break;
+      case 'module':
+      default:
+        // route like "/healthcare" → reuse the central module router.
+        final key = b.route.replaceAll('/', '').trim();
+        if (key.isNotEmpty) ServiceNav.openByKey(key);
+    }
+  }
+
+  Future<void> _launch(String raw) async {
+    final url = raw.trim();
+    if (url.isEmpty) return;
+    try {
+      final ok = await launchUrl(Uri.parse(url),
+          mode: LaunchMode.externalApplication);
+      if (!ok) SnackHelper.error('খুলতে সমস্যা হয়েছে');
+    } catch (_) {
+      SnackHelper.error('খুলতে সমস্যা হয়েছে');
+    }
+  }
 
   // ── Banner carousel ─────────────────────────────────────────────────
   List<HomeBanner> banners = [];

@@ -36,28 +36,27 @@ class SnServiceTile extends StatelessWidget {
                   children: [
                     Icon(service.icon, color: service.color, size: 26),
                     const SizedBox(height: 6),
-                    // Auto-fit the label: full name at a normal size on regular
-                    // phones, scaled DOWN only as needed on slim devices — so
-                    // long/dynamic names fit without truncating or overflowing.
+                    // Single long words (Ambulance, Information) use one line +
+                    // ellipsis so they never break mid-word; two-word names
+                    // (Home Service, Nagarik Sheba) wrap cleanly to 2 lines.
                     Flexible(
-                      child: LayoutBuilder(
-                        builder: (context, c) => FittedBox(
-                          fit: BoxFit.scaleDown,
-                          child: ConstrainedBox(
-                            constraints: BoxConstraints(maxWidth: c.maxWidth),
-                            child: Text(
-                              service.name.tr,
-                              textAlign: TextAlign.center,
-                              maxLines: 2,
-                              style: const TextStyle(
-                                fontSize: 11.5,
-                                fontWeight: FontWeight.w700,
-                                color: Color(0xFF1E293B),
-                                height: 1.1,
-                              ),
+                      child: Builder(
+                        builder: (_) {
+                          final label = service.name.tr;
+                          final multiWord = label.trim().contains(' ');
+                          return Text(
+                            label,
+                            textAlign: TextAlign.center,
+                            maxLines: multiWord ? 2 : 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                              fontSize: 11.5,
+                              fontWeight: FontWeight.w700,
+                              color: Color(0xFF1E293B),
+                              height: 1.1,
                             ),
-                          ),
-                        ),
+                          );
+                        },
                       ),
                     ),
                   ],

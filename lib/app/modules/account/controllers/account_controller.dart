@@ -199,7 +199,7 @@ class AccountController extends GetxController {
       saving = false;
       update();
       Get.back();
-      SnackHelper.success(res.message);
+      SnackHelper.success(res.message, title: 'Profile'.tr);
     } catch (e) {
       saving = false;
       update();

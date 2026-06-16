@@ -118,7 +118,7 @@ class ConfirmBookingView extends GetView<HomeServiceController> {
                       if (con.loadingDates && con.scheduleDates.isEmpty)
                         SnShimmer(
                           child: SizedBox(
-                            height: 64,
+                            height: 74,
                             child: ListView.separated(
                               scrollDirection: Axis.horizontal,
                               physics: const NeverScrollableScrollPhysics(),
@@ -126,7 +126,7 @@ class ConfirmBookingView extends GetView<HomeServiceController> {
                               separatorBuilder: (_, _) =>
                                   const SizedBox(width: 10),
                               itemBuilder: (_, _) => const SnBone(
-                                  width: 78, height: 64, radius: 12),
+                                  width: 78, height: 74, radius: 12),
                             ),
                           ),
                         )
@@ -135,7 +135,7 @@ class ConfirmBookingView extends GetView<HomeServiceController> {
                           from: 18,
                           duration: const Duration(milliseconds: 350),
                           child: SizedBox(
-                          height: 64,
+                          height: 74,
                           child: ListView.separated(
                             scrollDirection: Axis.horizontal,
                             itemCount: con.scheduleDates.length,
@@ -151,8 +151,8 @@ class ConfirmBookingView extends GetView<HomeServiceController> {
                                 },
                                 child: Container(
                                   width: 78,
-                                  padding:
-                                      const EdgeInsets.symmetric(vertical: 10),
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 4, vertical: 8),
                                   decoration: BoxDecoration(
                                     color: sel ? _darkTeal : AppColors.white,
                                     borderRadius: BorderRadius.circular(12),
@@ -164,8 +164,11 @@ class ConfirmBookingView extends GetView<HomeServiceController> {
                                   child: Column(
                                     mainAxisAlignment:
                                         MainAxisAlignment.center,
+                                    mainAxisSize: MainAxisSize.min,
                                     children: [
                                       Text(d.label,
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
                                           style: TextStyle(
                                               fontSize: 12,
                                               fontWeight: FontWeight.w600,
@@ -174,6 +177,8 @@ class ConfirmBookingView extends GetView<HomeServiceController> {
                                                   : const Color(0xFF64748B))),
                                       const SizedBox(height: 2),
                                       Text(d.day,
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
                                           style: TextStyle(
                                               fontSize: 13.5,
                                               fontWeight: FontWeight.w800,
@@ -274,72 +279,53 @@ class ConfirmBookingView extends GetView<HomeServiceController> {
                         from: 18,
                         duration: const Duration(milliseconds: 350),
                         child: Column(
-                        children: con.methods.map((m) {
+                        children: con.enabledMethods.map((m) {
                           final sel = con.selectedMethodKey == m.key;
-                          final disabled = !m.enabled;
                           return Padding(
                             padding: const EdgeInsets.only(bottom: 10),
                             child: GestureDetector(
-                              onTap:
-                                  disabled ? null : () => con.selectMethod(m.key),
-                              child: Opacity(
-                                opacity: disabled ? 0.5 : 1,
-                                child: Container(
-                                  padding: const EdgeInsets.all(14),
-                                  decoration: BoxDecoration(
-                                    color: AppColors.white,
-                                    borderRadius: BorderRadius.circular(14),
-                                    border: Border.all(
+                              onTap: () => con.selectMethod(m.key),
+                              child: Container(
+                                padding: const EdgeInsets.all(14),
+                                decoration: BoxDecoration(
+                                  color: AppColors.white,
+                                  borderRadius: BorderRadius.circular(14),
+                                  border: Border.all(
+                                      color: sel
+                                          ? _teal
+                                          : const Color(0xFFE2E8F0),
+                                      width: sel ? 1.6 : 1.2),
+                                ),
+                                child: Row(
+                                  children: [
+                                    Icon(
+                                        sel
+                                            ? Icons.radio_button_checked
+                                            : Icons.radio_button_off,
+                                        size: 20,
                                         color: sel
                                             ? _teal
-                                            : const Color(0xFFE2E8F0),
-                                        width: sel ? 1.6 : 1.2),
-                                  ),
-                                  child: Row(
-                                    children: [
-                                      Icon(
-                                          sel
-                                              ? Icons.radio_button_checked
-                                              : Icons.radio_button_off,
-                                          size: 20,
-                                          color: sel
-                                              ? _teal
-                                              : const Color(0xFFCBD5E1)),
-                                      const SizedBox(width: 10),
-                                      Expanded(
-                                        child: Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: [
-                                            Text(m.label,
-                                                style: const TextStyle(
-                                                    fontSize: 14,
-                                                    fontWeight: FontWeight.w800,
-                                                    color: Color(0xFF0F172A))),
-                                            const SizedBox(height: 2),
-                                            Text(m.description,
-                                                style: const TextStyle(
-                                                    fontSize: 12,
-                                                    color: Color(0xFF94A3B8))),
-                                          ],
-                                        ),
-                                      ),
-                                      if (disabled)
-                                        Container(
-                                          padding: const EdgeInsets.symmetric(
-                                              horizontal: 8, vertical: 4),
-                                          decoration: BoxDecoration(
-                                              color: const Color(0xFFF1F5F9),
-                                              borderRadius:
-                                                  BorderRadius.circular(20)),
-                                          child: Text('Soon'.tr,
+                                            : const Color(0xFFCBD5E1)),
+                                    const SizedBox(width: 10),
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text(m.label,
                                               style: const TextStyle(
-                                                  fontSize: 10.5,
-                                                  fontWeight: FontWeight.w700,
+                                                  fontSize: 14,
+                                                  fontWeight: FontWeight.w800,
+                                                  color: Color(0xFF0F172A))),
+                                          const SizedBox(height: 2),
+                                          Text(m.description,
+                                              style: const TextStyle(
+                                                  fontSize: 12,
                                                   color: Color(0xFF94A3B8))),
-                                        ),
-                                    ],
-                                  ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ),
                             ),

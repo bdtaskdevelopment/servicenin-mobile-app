@@ -163,7 +163,7 @@ class ProfileView extends GetView<AccountController> {
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(14)),
                 ),
-                child: Text('Edit profile'.tr,
+                child: Text('Update profile'.tr,
                     style:
                         const TextStyle(fontSize: 16, fontWeight: FontWeight.w800)),
               ),

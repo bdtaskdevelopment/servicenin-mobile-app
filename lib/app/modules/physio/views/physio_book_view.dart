@@ -108,7 +108,7 @@ class PhysioBookView extends GetView<PhysioController> {
                       if (con.loadingDates && con.scheduleDates.isEmpty)
                         SnShimmer(
                           child: SizedBox(
-                            height: 64,
+                            height: 74,
                             child: ListView.separated(
                               scrollDirection: Axis.horizontal,
                               physics: const NeverScrollableScrollPhysics(),
@@ -116,7 +116,7 @@ class PhysioBookView extends GetView<PhysioController> {
                               separatorBuilder: (_, _) =>
                                   const SizedBox(width: 10),
                               itemBuilder: (_, _) => const SnBone(
-                                  width: 76, height: 64, radius: 12),
+                                  width: 76, height: 74, radius: 12),
                             ),
                           ),
                         )
@@ -125,7 +125,7 @@ class PhysioBookView extends GetView<PhysioController> {
                           from: 18,
                           duration: const Duration(milliseconds: 350),
                           child: SizedBox(
-                          height: 64,
+                          height: 74,
                           child: ListView.separated(
                             scrollDirection: Axis.horizontal,
                             itemCount: con.scheduleDates.length,
@@ -138,6 +138,8 @@ class PhysioBookView extends GetView<PhysioController> {
                                 onTap: () => con.selectDate(i),
                                 child: Container(
                                   width: 76,
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 4, vertical: 8),
                                   decoration: BoxDecoration(
                                     color: sel ? _brown : AppColors.white,
                                     borderRadius: BorderRadius.circular(12),
@@ -149,8 +151,11 @@ class PhysioBookView extends GetView<PhysioController> {
                                   child: Column(
                                     mainAxisAlignment:
                                         MainAxisAlignment.center,
+                                    mainAxisSize: MainAxisSize.min,
                                     children: [
                                       Text(d.label,
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
                                           style: TextStyle(
                                               fontSize: 12,
                                               fontWeight: FontWeight.w600,
@@ -159,6 +164,8 @@ class PhysioBookView extends GetView<PhysioController> {
                                                   : const Color(0xFF64748B))),
                                       const SizedBox(height: 2),
                                       Text(d.dayShort,
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
                                           style: TextStyle(
                                               fontSize: 13,
                                               fontWeight: FontWeight.w800,

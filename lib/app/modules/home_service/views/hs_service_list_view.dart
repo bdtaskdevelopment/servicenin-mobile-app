@@ -48,12 +48,45 @@ class HsServiceListView extends GetView<HomeServiceController> {
                         ],
                       ),
                       const Spacer(),
-                      if (!isSearch)
+                      if (!isSearch) ...[
                         GestureDetector(
                           onTap: con.openSearch,
                           child: const Icon(Icons.search_rounded,
                               color: Color(0xFF1A1A1A), size: 22),
                         ),
+                        const SizedBox(width: 16),
+                      ],
+                      // Cart with live item-count badge → opens the cart page.
+                      GestureDetector(
+                        onTap: con.openCart,
+                        behavior: HitTestBehavior.opaque,
+                        child: Stack(
+                          clipBehavior: Clip.none,
+                          children: [
+                            const Icon(Icons.shopping_cart_outlined,
+                                color: Color(0xFF1A1A1A), size: 24),
+                            if (con.totalItems > 0)
+                              Positioned(
+                                right: -7,
+                                top: -7,
+                                child: Container(
+                                  padding: const EdgeInsets.all(3),
+                                  constraints: const BoxConstraints(
+                                      minWidth: 18, minHeight: 18),
+                                  decoration: const BoxDecoration(
+                                      color: AppColors.brandOrange,
+                                      shape: BoxShape.circle),
+                                  alignment: Alignment.center,
+                                  child: Text('${con.totalItems}',
+                                      style: const TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 10,
+                                          fontWeight: FontWeight.w800)),
+                                ),
+                              ),
+                          ],
+                        ),
+                      ),
                     ],
                   ),
                 ),

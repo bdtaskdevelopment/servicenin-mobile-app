@@ -3,7 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../../core/values/app_colors.dart';
+import '../../../core/values/app_url.dart';
 import '../../../data/models/response/healthcare_response.dart';
+import '../../../global_widget/invoice_actions.dart';
 import '../../../global_widget/sn_shimmer.dart';
 import '../controllers/appointments_controller.dart';
 
@@ -222,6 +224,15 @@ class _ApptCard extends StatelessWidget {
                 ),
             ],
           ),
+          if (appt.id.isNotEmpty) ...[
+            const SizedBox(height: 12),
+            InvoiceActions(
+              viewPath: ApiURL.hcInvoicePdf(appt.id),
+              downloadPath: ApiURL.hcInvoicePdfDownload(appt.id),
+              fileName: 'invoice-${appt.id}',
+              accent: const Color(0xFF0F7A52),
+            ),
+          ],
         ],
       ),
     );

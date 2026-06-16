@@ -10,6 +10,9 @@ import 'package:get_storage/get_storage.dart';
 // import 'package:internet_checker_plus/internet_level.dart';
 
 import 'app/app_binding.dart';
+import 'app/core/values/app_const.dart';
+import 'app/core/values/storage.dart';
+import 'app/data/services/storage.service.dart';
 import 'app/my_app.dart';
 // import 'firebase_options.dart';
 import 'package:flutter_log_console/flutter_log_console.dart';
@@ -32,6 +35,16 @@ void main() async {
 
     
     await GetStorage.init();
+
+    // One-time: make Bangla the default language. This resets any stale value
+    // left by earlier builds (e.g. English) so the app opens in Bangla. It runs
+    // only once — the user's later language choice persists after this.
+    if (StorageService.read('lang_default_bn_v1') != true) {
+      await StorageService.save(
+          StorageConstants.languageCode, AppConst.langCodeBn);
+      await StorageService.save('lang_default_bn_v1', true);
+    }
+
     try {
       await dotenv.load(fileName: ".env");
     } catch (e) {

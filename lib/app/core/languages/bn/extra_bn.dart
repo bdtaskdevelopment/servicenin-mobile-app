@@ -11,6 +11,11 @@ const Map<String, String> extraBn = {
   'Log in': 'লগইন করুন',
   'Login': 'লগইন',
 
+  // ── Home service booking errors ─────────────────────────────
+  'No services selected': 'কোনো সার্ভিস নির্বাচন করা হয়নি',
+  'Select a date & time slot': 'তারিখ ও সময় নির্বাচন করুন',
+  'Enter a service address': 'সার্ভিস ঠিকানা দিন',
+
   // ── Exit-app confirmation ───────────────────────────────────
   'Are you sure?': 'আপনি কি নিশ্চিত?',
   'Do you want to exit the app?': 'আপনি কি অ্যাপ থেকে বের হতে চান?',
@@ -27,7 +32,7 @@ const Map<String, String> extraBn = {
   // ── OTP (otp_view) ──────────────────────────────────────────
   'Enter OTP': 'OTP লিখুন',
   'A 6-digit code has been sent to ': 'একটি ৬-সংখ্যার কোড পাঠানো হয়েছে ',
-  'Change number': 'নম্বর পরিবর্তন করুন',
+  'Change number': 'নাম্বার পরিবর্তন করুন',
   'Resend code': 'কোড আবার পাঠান',
   'Didn\'t get the code?': 'কোড পাননি?',
   'Verify another way': 'অন্য পদ্ধতিতে যাচাই করুন',
@@ -115,6 +120,7 @@ const Map<String, String> extraBn = {
   'Investigations': 'পরীক্ষা-নিরীক্ষা',
   'Follow-up': 'পরবর্তী সাক্ষাৎ',
   'Download': 'ডাউনলোড',
+  'View invoice': 'ইনভয়েস দেখুন',
   'Rate your visit': 'আপনার সেবার মূল্যায়ন দিন',
   'How was your appointment?': 'আপনার সাক্ষাৎ কেমন ছিল?',
   'How was your appointment with': 'আপনার সাক্ষাৎ কেমন ছিল',

@@ -101,14 +101,18 @@ class HomeBanner {
     required this.route,
     required this.action,
     required this.type,
+    required this.url,
+    required this.phone,
   });
 
   final String title;
   final String subtitle;
   final String imageUrl;
   final String route;
-  final String action;
+  final String action; // module | url | call
   final String type;
+  final String url; // external link (action == url)
+  final String phone; // dial number (action == call)
 
   factory HomeBanner.fromMap(Map<String, dynamic> j) => HomeBanner(
         title: _str(j['title']),
@@ -117,6 +121,8 @@ class HomeBanner {
         route: _str(j['route']),
         action: _str(j['action']),
         type: _str(j['type']),
+        url: _str(j['url']),
+        phone: _str(j['phone']),
       );
 
   static List<HomeBanner> listFromResponse(dynamic src) {

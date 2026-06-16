@@ -59,7 +59,7 @@ const Map<String, String> commonBn = {
   'Accepted': 'গৃহীত',
   'Rejected': 'প্রত্যাখ্যাত',
   'Confirmed': 'নিশ্চিত',
-  'Verified': 'যাচাইকৃত',
+  'Verified': 'ভেরিফাইড',
   'Available': 'উপলব্ধ',
 
   // ── Common labels ──

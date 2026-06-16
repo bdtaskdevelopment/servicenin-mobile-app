@@ -3,7 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../../core/values/app_colors.dart';
+import '../../../core/values/app_url.dart';
 import '../../../global_widget/custom_app_bar.dart';
+import '../../../global_widget/invoice_actions.dart';
 import '../../../global_widget/sn_shimmer.dart';
 import '../controllers/ambulance_controller.dart';
 import '../widgets/ambulance_widgets.dart';
@@ -147,8 +149,23 @@ class _BookingsList extends StatelessWidget {
                 delay: Duration(milliseconds: 70 * e.key),
                 child: Padding(
                   padding: const EdgeInsets.only(bottom: 12),
-                  child: BookingCard(
-                      booking: e.value, onTap: () => con.trackBooking(e.value)),
+                  child: Column(
+                    children: [
+                      BookingCard(
+                          booking: e.value,
+                          onTap: () => con.trackBooking(e.value)),
+                      if (e.value.id.isNotEmpty) ...[
+                        const SizedBox(height: 10),
+                        InvoiceActions(
+                          viewPath: ApiURL.ambInvoicePdf(e.value.id),
+                          downloadPath:
+                              ApiURL.ambInvoicePdfDownload(e.value.id),
+                          fileName: 'invoice-${e.value.id}',
+                          accent: const Color(0xFF1E2A4A),
+                        ),
+                      ],
+                    ],
+                  ),
                 ),
               ))
           .toList(),
