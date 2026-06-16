@@ -294,14 +294,21 @@ class _CatTile extends StatelessWidget {
           Icon(cat.icon, color: _teal, size: 26),
           const SizedBox(height: 6),
           Flexible(
-            child: Text(cat.name,
-                textAlign: TextAlign.center,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-                style: const TextStyle(
-                    fontSize: 11,
-                    fontWeight: FontWeight.w600,
-                    color: Color(0xFF334155))),
+            child: LayoutBuilder(
+              builder: (context, c) => FittedBox(
+                fit: BoxFit.scaleDown,
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(maxWidth: c.maxWidth),
+                  child: Text(cat.name,
+                      textAlign: TextAlign.center,
+                      maxLines: 2,
+                      style: const TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w600,
+                          color: Color(0xFF334155))),
+                ),
+              ),
+            ),
           ),
         ],
       ),

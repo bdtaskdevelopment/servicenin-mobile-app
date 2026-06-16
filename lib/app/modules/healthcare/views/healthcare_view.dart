@@ -363,14 +363,21 @@ class _QuickGrid extends StatelessWidget {
                     ],
                   ),
                   const SizedBox(height: 8),
-                  Text(it.$2.tr,
-                      textAlign: TextAlign.center,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w700,
-                          color: Color(0xFF334155))),
+                  // Auto-fit so long labels (e.g. "Appointment") shrink to fit
+                  // on slim devices instead of breaking.
+                  SizedBox(
+                    width: double.infinity,
+                    child: FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: Text(it.$2.tr,
+                          textAlign: TextAlign.center,
+                          maxLines: 1,
+                          style: const TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w700,
+                              color: Color(0xFF334155))),
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -522,16 +529,23 @@ class _DeptTile extends StatelessWidget {
           Icon(dept.icon, color: dept.color, size: 26),
           const SizedBox(height: 6),
           Flexible(
-            child: Text(
-              dept.name,
-              textAlign: TextAlign.center,
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-              style: const TextStyle(
-                fontSize: 11.5,
-                fontWeight: FontWeight.w700,
-                color: Color(0xFF1E293B),
-                height: 1.1,
+            child: LayoutBuilder(
+              builder: (context, c) => FittedBox(
+                fit: BoxFit.scaleDown,
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(maxWidth: c.maxWidth),
+                  child: Text(
+                    dept.name,
+                    textAlign: TextAlign.center,
+                    maxLines: 2,
+                    style: const TextStyle(
+                      fontSize: 11.5,
+                      fontWeight: FontWeight.w700,
+                      color: Color(0xFF1E293B),
+                      height: 1.1,
+                    ),
+                  ),
+                ),
               ),
             ),
           ),
