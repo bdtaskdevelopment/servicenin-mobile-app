@@ -484,10 +484,7 @@ class _PrescriptionsSection extends StatelessWidget {
                             Row(
                               children: [
                                 Expanded(
-                                  child: Text(
-                                      p.diagnosis.isNotEmpty
-                                          ? p.diagnosis
-                                          : 'Prescription'.tr,
+                                  child: Text('Prescription'.tr,
                                       style: const TextStyle(
                                           fontSize: 14,
                                           fontWeight: FontWeight.w800,

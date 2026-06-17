@@ -207,6 +207,14 @@ class FindDoctorView extends GetView<DoctorsController> {
 class _DoctorCard extends StatelessWidget {
   const _DoctorCard({required this.doctor, required this.onTap});
   final HcDoctor doctor;
+
+  Widget _initialsBox() => Container(
+        color: _tile,
+        alignment: Alignment.center,
+        child: Text(doctor.initials,
+            style: const TextStyle(
+                color: _green, fontSize: 16, fontWeight: FontWeight.w800)),
+      );
   final VoidCallback onTap;
 
   @override
@@ -230,17 +238,21 @@ class _DoctorCard extends StatelessWidget {
             Stack(
               clipBehavior: Clip.none,
               children: [
-                Container(
-                  width: 56,
-                  height: 56,
-                  decoration: BoxDecoration(
-                      color: _tile, borderRadius: BorderRadius.circular(14)),
-                  alignment: Alignment.center,
-                  child: Text(doctor.initials,
-                      style: const TextStyle(
-                          color: _green,
-                          fontSize: 16,
-                          fontWeight: FontWeight.w800)),
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(14),
+                  child: SizedBox(
+                    width: 56,
+                    height: 56,
+                    child: doctor.photo.isNotEmpty
+                        ? Image.network(
+                            doctor.photo,
+                            fit: BoxFit.cover,
+                            errorBuilder: (_, _, _) => _initialsBox(),
+                            loadingBuilder: (_, child, progress) =>
+                                progress == null ? child : _initialsBox(),
+                          )
+                        : _initialsBox(),
+                  ),
                 ),
                 const Positioned(
                   right: -2,

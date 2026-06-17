@@ -585,6 +585,8 @@ class _FareCard extends StatelessWidget {
                       _row('Emergency'.tr, '৳${f.emergencyCharge}'),
                     if (f.nightCharge > 0) _row('Night'.tr, '৳${f.nightCharge}'),
                     if (f.taxAmount > 0) _row('Tax'.tr, '৳${f.taxAmount}'),
+                    if (c.vatApplies)
+                      _row('${'VAT'.tr} (${c.vatPercentLabel}%)', c.vatLabel),
                     const Padding(
                       padding: EdgeInsets.symmetric(vertical: 8),
                       child: Divider(height: 1, color: Color(0xFFF1F5F9)),
@@ -599,7 +601,7 @@ class _FareCard extends StatelessWidget {
                                   color: Color(0xFF0F172A),
                                   letterSpacing: 0.4)),
                         ),
-                        Text(f.totalLabel,
+                        Text(c.payableLabel,
                             style: const TextStyle(
                                 fontSize: 22,
                                 fontWeight: FontWeight.w800,
@@ -695,64 +697,47 @@ class _PayList extends StatelessWidget {
       from: 18,
       duration: const Duration(milliseconds: 350),
       child: Column(
-      children: c.methods.map((m) {
+      children: c.methods.where((m) => m.enabled).map((m) {
         final sel = m.key == c.selectedMethod;
-        final disabled = !m.enabled;
         return Padding(
           padding: const EdgeInsets.only(bottom: 10),
           child: GestureDetector(
-            onTap: disabled ? null : () => c.selectMethod(m.key),
-            child: Opacity(
-              opacity: disabled ? 0.55 : 1,
-              child: Container(
-                padding: const EdgeInsets.all(14),
-                decoration: BoxDecoration(
-                  color: AppColors.white,
-                  borderRadius: BorderRadius.circular(14),
-                  border: Border.all(
-                      color: sel ? _navy : const Color(0xFFE2E8F0),
-                      width: sel ? 1.6 : 1.2),
-                ),
-                child: Row(
-                  children: [
-                    Icon(
-                        sel
-                            ? Icons.radio_button_checked
-                            : Icons.radio_button_off,
-                        size: 20,
-                        color: sel ? _navy : const Color(0xFFCBD5E1)),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(m.label,
-                              style: const TextStyle(
-                                  fontSize: 14.5,
-                                  fontWeight: FontWeight.w800,
-                                  color: Color(0xFF0F172A))),
-                          const SizedBox(height: 2),
-                          Text(m.description,
-                              style: const TextStyle(
-                                  fontSize: 12, color: Color(0xFF94A3B8))),
-                        ],
-                      ),
-                    ),
-                    if (disabled)
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 8, vertical: 4),
-                        decoration: BoxDecoration(
-                            color: const Color(0xFFF1F5F9),
-                            borderRadius: BorderRadius.circular(20)),
-                        child: Text('Soon'.tr,
+            onTap: () => c.selectMethod(m.key),
+            child: Container(
+              padding: const EdgeInsets.all(14),
+              decoration: BoxDecoration(
+                color: AppColors.white,
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(
+                    color: sel ? _navy : const Color(0xFFE2E8F0),
+                    width: sel ? 1.6 : 1.2),
+              ),
+              child: Row(
+                children: [
+                  Icon(
+                      sel
+                          ? Icons.radio_button_checked
+                          : Icons.radio_button_off,
+                      size: 20,
+                      color: sel ? _navy : const Color(0xFFCBD5E1)),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(m.label,
                             style: const TextStyle(
-                                fontSize: 10.5,
-                                fontWeight: FontWeight.w700,
-                                color: Color(0xFF94A3B8))),
-                      ),
-                  ],
-                ),
+                                fontSize: 14.5,
+                                fontWeight: FontWeight.w800,
+                                color: Color(0xFF0F172A))),
+                        const SizedBox(height: 2),
+                        Text(m.description,
+                            style: const TextStyle(
+                                fontSize: 12, color: Color(0xFF94A3B8))),
+                      ],
+                    ),
+                  ),
+                ],
               ),
             ),
           ),

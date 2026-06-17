@@ -5,8 +5,10 @@ import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 
 import '../../../core/helpers/snack_helper.dart';
+import '../../../core/helpers/sslcommerz_helper.dart';
 import '../../../data/models/response/healthcare_response.dart';
 import '../../../data/repositories/healthcare.repo.dart';
+import '../../../data/services/settings.service.dart';
 import '../../../routes/app_pages.dart';
 import 'appointments_controller.dart';
 import 'healthcare_controller.dart';
@@ -20,6 +22,14 @@ class BookingController extends GetxController {
   String get doctorId => _doctor?.id ?? '';
   String get doctorName => _doctor?.name ?? 'Doctor';
   String get doctorInitials => _doctor?.initials ?? 'D';
+
+  /// Absolute doctor photo URL — prefers the richer profile response, falls
+  /// back to the value carried over from the list. Empty → initials avatar.
+  String get doctorPhoto {
+    final fromProfile = profile?.doctor.photoUrl ?? '';
+    if (fromProfile.isNotEmpty) return hcImageUrl(fromProfile);
+    return _doctor?.photo ?? '';
+  }
   String get doctorSpecialty => _doctor?.specialty ?? '';
   /// Fee shown on the profile / booking. Free doctors (`is_paid == false`)
   /// always show "Free"; paid doctors show their consultation fee.
@@ -45,6 +55,7 @@ class BookingController extends GetxController {
     venues = [];
     _dates = [];
     _slots = [];
+    _resetPayment();
     update();
     fetchProfile();
   }
@@ -111,6 +122,7 @@ class BookingController extends GetxController {
 
   Future<void> selectVenue(int i) async {
     selectedVenue = i;
+    _resetPayment();
     update();
     await fetchDates();
   }
@@ -144,6 +156,7 @@ class BookingController extends GetxController {
 
   Future<void> selectDate(int i) async {
     selectedDate = i;
+    _resetPayment();
     update();
     await fetchSlots();
   }
@@ -178,6 +191,7 @@ class BookingController extends GetxController {
 
   void selectTime(String label) {
     selectedTime = label;
+    _resetPayment();
     update();
   }
 
@@ -269,18 +283,71 @@ class BookingController extends GetxController {
   String get consultationFee => doctorFee;
   String get platformFee => '৳0';
   String get firstVisitDiscount => '৳0';
-  String get totalPayable => doctorFee;
 
-  int selectedPay = 0; // 0 = Cash at chamber, 1 = bKash
-  void selectPay(int i) {
-    selectedPay = i;
+  /// Numeric consultation fee for paid doctors (0 when the visit is free).
+  int get feeAmount => isPaid ? (profile?.doctor.consultationFee ?? 0) : 0;
+
+  // VAT pulled live from /api/v1/settings (`services_vat_enabled` /
+  // `services_vat_rate`). Added on top of the consultation fee and charged to
+  // the gateway. Falls back to 5% until settings load; 0 when VAT is disabled
+  // server-side or the visit is free.
+  double get _vatFraction => Get.isRegistered<SettingsService>()
+      ? SettingsService.to.vatFraction
+      : 0.05;
+  String get vatPercentLabel => Get.isRegistered<SettingsService>()
+      ? SettingsService.to.vatPercentLabel
+      : '5';
+  bool get vatApplies => feeAmount > 0 && _vatFraction > 0;
+  int get vatAmount => (feeAmount * _vatFraction).round();
+  String get vatLabel => '৳$vatAmount';
+  int get payableAmount => feeAmount + vatAmount;
+
+  String get totalPayable => isPaid ? '৳$payableAmount' : 'Free'.tr;
+
+  // ── Payment methods (GET /api/v1/healthcare/payment-methods) ─────────
+  // Driven by the admin gateway toggles, so the screen shows exactly what's
+  // enabled (e.g. cash + online) instead of hardcoded options.
+  List<HcPaymentMethod> methods = [];
+  String selectedMethodKey = '';
+  bool loadingMethods = false;
+
+  /// Only enabled gateways — disabled ones are never shown.
+  List<HcPaymentMethod> get enabledMethods =>
+      methods.where((m) => m.enabled).toList();
+
+  void selectMethod(String key) {
+    selectedMethodKey = key;
+    _resetPayment();
     update();
+  }
+
+  Future<void> _loadMethods() async {
+    loadingMethods = true;
+    update();
+    try {
+      methods = await _repo.fetchPaymentMethods();
+      final def = await _repo.fetchDefaultPaymentMethod();
+      selectedMethodKey = def.isNotEmpty
+          ? def
+          : (methods.firstWhereOrNull((m) => m.enabled)?.key ?? '');
+    } catch (_) {
+    } finally {
+      loadingMethods = false;
+      update();
+    }
   }
 
   // ── Booking ─────────────────────────────────────────────────────────
   HcAppointment? bookedAppointment;
   bool booking = false;
   String get token => '${bookedAppointment?.serialNo ?? ''}';
+
+  /// A successful SSLCommerz payment captured for the current appointment.
+  /// Reused on retry so a failed booking POST never charges the same visit
+  /// twice; cleared when the doctor/slot/payment selection changes or a
+  /// booking succeeds.
+  SslcResult? _paidPayment;
+  void _resetPayment() => _paidPayment = null;
 
   Future<void> _book() async {
     final vid = _venueId;
@@ -301,12 +368,39 @@ class BookingController extends GetxController {
         'scheduled_at': scheduledAt,
         'type': 'in_person',
         'reason': reasonCtrl.text.trim(),
-        'payment_method': selectedPay == 1 ? 'bkash' : 'cash',
+        'payment_method':
+            selectedMethodKey.isNotEmpty ? selectedMethodKey : 'cash',
         if (_familyMemberId != null && _familyMemberId!.isNotEmpty)
           'family_member_id': _familyMemberId,
         if (attachmentUrl.isNotEmpty) 'attachment_url': attachmentUrl,
       };
+      // Paid doctor + the online option selected → SSLCommerz: initiate →
+      // checkout → attach the gateway's val_id + tran_id to the payload. Reuse
+      // an already successful payment so a retry never charges the same visit
+      // twice.
+      if (isPaid && SslcommerzPay.isOnline(selectedMethodKey) && feeAmount > 0) {
+        var pay = _paidPayment;
+        if (pay == null || !pay.success) {
+          // Charge fee + VAT (matches the bill shown on the review screen).
+          pay = await SslcommerzPay.checkout(
+            amount: payableAmount.toDouble(),
+            productName: doctorName,
+            category: 'healthcare',
+          );
+          if (!pay.success) {
+            SnackHelper.error('পেমেন্ট সম্পন্ন হয়নি');
+            booking = false;
+            update();
+            return;
+          }
+          _paidPayment = pay;
+        }
+        payload['payment_method'] = 'sslcommerz';
+        payload['val_id'] = pay.valId;
+        payload['tran_id'] = pay.tranId;
+      }
       bookedAppointment = await _repo.bookAppointment(payload);
+      _paidPayment = null; // booking succeeded — payment consumed
       Get.toNamed(Routes.HC_CONFIRMED);
     } catch (e) {
       SnackHelper.error(e.toString().replaceFirst('Exception: ', ''));
@@ -320,6 +414,7 @@ class BookingController extends GetxController {
   void bookAppointment() {
     if (_dates.isEmpty) fetchDates();
     if (patients.isEmpty) _hc.fetchFamily();
+    if (methods.isEmpty) _loadMethods();
     Get.toNamed(Routes.HC_SLOT);
   }
 

@@ -260,7 +260,7 @@ const Map<String, String> groupBBn = {
   'COMMENT (OPTIONAL)': 'মন্তব্য (ঐচ্ছিক)',
   'Tell others about your experience…':
       'আপনার অভিজ্ঞতা সম্পর্কে অন্যদের জানান…',
-  'Submit rating': 'রেটিং জমা দিন',
+  'Submit rating': 'রেটিং দিন',
   'Poor': 'খারাপ',
   'Fair': 'মোটামুটি',
   'Good': 'ভালো',

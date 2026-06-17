@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../../core/values/app_colors.dart';
+import '../../../global_widget/sn_shimmer.dart';
 import '../controllers/booking_controller.dart';
 import '../widgets/booking_stepper.dart';
 
@@ -115,6 +116,12 @@ class ReviewConfirmView extends GetView<BookingController> {
                             _fee('Consultation fee'.tr, con.consultationFee, false),
                             const Divider(height: 1, color: Color(0xFFF1F5F9)),
                             _fee('Platform fee'.tr, con.platformFee, false),
+                            if (con.vatApplies) ...[
+                              const Divider(
+                                  height: 1, color: Color(0xFFF1F5F9)),
+                              _fee('${'VAT'.tr} (${con.vatPercentLabel}%)',
+                                  con.vatLabel, false),
+                            ],
                             const Divider(height: 1, color: Color(0xFFF1F5F9)),
                             _fee('First-visit discount'.tr,
                                 con.firstVisitDiscount, true),
@@ -146,38 +153,29 @@ class ReviewConfirmView extends GetView<BookingController> {
                         ),
                       ),
                       const SizedBox(height: 18),
-                      Row(
-                        children: [
-                          _Label('PAYMENT METHOD'.tr),
-                          const SizedBox(width: 8),
-                          const _V2Badge(),
-                        ],
-                      ),
-                      const SizedBox(height: 6),
-                      Text(
-                          'Current API books directly (no payment field) — pay at chamber. Online payment is planned for v2.'.tr,
-                          style: const TextStyle(
-                              fontSize: 12,
-                              color: Color(0xFF94A3B8),
-                              height: 1.4)),
+                      _Label('PAYMENT METHOD'.tr),
                       const SizedBox(height: 12),
-                      Row(
-                        children: [
-                          Expanded(
-                              child: _PayCard(
-                                  icon: Icons.bolt_rounded,
-                                  label: 'Cash at chamber'.tr,
-                                  selected: con.selectedPay == 0,
-                                  onTap: () => con.selectPay(0))),
-                          const SizedBox(width: 12),
-                          Expanded(
-                              child: _PayCard(
-                                  icon: Icons.water_drop_rounded,
-                                  label: 'bKash',
-                                  selected: con.selectedPay == 1,
-                                  onTap: () => con.selectPay(1))),
-                        ],
-                      ),
+                      if (con.loadingMethods && con.methods.isEmpty)
+                        const SnListSkeleton(
+                          count: 2,
+                          padding: EdgeInsets.zero,
+                          showTrailing: false,
+                        )
+                      else
+                        Column(
+                          children: con.enabledMethods
+                              .map((m) => Padding(
+                                    padding: const EdgeInsets.only(bottom: 10),
+                                    child: _PayCard(
+                                      icon: _hcPayIcon(m.key),
+                                      label: m.label,
+                                      description: m.description,
+                                      selected: con.selectedMethodKey == m.key,
+                                      onTap: () => con.selectMethod(m.key),
+                                    ),
+                                  ))
+                              .toList(),
+                        ),
                     ],
                   ),
                 ),
@@ -205,18 +203,31 @@ class ReviewConfirmView extends GetView<BookingController> {
                         child: SizedBox(
                           height: 54,
                           child: ElevatedButton(
-                            onPressed: con.confirmBooking,
+                            onPressed:
+                                con.booking ? null : con.confirmBooking,
                             style: ElevatedButton.styleFrom(
                               backgroundColor: _green,
                               foregroundColor: Colors.white,
+                              disabledBackgroundColor:
+                                  _green.withValues(alpha: 0.6),
+                              disabledForegroundColor: Colors.white,
                               elevation: 0,
                               shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(14)),
                             ),
-                            child: Text('Confirm booking'.tr,
-                                style: const TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w800)),
+                            child: con.booking
+                                ? const SizedBox(
+                                    width: 22,
+                                    height: 22,
+                                    child: CircularProgressIndicator(
+                                        strokeWidth: 2.4,
+                                        valueColor: AlwaysStoppedAnimation(
+                                            Colors.white)),
+                                  )
+                                : Text('Confirm booking'.tr,
+                                    style: const TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w800)),
                           ),
                         ),
                       ),
@@ -277,21 +288,19 @@ class _Label extends StatelessWidget {
           letterSpacing: 0.6));
 }
 
-class _V2Badge extends StatelessWidget {
-  const _V2Badge();
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-      decoration: BoxDecoration(
-          color: const Color(0xFFFEF3C7),
-          borderRadius: BorderRadius.circular(20)),
-      child: const Text('● v2',
-          style: TextStyle(
-              fontSize: 10.5,
-              fontWeight: FontWeight.w700,
-              color: Color(0xFFB45309))),
-    );
+/// Icon for a payment method, chosen from its server key.
+IconData _hcPayIcon(String key) {
+  switch (key) {
+    case 'cash':
+      return Icons.payments_outlined;
+    case 'sslcommerz':
+    case 'card':
+      return Icons.credit_card_rounded;
+    case 'bkash':
+    case 'nagad':
+      return Icons.account_balance_wallet_outlined;
+    default:
+      return Icons.payment_rounded;
   }
 }
 
@@ -300,9 +309,11 @@ class _PayCard extends StatelessWidget {
       {required this.icon,
       required this.label,
       required this.selected,
-      required this.onTap});
+      required this.onTap,
+      this.description = ''});
   final IconData icon;
   final String label;
+  final String description;
   final bool selected;
   final VoidCallback onTap;
   @override
@@ -310,7 +321,7 @@ class _PayCard extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 16),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
         decoration: BoxDecoration(
           color: AppColors.white,
           borderRadius: BorderRadius.circular(14),
@@ -320,14 +331,25 @@ class _PayCard extends StatelessWidget {
         ),
         child: Row(
           children: [
-            Icon(icon, size: 20, color: const Color(0xFF334155)),
-            const SizedBox(width: 8),
+            Icon(icon, size: 20, color: selected ? _green : const Color(0xFF334155)),
+            const SizedBox(width: 10),
             Expanded(
-              child: Text(label,
-                  style: const TextStyle(
-                      fontSize: 13.5,
-                      fontWeight: FontWeight.w700,
-                      color: Color(0xFF0F172A))),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(label,
+                      style: const TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w800,
+                          color: Color(0xFF0F172A))),
+                  if (description.isNotEmpty) ...[
+                    const SizedBox(height: 2),
+                    Text(description,
+                        style: const TextStyle(
+                            fontSize: 12, color: Color(0xFF94A3B8))),
+                  ],
+                ],
+              ),
             ),
             if (selected)
               const Icon(Icons.check_circle, size: 18, color: _green),

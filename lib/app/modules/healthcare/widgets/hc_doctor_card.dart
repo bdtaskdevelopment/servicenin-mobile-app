@@ -11,6 +11,16 @@ class HcDoctorCard extends StatelessWidget {
   const HcDoctorCard({super.key, required this.doctor});
   final HcDoctor doctor;
 
+  Widget _initialsBox() => Container(
+        color: _tile,
+        alignment: Alignment.center,
+        child: Text(doctor.initials,
+            style: TextStyle(
+                color: doctor.color,
+                fontSize: 16,
+                fontWeight: FontWeight.w800)),
+      );
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -25,17 +35,21 @@ class HcDoctorCard extends StatelessWidget {
           Stack(
             clipBehavior: Clip.none,
             children: [
-              Container(
-                width: 56,
-                height: 56,
-                decoration: BoxDecoration(
-                    color: _tile, borderRadius: BorderRadius.circular(14)),
-                alignment: Alignment.center,
-                child: Text(doctor.initials,
-                    style: TextStyle(
-                        color: doctor.color,
-                        fontSize: 16,
-                        fontWeight: FontWeight.w800)),
+              ClipRRect(
+                borderRadius: BorderRadius.circular(14),
+                child: SizedBox(
+                  width: 56,
+                  height: 56,
+                  child: doctor.photo.isNotEmpty
+                      ? Image.network(
+                          doctor.photo,
+                          fit: BoxFit.cover,
+                          errorBuilder: (_, _, _) => _initialsBox(),
+                          loadingBuilder: (_, child, progress) =>
+                              progress == null ? child : _initialsBox(),
+                        )
+                      : _initialsBox(),
+                ),
               ),
               const Positioned(
                 right: -2,

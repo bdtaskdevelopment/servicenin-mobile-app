@@ -671,3 +671,42 @@ class Prescription {
         .toList();
   }
 }
+
+// ── Payment method ──────────────────────────────────────────────────
+/// A payment option from `GET /api/v1/healthcare/payment-methods`. The backend
+/// advertises only methods whose admin gateway toggle is on, so the booking
+/// screen reflects the live settings (e.g. cash + online, bKash hidden).
+class HcPaymentMethod {
+  HcPaymentMethod({
+    required this.key,
+    required this.label,
+    required this.description,
+    required this.enabled,
+  });
+  final String key;
+  final String label;
+  final String description;
+  final bool enabled;
+
+  factory HcPaymentMethod.fromMap(Map<String, dynamic> j) => HcPaymentMethod(
+        key: _str(j['key']),
+        label: _str(j['label']),
+        description: _str(j['description']),
+        enabled: j['enabled'] == true,
+      );
+
+  static List<HcPaymentMethod> listFromResponse(dynamic src) {
+    final d = _data(src);
+    final list =
+        d is Map && d['methods'] is List ? d['methods'] as List : const [];
+    return list
+        .whereType<Map>()
+        .map((e) => HcPaymentMethod.fromMap(e.cast<String, dynamic>()))
+        .toList();
+  }
+
+  static String defaultKey(dynamic src) {
+    final d = _data(src);
+    return d is Map ? _str(d['default']) : '';
+  }
+}

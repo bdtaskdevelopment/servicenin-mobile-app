@@ -332,11 +332,13 @@ class PhysioController extends GetxController {
     loadingPayments = true;
     update();
     try {
-      paymentMethods = await _repo.fetchPaymentMethods();
-      final def = await _repo.fetchDefaultPaymentMethod();
-      selectedPaymentKey = def.isNotEmpty
-          ? def
-          : (paymentMethods.firstWhereOrNull((m) => m.enabled)?.key ?? '');
+      final all = await _repo.fetchPaymentMethods();
+      // Physio takes cash only — no online payment.
+      paymentMethods = all
+          .where((m) => m.enabled && m.key.toLowerCase() == 'cash')
+          .toList();
+      selectedPaymentKey =
+          paymentMethods.isNotEmpty ? paymentMethods.first.key : 'cash';
     } catch (_) {
     } finally {
       loadingPayments = false;

@@ -279,53 +279,43 @@ class PhysioBookView extends GetView<PhysioController> {
                         from: 18,
                         duration: const Duration(milliseconds: 350),
                         child: Column(
-                        children: con.paymentMethods.map((m) {
+                        children:
+                            con.paymentMethods.where((m) => m.enabled).map((m) {
                           final sel = con.selectedPaymentKey == m.key;
-                          final disabled = !m.enabled;
                           return Padding(
                             padding: const EdgeInsets.only(bottom: 10),
                             child: GestureDetector(
-                              onTap: disabled
-                                  ? null
-                                  : () => con.selectPayment(m.key),
-                              child: Opacity(
-                                opacity: disabled ? 0.5 : 1,
-                                child: Container(
-                                  padding: const EdgeInsets.all(14),
-                                  decoration: BoxDecoration(
-                                    color: AppColors.white,
-                                    borderRadius: BorderRadius.circular(12),
-                                    border: Border.all(
+                              onTap: () => con.selectPayment(m.key),
+                              child: Container(
+                                padding: const EdgeInsets.all(14),
+                                decoration: BoxDecoration(
+                                  color: AppColors.white,
+                                  borderRadius: BorderRadius.circular(12),
+                                  border: Border.all(
+                                      color: sel
+                                          ? _brown
+                                          : const Color(0xFFE2E8F0),
+                                      width: sel ? 1.6 : 1.2),
+                                ),
+                                child: Row(
+                                  children: [
+                                    Icon(
+                                        sel
+                                            ? Icons.radio_button_checked
+                                            : Icons.radio_button_off,
+                                        size: 20,
                                         color: sel
                                             ? _brown
-                                            : const Color(0xFFE2E8F0),
-                                        width: sel ? 1.6 : 1.2),
-                                  ),
-                                  child: Row(
-                                    children: [
-                                      Icon(
-                                          sel
-                                              ? Icons.radio_button_checked
-                                              : Icons.radio_button_off,
-                                          size: 20,
-                                          color: sel
-                                              ? _brown
-                                              : const Color(0xFFCBD5E1)),
-                                      const SizedBox(width: 10),
-                                      Expanded(
-                                        child: Text(m.label,
-                                            style: const TextStyle(
-                                                fontSize: 14,
-                                                fontWeight: FontWeight.w700,
-                                                color: Color(0xFF0F172A))),
-                                      ),
-                                      if (disabled)
-                                        Text('Soon'.tr,
-                                            style: const TextStyle(
-                                                fontSize: 11,
-                                                color: Color(0xFF94A3B8))),
-                                    ],
-                                  ),
+                                            : const Color(0xFFCBD5E1)),
+                                    const SizedBox(width: 10),
+                                    Expanded(
+                                      child: Text(m.label,
+                                          style: const TextStyle(
+                                              fontSize: 14,
+                                              fontWeight: FontWeight.w700,
+                                              color: Color(0xFF0F172A))),
+                                    ),
+                                  ],
                                 ),
                               ),
                             ),

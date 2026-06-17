@@ -15,7 +15,17 @@ class AmbulanceRepository {
   /// so the exact API `message` is preserved on both success and error.
   dynamic _payload(dynamic res) {
     final body = res.body;
-    if (body is Map) return body;
+    if (body is Map) {
+      // Reject backend errors (HTTP 4xx/5xx or {success:false}) instead of
+      // parsing the error body as a successful result.
+      final code = res.statusCode;
+      final failed = body['success'] == false || (code is int && code >= 400);
+      if (failed) {
+        final msg = (body['message'] ?? '').toString().trim();
+        throw Exception(msg.isNotEmpty ? msg : 'অনুরোধটি সম্পন্ন করা যায়নি');
+      }
+      return body;
+    }
     final raw = res.bodyString;
     if (raw != null && raw.toString().trim().isNotEmpty) return raw;
     throw Exception('সংযোগে সমস্যা — আবার চেষ্টা করুন');

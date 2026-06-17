@@ -334,7 +334,7 @@ class _QuickGrid extends StatelessWidget {
             child: GestureDetector(
               onTap: () => _open(it.$2),
               child: Container(
-              padding: const EdgeInsets.symmetric(vertical: 14),
+              padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 6),
               decoration: BoxDecoration(
                 color: AppColors.white,
                 borderRadius: BorderRadius.circular(14),
@@ -363,19 +363,22 @@ class _QuickGrid extends StatelessWidget {
                     ],
                   ),
                   const SizedBox(height: 8),
-                  // Auto-fit so long labels (e.g. "Appointment") shrink to fit
-                  // on slim devices instead of breaking.
-                  SizedBox(
-                    width: double.infinity,
-                    child: FittedBox(
-                      fit: BoxFit.scaleDown,
-                      child: Text(it.$2.tr,
-                          textAlign: TextAlign.center,
-                          maxLines: 1,
-                          style: const TextStyle(
-                              fontSize: 12,
-                              fontWeight: FontWeight.w700,
-                              color: Color(0xFF334155))),
+                  // Auto-fit so long labels (e.g. "Appointment" / "পরিবার")
+                  // shrink to fit on slim devices instead of truncating.
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 2),
+                    child: SizedBox(
+                      width: double.infinity,
+                      child: FittedBox(
+                        fit: BoxFit.scaleDown,
+                        child: Text(it.$2.tr,
+                            textAlign: TextAlign.center,
+                            maxLines: 1,
+                            style: const TextStyle(
+                                fontSize: 11,
+                                fontWeight: FontWeight.w700,
+                                color: Color(0xFF334155))),
+                      ),
                     ),
                   ),
                 ],

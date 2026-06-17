@@ -1,6 +1,9 @@
 class ApiURL {
   ApiURL._();
 
+  //===== App settings (VAT, payment toggles, SSLCommerz creds, branding)
+  static final String settings = 'api/v1/settings';
+
   //===== authentication part apis
   static final String login = '/login';
   static final String logout = '/logout';
@@ -72,6 +75,8 @@ class ApiURL {
       'api/v1/healthcare/doctors/$id/schedule-dates?venue_id=$venueId';
   static String hcTimeSlots(String id, String venueId, String date) =>
       'api/v1/healthcare/doctors/$id/time-slots?venue_id=$venueId&date=$date';
+  static final String hcPaymentMethods =
+      'api/v1/healthcare/payment-methods';
   static final String hcFamily = 'api/v1/healthcare/family';
   static final String hcDocumentsUpload =
       'api/v1/healthcare/documents/upload';
@@ -114,6 +119,10 @@ class ApiURL {
       'api/v1/services/bookings/$id/dispute';
   static String serviceBookingChat(String id) =>
       'api/v1/services/bookings/$id/chat';
+
+  //===== Payments (SSLCommerz) — create a checkout session
+  static final String paymentsSslcommerzInitiate =
+      'api/v1/payments/sslcommerz/initiate';
 
   //===== Invoice PDFs — view (inline) + download (attachment)
   static String hsInvoicePdf(String id) =>

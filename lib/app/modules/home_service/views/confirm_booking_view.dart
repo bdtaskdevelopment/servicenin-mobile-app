@@ -48,27 +48,71 @@ class ConfirmBookingView extends GetView<HomeServiceController> {
                       // Cart summary
                       ...con.cartItems.map((s) => Container(
                             margin: const EdgeInsets.only(bottom: 10),
-                            padding: const EdgeInsets.all(14),
+                            padding:
+                                const EdgeInsets.fromLTRB(14, 6, 6, 6),
                             decoration: BoxDecoration(
                                 color: AppColors.white,
                                 borderRadius: BorderRadius.circular(14)),
                             child: Row(
-                              mainAxisAlignment:
-                                  MainAxisAlignment.spaceBetween,
                               children: [
-                                Text('${s.name} ×${con.qtyOf(s)}',
-                                    style: const TextStyle(
-                                        fontSize: 14.5,
-                                        fontWeight: FontWeight.w700,
-                                        color: Color(0xFF0F172A))),
+                                Expanded(
+                                  child: Text('${s.name} ×${con.qtyOf(s)}',
+                                      maxLines: 2,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: const TextStyle(
+                                          fontSize: 14.5,
+                                          fontWeight: FontWeight.w700,
+                                          color: Color(0xFF0F172A))),
+                                ),
+                                const SizedBox(width: 8),
                                 Text('৳${s.price * con.qtyOf(s)}',
                                     style: const TextStyle(
                                         fontSize: 15,
                                         fontWeight: FontWeight.w800,
                                         color: Color(0xFF0F172A))),
+                                IconButton(
+                                  splashRadius: 20,
+                                  visualDensity: VisualDensity.compact,
+                                  tooltip: 'Remove'.tr,
+                                  onPressed: () => con.removeItem(s),
+                                  icon: const Icon(
+                                      Icons.delete_outline_rounded,
+                                      size: 22,
+                                      color: Color(0xFFE23744)),
+                                ),
                               ],
                             ),
                           )),
+                      // Bill: subtotal + 5% VAT = payable
+                      Container(
+                        padding: const EdgeInsets.all(14),
+                        decoration: BoxDecoration(
+                            color: AppColors.white,
+                            borderRadius: BorderRadius.circular(14)),
+                        child: Column(
+                          children: [
+                            _BillRow(
+                                label: 'Subtotal'.tr,
+                                value: '৳${con.totalPrice}'),
+                            if (con.vatApplies) ...[
+                              const SizedBox(height: 8),
+                              _BillRow(
+                                  label:
+                                      '${'VAT'.tr} (${con.vatPercentLabel}%)',
+                                  value: '৳${con.cartVat}'),
+                            ],
+                            const Padding(
+                              padding: EdgeInsets.symmetric(vertical: 10),
+                              child: Divider(
+                                  height: 1, color: Color(0xFFEDEFF2)),
+                            ),
+                            _BillRow(
+                                label: 'Total'.tr,
+                                value: '৳${con.cartPayable}',
+                                emphasize: true),
+                          ],
+                        ),
+                      ),
                       const SizedBox(height: 10),
                       _Label('SERVICE ADDRESS'.tr),
                       const SizedBox(height: 8),
@@ -346,10 +390,10 @@ class ConfirmBookingView extends GetView<HomeServiceController> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Text('Total - pay after'.tr,
+                          Text('Total (incl. VAT)'.tr,
                               style: const TextStyle(
                                   fontSize: 11.5, color: Color(0xFF94A3B8))),
-                          Text('৳${con.totalPrice}',
+                          Text('৳${con.cartPayable}',
                               style: const TextStyle(
                                   fontSize: 18,
                                   fontWeight: FontWeight.w800,
@@ -391,6 +435,35 @@ class ConfirmBookingView extends GetView<HomeServiceController> {
           },
         ),
       ),
+    );
+  }
+}
+
+class _BillRow extends StatelessWidget {
+  const _BillRow(
+      {required this.label, required this.value, this.emphasize = false});
+  final String label;
+  final String value;
+  final bool emphasize;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(label,
+            style: TextStyle(
+                fontSize: emphasize ? 15 : 13.5,
+                fontWeight: emphasize ? FontWeight.w800 : FontWeight.w600,
+                color: emphasize
+                    ? const Color(0xFF0F172A)
+                    : const Color(0xFF64748B))),
+        Text(value,
+            style: TextStyle(
+                fontSize: emphasize ? 16 : 14,
+                fontWeight: FontWeight.w800,
+                color: const Color(0xFF0F172A))),
+      ],
     );
   }
 }

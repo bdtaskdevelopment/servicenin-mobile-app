@@ -10,6 +10,15 @@ import '../controllers/booking_controller.dart';
 const _green = Color(0xFF0F7A52);
 const _tile = Color(0xFFD9F7E6);
 
+/// Initials avatar shown while the photo loads, on error, or when none is set.
+Widget _profileInitials(String initials) => Container(
+      color: _tile,
+      alignment: Alignment.center,
+      child: Text(initials,
+          style: const TextStyle(
+              color: _green, fontSize: 20, fontWeight: FontWeight.w800)),
+    );
+
 class DoctorProfileView extends GetView<BookingController> {
   const DoctorProfileView({super.key});
 
@@ -58,18 +67,25 @@ class DoctorProfileView extends GetView<BookingController> {
                       Stack(
                         clipBehavior: Clip.none,
                         children: [
-                          Container(
-                            width: 64,
-                            height: 64,
-                            decoration: BoxDecoration(
-                                color: _tile,
-                                borderRadius: BorderRadius.circular(16)),
-                            alignment: Alignment.center,
-                            child: Text(con.doctorInitials,
-                                style: const TextStyle(
-                                    color: _green,
-                                    fontSize: 20,
-                                    fontWeight: FontWeight.w800)),
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(16),
+                            child: SizedBox(
+                              width: 64,
+                              height: 64,
+                              child: con.doctorPhoto.isNotEmpty
+                                  ? Image.network(
+                                      con.doctorPhoto,
+                                      fit: BoxFit.cover,
+                                      errorBuilder: (_, _, _) =>
+                                          _profileInitials(con.doctorInitials),
+                                      loadingBuilder: (_, child, progress) =>
+                                          progress == null
+                                              ? child
+                                              : _profileInitials(
+                                                  con.doctorInitials),
+                                    )
+                                  : _profileInitials(con.doctorInitials),
+                            ),
                           ),
                           const Positioned(
                             right: -2,

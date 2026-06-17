@@ -11,6 +11,11 @@ const Map<String, String> extraBn = {
   'Log in': 'লগইন করুন',
   'Login': 'লগইন',
 
+  // ── Home service: bill summary ──────────────────────────────
+  'Subtotal': 'সাবটোটাল',
+  'VAT': 'ভ্যাট',
+  'Total (incl. VAT)': 'মোট (ভ্যাটসহ)',
+
   // ── Home service booking errors ─────────────────────────────
   'No services selected': 'কোনো সার্ভিস নির্বাচন করা হয়নি',
   'Select a date & time slot': 'তারিখ ও সময় নির্বাচন করুন',
@@ -124,7 +129,7 @@ const Map<String, String> extraBn = {
   'Rate your visit': 'আপনার সেবার মূল্যায়ন দিন',
   'How was your appointment?': 'আপনার সাক্ষাৎ কেমন ছিল?',
   'How was your appointment with': 'আপনার সাক্ষাৎ কেমন ছিল',
-  'Submit review': 'মতামত জমা দিন',
+  'Submit review': 'রেটিং দিন',
 
   // ── Common labels (uppercase) ───────────────────────────────
   'AMBULANCE': 'অ্যাম্বুলেন্স',

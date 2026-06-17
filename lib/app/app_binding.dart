@@ -21,6 +21,7 @@ import 'data/providers/auth.provider.dart';
 import 'data/providers/blood.provider.dart';
 import 'data/providers/info.provider.dart';
 import 'data/providers/profile.provider.dart';
+import 'data/providers/payment.provider.dart';
 import 'data/repositories/ambulance.repo.dart';
 import 'data/repositories/healthcare.repo.dart';
 import 'data/repositories/service.repo.dart';
@@ -36,6 +37,8 @@ import 'data/repositories/auth.repo.dart';
 import 'data/repositories/blood.repo.dart';
 import 'data/repositories/info.repo.dart';
 import 'data/repositories/profile.repo.dart';
+import 'data/repositories/payment.repo.dart';
+import 'data/services/settings.service.dart';
 import 'data/services/storage.service.dart';
 
 class AppBinding extends Bindings {
@@ -140,6 +143,16 @@ class AppDependencyInjection {
       () => InfoRepository(provider: Get.find()),
       fenix: true,
     );
+
+    Get.lazyPut<PaymentProvider>(() => PaymentProvider(), fenix: true);
+    Get.lazyPut<PaymentRepository>(
+      () => PaymentRepository(provider: Get.find()),
+      fenix: true,
+    );
+
+    // Server-driven settings (VAT, payment toggles, SSLCommerz creds). Permanent
+    // so it's available everywhere; fetches once on init.
+    Get.put<SettingsService>(SettingsService(), permanent: true);
 
     Get.lazyPut<AppService>(() => AppService());
 

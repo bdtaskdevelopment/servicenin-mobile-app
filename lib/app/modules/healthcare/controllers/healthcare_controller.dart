@@ -2,10 +2,23 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../../core/helpers/snack_helper.dart';
+import '../../../core/values/app_config.dart';
 import '../../../data/models/response/healthcare_response.dart';
 import '../../../data/repositories/healthcare.repo.dart';
 import '../../../routes/app_pages.dart';
 import 'doctors_controller.dart';
+
+/// Build an absolute image URL from a doctor `photo_url`, which may already be
+/// absolute (`https://…`) or a server-relative path (`/uploads/…`). Returns ''
+/// when there's no photo, so callers fall back to the initials avatar.
+String hcImageUrl(String path) {
+  if (path.isEmpty) return '';
+  if (path.startsWith('http')) return path;
+  final base = AppConfig.baseUrl.endsWith('/')
+      ? AppConfig.baseUrl.substring(0, AppConfig.baseUrl.length - 1)
+      : AppConfig.baseUrl;
+  return path.startsWith('/') ? '$base$path' : '$base/$path';
+}
 
 /// Icon + accent colour for a department, chosen from its specialization name.
 (IconData, Color) hcDeptStyle(String spec) {
@@ -71,6 +84,7 @@ class HcDoctor {
     this.video = false,
     this.id = '',
     this.isPaid = true,
+    this.photo = '',
   });
 
   final String initials;
@@ -86,6 +100,9 @@ class HcDoctor {
   final String id;
   final bool isPaid;
 
+  /// Absolute doctor photo URL (empty → show the initials avatar).
+  final String photo;
+
   factory HcDoctor.fromApi(Doctor d) => HcDoctor(
         id: d.id,
         initials: d.initials,
@@ -100,6 +117,7 @@ class HcDoctor {
         slot: d.isAvailable ? 'Available today' : 'By schedule',
         color: const Color(0xFF16A34A),
         isPaid: d.isPaid,
+        photo: hcImageUrl(d.photoUrl),
       );
 }
 

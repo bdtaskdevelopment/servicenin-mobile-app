@@ -5,6 +5,7 @@ import '../../../core/helpers/snack_helper.dart';
 import '../../../core/helpers/sslcommerz_helper.dart';
 import '../../../data/models/response/service_response.dart';
 import '../../../data/repositories/service.repo.dart';
+import '../../../data/services/settings.service.dart';
 import '../../../routes/app_pages.dart';
 
 /// Icon for a service category, chosen from its (English) name.
@@ -224,6 +225,7 @@ class HomeServiceController extends GetxController {
   void add(HsServiceItem s) {
     _byId[s.id] = s;
     _cart[s.id] = (_cart[s.id] ?? 0) + 1;
+    _paidPayment = null; // cart (amount) changed → any prior payment is stale
     update();
   }
 
@@ -234,7 +236,20 @@ class HomeServiceController extends GetxController {
     } else {
       _cart[s.id] = q;
     }
+    _paidPayment = null; // cart (amount) changed → any prior payment is stale
     update();
+  }
+
+  /// Remove a service from the cart entirely (the delete button on the confirm
+  /// page). If nothing is left, returns to the previous screen.
+  void removeItem(HsServiceItem s) {
+    _cart.remove(s.id);
+    _paidPayment = null; // cart (amount) changed → any prior payment is stale
+    update();
+    if (_cart.isEmpty) {
+      SnackHelper.error('কার্টে কোনো সার্ভিস নেই', title: _moduleTitle);
+      Get.back();
+    }
   }
 
   int get totalItems => _cart.values.fold(0, (a, b) => a + b);
@@ -314,9 +329,23 @@ class HomeServiceController extends GetxController {
   }
 
   int get subtotalAmount => lastBooking?.subtotal ?? totalPrice;
-  int get vat => lastBooking?.vatAmount ?? (totalPrice * 0.05).round();
-  int get totalPaid => lastBooking?.amount ?? (totalPrice + vat);
+  int get vat => lastBooking?.vatAmount ?? cartVat;
+  int get totalPaid => lastBooking?.amount ?? cartPayable;
   String get bookingId => lastBooking?.invoiceNo ?? '—';
+
+  // VAT applied to the live cart. The rate comes from /api/v1/settings
+  // (`services_vat_enabled` / `services_vat_rate`) and matches what the backend
+  // adds on /services/book, so the charged amount is never short. Falls back to
+  // 5% until settings load.
+  double get _vatFraction => Get.isRegistered<SettingsService>()
+      ? SettingsService.to.vatFraction
+      : 0.05;
+  String get vatPercentLabel => Get.isRegistered<SettingsService>()
+      ? SettingsService.to.vatPercentLabel
+      : '5';
+  bool get vatApplies => _vatFraction > 0;
+  int get cartVat => (totalPrice * _vatFraction).round();
+  int get cartPayable => totalPrice + cartVat;
 
   // Provider details are not in these endpoints yet (coming later).
   String get techName => 'Service provider';
@@ -327,6 +356,12 @@ class HomeServiceController extends GetxController {
   // ── Booking ─────────────────────────────────────────────────────────
   ServiceBooking? lastBooking;
   bool placing = false;
+
+  /// A successful SSLCommerz payment captured for the current cart. If the
+  /// booking POST fails after payment, a retry reuses this instead of opening
+  /// the gateway again — so the same transaction is never charged twice.
+  /// Cleared when the cart changes or a booking succeeds.
+  SslcResult? _paidPayment;
 
   // ── Track (booking detail + timeline) ───────────────────────────────
   ServiceBooking? trackedBooking;
@@ -364,6 +399,9 @@ class HomeServiceController extends GetxController {
 
   Future<void> reviewBooking() async {
     if (totalItems == 0) return;
+    // Starting a fresh booking — drop any previous booking so summary/amount
+    // getters reflect the current cart, not a completed one.
+    lastBooking = null;
     Get.toNamed(Routes.HS_CONFIRM);
     // Load schedule + payment options for the confirm screen.
     if (_dates.isEmpty) await _loadDates();
@@ -451,22 +489,8 @@ class HomeServiceController extends GetxController {
     update();
     try {
       address = addressCtrl.text.trim();
-      // Online payment (SSLCommerz sandbox) must complete before booking.
-      if (SslcommerzPay.isOnline(selectedMethodKey)) {
-        final paid = await SslcommerzPay.pay(
-          amount: totalPaid.toDouble(),
-          tranId: 'HS-${DateTime.now().millisecondsSinceEpoch}',
-          category: 'home_service',
-        );
-        if (!paid) {
-          SnackHelper.error('পেমেন্ট সম্পন্ন হয়নি', title: _moduleTitle);
-          placing = false;
-          update();
-          return;
-        }
-      }
       final categoryId = cartItems.first.categoryId;
-      final payload = {
+      final payload = <String, dynamic>{
         'category_id': categoryId,
         'address': address,
         'scheduled_at': '${d.date}T00:00:00+06:00',
@@ -477,6 +501,31 @@ class HomeServiceController extends GetxController {
             .map((s) => {'sub_service_id': s.id, 'quantity': qtyOf(s)})
             .toList(),
       };
+      // Online payment (SSLCommerz sandbox): initiate → checkout → attach the
+      // gateway's val_id + tran_id to the booking payload. Reuse an already
+      // successful payment so a retry never charges the same booking twice.
+      if (SslcommerzPay.isOnline(selectedMethodKey)) {
+        var pay = _paidPayment;
+        if (pay == null || !pay.success) {
+          // Charge the current cart total incl. 5% VAT (matches what the
+          // backend requires), never a stale amount from a previous booking.
+          pay = await SslcommerzPay.checkout(
+            amount: cartPayable.toDouble(),
+            productName: bookingSummary,
+            category: 'homeservice',
+          );
+          if (!pay.success) {
+            SnackHelper.error('পেমেন্ট সম্পন্ন হয়নি', title: _moduleTitle);
+            placing = false;
+            update();
+            return;
+          }
+          _paidPayment = pay;
+        }
+        payload['payment_method'] = 'sslcommerz';
+        payload['val_id'] = pay.valId;
+        payload['tran_id'] = pay.tranId;
+      }
       // Capture the cart summary before clearing (the booking response may
       // not echo the items back).
       lastCartSummary = cartItems.isEmpty
@@ -484,6 +533,7 @@ class HomeServiceController extends GetxController {
           : '${cartItems.first.displayName} ×$totalItems';
       lastBooking = await _repo.book(payload);
       _cart.clear();
+      _paidPayment = null; // booking succeeded — payment consumed
       Get.toNamed(Routes.HS_PLACED);
     } catch (e) {
       SnackHelper.error(e.toString().replaceFirst('Exception: ', ''),
@@ -495,10 +545,16 @@ class HomeServiceController extends GetxController {
   }
 
   Future<void> trackBooking() async {
-    final id = lastBooking?.id ?? trackedBooking?.id;
-    if (id == null || id.isEmpty) return;
+    // Always open the tracking page using the booking we already have, then
+    // refresh from the API when we have a real id. (The create response may
+    // omit a top-level id, which previously made this button do nothing.)
+    trackedBooking = lastBooking ?? trackedBooking;
+    update();
     Get.toNamed(Routes.HS_TRACKING);
-    await _loadTrack(id);
+    final id = (lastBooking?.id.isNotEmpty ?? false)
+        ? lastBooking!.id
+        : (trackedBooking?.id ?? '');
+    if (id.isNotEmpty) await _loadTrack(id);
   }
 
   Future<void> openBooking(ServiceBooking b) async {
