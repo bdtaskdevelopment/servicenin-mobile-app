@@ -403,9 +403,20 @@ class HomeServiceController extends GetxController {
     // getters reflect the current cart, not a completed one.
     lastBooking = null;
     Get.toNamed(Routes.HS_CONFIRM);
-    // Load schedule + payment options for the confirm screen.
+    // Refresh VAT/payment settings so the bill honours the current server-side
+    // `services_vat_enabled` flag (no VAT when it's off), then load schedule +
+    // payment options for the confirm screen.
+    _refreshSettings();
     if (_dates.isEmpty) await _loadDates();
     if (methods.isEmpty) await _loadMethods();
+  }
+
+  /// Re-pull `/api/v1/settings` so a server-side VAT toggle takes effect
+  /// without an app restart, then rebuild the bill.
+  Future<void> _refreshSettings() async {
+    if (!Get.isRegistered<SettingsService>()) return;
+    await SettingsService.to.load();
+    update();
   }
 
   /// Cart icon tap → open the cart (confirm) page, or notify when empty.

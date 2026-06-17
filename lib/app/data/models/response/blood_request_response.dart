@@ -8,6 +8,7 @@ dynamic _decode(dynamic src) => src is String ? jsonDecode(src) : src;
 class BloodRequestEntry {
   BloodRequestEntry({
     required this.id,
+    required this.requesterId,
     required this.bloodGroup,
     required this.unitsNeeded,
     required this.hospitalName,
@@ -25,6 +26,7 @@ class BloodRequestEntry {
   });
 
   final String id;
+  final String requesterId;
   final String bloodGroup;
   final int unitsNeeded;
   final String hospitalName;
@@ -75,6 +77,7 @@ class BloodRequestEntry {
 
     return BloodRequestEntry(
       id: str(json['id']),
+      requesterId: str(json['requester_id']),
       bloodGroup: str(json['blood_group']),
       unitsNeeded: asInt(json['units_needed']),
       hospitalName: str(json['hospital_name']),

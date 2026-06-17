@@ -303,6 +303,13 @@ class BloodController extends GetxController {
     }
   }
 
+  /// True when the logged-in user owns this request — you can't respond to
+  /// (donate for) your own request, so the Respond button is hidden for it.
+  bool isMyRequest(BloodRequestEntry r) {
+    final me = _currentUserId();
+    return me != null && me.isNotEmpty && r.requesterId == me;
+  }
+
   /// The logged-in user's id, read from stored auth info.
   String? _currentUserId() {
     final raw = StorageService.read(StorageConstants.userInfo);

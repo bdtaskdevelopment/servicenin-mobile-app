@@ -415,7 +415,16 @@ class BookingController extends GetxController {
     if (_dates.isEmpty) fetchDates();
     if (patients.isEmpty) _hc.fetchFamily();
     if (methods.isEmpty) _loadMethods();
+    // Refresh settings so VAT honours the current server-side
+    // `services_vat_enabled` flag (no VAT when it's off).
+    _refreshSettings();
     Get.toNamed(Routes.HC_SLOT);
+  }
+
+  Future<void> _refreshSettings() async {
+    if (!Get.isRegistered<SettingsService>()) return;
+    await SettingsService.to.load();
+    update();
   }
 
   void slotContinue() => Get.toNamed(Routes.HC_PATIENT);

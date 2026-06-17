@@ -472,6 +472,11 @@ class HcAppointment {
   String get specialty => doctor?.specialization ?? '';
   String get venueName => venue?.venueName ?? '';
   String get feeLabel => fee > 0 ? '৳$fee' : 'Free'.tr;
+
+  /// A free visit (no charge) — `payment_method == "free"` or a zero fee. Such
+  /// appointments have no invoice, so the view/download actions are hidden.
+  bool get isFree => paymentMethod.toLowerCase() == 'free' || fee <= 0;
+
   String get statusLabel =>
       status.isEmpty ? '' : status[0].toUpperCase() + status.substring(1);
 

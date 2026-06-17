@@ -8,6 +8,7 @@ const Map<String, String> groupABn = {
   'Send a blood request': 'রক্তের অনুরোধ পাঠান',
   'Donate': 'রক্ত দিন',
   'Give blood · save lives': 'রক্ত দিন · জীবন বাঁচান',
+  'You created this request': 'এটি আপনার নিজের অনুরোধ',
   'Available for donation': 'রক্তদানের জন্য উপলব্ধ',
   'You\'ll receive nearby blood requests': 'আপনি কাছাকাছি রক্তের অনুরোধ পাবেন',
   'You\'re paused — no requests for now': 'আপনি বিরতিতে আছেন — এখন কোনো অনুরোধ নেই',

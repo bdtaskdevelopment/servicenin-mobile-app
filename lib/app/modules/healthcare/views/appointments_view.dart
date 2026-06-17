@@ -224,7 +224,9 @@ class _ApptCard extends StatelessWidget {
                 ),
             ],
           ),
-          if (appt.id.isNotEmpty) ...[
+          // Free visits have no invoice — hide view/download for them; paid
+          // (cash or online) appointments keep the actions.
+          if (appt.id.isNotEmpty && !appt.isFree) ...[
             const SizedBox(height: 12),
             InvoiceActions(
               viewPath: ApiURL.hcInvoicePdf(appt.id),

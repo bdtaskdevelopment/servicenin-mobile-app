@@ -182,31 +182,51 @@ class BloodRequestDetailView extends GetView<BloodController> {
                     child: SizedBox(
                       height: 54,
                       child: GetBuilder<BloodController>(
-                        builder: (con) => ElevatedButton(
-                          onPressed: con.responding
-                              ? null
-                              : () => con.respondToRequest(req.id),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: _red,
-                            foregroundColor: Colors.white,
-                            disabledBackgroundColor:
-                                _red.withValues(alpha: 0.6),
-                            elevation: 0,
-                            shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(14)),
-                          ),
-                          child: con.responding
-                              ? const SizedBox(
-                                  width: 22,
-                                  height: 22,
-                                  child: CircularProgressIndicator(
-                                      strokeWidth: 2.5, color: Colors.white),
-                                )
-                              : Text('Respond — I can donate'.tr,
-                                  style: const TextStyle(
-                                      fontSize: 15.5,
-                                      fontWeight: FontWeight.w700)),
-                        ),
+                        // You can't respond to (donate for) your own request, so
+                        // the Respond button is replaced with a note for the
+                        // requester.
+                        builder: (con) => con.isMyRequest(req)
+                            ? Container(
+                                alignment: Alignment.center,
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFFFFF1F2),
+                                  borderRadius: BorderRadius.circular(14),
+                                  border: Border.all(
+                                      color: const Color(0xFFFECDD3)),
+                                ),
+                                child: Text('You created this request'.tr,
+                                    style: const TextStyle(
+                                        fontSize: 13.5,
+                                        fontWeight: FontWeight.w700,
+                                        color: Color(0xFFE11D48))),
+                              )
+                            : ElevatedButton(
+                                onPressed: con.responding
+                                    ? null
+                                    : () => con.respondToRequest(req.id),
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: _red,
+                                  foregroundColor: Colors.white,
+                                  disabledBackgroundColor:
+                                      _red.withValues(alpha: 0.6),
+                                  elevation: 0,
+                                  shape: RoundedRectangleBorder(
+                                      borderRadius:
+                                          BorderRadius.circular(14)),
+                                ),
+                                child: con.responding
+                                    ? const SizedBox(
+                                        width: 22,
+                                        height: 22,
+                                        child: CircularProgressIndicator(
+                                            strokeWidth: 2.5,
+                                            color: Colors.white),
+                                      )
+                                    : Text('Respond — I can donate'.tr,
+                                        style: const TextStyle(
+                                            fontSize: 15.5,
+                                            fontWeight: FontWeight.w700)),
+                              ),
                       ),
                     ),
                   ),

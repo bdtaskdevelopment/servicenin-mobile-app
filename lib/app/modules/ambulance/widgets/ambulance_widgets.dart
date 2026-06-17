@@ -76,7 +76,12 @@ class AmbulanceCard extends StatelessWidget {
                   children: [
                     const Icon(Icons.circle, size: 6, color: Color(0xFF16A34A)),
                     const SizedBox(width: 4),
-                    Text('Available'.tr,
+                    // Ambulance availability badge: "অ্যাভেইলেবল" in Bangla
+                    // (not the shared "উপলব্ধ" used elsewhere for balances etc.).
+                    Text(
+                        Get.locale?.languageCode == 'bn'
+                            ? 'অ্যাভেইলেবল'
+                            : 'Available',
                         style: const TextStyle(
                             fontSize: 11,
                             fontWeight: FontWeight.w700,

@@ -152,30 +152,37 @@ class ReviewConfirmView extends GetView<BookingController> {
                           ],
                         ),
                       ),
-                      const SizedBox(height: 18),
-                      _Label('PAYMENT METHOD'.tr),
-                      const SizedBox(height: 12),
-                      if (con.loadingMethods && con.methods.isEmpty)
-                        const SnListSkeleton(
-                          count: 2,
-                          padding: EdgeInsets.zero,
-                          showTrailing: false,
-                        )
-                      else
-                        Column(
-                          children: con.enabledMethods
-                              .map((m) => Padding(
-                                    padding: const EdgeInsets.only(bottom: 10),
-                                    child: _PayCard(
-                                      icon: _hcPayIcon(m.key),
-                                      label: m.label,
-                                      description: m.description,
-                                      selected: con.selectedMethodKey == m.key,
-                                      onTap: () => con.selectMethod(m.key),
-                                    ),
-                                  ))
-                              .toList(),
-                        ),
+                      // Payment method only matters for paid doctors. A free
+                      // visit (is_paid == false) books directly with no charge,
+                      // so the selector is hidden.
+                      if (con.isPaid) ...[
+                        const SizedBox(height: 18),
+                        _Label('PAYMENT METHOD'.tr),
+                        const SizedBox(height: 12),
+                        if (con.loadingMethods && con.methods.isEmpty)
+                          const SnListSkeleton(
+                            count: 2,
+                            padding: EdgeInsets.zero,
+                            showTrailing: false,
+                          )
+                        else
+                          Column(
+                            children: con.enabledMethods
+                                .map((m) => Padding(
+                                      padding:
+                                          const EdgeInsets.only(bottom: 10),
+                                      child: _PayCard(
+                                        icon: _hcPayIcon(m.key),
+                                        label: m.label,
+                                        description: m.description,
+                                        selected:
+                                            con.selectedMethodKey == m.key,
+                                        onTap: () => con.selectMethod(m.key),
+                                      ),
+                                    ))
+                                .toList(),
+                          ),
+                      ],
                     ],
                   ),
                 ),

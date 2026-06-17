@@ -88,6 +88,15 @@ class FareController extends GetxController {
     _amb.onTripChanged = estimate;
     fetchTypes();
     fetchMethods();
+    // Refresh settings so VAT honours the current server-side
+    // `services_vat_enabled` flag (no VAT when it's off).
+    _refreshSettings();
+  }
+
+  Future<void> _refreshSettings() async {
+    if (!Get.isRegistered<SettingsService>()) return;
+    await SettingsService.to.load();
+    update();
   }
 
   /// Prepare the fare screen for a tapped ambulance: pre-select its type and
