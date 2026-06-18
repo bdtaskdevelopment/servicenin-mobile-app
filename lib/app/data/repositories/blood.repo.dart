@@ -40,6 +40,19 @@ class BloodRepository {
     return AuthSimpleResponse.fromMap(_payload(res));
   }
 
+  /// GET /api/v1/blood/donors/me — the logged-in user's donor profile, or null
+  /// when they aren't a registered donor (API returns "donor not found").
+  Future<DonorEntry?> fetchMyDonor() async {
+    final res = await provider.getData(ApiURL.bloodDonorMe);
+    final body = _payload(res);
+    if (body is Map) {
+      if (body['success'] == false) return null;
+      final data = body['data'];
+      if (data is Map) return DonorEntry.fromMap(data.cast<String, dynamic>());
+    }
+    return null;
+  }
+
   /// Update the logged-in donor's availability.
   Future<AuthSimpleResponse> updateAvailability(bool isAvailable) async {
     final payload = {'is_available': isAvailable};

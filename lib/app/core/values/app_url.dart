@@ -26,6 +26,7 @@ class ApiURL {
   static final String bloodDonors = 'api/v1/blood/donors';
   static final String bloodDonorsNearest = 'api/v1/blood/donors/nearest';
   static final String bloodDonorsLeaderboard = 'api/v1/blood/donors/leaderboard';
+  static final String bloodDonorMe = 'api/v1/blood/donors/me';
   static final String bloodDonorAvailability =
       'api/v1/blood/donors/me/availability';
   static final String bloodDonorRegister = 'api/v1/blood/donors/register';

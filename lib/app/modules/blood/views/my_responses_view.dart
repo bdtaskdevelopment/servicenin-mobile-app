@@ -109,44 +109,45 @@ class MyResponsesView extends GetView<BloodController> {
 }
 
 // ── Status badge colours ────────────────────────────────────────────
-({Color bg, Color fg, String label}) _statusStyle(String status) {
-  final s = status.toLowerCase();
-  switch (s) {
-    case 'verified':
-    case 'completed':
-    case 'fulfilled':
-    case 'accepted':
-      return (
-        bg: const Color(0xFFDCFCE7),
-        fg: const Color(0xFF15803D),
-        label: _cap(s)
-      );
-    case 'pending':
-    case 'matched':
-      return (
-        bg: const Color(0xFFFEF3C7),
-        fg: const Color(0xFFB45309),
-        label: _cap(s)
-      );
-    case 'rejected':
-    case 'cancelled':
-    case 'canceled':
-    case 'expired':
-      return (
-        bg: const Color(0xFFFEE2E2),
-        fg: const Color(0xFFDC2626),
-        label: _cap(s)
-      );
-    default:
-      return (
-        bg: const Color(0xFFEEF2F7),
-        fg: const Color(0xFF475569),
-        label: s.isEmpty ? 'Pending' : _cap(s)
-      );
-  }
-}
+// Status badge hidden for now — helpers kept (commented) for easy restore.
+// ({Color bg, Color fg, String label}) _statusStyle(String status) {
+//   final s = status.toLowerCase();
+//   switch (s) {
+//     case 'verified':
+//     case 'completed':
+//     case 'fulfilled':
+//     case 'accepted':
+//       return (
+//         bg: const Color(0xFFDCFCE7),
+//         fg: const Color(0xFF15803D),
+//         label: _cap(s)
+//       );
+//     case 'pending':
+//     case 'matched':
+//       return (
+//         bg: const Color(0xFFFEF3C7),
+//         fg: const Color(0xFFB45309),
+//         label: _cap(s)
+//       );
+//     case 'rejected':
+//     case 'cancelled':
+//     case 'canceled':
+//     case 'expired':
+//       return (
+//         bg: const Color(0xFFFEE2E2),
+//         fg: const Color(0xFFDC2626),
+//         label: _cap(s)
+//       );
+//     default:
+//       return (
+//         bg: const Color(0xFFEEF2F7),
+//         fg: const Color(0xFF475569),
+//         label: s.isEmpty ? 'Pending' : _cap(s)
+//       );
+//   }
+// }
 
-String _cap(String s) => s.isEmpty ? s : s[0].toUpperCase() + s.substring(1);
+// String _cap(String s) => s.isEmpty ? s : s[0].toUpperCase() + s.substring(1);
 
 class _ResponseCard extends StatelessWidget {
   const _ResponseCard({required this.res, required this.con});
@@ -157,7 +158,7 @@ class _ResponseCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final name =
         res.requesterName.isNotEmpty ? res.requesterName : 'Requester';
-    final st = _statusStyle(res.status);
+    // final st = _statusStyle(res.status); // status hidden for now
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
@@ -192,18 +193,19 @@ class _ResponseCard extends StatelessWidget {
                   ],
                 ),
               ),
-              const SizedBox(width: 8),
-              Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                decoration: BoxDecoration(
-                    color: st.bg, borderRadius: BorderRadius.circular(20)),
-                child: Text(st.label,
-                    style: TextStyle(
-                        fontSize: 11,
-                        fontWeight: FontWeight.w800,
-                        color: st.fg)),
-              ),
+              // Status badge hidden for now — no need to show response status.
+              // const SizedBox(width: 8),
+              // Container(
+              //   padding:
+              //       const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+              //   decoration: BoxDecoration(
+              //       color: st.bg, borderRadius: BorderRadius.circular(20)),
+              //   child: Text(st.label,
+              //       style: TextStyle(
+              //           fontSize: 11,
+              //           fontWeight: FontWeight.w800,
+              //           color: st.fg)),
+              // ),
             ],
           ),
           const SizedBox(height: 10),

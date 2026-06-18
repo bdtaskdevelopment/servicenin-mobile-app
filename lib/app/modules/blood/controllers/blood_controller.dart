@@ -12,7 +12,8 @@ import '../../../data/models/response/donor_response.dart';
 import '../../../data/repositories/blood.repo.dart';
 import '../../../data/services/storage.service.dart';
 import '../../../routes/app_pages.dart';
-import '../widgets/respond_otp_sheet.dart';
+// OTP step removed — responses are auto-verified server-side.
+// import '../widgets/respond_otp_sheet.dart';
 import 'blood_chat_controller.dart';
 
 enum BloodSeverity { critical, urgent, routine }
@@ -78,6 +79,37 @@ class BloodController extends GetxController {
     fetchNearestDonors();
     fetchMyResponses();
     fetchMyRank();
+    fetchMyDonorStatus();
+  }
+
+  /// Pull-to-refresh for the Blood Bank home page — reloads the nearby donors,
+  /// my responses, my leaderboard rank and my donor availability together.
+  Future<void> refreshHome() async {
+    await Future.wait([
+      fetchNearestDonors(),
+      fetchMyResponses(),
+      fetchMyRank(),
+      fetchMyDonorStatus(),
+    ]);
+  }
+
+  /// GET /api/v1/blood/donors/me — seed the availability toggle from the
+  /// donor profile's `is_available`. Null means the user isn't a registered
+  /// donor yet, so the toggle stays at its default until they register.
+  Future<void> fetchMyDonorStatus() async {
+    try {
+      final me = await _repo.fetchMyDonor();
+      if (me != null) {
+        isDonor = true;
+        isAvailable = me.isAvailable;
+      } else {
+        isDonor = false;
+      }
+    } catch (_) {
+      // Keep the current toggle state on failure.
+    } finally {
+      update();
+    }
   }
 
   /// GET /api/v1/blood/donors/nearest — for the "Requests near you" section.
@@ -165,8 +197,9 @@ class BloodController extends GetxController {
   bool responding = false;
   bool verifyingOtp = false;
 
-  /// POST /api/v1/blood/requests/:id/respond — offer to donate. On success an
-  /// OTP is sent, so we open the verify sheet.
+  /// POST /api/v1/blood/requests/:id/respond — offer to donate. The backend now
+  /// auto-verifies the response (otp_verified: true), so we go straight to the
+  /// confirmation screen instead of an OTP step.
   Future<void> respondToRequest(String requestId) async {
     if (responding) return;
     responding = true;
@@ -177,7 +210,10 @@ class BloodController extends GetxController {
       update();
       if (res.success) {
         SnackHelper.success(res.message);
-        RespondOtpSheet.show();
+        // OTP step removed — response is auto-verified server-side.
+        // RespondOtpSheet.show();
+        fetchMyResponses();
+        Get.offNamed(Routes.BLOOD_CONFIRMED);
       } else {
         SnackHelper.error(res.message);
       }
@@ -310,6 +346,13 @@ class BloodController extends GetxController {
     return me != null && me.isNotEmpty && r.requesterId == me;
   }
 
+  /// True when this donor card is the logged-in user — you can't call
+  /// yourself, so the "Call donor" button is hidden for your own profile.
+  bool isMyDonor(DonorEntry d) {
+    final me = _currentUserId();
+    return me != null && me.isNotEmpty && d.userId == me;
+  }
+
   /// The logged-in user's id, read from stored auth info.
   String? _currentUserId() {
     final raw = StorageService.read(StorageConstants.userInfo);
@@ -322,8 +365,10 @@ class BloodController extends GetxController {
     return null;
   }
 
-  // Whether the donor is currently available to donate (front-page switch).
+  // Whether the donor is currently available to donate (front-page switch),
+  // seeded from /donors/me. `isDonor` is false until the user registers.
   bool isAvailable = true;
+  bool isDonor = false;
 
   Future<void> toggleAvailable(bool value) async {
     

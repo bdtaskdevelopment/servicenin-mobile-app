@@ -59,9 +59,13 @@ class DonorRegisterController extends GetxController {
       busy = false;
       update();
       if (res.success) {
-        otp = ''; // fresh start for the OTP screen
         SnackHelper.success(res.message);
-        Get.toNamed(Routes.BLOOD_DONOR_VERIFY_OTP);
+        // OTP step removed — the backend now auto-verifies donors on
+        // registration (response carries otp_verified: true), so we skip the
+        // OTP screen and return to the blood home page.
+        // otp = ''; // fresh start for the OTP screen
+        // Get.toNamed(Routes.BLOOD_DONOR_VERIFY_OTP);
+        Get.until((route) => route.settings.name == Routes.BLOOD);
       } else {
         SnackHelper.error(res.message);
       }

@@ -108,7 +108,10 @@ class DonorDetailView extends GetView<BloodController> {
                                               color: const Color(0xFFDCFCE7),
                                               borderRadius:
                                                   BorderRadius.circular(20)),
-                                          child: Text('Available'.tr,
+                                          child: Text(
+                                              Get.locale?.languageCode == 'bn'
+                                                  ? 'অ্যাভেইলেবল'
+                                                  : 'Available',
                                               style: const TextStyle(
                                                   fontSize: 11,
                                                   fontWeight: FontWeight.w800,
@@ -202,20 +205,38 @@ class DonorDetailView extends GetView<BloodController> {
                   Expanded(
                     child: SizedBox(
                       height: 54,
-                      child: ElevatedButton.icon(
-                        onPressed: () => controller.callPhone(donor.phone),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: _red,
-                          foregroundColor: Colors.white,
-                          elevation: 0,
-                          shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(14)),
-                        ),
-                        icon: const Icon(Icons.call_rounded, size: 20),
-                        label: Text('Call donor'.tr,
-                            style: const TextStyle(
-                                fontSize: 15.5, fontWeight: FontWeight.w700)),
-                      ),
+                      // You can't call yourself — hide the call button on your
+                      // own donor profile and show a note instead.
+                      child: controller.isMyDonor(donor)
+                          ? Container(
+                              alignment: Alignment.center,
+                              decoration: BoxDecoration(
+                                color: const Color(0xFFFFF1F2),
+                                borderRadius: BorderRadius.circular(14),
+                                border:
+                                    Border.all(color: const Color(0xFFFECDD3)),
+                              ),
+                              child: Text('This is your donor profile'.tr,
+                                  style: const TextStyle(
+                                      fontSize: 13.5,
+                                      fontWeight: FontWeight.w700,
+                                      color: Color(0xFFE11D48))),
+                            )
+                          : ElevatedButton.icon(
+                              onPressed: () => controller.callPhone(donor.phone),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: _red,
+                                foregroundColor: Colors.white,
+                                elevation: 0,
+                                shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(14)),
+                              ),
+                              icon: const Icon(Icons.call_rounded, size: 20),
+                              label: Text('Call donor'.tr,
+                                  style: const TextStyle(
+                                      fontSize: 15.5,
+                                      fontWeight: FontWeight.w700)),
+                            ),
                     ),
                   ),
                 ],

@@ -243,7 +243,10 @@ class DonorCard extends StatelessWidget {
                   children: [
                     const Icon(Icons.circle, size: 7, color: Color(0xFF16A34A)),
                     const SizedBox(width: 4),
-                    Text('Available'.tr,
+                    Text(
+                        Get.locale?.languageCode == 'bn'
+                            ? 'অ্যাভেইলেবল'
+                            : 'Available',
                         style: const TextStyle(
                             fontSize: 11,
                             fontWeight: FontWeight.w700,

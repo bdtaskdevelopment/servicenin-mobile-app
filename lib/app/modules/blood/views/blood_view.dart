@@ -20,7 +20,11 @@ class BloodView extends GetView<BloodController> {
           children: [
             _Header(),
             Expanded(
-              child: ListView(
+              child: RefreshIndicator(
+                onRefresh: controller.refreshHome,
+                color: const Color(0xFFE11D48),
+                child: ListView(
+                physics: const AlwaysScrollableScrollPhysics(),
                 padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
                 children: [
                   // Need blood / Donate — both tappable
@@ -86,6 +90,7 @@ class BloodView extends GetView<BloodController> {
                     ),
                   ),
                 ],
+              ),
               ),
             ),
           ],
@@ -312,7 +317,10 @@ class _DonorCard extends StatelessWidget {
               children: [
                 const Icon(Icons.check_circle, size: 13, color: Color(0xFF16A34A)),
                 const SizedBox(width: 4),
-                Text('Available'.tr,
+                Text(
+                    Get.locale?.languageCode == 'bn'
+                        ? 'অ্যাভেইলেবল'
+                        : 'Available',
                     style: const TextStyle(
                         fontSize: 11,
                         fontWeight: FontWeight.w700,
