@@ -212,6 +212,13 @@ class JobApplicationModel {
 // ── Resume upload ───────────────────────────────────────────────────
 String jobsResumeUrlFromResponse(dynamic src) {
   final d = _data(src);
-  if (d is Map) return _str(d['resume_url']);
+  if (d is Map) {
+    for (final k in ['resume_url', 'url', 'file_url', 'cv_url']) {
+      final v = _str(d[k]);
+      if (v.isNotEmpty) return v;
+    }
+  } else if (d is String) {
+    return _str(d);
+  }
   return '';
 }

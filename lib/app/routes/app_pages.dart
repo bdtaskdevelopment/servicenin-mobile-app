@@ -101,6 +101,8 @@ import '../modules/blood/bindings/blood_binding.dart';
 import '../modules/blood/views/blood_view.dart';
 import '../modules/blood/views/blood_requests_view.dart';
 import '../modules/blood/views/blood_request_detail_view.dart';
+import '../modules/blood/views/my_requests_view.dart';
+import '../modules/blood/views/blood_responders_view.dart';
 import '../modules/blood/views/need_blood_view.dart';
 import '../modules/blood/views/finding_donors_view.dart';
 import '../modules/blood/views/donor_tracking_view.dart';
@@ -592,6 +594,16 @@ class AppPages {
     GetPage(
       name: _Paths.BLOOD_REQUEST_DETAIL,
       page: () => const BloodRequestDetailView(),
+      binding: BloodBinding(),
+    ),
+    GetPage(
+      name: _Paths.BLOOD_MY_REQUESTS,
+      page: () => const MyRequestsView(),
+      binding: BloodBinding(),
+    ),
+    GetPage(
+      name: _Paths.BLOOD_RESPONDERS,
+      page: () => const BloodRespondersView(),
       binding: BloodBinding(),
     ),
     GetPage(

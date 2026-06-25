@@ -10,6 +10,18 @@ const Map<String, String> groupABn = {
   'Give blood · save lives': 'রক্ত দিন · জীবন বাঁচান',
   'You created this request': 'এটি আপনার নিজের অনুরোধ',
   'This is your donor profile': 'এটি আপনার নিজের ডোনার প্রোফাইল',
+  'Your blood requests · view responders':
+      'আপনার রক্তের অনুরোধ · রেসপন্ডার দেখুন',
+  'Responders': 'রেসপন্ডার',
+  'responders': 'রেসপন্ডার',
+  'View responders →': 'রেসপন্ডার দেখুন →',
+  'No responders yet': 'এখনো কোনো রেসপন্ডার নেই',
+  'Blood received — request fulfilled': 'রক্ত গ্রহণ সম্পন্ন — অনুরোধ পূর্ণ হয়েছে',
+  'Mark blood received': 'রক্ত গ্রহণ নিশ্চিত করুন',
+  'Confirm blood received': 'রক্ত গ্রহণ নিশ্চিত করুন',
+  'Are you sure you have received blood?':
+      'আপনি কি নিশ্চিত যে আপনি রক্ত পেয়েছেন?',
+  'Yes, received': 'হ্যাঁ, পেয়েছি',
   'Available for donation': 'রক্তদানের জন্য অ্যাভেইলেবল',
   'You\'ll receive nearby blood requests': 'আপনি কাছাকাছি রক্তের অনুরোধ পাবেন',
   'You\'re paused — no requests for now': 'আপনি বিরতিতে আছেন — এখন কোনো অনুরোধ নেই',

@@ -10,7 +10,18 @@ FutureOr<Request> authInterceptor(request) async {
   printLog('auth interceptor call ====');
   final token = StorageService.read(StorageConstants.accessToken);
   printLog(token);
-  request.headers['Content-Type'] = 'application/json';
+  // Preserve a multipart content-type (file uploads set it with a boundary).
+  // Forcing application/json here would strip the boundary and the server
+  // would fail to parse the uploaded file (e.g. job resume/CV upload).
+  final existingCt = request.headers.entries
+      .firstWhere(
+        (e) => e.key.toLowerCase() == 'content-type',
+        orElse: () => const MapEntry('', ''),
+      )
+      .value;
+  if (!existingCt.toLowerCase().contains('multipart')) {
+    request.headers['Content-Type'] = 'application/json';
+  }
   request.headers['Accept'] = 'application/json';
   if (token != null && token.isNotEmpty) {
     request.headers['Authorization'] = 'Bearer $token';

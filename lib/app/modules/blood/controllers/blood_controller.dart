@@ -7,6 +7,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../../core/helpers/snack_helper.dart';
 import '../../../core/values/storage.dart';
 import '../../../data/models/response/blood_request_response.dart';
+import '../../../data/models/response/blood_responder_response.dart';
 import '../../../data/models/response/blood_response_response.dart';
 import '../../../data/models/response/donor_response.dart';
 import '../../../data/repositories/blood.repo.dart';
@@ -80,6 +81,7 @@ class BloodController extends GetxController {
     fetchMyResponses();
     fetchMyRank();
     fetchMyDonorStatus();
+    fetchMyRequests();
   }
 
   /// Pull-to-refresh for the Blood Bank home page — reloads the nearby donors,
@@ -90,6 +92,7 @@ class BloodController extends GetxController {
       fetchMyResponses(),
       fetchMyRank(),
       fetchMyDonorStatus(),
+      fetchMyRequests(),
     ]);
   }
 
@@ -266,6 +269,145 @@ class BloodController extends GetxController {
   void openMyResponses() {
     fetchMyResponses();
     Get.toNamed(Routes.BLOOD_MY_RESPONSES);
+  }
+
+  // ── My requests (GET /api/v1/blood/requests/my) ─────────────────────
+  List<BloodRequestEntry> myRequests = [];
+  bool loadingMyRequests = false;
+
+  Future<void> fetchMyRequests() async {
+    loadingMyRequests = true;
+    update();
+    try {
+      myRequests = await _repo.fetchMyRequests();
+    } catch (e) {
+      SnackHelper.error(e.toString().replaceFirst('Exception: ', ''));
+    } finally {
+      loadingMyRequests = false;
+      update();
+    }
+  }
+
+  void openMyRequests() {
+    fetchMyRequests();
+    Get.toNamed(Routes.BLOOD_MY_REQUESTS);
+  }
+
+  // ── Responders for a chosen request ─────────────────────────────────
+  // (GET /api/v1/blood/requests/:id/responders)
+  BloodRequestEntry? selectedMyRequest;
+  List<BloodResponder> responders = [];
+  bool loadingResponders = false;
+  bool completing = false;
+
+  /// True once blood has been confirmed received for the open request — used
+  /// to disable the call / chat / complete actions.
+  bool get requestCompleted => selectedMyRequest?.isFulfilled ?? false;
+
+  void openResponders(BloodRequestEntry r) {
+    selectedMyRequest = r;
+    responders = [];
+    update();
+    Get.toNamed(Routes.BLOOD_RESPONDERS);
+    fetchResponders();
+  }
+
+  Future<void> fetchResponders() async {
+    final id = selectedMyRequest?.id ?? '';
+    if (id.isEmpty) return;
+    loadingResponders = true;
+    update();
+    try {
+      responders = await _repo.fetchResponders(id);
+    } catch (e) {
+      SnackHelper.error(e.toString().replaceFirst('Exception: ', ''));
+    } finally {
+      loadingResponders = false;
+      update();
+    }
+  }
+
+  /// Call a responder (donor). Falls back to a message when no phone is set.
+  void callResponder(BloodResponder r) {
+    if (r.donorPhone.isEmpty) {
+      SnackHelper.error('ডোনারের ফোন নম্বর পাওয়া যায়নি');
+      return;
+    }
+    callPhone(r.donorPhone);
+  }
+
+  /// Open the fulfillment chat with a responder (keyed by the fulfillment id).
+  void chatResponder(BloodResponder r) {
+    Get.find<BloodChatController>().configure(
+      chatId: r.id,
+      partnerName: r.displayName,
+      partnerPhone: r.donorPhone,
+    );
+    Get.toNamed(Routes.BLOOD_CHAT);
+  }
+
+  /// "Mark complete" → confirm, then POST /fulfillments/:id/received. On
+  /// success the request is marked fulfilled so the actions are disabled.
+  Future<void> confirmReceived(BloodResponder r) async {
+    if (completing || requestCompleted) return;
+    final ok = await Get.dialog<bool>(
+      AlertDialog(
+        title: Text('Confirm blood received'.tr),
+        content: Text('Are you sure you have received blood?'.tr),
+        actions: [
+          TextButton(
+            onPressed: () => Get.back(result: false),
+            child: Text('Cancel'.tr),
+          ),
+          TextButton(
+            onPressed: () => Get.back(result: true),
+            child: Text('Yes, received'.tr),
+          ),
+        ],
+      ),
+    );
+    if (ok != true) return;
+    completing = true;
+    update();
+    try {
+      final res = await _repo.confirmReceived(r.id);
+      if (res.success) {
+        SnackHelper.success(res.message.isNotEmpty
+            ? res.message
+            : 'Blood received confirmed. Thank you!');
+        // Mark the open request fulfilled so call/chat/complete disable.
+        final cur = selectedMyRequest;
+        if (cur != null) {
+          selectedMyRequest = BloodRequestEntry(
+            id: cur.id,
+            requesterId: cur.requesterId,
+            bloodGroup: cur.bloodGroup,
+            unitsNeeded: cur.unitsNeeded,
+            hospitalName: cur.hospitalName,
+            hospitalAddress: cur.hospitalAddress,
+            contactName: cur.contactName,
+            contactPhone: cur.contactPhone,
+            contactEmail: cur.contactEmail,
+            urgency: cur.urgency,
+            status: 'fulfilled',
+            notes: cur.notes,
+            requesterName: cur.requesterName,
+            requesterPhone: cur.requesterPhone,
+            responseCount: cur.responseCount,
+            createdAt: cur.createdAt,
+            expiresAt: cur.expiresAt,
+          );
+        }
+        fetchMyRequests(); // refresh the my-requests list in the background
+      } else {
+        SnackHelper.error(res.message);
+      }
+    } catch (e) {
+      SnackHelper.error(e.toString().replaceFirst('Exception: ', ''));
+    } finally {
+      completing = false;
+      update();
+    }
   }
 
   // ── Chat partner (shared by the donor-chat screen) ──────────────────

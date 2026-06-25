@@ -1,9 +1,9 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:image_picker/image_picker.dart';
 
 import '../../../core/helpers/snack_helper.dart';
 import '../../../data/models/response/jobs_response.dart';
@@ -300,14 +300,26 @@ class JobsController extends GetxController {
   // ── Resume upload ───────────────────────────────────────────────────
   Future<void> pickAndUploadResume() async {
     try {
-      final picked =
-          await ImagePicker().pickImage(source: ImageSource.gallery);
-      if (picked == null) return;
+      // The API only accepts pdf/doc/docx, so use a document picker (not an
+      // image picker) restricted to those types.
+      final result = await FilePicker.platform.pickFiles(
+        type: FileType.custom,
+        allowedExtensions: const ['pdf', 'doc', 'docx'],
+      );
+      final path = result?.files.single.path;
+      if (path == null) return;
       uploadingResume = true;
       update();
-      resumeUrl = await _repo.uploadResume(File(picked.path));
-      resumeName = picked.name;
-      SnackHelper.success('Resume uploaded');
+      final url = await _repo.uploadResume(File(path));
+      if (url.isEmpty) {
+        // Upload didn't return a URL — don't show a CV as attached, so the
+        // required-CV check stays accurate.
+        SnackHelper.error('Resume upload failed — please try again'.tr);
+      } else {
+        resumeUrl = url;
+        resumeName = result!.files.single.name;
+        SnackHelper.success('Resume uploaded'.tr);
+      }
     } catch (e) {
       SnackHelper.error(e.toString().replaceFirst('Exception: ', ''));
     } finally {
@@ -320,6 +332,11 @@ class JobsController extends GetxController {
   Future<void> submitApplication() async {
     final j = selected;
     if (j == null || applying) return;
+    // CV/resume is mandatory — block submission until one is uploaded.
+    if (resumeUrl.isEmpty) {
+      SnackHelper.error('Please upload your CV before applying'.tr);
+      return;
+    }
     applying = true;
     update();
     try {
@@ -329,11 +346,17 @@ class JobsController extends GetxController {
         'availability': availability.text.trim().isEmpty
             ? 'Immediate'
             : availability.text.trim(),
-        if (resumeUrl.isNotEmpty) 'resume_url': resumeUrl,
+        'resume_url': resumeUrl,
       });
       if (res.success) {
         SnackHelper.success(
             res.message.isNotEmpty ? res.message : 'Application submitted');
+        // Clear the form so a fresh application doesn't reuse stale input.
+        coverLetter.clear();
+        expectedSalary.clear();
+        availability.clear();
+        resumeUrl = '';
+        resumeName = '';
         fetchMyApplications();
         Get.offNamed(Routes.JOBS_APPLICATIONS);
       } else {

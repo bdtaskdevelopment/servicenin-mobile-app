@@ -21,6 +21,7 @@ class BloodRequestEntry {
     required this.notes,
     required this.requesterName,
     required this.requesterPhone,
+    this.responseCount = 0,
     this.createdAt,
     this.expiresAt,
   });
@@ -39,6 +40,7 @@ class BloodRequestEntry {
   final String notes;
   final String requesterName;
   final String requesterPhone;
+  final int responseCount;
   final DateTime? createdAt;
   final DateTime? expiresAt;
 
@@ -92,7 +94,18 @@ class BloodRequestEntry {
       expiresAt: date(json['expires_at']),
       requesterName: str(profile['full_name']),
       requesterPhone: str(requester['phone']),
+      responseCount: asInt(json['response_count']),
     );
+  }
+
+  /// Human label for the request status (e.g. "open" → "Open").
+  String get statusLabel =>
+      status.isEmpty ? '' : status[0].toUpperCase() + status.substring(1);
+
+  /// True once the request has been fulfilled / closed.
+  bool get isFulfilled {
+    final s = status.toLowerCase();
+    return s == 'fulfilled' || s == 'completed' || s == 'closed';
   }
 
   /// Parses a bare array or `{ success, message, data: [...] }`.

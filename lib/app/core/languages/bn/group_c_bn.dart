@@ -86,6 +86,11 @@ const Map<String, String> groupCBn = {
   'Set up name, skills & experience': 'নাম, দক্ষতা ও অভিজ্ঞতা যোগ করুন',
   'RESUME': 'রিজিউমে',
   'Upload your resume': 'আপনার রিজিউমে আপলোড করুন',
+  'Please upload your CV before applying':
+      'আবেদন করার আগে আপনার সিভি আপলোড করুন',
+  'Resume upload failed — please try again':
+      'রিজিউমে আপলোড ব্যর্থ — আবার চেষ্টা করুন',
+  'PDF, DOC or DOCX': 'PDF, DOC বা DOCX',
   'Tap to replace': 'পরিবর্তন করতে ট্যাপ করুন',
   'Image of CV (jpg/png)': 'সিভি-র ছবি (jpg/png)',
   'EXPECTED SALARY': 'প্রত্যাশিত বেতন',

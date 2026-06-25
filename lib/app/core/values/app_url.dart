@@ -18,11 +18,16 @@ class ApiURL {
 
   //===== Blood
   static final String bloodRequests = 'api/v1/blood/requests';
+  static final String bloodRequestsMy = 'api/v1/blood/requests/my';
   static String bloodRequestRespond(String id) =>
       'api/v1/blood/requests/$id/respond';
+  static String bloodRequestResponders(String id) =>
+      'api/v1/blood/requests/$id/responders';
   static final String bloodResponsesMy = 'api/v1/blood/responses/my';
   static String bloodFulfillmentChat(String id) =>
       'api/v1/blood/fulfillments/$id/chat';
+  static String bloodFulfillmentReceived(String id) =>
+      'api/v1/blood/fulfillments/$id/received';
   static final String bloodDonors = 'api/v1/blood/donors';
   static final String bloodDonorsNearest = 'api/v1/blood/donors/nearest';
   static final String bloodDonorsLeaderboard = 'api/v1/blood/donors/leaderboard';

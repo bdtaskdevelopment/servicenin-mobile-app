@@ -1,6 +1,7 @@
 import '../../core/values/app_url.dart';
 import '../models/response/auth_response.dart';
 import '../models/response/blood_request_response.dart';
+import '../models/response/blood_responder_response.dart';
 import '../models/response/blood_response_response.dart';
 import '../models/response/chat_message_response.dart';
 import '../models/response/donor_response.dart';
@@ -82,6 +83,26 @@ class BloodRepository {
   Future<List<BloodRequestEntry>> fetchRequests() async {
     final res = await provider.getData(ApiURL.bloodRequests);
     return BloodRequestEntry.listFromResponse(_payload(res));
+  }
+
+  /// GET /api/v1/blood/requests/my — the requests I created.
+  Future<List<BloodRequestEntry>> fetchMyRequests() async {
+    final res = await provider.getData(ApiURL.bloodRequestsMy);
+    return BloodRequestEntry.listFromResponse(_payload(res));
+  }
+
+  /// GET /api/v1/blood/requests/:id/responders — donors who responded.
+  Future<List<BloodResponder>> fetchResponders(String requestId) async {
+    final res =
+        await provider.getData(ApiURL.bloodRequestResponders(requestId));
+    return BloodResponder.listFromResponse(_payload(res));
+  }
+
+  /// POST /api/v1/blood/fulfillments/:id/received — confirm blood received.
+  Future<AuthSimpleResponse> confirmReceived(String fulfillmentId) async {
+    final res = await provider
+        .postData(ApiURL.bloodFulfillmentReceived(fulfillmentId), {});
+    return AuthSimpleResponse.fromMap(_payload(res));
   }
 
   /// POST /api/v1/blood/requests/:id/respond — offer to donate.

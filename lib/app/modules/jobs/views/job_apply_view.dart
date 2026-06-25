@@ -86,7 +86,7 @@ class JobApplyView extends GetView<JobsController> {
                     //   ),
                     // ),
                     // const SizedBox(height: 18),
-                    _Label('RESUME'.tr),
+                    _Label('${'RESUME'.tr} *'),
                     const SizedBox(height: 10),
                     GestureDetector(
                       onTap: con.uploadingResume
@@ -130,7 +130,7 @@ class JobApplyView extends GetView<JobsController> {
                                   Text(
                                       con.resumeName.isNotEmpty
                                           ? 'Tap to replace'.tr
-                                          : 'Image of CV (jpg/png)'.tr,
+                                          : 'PDF, DOC or DOCX'.tr,
                                       style: const TextStyle(
                                           fontSize: 12,
                                           color: Color(0xFF94A3B8))),

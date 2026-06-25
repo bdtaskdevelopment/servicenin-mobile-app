@@ -95,6 +95,8 @@ abstract class Routes {
   static const EMERGENCY_CONTACTS = _Paths.EMERGENCY_CONTACTS;
   static const BLOOD_REQUESTS = _Paths.BLOOD_REQUESTS;
   static const BLOOD_REQUEST_DETAIL = _Paths.BLOOD_REQUEST_DETAIL;
+  static const BLOOD_MY_REQUESTS = _Paths.BLOOD_MY_REQUESTS;
+  static const BLOOD_RESPONDERS = _Paths.BLOOD_RESPONDERS;
   static const BLOOD_NEED = _Paths.BLOOD_NEED;
   static const BLOOD_FINDING = _Paths.BLOOD_FINDING;
   static const BLOOD_TRACKING = _Paths.BLOOD_TRACKING;
@@ -231,6 +233,8 @@ abstract class _Paths {
   static const EMERGENCY_CONTACTS = '/emergency-contacts';
   static const BLOOD_REQUESTS = '/blood-requests';
   static const BLOOD_REQUEST_DETAIL = '/blood-request-detail';
+  static const BLOOD_MY_REQUESTS = '/blood-my-requests';
+  static const BLOOD_RESPONDERS = '/blood-responders';
   static const BLOOD_NEED = '/blood-need';
   static const BLOOD_FINDING = '/blood-finding';
   static const BLOOD_TRACKING = '/blood-tracking';
