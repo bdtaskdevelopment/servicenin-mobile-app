@@ -1,8 +1,10 @@
 import 'package:animate_do/animate_do.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../../core/values/app_colors.dart';
+import '../../../core/values/app_config.dart';
 import '../../../data/models/response/service_response.dart';
 import '../../../global_widget/sn_shimmer.dart';
 import '../controllers/home_service_controller.dart';
@@ -10,6 +12,26 @@ import '../controllers/home_service_controller.dart';
 const _teal = Color(0xFF0E9F8E);
 const _darkTeal = Color(0xFF0E7C6B);
 const _tile = Color(0xFFE0F2EF);
+
+/// Build an absolute URL for a provider photo, which may be absolute or a
+/// server-relative path (`/static/uploads/...`).
+String _providerPhotoUrl(String path) {
+  if (path.isEmpty) return '';
+  if (path.startsWith('http')) return path;
+  final base = AppConfig.baseUrl.endsWith('/')
+      ? AppConfig.baseUrl.substring(0, AppConfig.baseUrl.length - 1)
+      : AppConfig.baseUrl;
+  return path.startsWith('/') ? '$base$path' : '$base/$path';
+}
+
+Future<void> _callProvider(String phone) async {
+  final digits = phone.trim();
+  if (digits.isEmpty) return;
+  try {
+    await launchUrl(Uri.parse('tel:$digits'),
+        mode: LaunchMode.externalApplication);
+  } catch (_) {}
+}
 
 class HsMyBookingsView extends GetView<HomeServiceController> {
   const HsMyBookingsView({super.key});
@@ -124,15 +146,20 @@ class _BookingCard extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(b.title,
-                        maxLines: 1,
+                    Text(b.servicesLabel,
+                        maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                         style: const TextStyle(
                             fontSize: 14.5,
                             fontWeight: FontWeight.w800,
                             color: Color(0xFF0F172A))),
                     const SizedBox(height: 2),
-                    Text(b.invoiceNo,
+                    Text(
+                        b.categoriesLabel.isNotEmpty
+                            ? '${b.categoriesLabel} · ${b.invoiceNo}'
+                            : b.invoiceNo,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                         style: const TextStyle(
                             fontSize: 11.5, color: Color(0xFF94A3B8))),
                   ],
@@ -141,6 +168,10 @@ class _BookingCard extends StatelessWidget {
               _StatusChip(status: b.status),
             ],
           ),
+          if (b.provider != null) ...[
+            const SizedBox(height: 12),
+            _ProviderRow(provider: b.provider!),
+          ],
           const Padding(
             padding: EdgeInsets.symmetric(vertical: 12),
             child: Divider(height: 1, color: Color(0xFFF1F5F9)),
@@ -168,6 +199,93 @@ class _BookingCard extends StatelessWidget {
       ),
     );
   }
+}
+
+/// Assigned provider strip: photo/initials, name, rating + a call button.
+class _ProviderRow extends StatelessWidget {
+  const _ProviderRow({required this.provider});
+  final ServiceBookingProvider provider;
+
+  @override
+  Widget build(BuildContext context) {
+    final photo = _providerPhotoUrl(provider.photoUrl);
+    return Container(
+      padding: const EdgeInsets.all(10),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF7FAF9),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: const Color(0xFFE6F0EE)),
+      ),
+      child: Row(
+        children: [
+          ClipRRect(
+            borderRadius: BorderRadius.circular(10),
+            child: SizedBox(
+              width: 38,
+              height: 38,
+              child: photo.isNotEmpty
+                  ? Image.network(photo,
+                      fit: BoxFit.cover,
+                      errorBuilder: (_, _, _) => _initials())
+                  : _initials(),
+            ),
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(provider.displayName,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                        fontSize: 13.5,
+                        fontWeight: FontWeight.w800,
+                        color: Color(0xFF0F172A))),
+                const SizedBox(height: 1),
+                Row(
+                  children: [
+                    const Icon(Icons.star_rounded,
+                        size: 14, color: Color(0xFFF59E0B)),
+                    const SizedBox(width: 2),
+                    Text(provider.ratingLabel,
+                        style: const TextStyle(
+                            fontSize: 11.5,
+                            fontWeight: FontWeight.w700,
+                            color: Color(0xFF64748B))),
+                    if (provider.totalJobs > 0)
+                      Text('  ·  ${provider.totalJobs} ${'jobs'.tr}',
+                          style: const TextStyle(
+                              fontSize: 11.5, color: Color(0xFF94A3B8))),
+                  ],
+                ),
+              ],
+            ),
+          ),
+          if (provider.phone.isNotEmpty)
+            GestureDetector(
+              onTap: () => _callProvider(provider.phone),
+              child: Container(
+                width: 38,
+                height: 38,
+                decoration: BoxDecoration(
+                    color: _darkTeal, borderRadius: BorderRadius.circular(10)),
+                child: const Icon(Icons.call_rounded,
+                    size: 18, color: Colors.white),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
+  Widget _initials() => Container(
+        color: _tile,
+        alignment: Alignment.center,
+        child: Text(provider.initials,
+            style: const TextStyle(
+                color: _teal, fontSize: 13, fontWeight: FontWeight.w800)),
+      );
 }
 
 class _StatusChip extends StatelessWidget {

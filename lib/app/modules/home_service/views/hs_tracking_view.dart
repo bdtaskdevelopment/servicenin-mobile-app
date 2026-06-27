@@ -20,26 +20,47 @@ class HsTrackingView extends GetView<HomeServiceController> {
       backgroundColor: AppColors.white,
       body: GetBuilder<HomeServiceController>(
         builder: (con) {
-          // Latest provider location from the timeline (if shared).
-          LatLng center = const LatLng(23.78, 90.40);
-          bool hasLoc = false;
-          for (final t in con.timeline) {
-            if (t.lat != null && t.lng != null) {
-              center = LatLng(t.lat!, t.lng!);
-              hasLoc = true;
+          final b = con.trackedBooking;
+          // Provider location — prefer the booking's provider_lat/lng, else the
+          // latest point shared on the timeline.
+          LatLng? providerPt;
+          if (b != null && b.hasProviderLocation) {
+            providerPt = LatLng(b.providerLat!, b.providerLng!);
+          } else {
+            for (final t in con.timeline) {
+              if (t.lat != null && t.lng != null) {
+                providerPt = LatLng(t.lat!, t.lng!);
+              }
             }
           }
+          final userPt =
+              con.hasUserLocation ? LatLng(con.userLat!, con.userLng!) : null;
+          final hasLoc = providerPt != null;
+          // Center on the midpoint when we have both points, else the provider.
+          final LatLng center = (providerPt != null && userPt != null)
+              ? LatLng((providerPt.latitude + userPt.latitude) / 2,
+                  (providerPt.longitude + userPt.longitude) / 2)
+              : (providerPt ?? const LatLng(23.78, 90.40));
+          final double zoom = (providerPt != null && userPt != null)
+              ? 12.5
+              : (hasLoc ? 14 : 11);
           return Stack(
             children: [
               Positioned.fill(
                 child: SnMap(
                   center: center,
-                  zoom: hasLoc ? 14 : 11,
+                  zoom: zoom,
                   interactive: false,
+                  route: (providerPt != null && userPt != null)
+                      ? [userPt, providerPt]
+                      : const [],
                   markers: [
-                    if (hasLoc)
-                      SnMapMarker(center, _darkTeal,
+                    if (providerPt != null)
+                      SnMapMarker(providerPt, _darkTeal,
                           Icons.engineering_rounded),
+                    if (userPt != null)
+                      SnMapMarker(userPt, const Color(0xFF2563EB),
+                          Icons.my_location_rounded),
                   ],
                 ),
               ),
@@ -64,13 +85,35 @@ class HsTrackingView extends GetView<HomeServiceController> {
                             ]),
                         child: Text(
                             hasLoc
-                                ? 'Provider location · live'.tr
+                                ? (con.providerDistanceLabel.isNotEmpty
+                                    ? '${'Provider'.tr} · ${con.providerDistanceLabel}'
+                                    : 'Provider location · live'.tr)
                                 : 'Waiting for provider location'.tr,
                             style: const TextStyle(
                                 fontSize: 12.5,
                                 fontWeight: FontWeight.w700,
                                 color: Color(0xFF0F172A))),
                       ),
+                      const SizedBox(width: 10),
+                      con.loadingTrack
+                          ? Container(
+                              width: 42,
+                              height: 42,
+                              decoration: BoxDecoration(
+                                  color: AppColors.white,
+                                  shape: BoxShape.circle,
+                                  boxShadow: [
+                                    BoxShadow(
+                                        color:
+                                            Colors.black.withValues(alpha: 0.1),
+                                        blurRadius: 8)
+                                  ]),
+                              padding: const EdgeInsets.all(11),
+                              child: const CircularProgressIndicator(
+                                  strokeWidth: 2.4, color: _darkTeal),
+                            )
+                          : _round(Icons.refresh_rounded,
+                              con.refreshTracking),
                     ],
                   ),
                 ),
@@ -122,6 +165,32 @@ class HsTrackingView extends GetView<HomeServiceController> {
                           // Text(con.whenSummary,
                           //     style: const TextStyle(
                           //         fontSize: 12.5, color: Color(0xFF94A3B8))),
+                          if (con.providerDistanceLabel.isNotEmpty) ...[
+                            const SizedBox(height: 10),
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 12, vertical: 8),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFFEAF7F4),
+                                borderRadius: BorderRadius.circular(10),
+                                border:
+                                    Border.all(color: const Color(0xFFCDEBE4)),
+                              ),
+                              child: Row(
+                                children: [
+                                  const Icon(Icons.near_me_rounded,
+                                      size: 16, color: _darkTeal),
+                                  const SizedBox(width: 8),
+                                  Text(
+                                      '${'Provider is'.tr} ${con.providerDistanceLabel} ${'from you'.tr}',
+                                      style: const TextStyle(
+                                          fontSize: 12.5,
+                                          fontWeight: FontWeight.w700,
+                                          color: Color(0xFF0F4D40))),
+                                ],
+                              ),
+                            ),
+                          ],
                           const SizedBox(height: 14),
                           Row(
                             children: [

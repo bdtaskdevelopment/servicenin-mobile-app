@@ -259,6 +259,49 @@ class ServiceBookingItem {
   }
 }
 
+/// The provider assigned to a booking (present once `status == assigned`).
+class ServiceBookingProvider {
+  ServiceBookingProvider({
+    required this.id,
+    required this.fullName,
+    required this.phone,
+    required this.photoUrl,
+    required this.rating,
+    required this.totalJobs,
+    required this.skills,
+  });
+
+  final String id;
+  final String fullName;
+  final String phone;
+  final String photoUrl;
+  final double rating;
+  final int totalJobs;
+  final String skills;
+
+  String get displayName => fullName.isNotEmpty ? fullName : 'Service provider';
+  String get ratingLabel => rating > 0 ? rating.toStringAsFixed(1) : '—';
+
+  String get initials {
+    final parts =
+        displayName.trim().split(RegExp(r'\s+')).where((p) => p.isNotEmpty);
+    if (parts.isEmpty) return 'SP';
+    if (parts.length == 1) return parts.first[0].toUpperCase();
+    return (parts.first[0] + parts.last[0]).toUpperCase();
+  }
+
+  factory ServiceBookingProvider.fromMap(Map<String, dynamic> j) =>
+      ServiceBookingProvider(
+        id: _str(j['id']),
+        fullName: _str(j['full_name']),
+        phone: _str(j['phone']),
+        photoUrl: _str(j['photo_url']),
+        rating: _dbl(j['rating']) ?? 0,
+        totalJobs: _int(j['total_jobs']),
+        skills: _str(j['skills']),
+      );
+}
+
 class ServiceBooking {
   ServiceBooking({
     required this.id,
@@ -278,6 +321,13 @@ class ServiceBooking {
     required this.categoryName,
     required this.subServiceName,
     required this.items,
+    required this.servicesSummary,
+    required this.categoryNames,
+    required this.isMultiCategory,
+    this.provider,
+    this.providerLat,
+    this.providerLng,
+    this.locationUpdatedAt,
     this.scheduledAt,
     this.createdAt,
   });
@@ -299,8 +349,18 @@ class ServiceBooking {
   final String categoryName;
   final String subServiceName;
   final List<ServiceBookingItem> items;
+  final String servicesSummary;
+  final List<String> categoryNames;
+  final bool isMultiCategory;
+  final ServiceBookingProvider? provider;
+  final double? providerLat;
+  final double? providerLng;
+  final DateTime? locationUpdatedAt;
   final DateTime? scheduledAt;
   final DateTime? createdAt;
+
+  /// True when the provider has shared a GPS location for live tracking.
+  bool get hasProviderLocation => providerLat != null && providerLng != null;
 
   String get amountLabel => '৳$amount';
   String get subtotalLabel => '৳$subtotal';
@@ -309,6 +369,15 @@ class ServiceBooking {
   String get title => subServiceName.isNotEmpty
       ? subServiceName
       : (categoryName.isNotEmpty ? categoryName : 'Service');
+
+  /// All services on the booking — uses the server `services_summary`
+  /// (e.g. "Gas Refill (R-32), Wall cleaning") so multi-category bookings show
+  /// every service, falling back to the single title.
+  String get servicesLabel =>
+      servicesSummary.isNotEmpty ? servicesSummary : title;
+
+  /// Comma-joined category names (e.g. "AC Repair · Home Cleaning").
+  String get categoriesLabel => categoryNames.join(' · ');
 
   String get whenLabel {
     final dt = scheduledAt?.toLocal();
@@ -338,6 +407,10 @@ class ServiceBooking {
     final cat = j['category'] is Map ? j['category'] as Map : const {};
     final sub = j['sub_service'] is Map ? j['sub_service'] as Map : const {};
     final itemsRaw = j['items'] is List ? j['items'] as List : const [];
+    final catNamesRaw =
+        j['category_names'] is List ? j['category_names'] as List : const [];
+    final prov = j['provider'] is Map ? j['provider'] as Map : null;
+    final locUpdated = _str(j['location_updated_at']);
     final sched = _str(j['scheduled_at']);
     final created = _str(j['created_at']);
     return ServiceBooking(
@@ -361,6 +434,16 @@ class ServiceBooking {
           .whereType<Map>()
           .map((e) => ServiceBookingItem.fromMap(e.cast<String, dynamic>()))
           .toList(),
+      servicesSummary: _str(j['services_summary']),
+      categoryNames:
+          catNamesRaw.map((e) => _str(e)).where((s) => s.isNotEmpty).toList(),
+      isMultiCategory: j['is_multi_category'] == true,
+      provider:
+          prov == null ? null : ServiceBookingProvider.fromMap(prov.cast<String, dynamic>()),
+      providerLat: _dbl(j['provider_lat']),
+      providerLng: _dbl(j['provider_lng']),
+      locationUpdatedAt:
+          locUpdated.isEmpty ? null : DateTime.tryParse(locUpdated),
       scheduledAt: sched.isEmpty ? null : DateTime.tryParse(sched),
       createdAt: created.isEmpty ? null : DateTime.tryParse(created),
     );

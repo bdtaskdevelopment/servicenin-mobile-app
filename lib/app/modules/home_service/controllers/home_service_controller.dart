@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
 
+import '../../../core/helpers/location_helper.dart';
 import '../../../core/helpers/snack_helper.dart';
 import '../../../core/helpers/sslcommerz_helper.dart';
 import '../../../data/models/response/service_response.dart';
@@ -368,6 +370,19 @@ class HomeServiceController extends GetxController {
   List<ServiceTimelineEntry> timeline = [];
   bool loadingTrack = false;
 
+  // The user's location + how far the assigned provider is (computed from the
+  // booking's provider_lat/lng on the tracking screen).
+  double? userLat;
+  double? userLng;
+  double? providerDistanceKm;
+
+  bool get hasUserLocation => userLat != null && userLng != null;
+
+  /// "1.8 km away" label for the provider, or '' when not computable.
+  String get providerDistanceLabel => providerDistanceKm == null
+      ? ''
+      : '${providerDistanceKm!.toStringAsFixed(1)} km away';
+
   // ── My bookings ─────────────────────────────────────────────────────
   List<ServiceBooking> myBookings = [];
   bool loadingMyBookings = false;
@@ -576,6 +591,13 @@ class HomeServiceController extends GetxController {
     await _loadTrack(b.id);
   }
 
+  /// Manual refresh from the tracking screen — re-pulls the booking (and the
+  /// provider's latest location) and recomputes the distance.
+  Future<void> refreshTracking() async {
+    final id = trackedBooking?.id ?? lastBooking?.id ?? '';
+    if (id.isNotEmpty) await _loadTrack(id);
+  }
+
   Future<void> _loadTrack(String id) async {
     loadingTrack = true;
     update();
@@ -589,6 +611,34 @@ class HomeServiceController extends GetxController {
       loadingTrack = false;
       update();
     }
+    // Compute the distance from the user to the provider (best-effort, after
+    // the main load so a slow GPS fix doesn't block the screen).
+    _updateProviderDistance();
+  }
+
+  /// Get the user's location and compute the straight-line distance to the
+  /// assigned provider's shared location. No-op when either is unavailable.
+  Future<void> _updateProviderDistance() async {
+    final b = trackedBooking;
+    if (b == null || !b.hasProviderLocation) {
+      providerDistanceKm = null;
+      update();
+      return;
+    }
+    final pos = await LocationService.getCurrentPosition();
+    final lat = pos?.latitude ?? LocationService.cachedLat;
+    final lng = pos?.longitude ?? LocationService.cachedLng;
+    if (lat == null || lng == null) {
+      providerDistanceKm = null;
+      update();
+      return;
+    }
+    userLat = lat;
+    userLng = lng;
+    final meters =
+        Geolocator.distanceBetween(lat, lng, b.providerLat!, b.providerLng!);
+    providerDistanceKm = meters / 1000.0;
+    update();
   }
 
   Future<void> fetchMyBookings() async {
