@@ -9,6 +9,8 @@ dynamic _decode(dynamic src) => src is String ? jsonDecode(src) : src;
 String _str(dynamic v) => v?.toString().trim() ?? '';
 int _int(dynamic v) =>
     v is int ? v : int.tryParse(_str(v)) ?? (v is num ? v.toInt() : 0);
+double? _doubleOrNull(dynamic v) =>
+    v is num ? v.toDouble() : double.tryParse(_str(v));
 
 /// A booking from `/api/v1/ambulance/bookings` (list + create response).
 class AmbulanceBookingEntry {
@@ -22,9 +24,13 @@ class AmbulanceBookingEntry {
     required this.pickupAddress,
     required this.pickupDivision,
     required this.pickupZilla,
+    this.pickupLat,
+    this.pickupLng,
     required this.destination,
     required this.dropDivision,
     required this.dropZilla,
+    this.destLat,
+    this.destLng,
     required this.distanceKm,
     required this.estimatedFare,
     required this.totalFare,
@@ -44,9 +50,13 @@ class AmbulanceBookingEntry {
   final String pickupAddress;
   final String pickupDivision;
   final String pickupZilla;
+  final double? pickupLat;
+  final double? pickupLng;
   final String destination;
   final String dropDivision;
   final String dropZilla;
+  final double? destLat;
+  final double? destLng;
   final int distanceKm;
   final int estimatedFare;
   final int totalFare;
@@ -101,9 +111,13 @@ class AmbulanceBookingEntry {
       pickupAddress: _str(json['pickup_address']),
       pickupDivision: _str(json['pickup_division']),
       pickupZilla: _str(json['pickup_zilla']),
+      pickupLat: _doubleOrNull(json['pickup_lat']),
+      pickupLng: _doubleOrNull(json['pickup_lng']),
       destination: _str(json['destination']),
       dropDivision: _str(json['drop_division']),
       dropZilla: _str(json['drop_zilla']),
+      destLat: _doubleOrNull(json['dest_lat']),
+      destLng: _doubleOrNull(json['dest_lng']),
       distanceKm: _int(json['distance_km']),
       estimatedFare: _int(json['estimated_fare']),
       totalFare: _int(json['total_fare']),

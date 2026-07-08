@@ -2,11 +2,15 @@ import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 import 'package:latlong2/latlong.dart';
 
+import '../../../core/helpers/location_helper.dart';
 import '../../../core/helpers/snack_helper.dart';
 import '../../../core/values/bd_geo.dart';
 import '../../../data/models/response/ambulance_booking_response.dart';
 import '../../../data/models/response/ambulance_response.dart';
+import '../../../data/models/sn_place.dart';
 import '../../../data/repositories/ambulance.repo.dart';
+import '../../../data/services/geo_search.service.dart';
+import '../../../data/services/route_planner.service.dart';
 import '../../../routes/app_pages.dart';
 import 'fare_controller.dart';
 
@@ -21,21 +25,24 @@ class AmbulanceController extends GetxController {
   List<AmbulanceBookingEntry> bookings = [];
   bool loadingBookings = false;
 
-  // ── Locations (GET /api/v1/locations/…) ─────────────────────────────
-  List<String> divisions = [];
-  List<String> pickupDistricts = [];
-  List<String> dropDistricts = [];
-  String pickupDivision = '';
-  String pickupZilla = '';
-  String dropDivision = '';
-  String dropZilla = '';
-  bool loadingLocations = false;
-
   /// The ambulance tapped from a list — carried into the fare screen.
   Ambulance? selectedAmbulance;
 
   /// The most recently confirmed booking — shown on the confirmed screen.
   AmbulanceBookingEntry? lastBooking;
+
+  // ── Pickup / destination (address search) ────────────────────────────
+  SnPlace? pickupPlace;
+  SnPlace? dropPlace;
+  bool loadingPickup = false;
+
+  /// The road route between pickup and destination, drawn on the map.
+  List<LatLng> routePoints = [];
+  double routeDistanceKm = 0;
+  double routeDurationMin = 0;
+  bool loadingRoute = false;
+
+  bool get hasTrip => pickupPlace != null && dropPlace != null;
 
   /// Called when pickup/destination change, so the fare screen can re-estimate.
   VoidCallback? onTripChanged;
@@ -45,12 +52,12 @@ class AmbulanceController extends GetxController {
     super.onInit();
     fetchAvailable();
     fetchBookings();
-    loadLocations();
+    _initDefaultPickup();
   }
 
-  // ── Map points (derived from the selected division/zilla names) ──────
-  LatLng get pickupPoint => BdGeo.point(pickupZilla, pickupDivision);
-  LatLng get destPoint => BdGeo.point(dropZilla, dropDivision);
+  // ── Map points (fall back to the Bangladesh centroid until chosen) ───
+  LatLng get pickupPoint => pickupPlace?.point ?? BdGeo.country;
+  LatLng get destPoint => dropPlace?.point ?? BdGeo.country;
 
   Future<void> fetchAvailable() async {
     loadingAvailable = true;
@@ -78,68 +85,53 @@ class AmbulanceController extends GetxController {
     }
   }
 
-  Future<void> loadLocations() async {
-    if (divisions.isNotEmpty) return; // already loaded
-    loadingLocations = true;
+  /// Defaults pickup to the device's current GPS position, reverse-geocoded
+  /// to a readable address. Silently does nothing if location is unavailable
+  /// or denied — the user can still search pickup manually.
+  Future<void> _initDefaultPickup() async {
+    loadingPickup = true;
     update();
     try {
-      divisions = await _repo.fetchDivisions();
-      if (divisions.isNotEmpty) {
-        pickupDivision = divisions.first;
-        dropDivision = divisions.first;
-        pickupDistricts = await _repo.fetchDistricts(pickupDivision);
-        dropDistricts = List<String>.from(pickupDistricts);
-        if (pickupDistricts.isNotEmpty) pickupZilla = pickupDistricts.first;
-        // default the destination to a different district when possible
-        if (dropDistricts.length > 1) {
-          dropZilla = dropDistricts[1];
-        } else if (dropDistricts.isNotEmpty) {
-          dropZilla = dropDistricts.first;
-        }
-      }
-    } catch (e) {
-      SnackHelper.error(e.toString().replaceFirst('Exception: ', ''));
-    } finally {
-      loadingLocations = false;
+      final pos = await LocationService.getCurrentPosition();
+      if (pos == null) return;
+      final point = LatLng(pos.latitude, pos.longitude);
+      final address = await GeoSearchService.instance.reverse(point);
+      pickupPlace = SnPlace(
+        label: address ?? 'My current location'.tr,
+        address: address ?? 'My current location'.tr,
+        point: point,
+      );
       update();
-      onTripChanged?.call(); // estimate once a default trip is known
+      await _updateRoute();
+    } finally {
+      loadingPickup = false;
+      update();
     }
   }
 
-  Future<void> setPickupDivision(String div) async {
-    if (div == pickupDivision) return;
-    pickupDivision = div;
-    pickupZilla = '';
+  Future<void> setPickupPlace(SnPlace place) async {
+    pickupPlace = place;
     update();
-    try {
-      pickupDistricts = await _repo.fetchDistricts(div);
-      if (pickupDistricts.isNotEmpty) pickupZilla = pickupDistricts.first;
-    } catch (_) {}
-    update();
-    onTripChanged?.call();
+    await _updateRoute();
   }
 
-  void setPickupZilla(String z) {
-    pickupZilla = z;
+  Future<void> setDropPlace(SnPlace place) async {
+    dropPlace = place;
     update();
-    onTripChanged?.call();
+    await _updateRoute();
   }
 
-  Future<void> setDropDivision(String div) async {
-    if (div == dropDivision) return;
-    dropDivision = div;
-    dropZilla = '';
+  Future<void> _updateRoute() async {
+    final p = pickupPlace;
+    final d = dropPlace;
+    if (p == null || d == null) return;
+    loadingRoute = true;
     update();
-    try {
-      dropDistricts = await _repo.fetchDistricts(div);
-      if (dropDistricts.isNotEmpty) dropZilla = dropDistricts.first;
-    } catch (_) {}
-    update();
-    onTripChanged?.call();
-  }
-
-  void setDropZilla(String z) {
-    dropZilla = z;
+    final r = await RoutePlannerService.instance.route(p.point, d.point);
+    routePoints = r.points;
+    routeDistanceKm = r.distanceKm;
+    routeDurationMin = r.durationMin;
+    loadingRoute = false;
     update();
     onTripChanged?.call();
   }
@@ -173,10 +165,24 @@ class AmbulanceController extends GetxController {
   /// Open a past booking's summary/map.
   void trackBooking(AmbulanceBookingEntry b) {
     lastBooking = b;
-    pickupDivision = b.pickupDivision;
-    pickupZilla = b.pickupZilla;
-    dropDivision = b.dropDivision;
-    dropZilla = b.dropZilla;
+    pickupPlace = SnPlace(
+      label: b.pickupAddress.isNotEmpty
+          ? b.pickupAddress
+          : '${b.pickupZilla}, ${b.pickupDivision}',
+      address: b.pickupAddress,
+      point: (b.pickupLat != null && b.pickupLng != null)
+          ? LatLng(b.pickupLat!, b.pickupLng!)
+          : BdGeo.point(b.pickupZilla, b.pickupDivision),
+    );
+    dropPlace = SnPlace(
+      label:
+          b.destination.isNotEmpty ? b.destination : '${b.dropZilla}, ${b.dropDivision}',
+      address: b.destination,
+      point: (b.destLat != null && b.destLng != null)
+          ? LatLng(b.destLat!, b.destLng!)
+          : BdGeo.point(b.dropZilla, b.dropDivision),
+    );
+    routePoints = [pickupPlace!.point, dropPlace!.point];
     _livePos = null;
     update();
     Get.toNamed(Routes.AMBULANCE_CONFIRMED);

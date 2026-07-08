@@ -1,13 +1,15 @@
 import 'package:animate_do/animate_do.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:latlong2/latlong.dart';
 
 import '../../../core/values/app_colors.dart';
-import '../../../global_widget/sn_map.dart';
+import '../../../data/models/sn_place.dart';
+import '../../../global_widget/sn_map.dart' show SnMapMarker;
+import '../../../global_widget/sn_google_map.dart';
 import '../../../global_widget/sn_shimmer.dart';
 import '../controllers/ambulance_controller.dart';
 import '../controllers/fare_controller.dart';
+import 'place_search_view.dart';
 
 const _navy = Color(0xFF1E2A4A);
 const _red = Color(0xFFE23744);
@@ -23,49 +25,18 @@ class FareEstimateView extends GetView<FareController> {
       body: SafeArea(
         child: Column(
           children: [
-            // Header
-            Padding(
-              padding: const EdgeInsets.fromLTRB(8, 6, 16, 8),
-              child: Row(
-                children: [
-                  IconButton(
-                    splashRadius: 22,
-                    onPressed: () => Get.back(),
-                    icon: const Icon(Icons.arrow_back_ios_new_rounded,
-                        size: 20, color: Color(0xFF1A1A1A)),
-                  ),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text('Fare estimate'.tr,
-                          style: const TextStyle(
-                              fontSize: 19,
-                              fontWeight: FontWeight.w800,
-                              color: Color(0xFF0F172A))),
-                      const SizedBox(height: 1),
-                      Text('Cash on completion · No advance'.tr,
-                          style: const TextStyle(
-                              fontSize: 12, color: Color(0xFF94A3B8))),
-                    ],
-                  ),
-                ],
-              ),
+            // Search — pickup/destination, pinned at the top.
+            GetBuilder<AmbulanceController>(
+              builder: (amb) => _AddressPicker(con: amb),
+            ),
+            // Map — below the search, full road route.
+            GetBuilder<AmbulanceController>(
+              builder: (amb) => _MapCard(amb: amb),
             ),
             Expanded(
               child: ListView(
-                padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+                padding: const EdgeInsets.fromLTRB(16, 14, 16, 16),
                 children: [
-                  // Map + pickup/destination
-                  GetBuilder<AmbulanceController>(
-                    builder: (amb) => Column(
-                      children: [
-                        _MapCard(amb: amb),
-                        const SizedBox(height: 12),
-                        _LocationPicker(con: amb),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 14),
                   _Label('AMBULANCE TYPE'.tr),
                   const SizedBox(height: 10),
                   GetBuilder<FareController>(builder: (c) => _TypeSelector(c: c)),
@@ -141,254 +112,155 @@ class _MapCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final p = amb.pickupPoint;
     final d = amb.destPoint;
-    final mid = LatLng(
-        (p.latitude + d.latitude) / 2, (p.longitude + d.longitude) / 2);
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(16),
-      child: SizedBox(
-        height: 150,
-        child: SnMap(
-          center: mid,
-          zoom: 7.2,
-          interactive: false,
-          route: [p, d],
-          markers: [
-            SnMapMarker(p, _green, Icons.my_location_rounded),
+    final hasRoute = amb.hasTrip && amb.routePoints.length >= 2;
+    return SizedBox(
+      height: 260,
+      child: SnGoogleMap(
+        center: p,
+        zoom: 14,
+        interactive: true,
+        fitToRoute: hasRoute,
+        route: hasRoute ? amb.routePoints : const [],
+        markers: [
+          SnMapMarker(p, _green, Icons.my_location_rounded),
+          if (amb.dropPlace != null)
             SnMapMarker(d, _red, Icons.location_on_rounded),
-          ],
-        ),
+        ],
       ),
     );
   }
 }
 
-// ── Pickup + destination ────────────────────────────────────────────
-class _LocationPicker extends StatelessWidget {
-  const _LocationPicker({required this.con});
+// ── Pickup + destination (address search) — pinned at the top ────────
+class _AddressPicker extends StatelessWidget {
+  const _AddressPicker({required this.con});
   final AmbulanceController con;
+
+  Future<void> _search(String hint, void Function(SnPlace) onPicked) async {
+    final place =
+        await Get.to<SnPlace>(() => PlaceSearchView(title: hint));
+    if (place != null) onPicked(place);
+  }
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(14),
+      margin: const EdgeInsets.fromLTRB(12, 8, 12, 8),
+      padding: const EdgeInsets.fromLTRB(4, 10, 14, 10),
       decoration: BoxDecoration(
         color: AppColors.white,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFFEDEFF2)),
+        boxShadow: [
+          BoxShadow(color: Colors.black.withValues(alpha: 0.06), blurRadius: 10),
+        ],
       ),
-      child: Column(
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _LocBlock(
-            dotColor: _green,
-            label: 'PICKUP'.tr,
-            division: con.pickupDivision,
-            zilla: con.pickupZilla,
-            onDivision: () => _sheet(
-              title: 'Pickup division'.tr,
-              options: con.divisions,
-              selected: con.pickupDivision,
-              onSelect: con.setPickupDivision,
-            ),
-            onZilla: () => _sheet(
-              title: 'Pickup district'.tr,
-              options: con.pickupDistricts,
-              selected: con.pickupZilla,
-              onSelect: con.setPickupZilla,
+          IconButton(
+            splashRadius: 20,
+            onPressed: () => Get.back(),
+            icon: const Icon(Icons.arrow_back_ios_new_rounded,
+                size: 18, color: Color(0xFF1A1A1A)),
+          ),
+          Expanded(
+            child: Column(
+              children: [
+                _AddressRow(
+                  dotColor: _green,
+                  label: 'PICKUP'.tr,
+                  value: con.pickupPlace?.label,
+                  loading: con.loadingPickup,
+                  onTap: () =>
+                      _search('Search pickup location'.tr, con.setPickupPlace),
+                ),
+                const Padding(
+                  padding: EdgeInsets.symmetric(vertical: 8),
+                  child: Divider(height: 1, color: Color(0xFFF1F5F9)),
+                ),
+                _AddressRow(
+                  dotColor: _red,
+                  label: 'DESTINATION'.tr,
+                  value: con.dropPlace?.label,
+                  loading: false,
+                  onTap: () => _search('Search destination'.tr, con.setDropPlace),
+                ),
+              ],
             ),
           ),
-          const Padding(
-            padding: EdgeInsets.symmetric(vertical: 12),
-            child: Divider(height: 1, color: Color(0xFFF1F5F9)),
-          ),
-          _LocBlock(
-            dotColor: _red,
-            label: 'DESTINATION'.tr,
-            division: con.dropDivision,
-            zilla: con.dropZilla,
-            onDivision: () => _sheet(
-              title: 'Destination division'.tr,
-              options: con.divisions,
-              selected: con.dropDivision,
-              onSelect: con.setDropDivision,
-            ),
-            onZilla: () => _sheet(
-              title: 'Destination district'.tr,
-              options: con.dropDistricts,
-              selected: con.dropZilla,
-              onSelect: con.setDropZilla,
-            ),
+          IconButton(
+            splashRadius: 20,
+            onPressed: con.openBookings,
+            tooltip: 'Trip history'.tr,
+            icon: const Icon(Icons.history_rounded,
+                size: 22, color: Color(0xFF1A1A1A)),
           ),
         ],
       ),
     );
   }
-
-  void _sheet({
-    required String title,
-    required List<String> options,
-    required String selected,
-    required void Function(String) onSelect,
-  }) {
-    if (options.isEmpty) return;
-    Get.bottomSheet(
-      isScrollControlled: true,
-      Container(
-        constraints: BoxConstraints(maxHeight: Get.height * 0.7),
-        decoration: const BoxDecoration(
-          color: AppColors.white,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-        ),
-        padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Center(
-              child: Container(
-                width: 40,
-                height: 4,
-                decoration: BoxDecoration(
-                    color: const Color(0xFFE2E8F0),
-                    borderRadius: BorderRadius.circular(2)),
-              ),
-            ),
-            const SizedBox(height: 14),
-            Text(title,
-                style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w800,
-                    color: Color(0xFF0F172A))),
-            const SizedBox(height: 8),
-            Flexible(
-              child: ListView(
-                shrinkWrap: true,
-                padding: EdgeInsets.only(
-                    bottom: MediaQuery.of(Get.context!).padding.bottom + 8),
-                children: options.map((o) {
-                  final sel = o == selected;
-                  return ListTile(
-                    contentPadding: EdgeInsets.zero,
-                    onTap: () {
-                      onSelect(o);
-                      Get.back();
-                    },
-                    title: Text(o,
-                        style: TextStyle(
-                            fontSize: 15,
-                            fontWeight: sel ? FontWeight.w800 : FontWeight.w500,
-                            color: sel ? _red : const Color(0xFF334155))),
-                    trailing: sel
-                        ? const Icon(Icons.check_rounded, color: _red)
-                        : null,
-                  );
-                }).toList(),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
 }
 
-class _LocBlock extends StatelessWidget {
-  const _LocBlock({
+class _AddressRow extends StatelessWidget {
+  const _AddressRow({
     required this.dotColor,
     required this.label,
-    required this.division,
-    required this.zilla,
-    required this.onDivision,
-    required this.onZilla,
+    required this.value,
+    required this.loading,
+    required this.onTap,
   });
   final Color dotColor;
   final String label;
-  final String division;
-  final String zilla;
-  final VoidCallback onDivision;
-  final VoidCallback onZilla;
+  final String? value;
+  final bool loading;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          children: [
-            Container(
+    return GestureDetector(
+      onTap: onTap,
+      behavior: HitTestBehavior.opaque,
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(top: 4),
+            child: Container(
               width: 10,
               height: 10,
               decoration:
                   BoxDecoration(color: dotColor, shape: BoxShape.circle),
             ),
-            const SizedBox(width: 8),
-            Text(label,
-                style: const TextStyle(
-                    fontSize: 11,
-                    fontWeight: FontWeight.w700,
-                    color: Color(0xFF94A3B8),
-                    letterSpacing: 0.6)),
-          ],
-        ),
-        const SizedBox(height: 8),
-        Row(
-          children: [
-            Expanded(
-                child: _DropChip(
-                    label: 'Division'.tr, value: division, onTap: onDivision)),
-            const SizedBox(width: 10),
-            Expanded(
-                child:
-                    _DropChip(label: 'District'.tr, value: zilla, onTap: onZilla)),
-          ],
-        ),
-      ],
-    );
-  }
-}
-
-class _DropChip extends StatelessWidget {
-  const _DropChip(
-      {required this.label, required this.value, required this.onTap});
-  final String label;
-  final String value;
-  final VoidCallback onTap;
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-        decoration: BoxDecoration(
-          color: const Color(0xFFF7F8FA),
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: const Color(0xFFE2E8F0)),
-        ),
-        child: Row(
-          children: [
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(label,
-                      style: const TextStyle(
-                          fontSize: 10,
-                          fontWeight: FontWeight.w600,
-                          color: Color(0xFF94A3B8))),
-                  const SizedBox(height: 2),
-                  Text(value.isEmpty ? '—' : value,
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(label,
+                    style: const TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w700,
+                        color: Color(0xFF94A3B8),
+                        letterSpacing: 0.6)),
+                const SizedBox(height: 3),
+                if (loading)
+                  const SnBone(width: 140, height: 14)
+                else
+                  Text(value ?? 'Search an address'.tr,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                          fontSize: 13.5,
+                      style: TextStyle(
+                          fontSize: 14.5,
                           fontWeight: FontWeight.w800,
-                          color: Color(0xFF0F172A))),
-                ],
-              ),
+                          color: value == null
+                              ? const Color(0xFF94A3B8)
+                              : const Color(0xFF0F172A))),
+              ],
             ),
-            const Icon(Icons.keyboard_arrow_down_rounded,
-                size: 20, color: Color(0xFF64748B)),
-          ],
-        ),
+          ),
+          const Icon(Icons.search_rounded, size: 20, color: Color(0xFF64748B)),
+        ],
       ),
     );
   }

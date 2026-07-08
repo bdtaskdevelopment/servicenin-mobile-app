@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:latlong2/latlong.dart';
 
 import '../../../core/values/app_colors.dart';
-import '../../../core/values/bd_geo.dart';
 import '../../../global_widget/sn_map.dart';
 import '../../../routes/app_pages.dart';
 import '../controllers/ambulance_controller.dart';
@@ -18,11 +16,9 @@ class BookingConfirmedView extends GetView<AmbulanceController> {
   @override
   Widget build(BuildContext context) {
     final b = controller.lastBooking;
-    final pickup =
-        BdGeo.point(b?.pickupZilla ?? '', b?.pickupDivision ?? '');
-    final drop = BdGeo.point(b?.dropZilla ?? '', b?.dropDivision ?? '');
-    final mid = LatLng((pickup.latitude + drop.latitude) / 2,
-        (pickup.longitude + drop.longitude) / 2);
+    final pickup = controller.pickupPoint;
+    final drop = controller.destPoint;
+    final hasRoute = controller.routePoints.length >= 2;
 
     return Scaffold(
       backgroundColor: const Color(0xFFF7F8FA),
@@ -37,10 +33,11 @@ class BookingConfirmedView extends GetView<AmbulanceController> {
               children: [
                 Positioned.fill(
                   child: SnMap(
-                    center: mid,
-                    zoom: 7,
+                    center: pickup,
+                    zoom: 13,
                     interactive: false,
-                    route: [pickup, drop],
+                    fitToRoute: hasRoute,
+                    route: hasRoute ? controller.routePoints : [pickup, drop],
                     markers: [
                       SnMapMarker(pickup, _green, Icons.my_location_rounded),
                       SnMapMarker(drop, _red, Icons.location_on_rounded),
@@ -54,8 +51,8 @@ class BookingConfirmedView extends GetView<AmbulanceController> {
                     child: Padding(
                       padding: const EdgeInsets.all(8),
                       child: InkWell(
-                        onTap: () => Get.until(
-                            (r) => r.settings.name == Routes.AMBULANCE),
+                        onTap: () => Get.offNamedUntil(
+                            Routes.AMBULANCE, (r) => r.isFirst),
                         customBorder: const CircleBorder(),
                         child: Container(
                           width: 40,
@@ -232,8 +229,8 @@ class BookingConfirmedView extends GetView<AmbulanceController> {
                         width: double.infinity,
                         height: 52,
                         child: OutlinedButton(
-                          onPressed: () => Get.until(
-                              (r) => Get.currentRoute == Routes.AMBULANCE),
+                          onPressed: () => Get.offNamedUntil(
+                              Routes.AMBULANCE, (r) => r.isFirst),
                           style: OutlinedButton.styleFrom(
                             foregroundColor: _navy,
                             side: const BorderSide(color: Color(0xFFE2E8F0)),

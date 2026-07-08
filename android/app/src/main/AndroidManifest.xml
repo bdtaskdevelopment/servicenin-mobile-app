@@ -9,6 +9,11 @@
         android:name="${applicationName}"
         android:usesCleartextTraffic="true"
         android:icon="@mipmap/ic_launcher">
+        <!-- Google Maps SDK key — value comes from android/local.properties
+             (MAPS_API_KEY), wired via manifestPlaceholders in build.gradle.kts. -->
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="${mapsApiKey}" />
         <activity
             android:name=".MainActivity"
             android:exported="true"

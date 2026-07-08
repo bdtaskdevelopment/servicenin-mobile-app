@@ -13,6 +13,7 @@ class SnMap extends StatelessWidget {
     this.route = const [],
     this.routeColor = const Color(0xFFE23744),
     this.interactive = true,
+    this.fitToRoute = false,
   });
 
   final LatLng center;
@@ -22,12 +23,23 @@ class SnMap extends StatelessWidget {
   final Color routeColor;
   final bool interactive;
 
+  /// When true and [route] has 2+ points, frames the camera to show the
+  /// whole route instead of using [center]/[zoom].
+  final bool fitToRoute;
+
   @override
   Widget build(BuildContext context) {
+    final canFit = fitToRoute && route.length >= 2;
     return FlutterMap(
       options: MapOptions(
         initialCenter: center,
         initialZoom: zoom,
+        initialCameraFit: canFit
+            ? CameraFit.bounds(
+                bounds: LatLngBounds.fromPoints(route),
+                padding: const EdgeInsets.fromLTRB(32, 40, 32, 40),
+              )
+            : null,
         interactionOptions: InteractionOptions(
           flags: interactive ? InteractiveFlag.all : InteractiveFlag.none,
         ),

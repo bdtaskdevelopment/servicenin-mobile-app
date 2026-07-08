@@ -148,9 +148,7 @@ class FareController extends GetxController {
 
   Future<void> estimate() async {
     final typeId = selectedTypeId;
-    if (typeId == null ||
-        _amb.pickupZilla.isEmpty ||
-        _amb.dropZilla.isEmpty) {
+    if (typeId == null || !_amb.hasTrip) {
       return;
     }
     loadingFare = true;
@@ -159,10 +157,7 @@ class FareController extends GetxController {
     try {
       fare = await _repo.estimateFare({
         'type_id': typeId,
-        'pickup_division': _amb.pickupDivision,
-        'pickup_zilla': _amb.pickupZilla,
-        'drop_division': _amb.dropDivision,
-        'drop_zilla': _amb.dropZilla,
+        'distance_km': _amb.routeDistanceKm,
         'is_emergency': isEmergency,
       });
     } catch (e) {
@@ -196,7 +191,7 @@ class FareController extends GetxController {
       SnackHelper.error('অ্যাম্বুলেন্স টাইপ নির্বাচন করুন');
       return;
     }
-    if (_amb.pickupZilla.isEmpty || _amb.dropZilla.isEmpty) {
+    if (!_amb.hasTrip) {
       SnackHelper.error('পিকআপ ও গন্তব্য নির্বাচন করুন');
       return;
     }
@@ -210,10 +205,13 @@ class FareController extends GetxController {
         'patient_name': patientNameCtrl.text.trim().isEmpty
             ? 'Patient'
             : patientNameCtrl.text.trim(),
-        'pickup_division': _amb.pickupDivision,
-        'pickup_zilla': _amb.pickupZilla,
-        'drop_division': _amb.dropDivision,
-        'drop_zilla': _amb.dropZilla,
+        'pickup_address': _amb.pickupPlace!.address,
+        'pickup_lat': _amb.pickupPlace!.point.latitude,
+        'pickup_lng': _amb.pickupPlace!.point.longitude,
+        'destination': _amb.dropPlace!.address,
+        'dest_lat': _amb.dropPlace!.point.latitude,
+        'dest_lng': _amb.dropPlace!.point.longitude,
+        'distance_km': _amb.routeDistanceKm,
         'payment_method': selectedMethod ?? 'cash',
         'booking_type': isEmergency ? 'emergency' : 'scheduled',
       };
