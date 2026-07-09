@@ -105,33 +105,35 @@ class _PlaceSearchViewState extends State<PlaceSearchView> {
                         borderRadius: BorderRadius.circular(12),
                         border: Border.all(color: const Color(0xFFE2E8F0)),
                       ),
-                      child: TextField(
-                        controller: _ctrl,
-                        focusNode: _focus,
-                        onChanged: _onChanged,
-                        textInputAction: TextInputAction.search,
-                        decoration: InputDecoration(
-                          isDense: true,
-                          border: InputBorder.none,
-                          hintText: widget.title,
-                          hintStyle:
-                              const TextStyle(fontSize: 14, color: Color(0xFF94A3B8)),
-                          suffixIcon: _ctrl.text.isEmpty
-                              ? null
-                              : IconButton(
-                                  splashRadius: 16,
-                                  icon: const Icon(Icons.close_rounded,
-                                      size: 18, color: Color(0xFF94A3B8)),
-                                  onPressed: () {
-                                    _ctrl.clear();
-                                    _onChanged('');
-                                  },
-                                ),
+                      child: Center(
+                        child: TextField(
+                          controller: _ctrl,
+                          focusNode: _focus,
+                          onChanged: _onChanged,
+                          textInputAction: TextInputAction.search,
+                          decoration: InputDecoration(
+                            isCollapsed: true,
+                            border: InputBorder.none,
+                            hintText: widget.title,
+                            hintStyle: const TextStyle(
+                                fontSize: 14, color: Color(0xFF94A3B8)),
+                            suffixIcon: _ctrl.text.isEmpty
+                                ? null
+                                : IconButton(
+                                    splashRadius: 16,
+                                    icon: const Icon(Icons.close_rounded,
+                                        size: 18, color: Color(0xFF94A3B8)),
+                                    onPressed: () {
+                                      _ctrl.clear();
+                                      _onChanged('');
+                                    },
+                                  ),
+                          ),
+                          style: const TextStyle(
+                              fontSize: 14.5,
+                              fontWeight: FontWeight.w600,
+                              color: Color(0xFF0F172A)),
                         ),
-                        style: const TextStyle(
-                            fontSize: 14.5,
-                            fontWeight: FontWeight.w600,
-                            color: Color(0xFF0F172A)),
                       ),
                     ),
                   ),

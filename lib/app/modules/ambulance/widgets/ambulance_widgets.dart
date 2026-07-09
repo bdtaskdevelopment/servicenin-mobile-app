@@ -6,6 +6,78 @@ import '../../../data/models/response/ambulance_booking_response.dart';
 import '../../../data/models/response/ambulance_response.dart';
 
 const _red = Color(0xFFE23744);
+const _navy = Color(0xFF1E2A4A);
+const _green = Color(0xFF16A34A);
+
+/// Popup shown right after a booking is created — a "Thank you" message
+/// with a single Done button the caller awaits before navigating on.
+class BookingThankYouDialog extends StatelessWidget {
+  const BookingThankYouDialog({super.key, required this.bookingNo});
+  final String bookingNo;
+
+  @override
+  Widget build(BuildContext context) {
+    return Dialog(
+      backgroundColor: Colors.transparent,
+      insetPadding: const EdgeInsets.symmetric(horizontal: 28),
+      child: Container(
+        padding: const EdgeInsets.fromLTRB(24, 28, 24, 20),
+        decoration: BoxDecoration(
+          color: AppColors.white,
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 64,
+              height: 64,
+              decoration: const BoxDecoration(
+                color: Color(0xFFDCFCE7),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(Icons.check_circle_rounded,
+                  color: _green, size: 36),
+            ),
+            const SizedBox(height: 16),
+            Text('Thank you!'.tr,
+                style: const TextStyle(
+                    fontSize: 19,
+                    fontWeight: FontWeight.w800,
+                    color: Color(0xFF0F172A))),
+            const SizedBox(height: 8),
+            Text(
+              bookingNo.isNotEmpty
+                  ? '${'Your ambulance booking has been confirmed.'.tr} ($bookingNo)'
+                  : 'Your ambulance booking has been confirmed.'.tr,
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                  fontSize: 13.5, color: Color(0xFF64748B), height: 1.4),
+            ),
+            const SizedBox(height: 22),
+            SizedBox(
+              width: double.infinity,
+              height: 50,
+              child: ElevatedButton(
+                onPressed: () => Get.back(),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: _navy,
+                  foregroundColor: Colors.white,
+                  elevation: 0,
+                  shape:
+                      RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                ),
+                child: Text('Done'.tr,
+                    style: const TextStyle(
+                        fontSize: 15.5, fontWeight: FontWeight.w800)),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
 
 /// A single available-ambulance card (front page + "see all" list).
 class AmbulanceCard extends StatelessWidget {
@@ -200,5 +272,86 @@ class BookingCard extends StatelessWidget {
   String _statusLabel(String s) {
     if (s.isEmpty) return 'Pending'.tr;
     return s[0].toUpperCase() + s.substring(1).replaceAll('_', ' ');
+  }
+}
+
+/// The "Hotline 1 / Hotline 2 / Hotline 3" strip — admin-configured numbers
+/// from `/api/v1/ambulance/hotlines`. Tapping a card dials that number.
+class HotlineStrip extends StatelessWidget {
+  const HotlineStrip(
+      {super.key, required this.hotlines, required this.onCall});
+  final List<AmbulanceHotline> hotlines;
+  final ValueChanged<String> onCall;
+
+  @override
+  Widget build(BuildContext context) {
+    if (hotlines.isEmpty) return const SizedBox.shrink();
+    return Row(
+      children: hotlines
+          .asMap()
+          .entries
+          .map((e) => Expanded(
+                child: Padding(
+                  padding: EdgeInsets.only(
+                      right: e.key == hotlines.length - 1 ? 0 : 10),
+                  child: _HotlineCard(
+                      hotline: e.value, onTap: () => onCall(e.value.number)),
+                ),
+              ))
+          .toList(),
+    );
+  }
+}
+
+class _HotlineCard extends StatelessWidget {
+  const _HotlineCard({required this.hotline, required this.onTap});
+  final AmbulanceHotline hotline;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 10),
+        decoration: BoxDecoration(
+          color: _red.withValues(alpha: 0.08),
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(color: _red.withValues(alpha: 0.18)),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                const Icon(Icons.call_rounded, color: _red, size: 15),
+                const SizedBox(width: 5),
+                Expanded(
+                  child: Text(
+                    hotline.label,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                        fontSize: 11.5,
+                        fontWeight: FontWeight.w700,
+                        color: Color(0xFF7A1520)),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 4),
+            Text(
+              hotline.number,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(
+                  fontSize: 14.5,
+                  fontWeight: FontWeight.w800,
+                  color: Color(0xFF0F172A)),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }

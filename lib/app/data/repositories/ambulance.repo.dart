@@ -68,6 +68,13 @@ class AmbulanceRepository {
     return FareEstimate.fromResponse(_payload(res));
   }
 
+  /// GET /api/v1/ambulance/hotlines — admin-configured hotline numbers
+  /// (Hotline 1, Hotline 2, Hotline 3).
+  Future<List<AmbulanceHotline>> fetchHotlines() async {
+    final res = await provider.getData(ApiURL.ambulanceHotlines);
+    return AmbulanceHotline.listFromResponse(_payload(res));
+  }
+
   /// GET /api/v1/ambulance/payment-methods — payment options.
   Future<List<PaymentMethodOption>> fetchPaymentMethods() async {
     final res = await provider.getData(ApiURL.ambulancePaymentMethods);

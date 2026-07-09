@@ -37,6 +37,7 @@ class AmbulanceView extends GetView<AmbulanceController> {
           await Future.wait([
             controller.fetchAvailable(),
             controller.fetchBookings(),
+            controller.fetchHotlines(),
           ]);
         },
         child: GetBuilder<AmbulanceController>(
@@ -44,6 +45,11 @@ class AmbulanceView extends GetView<AmbulanceController> {
             return ListView(
               padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
               children: [
+                if (con.hotlines.isNotEmpty) ...[
+                  HotlineStrip(
+                      hotlines: con.hotlines, onCall: con.callHotline),
+                  const SizedBox(height: 22),
+                ],
                 _SectionHeader(
                   title: 'Available ambulances'.tr,
                   onSeeAll: con.openSeeAll,

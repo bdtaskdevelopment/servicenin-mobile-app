@@ -11,6 +11,7 @@ import '../../../data/models/response/fare_estimate_response.dart';
 import '../../../data/repositories/ambulance.repo.dart';
 import '../../../data/services/storage.service.dart';
 import '../../../routes/app_pages.dart';
+import '../widgets/ambulance_widgets.dart';
 import 'ambulance_controller.dart';
 
 T? _firstOrNull<T>(Iterable<T> items, bool Function(T) test) {
@@ -231,6 +232,10 @@ class FareController extends GetxController {
       _paidPayment = null; // booking succeeded — payment consumed
       _amb.lastBooking = created;
       _amb.fetchBookings(); // refresh the recent-bookings list
+      await Get.dialog(
+        BookingThankYouDialog(bookingNo: created.bookingNo),
+        barrierDismissible: false,
+      );
       Get.toNamed(Routes.AMBULANCE_CONFIRMED);
     } catch (e) {
       SnackHelper.error(e.toString().replaceFirst('Exception: ', ''));

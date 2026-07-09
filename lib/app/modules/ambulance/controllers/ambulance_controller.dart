@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 import 'package:latlong2/latlong.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../../core/helpers/location_helper.dart';
 import '../../../core/helpers/snack_helper.dart';
@@ -24,6 +25,10 @@ class AmbulanceController extends GetxController {
   // ── Bookings (GET /api/v1/ambulance/bookings) ───────────────────────
   List<AmbulanceBookingEntry> bookings = [];
   bool loadingBookings = false;
+
+  // ── Hotlines (GET /api/v1/ambulance/hotlines) ───────────────────────
+  List<AmbulanceHotline> hotlines = [];
+  bool loadingHotlines = false;
 
   /// The ambulance tapped from a list — carried into the fare screen.
   Ambulance? selectedAmbulance;
@@ -57,6 +62,7 @@ class AmbulanceController extends GetxController {
     super.onInit();
     fetchAvailable();
     fetchBookings();
+    fetchHotlines();
     _initDefaultPickup();
   }
 
@@ -87,6 +93,31 @@ class AmbulanceController extends GetxController {
     } finally {
       loadingBookings = false;
       update();
+    }
+  }
+
+  Future<void> fetchHotlines() async {
+    loadingHotlines = true;
+    update();
+    try {
+      hotlines = await _repo.fetchHotlines();
+    } catch (e) {
+      // Silent — the hotline strip just doesn't render if this fails.
+    } finally {
+      loadingHotlines = false;
+      update();
+    }
+  }
+
+  /// Open the phone dialer for a hotline number.
+  Future<void> callHotline(String number) async {
+    final digits = number.trim();
+    if (digits.isEmpty) return;
+    final uri = Uri.parse('tel:$digits');
+    try {
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
+    } catch (_) {
+      SnackHelper.error('ডায়াল করা যায়নি');
     }
   }
 

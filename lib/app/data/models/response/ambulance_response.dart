@@ -148,3 +148,31 @@ class Ambulance {
         .toList();
   }
 }
+
+/// A hotline number from `/api/v1/ambulance/hotlines` (e.g. Hotline 1,
+/// Hotline 2, Hotline 3, configured by the admin under ambulance settings).
+class AmbulanceHotline {
+  AmbulanceHotline({required this.label, required this.number});
+
+  final String label;
+  final String number;
+
+  factory AmbulanceHotline.fromMap(Map<String, dynamic> json) {
+    return AmbulanceHotline(
+      label: _str(json['label']),
+      number: _str(json['number']),
+    );
+  }
+
+  static List<AmbulanceHotline> listFromResponse(dynamic src) {
+    final decoded = _decode(src);
+    final list = decoded is Map
+        ? (decoded['data'] is List ? decoded['data'] as List : const [])
+        : (decoded is List ? decoded : const []);
+    return list
+        .whereType<Map>()
+        .map((e) => AmbulanceHotline.fromMap(e.cast<String, dynamic>()))
+        .where((h) => h.number.isNotEmpty)
+        .toList();
+  }
+}

@@ -4,9 +4,11 @@ import 'package:get/get.dart';
 
 import '../../../core/values/app_colors.dart';
 import '../../../data/models/sn_place.dart';
+import '../../../global_widget/custom_app_bar.dart';
 import '../../../global_widget/sn_map.dart' show SnMapMarker;
 import '../../../global_widget/sn_google_map.dart';
 import '../../../global_widget/sn_shimmer.dart';
+import '../../../routes/app_pages.dart';
 import '../controllers/ambulance_controller.dart';
 import '../controllers/fare_controller.dart';
 import 'place_search_view.dart';
@@ -14,6 +16,8 @@ import 'place_search_view.dart';
 const _navy = Color(0xFF1E2A4A);
 const _red = Color(0xFFE23744);
 const _green = Color(0xFF16A34A);
+const _pickupBlue = Color(0xFF2563EB);
+const _routeBlue = Color(0xFF4285F4);
 
 class FareEstimateView extends GetView<FareController> {
   const FareEstimateView({super.key});
@@ -22,16 +26,41 @@ class FareEstimateView extends GetView<FareController> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF7F8FA),
+      appBar: CustomAppBar(
+        title: 'Book ambulance'.tr,
+        backgroundColor: AppColors.white,
+        actions: const [
+          Padding(
+            padding: EdgeInsets.only(right: 6),
+            child: _OverflowMenu(),
+          ),
+        ],
+      ),
       body: SafeArea(
+        top: false,
         child: Column(
           children: [
-            // Search — pickup/destination, pinned at the top.
-            GetBuilder<AmbulanceController>(
-              builder: (amb) => _AddressPicker(con: amb),
-            ),
-            // Map — below the search, full road route.
-            GetBuilder<AmbulanceController>(
-              builder: (amb) => _MapCard(amb: amb),
+            // Map fills the top of the screen; the pickup/destination
+            // search card floats on top of it.
+            SizedBox(
+              height: MediaQuery.of(context).size.height * 0.44,
+              child: Stack(
+                children: [
+                  Positioned.fill(
+                    child: GetBuilder<AmbulanceController>(
+                      builder: (amb) => _MapCard(amb: amb),
+                    ),
+                  ),
+                  Positioned(
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    child: GetBuilder<AmbulanceController>(
+                      builder: (amb) => _AddressPicker(con: amb),
+                    ),
+                  ),
+                ],
+              ),
             ),
             Expanded(
               child: ListView(
@@ -116,20 +145,18 @@ class _MapCard extends StatelessWidget {
     final p = amb.pickupPoint;
     final d = amb.destPoint;
     final hasRoute = amb.hasTrip && amb.routePoints.length >= 2;
-    return SizedBox(
-      height: 260,
-      child: SnGoogleMap(
-        center: p,
-        zoom: 14,
-        interactive: true,
-        fitToRoute: hasRoute,
-        route: hasRoute ? amb.routePoints : const [],
-        markers: [
-          SnMapMarker(p, _green, Icons.my_location_rounded),
-          if (amb.dropPlace != null)
-            SnMapMarker(d, _red, Icons.location_on_rounded),
-        ],
-      ),
+    return SnGoogleMap(
+      center: p,
+      zoom: 14,
+      interactive: true,
+      fitToRoute: hasRoute,
+      route: hasRoute ? amb.routePoints : const [],
+      routeColor: _routeBlue,
+      markers: [
+        SnMapMarker(p, _green, Icons.my_location_rounded),
+        if (amb.dropPlace != null)
+          SnMapMarker(d, _red, Icons.location_on_rounded),
+      ],
     );
   }
 }
@@ -147,124 +174,201 @@ class _AddressPicker extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.fromLTRB(12, 8, 12, 8),
-      padding: const EdgeInsets.fromLTRB(4, 10, 14, 10),
-      decoration: BoxDecoration(
-        color: AppColors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(color: Colors.black.withValues(alpha: 0.06), blurRadius: 10),
-        ],
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          IconButton(
-            splashRadius: 20,
-            onPressed: () => Get.back(),
-            icon: const Icon(Icons.arrow_back_ios_new_rounded,
-                size: 18, color: Color(0xFF1A1A1A)),
-          ),
-          Expanded(
-            child: Column(
-              children: [
-                _AddressRow(
-                  dotColor: _green,
-                  label: 'PICKUP'.tr,
-                  value: con.pickupPlace?.label,
-                  loading: con.loadingPickup,
-                  onTap: () =>
-                      _search('Search pickup location'.tr, con.setPickupPlace),
-                ),
-                const Padding(
-                  padding: EdgeInsets.symmetric(vertical: 8),
-                  child: Divider(height: 1, color: Color(0xFFF1F5F9)),
-                ),
-                _AddressRow(
-                  dotColor: _red,
-                  label: 'DESTINATION'.tr,
-                  value: con.dropPlace?.label,
-                  loading: false,
-                  onTap: () => _search('Search destination'.tr, con.setDropPlace),
-                ),
-              ],
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 10, 16, 10),
+      child: Container(
+        decoration: BoxDecoration(
+          color: AppColors.white,
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(color: const Color(0xFFE5E7EB)),
+        ),
+        child: Column(
+          children: [
+            _AddressField(
+              icon: Container(
+                width: 10,
+                height: 10,
+                decoration: const BoxDecoration(
+                    color: _pickupBlue, shape: BoxShape.circle),
+              ),
+              value: con.pickupPlace?.label,
+              placeholder: 'Your location'.tr,
+              loading: con.loadingPickup,
+              valueColor: _pickupBlue,
+              trailing: IconButton(
+                onPressed: () => _search(
+                    'Search pickup location'.tr, con.setPickupPlace),
+                splashRadius: 18,
+                icon: const Icon(Icons.search_rounded,
+                    size: 20, color: Color(0xFF94A3B8)),
+              ),
+              onTap: () =>
+                  _search('Search pickup location'.tr, con.setPickupPlace),
             ),
-          ),
-          IconButton(
-            splashRadius: 20,
-            onPressed: con.openBookings,
-            tooltip: 'Trip history'.tr,
-            icon: const Icon(Icons.history_rounded,
-                size: 22, color: Color(0xFF1A1A1A)),
-          ),
-        ],
+            const _AddressConnector(),
+            _AddressField(
+              icon: const Icon(Icons.location_on_rounded,
+                  size: 18, color: _red),
+              value: con.dropPlace?.label,
+              placeholder: 'Choose destination'.tr,
+              loading: false,
+              trailing: IconButton(
+                onPressed: () =>
+                    _search('Search destination'.tr, con.setDropPlace),
+                splashRadius: 18,
+                icon: const Icon(Icons.search_rounded,
+                    size: 20, color: Color(0xFF94A3B8)),
+              ),
+              onTap: () => _search('Search destination'.tr, con.setDropPlace),
+            ),
+          ],
+        ),
       ),
     );
   }
 }
 
-class _AddressRow extends StatelessWidget {
-  const _AddressRow({
-    required this.dotColor,
-    required this.label,
-    required this.value,
-    required this.loading,
-    required this.onTap,
-  });
-  final Color dotColor;
-  final String label;
-  final String? value;
-  final bool loading;
-  final VoidCallback onTap;
+/// The short dotted line + hairline divider linking the pickup and
+/// destination fields — the familiar "route" accent from map apps.
+class _AddressConnector extends StatelessWidget {
+  const _AddressConnector();
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: 18,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 14),
+        child: Row(
+          children: [
+            SizedBox(
+              width: 20,
+              child: Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: List.generate(
+                    3,
+                    (_) => Container(
+                      width: 3,
+                      height: 3,
+                      decoration: const BoxDecoration(
+                          color: Color(0xFF94A3B8), shape: BoxShape.circle),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(width: 10),
+            const Expanded(
+              child:
+                  Divider(height: 1, thickness: 1, color: Color(0xFFE2E8F0)),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// The overflow (⋮) menu in the top bar — booking history + support.
+class _OverflowMenu extends StatelessWidget {
+  const _OverflowMenu();
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      behavior: HitTestBehavior.opaque,
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Padding(
-            padding: const EdgeInsets.only(top: 4),
+    return PopupMenuButton<String>(
+      splashRadius: 20,
+      icon: const Icon(Icons.more_vert_rounded,
+          size: 22, color: Color(0xFF1A1A1A)),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      onSelected: (value) {
+        if (value == 'history') {
+          Get.find<AmbulanceController>().openBookings();
+        } else if (value == 'support') {
+          Get.toNamed(Routes.AMBULANCE_SUPPORT);
+        }
+      },
+      itemBuilder: (context) => [
+        PopupMenuItem(
+          value: 'history',
+          child: Row(
+            children: [
+              const Icon(Icons.history_rounded,
+                  size: 18, color: Color(0xFF1A1A1A)),
+              const SizedBox(width: 10),
+              Text('Booking history'.tr),
+            ],
+          ),
+        ),
+        PopupMenuItem(
+          value: 'support',
+          child: Row(
+            children: [
+              const Icon(Icons.support_agent_rounded,
+                  size: 18, color: Color(0xFF1A1A1A)),
+              const SizedBox(width: 10),
+              Text('Support'.tr),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _AddressField extends StatelessWidget {
+  const _AddressField({
+    required this.icon,
+    required this.value,
+    required this.placeholder,
+    required this.loading,
+    required this.onTap,
+    this.valueColor,
+    this.trailing,
+  });
+  final Widget icon;
+  final String? value;
+  final String placeholder;
+  final bool loading;
+  final VoidCallback onTap;
+  final Color? valueColor;
+  final Widget? trailing;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Expanded(
+          child: GestureDetector(
+            onTap: onTap,
+            behavior: HitTestBehavior.opaque,
             child: Container(
-              width: 10,
-              height: 10,
-              decoration:
-                  BoxDecoration(color: dotColor, shape: BoxShape.circle),
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 13),
+              child: Row(
+                children: [
+                  SizedBox(width: 20, child: Center(child: icon)),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: loading
+                        ? const SnBone(width: 140, height: 14)
+                        : Text(value ?? placeholder,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                                fontSize: 14.5,
+                                fontWeight: FontWeight.w700,
+                                color: valueColor ??
+                                    (value == null
+                                        ? const Color(0xFF94A3B8)
+                                        : const Color(0xFF0F172A)))),
+                  ),
+                ],
+              ),
             ),
           ),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(label,
-                    style: const TextStyle(
-                        fontSize: 11,
-                        fontWeight: FontWeight.w700,
-                        color: Color(0xFF94A3B8),
-                        letterSpacing: 0.6)),
-                const SizedBox(height: 3),
-                if (loading)
-                  const SnBone(width: 140, height: 14)
-                else
-                  Text(value ?? 'Search an address'.tr,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                          fontSize: 14.5,
-                          fontWeight: FontWeight.w800,
-                          color: value == null
-                              ? const Color(0xFF94A3B8)
-                              : const Color(0xFF0F172A))),
-              ],
-            ),
-          ),
-          const Icon(Icons.search_rounded, size: 20, color: Color(0xFF64748B)),
-        ],
-      ),
+        ),
+        if (trailing != null)
+          Padding(padding: const EdgeInsets.only(right: 6), child: trailing),
+      ],
     );
   }
 }

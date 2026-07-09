@@ -98,6 +98,7 @@ import '../modules/ambulance/views/all_ambulances_view.dart';
 import '../modules/ambulance/views/booking_confirmed_view.dart';
 import '../modules/ambulance/views/rate_ambulance_view.dart';
 import '../modules/ambulance/views/emergency_contacts_view.dart';
+import '../modules/ambulance/views/ambulance_support_view.dart';
 import '../modules/blood/bindings/blood_binding.dart';
 import '../modules/blood/views/blood_view.dart';
 import '../modules/blood/views/blood_requests_view.dart';
@@ -590,6 +591,11 @@ class AppPages {
     GetPage(
       name: _Paths.EMERGENCY_CONTACTS,
       page: () => const EmergencyContactsView(),
+      binding: AmbulanceBinding(),
+    ),
+    GetPage(
+      name: _Paths.AMBULANCE_SUPPORT,
+      page: () => const AmbulanceSupportView(),
       binding: AmbulanceBinding(),
     ),
     GetPage(

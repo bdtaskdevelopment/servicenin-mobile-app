@@ -9,6 +9,7 @@ import '../controllers/ambulance_controller.dart';
 const _navy = Color(0xFF1E2A4A);
 const _red = Color(0xFFE23744);
 const _green = Color(0xFF16A34A);
+const _routeBlue = Color(0xFF4285F4);
 
 class BookingConfirmedView extends GetView<AmbulanceController> {
   const BookingConfirmedView({super.key});
@@ -38,6 +39,7 @@ class BookingConfirmedView extends GetView<AmbulanceController> {
                     interactive: false,
                     fitToRoute: hasRoute,
                     route: hasRoute ? controller.routePoints : [pickup, drop],
+                    routeColor: _routeBlue,
                     markers: [
                       SnMapMarker(pickup, _green, Icons.my_location_rounded),
                       SnMapMarker(drop, _red, Icons.location_on_rounded),
@@ -113,6 +115,13 @@ class BookingConfirmedView extends GetView<AmbulanceController> {
                                     style: const TextStyle(
                                         fontSize: 12.5,
                                         color: Color(0xFF94A3B8))),
+                                const SizedBox(height: 4),
+                                Text(
+                                    'Thank you for booking with us!'.tr,
+                                    style: const TextStyle(
+                                        fontSize: 12.5,
+                                        fontWeight: FontWeight.w600,
+                                        color: _green)),
                               ],
                             ),
                           ),
