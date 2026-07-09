@@ -14,6 +14,10 @@ class FareEstimate {
     required this.baseFare,
     required this.perKmFare,
     required this.mileageCharge,
+    required this.estimatedWaitMinutes,
+    required this.waitingFreeMinutes,
+    required this.waitingRatePerMin,
+    required this.waitingCharge,
     required this.emergencyCharge,
     required this.nightCharge,
     required this.subTotal,
@@ -27,6 +31,10 @@ class FareEstimate {
   final int baseFare;
   final int perKmFare;
   final int mileageCharge;
+  final int estimatedWaitMinutes;
+  final int waitingFreeMinutes;
+  final int waitingRatePerMin;
+  final int waitingCharge;
   final int emergencyCharge;
   final int nightCharge;
   final int subTotal;
@@ -47,6 +55,7 @@ class FareEstimate {
   String get totalLabel => '৳${fmt(totalFare)}';
   String get baseLabel => '৳${fmt(baseFare)}';
   String get mileageLabel => '৳${fmt(mileageCharge)}';
+  String get waitingLabel => '৳${fmt(waitingCharge)}';
 
   factory FareEstimate.fromMap(Map<String, dynamic> json) {
     return FareEstimate(
@@ -55,6 +64,10 @@ class FareEstimate {
       baseFare: _int(json['base_fare']),
       perKmFare: _int(json['per_km_fare']),
       mileageCharge: _int(json['mileage_charge']),
+      estimatedWaitMinutes: _int(json['estimated_wait_minutes']),
+      waitingFreeMinutes: _int(json['waiting_free_minutes']),
+      waitingRatePerMin: _int(json['waiting_rate_per_min']),
+      waitingCharge: _int(json['waiting_charge']),
       emergencyCharge: _int(json['emergency_charge']),
       nightCharge: _int(json['night_charge']),
       subTotal: _int(json['sub_total']),

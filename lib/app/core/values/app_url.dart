@@ -44,6 +44,8 @@ class ApiURL {
   static final String ambulanceFareEstimate = 'api/v1/ambulance/fare/estimate';
   static final String ambulancePaymentMethods =
       'api/v1/ambulance/payment-methods';
+  static String ambulanceBookingRate(String id) =>
+      'api/v1/ambulance/bookings/$id/rate';
 
   //===== Locations
   static final String locationDivisions = 'api/v1/locations/divisions';

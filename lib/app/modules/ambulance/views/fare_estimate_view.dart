@@ -44,6 +44,9 @@ class FareEstimateView extends GetView<FareController> {
                   GetBuilder<FareController>(
                       builder: (c) => _EmergencyToggle(c: c)),
                   const SizedBox(height: 14),
+                  GetBuilder<FareController>(
+                      builder: (c) => _WaitingTimeSelector(c: c)),
+                  const SizedBox(height: 14),
                   GetBuilder<FareController>(builder: (c) => _FareCard(c: c)),
                   const SizedBox(height: 14),
                   _PatientCard(c: controller),
@@ -396,6 +399,88 @@ class _EmergencyToggle extends StatelessWidget {
   }
 }
 
+// ── Expected waiting time ─────────────────────────────────────────────
+class _WaitingTimeSelector extends StatelessWidget {
+  const _WaitingTimeSelector({required this.c});
+  final FareController c;
+
+  static const _presets = [
+    {'label': 'No wait', 'minutes': 0},
+    {'label': '1 hour', 'minutes': 60},
+    {'label': '3 hours', 'minutes': 180},
+    {'label': '5 hours', 'minutes': 300},
+    {'label': '1 day', 'minutes': 1440},
+    {'label': '2 days', 'minutes': 2880},
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    final freeMin = c.selectedType?.freeWaitMinutes ?? 45;
+    final rate = c.selectedType?.waitingFarePerMin ?? 0;
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: AppColors.white,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: const Color(0xFFEDEFF2)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Icon(Icons.hourglass_bottom_rounded,
+                  color: Color(0xFF64748B), size: 20),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text('Expected waiting time'.tr,
+                    style: const TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w700,
+                        color: Color(0xFF0F172A))),
+              ),
+            ],
+          ),
+          const SizedBox(height: 4),
+          Padding(
+            padding: const EdgeInsets.only(left: 30),
+            child: Text(
+                '$freeMin ${'min free'.tr}, then ৳$rate/${'min'.tr}',
+                style: const TextStyle(fontSize: 12, color: Color(0xFF94A3B8))),
+          ),
+          const SizedBox(height: 12),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: _presets.map((p) {
+              final minutes = p['minutes'] as int;
+              final sel = c.waitingMinutes == minutes;
+              return GestureDetector(
+                onTap: () => c.setWaitingMinutes(minutes),
+                child: Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 14, vertical: 9),
+                  decoration: BoxDecoration(
+                    color: sel ? _navy.withValues(alpha: 0.1) : Colors.white,
+                    borderRadius: BorderRadius.circular(24),
+                    border: Border.all(
+                        color: sel ? _navy : const Color(0xFFE2E8F0)),
+                  ),
+                  child: Text((p['label'] as String).tr,
+                      style: TextStyle(
+                          fontSize: 12.5,
+                          fontWeight: FontWeight.w700,
+                          color: sel ? _navy : const Color(0xFF334155))),
+                ),
+              );
+            }).toList(),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 // ── Fare breakdown ──────────────────────────────────────────────────
 class _FareCard extends StatelessWidget {
   const _FareCard({required this.c});
@@ -453,12 +538,14 @@ class _FareCard extends StatelessWidget {
                     _row('Distance'.tr, '${f.distanceKm} km'),
                     _row('Base fare'.tr, '৳${f.baseFare}'),
                     _row('${'Mileage'.tr} (৳${f.perKmFare}/km)', '৳${f.mileageCharge}'),
+                    if (f.waitingCharge > 0)
+                      _row(
+                          '${'Waiting'.tr} (${f.estimatedWaitMinutes - f.waitingFreeMinutes} ${'min'.tr})',
+                          f.waitingLabel),
                     if (f.emergencyCharge > 0)
                       _row('Emergency'.tr, '৳${f.emergencyCharge}'),
                     if (f.nightCharge > 0) _row('Night'.tr, '৳${f.nightCharge}'),
                     if (f.taxAmount > 0) _row('Tax'.tr, '৳${f.taxAmount}'),
-                    if (c.vatApplies)
-                      _row('${'VAT'.tr} (${c.vatPercentLabel}%)', c.vatLabel),
                     const Padding(
                       padding: EdgeInsets.symmetric(vertical: 8),
                       child: Divider(height: 1, color: Color(0xFFF1F5F9)),

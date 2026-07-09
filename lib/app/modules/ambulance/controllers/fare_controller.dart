@@ -9,7 +9,6 @@ import '../../../core/values/storage.dart';
 import '../../../data/models/response/ambulance_response.dart';
 import '../../../data/models/response/fare_estimate_response.dart';
 import '../../../data/repositories/ambulance.repo.dart';
-import '../../../data/services/settings.service.dart';
 import '../../../data/services/storage.service.dart';
 import '../../../routes/app_pages.dart';
 import 'ambulance_controller.dart';
@@ -39,26 +38,11 @@ class FareController extends GetxController {
   FareEstimate? fare;
   bool loadingFare = false;
 
-  // ── VAT ──────────────────────────────────────────────────────────────
-  // The backend can already tax a trip via the ambulance type's own tax_rate
-  // (included in total_fare). When that's 0, we apply the global VAT from
-  // /api/v1/settings (`services_vat_enabled` / `services_vat_rate`) on top of
-  // the fare so ambulance bookings are taxed like the other modules. The
-  // guard below means we never double-tax if the type's rate is turned on.
   int get _fareTotal => fare?.totalFare ?? 0;
-  bool get _serverTaxed => (fare?.taxAmount ?? 0) > 0;
-  double get _vatFraction => Get.isRegistered<SettingsService>()
-      ? SettingsService.to.vatFraction
-      : 0.05;
-  String get vatPercentLabel => Get.isRegistered<SettingsService>()
-      ? SettingsService.to.vatPercentLabel
-      : '5';
-  bool get vatApplies => !_serverTaxed && _vatFraction > 0 && _fareTotal > 0;
-  int get vatAmount => vatApplies ? (_fareTotal * _vatFraction).round() : 0;
-  String get vatLabel => '৳${FareEstimate.fmt(vatAmount)}';
 
-  /// Fare + VAT — the amount charged to the gateway and shown as the total.
-  int get payableAmount => _fareTotal + vatAmount;
+  /// The amount charged to the gateway and shown as the total (no VAT — the
+  /// ambulance module doesn't add one on top of the fare estimate).
+  int get payableAmount => _fareTotal;
   String get payableLabel => '৳${FareEstimate.fmt(payableAmount)}';
 
   // ── Payment methods (GET /api/v1/ambulance/payment-methods) ─────────
@@ -67,6 +51,11 @@ class FareController extends GetxController {
   bool loadingMethods = false;
 
   bool isEmergency = false;
+
+  // ── Expected waiting time at the destination ─────────────────────────
+  // The first `selectedType?.freeWaitMinutes` (server default 45) are free;
+  // beyond that, `selectedType?.waitingFarePerMin` applies per extra minute.
+  int waitingMinutes = 0;
 
   // Booking inputs
   final TextEditingController patientNameCtrl =
@@ -88,15 +77,6 @@ class FareController extends GetxController {
     _amb.onTripChanged = estimate;
     fetchTypes();
     fetchMethods();
-    // Refresh settings so VAT honours the current server-side
-    // `services_vat_enabled` flag (no VAT when it's off).
-    _refreshSettings();
-  }
-
-  Future<void> _refreshSettings() async {
-    if (!Get.isRegistered<SettingsService>()) return;
-    await SettingsService.to.load();
-    update();
   }
 
   /// Prepare the fare screen for a tapped ambulance: pre-select its type and
@@ -159,6 +139,7 @@ class FareController extends GetxController {
         'type_id': typeId,
         'distance_km': _amb.routeDistanceKm,
         'is_emergency': isEmergency,
+        'estimated_wait_minutes': waitingMinutes,
       });
     } catch (e) {
       SnackHelper.error(e.toString().replaceFirst('Exception: ', ''));
@@ -181,6 +162,12 @@ class FareController extends GetxController {
 
   void toggleEmergency(bool v) {
     isEmergency = v;
+    update();
+    estimate();
+  }
+
+  void setWaitingMinutes(int minutes) {
+    waitingMinutes = minutes;
     update();
     estimate();
   }
@@ -214,6 +201,7 @@ class FareController extends GetxController {
         'distance_km': _amb.routeDistanceKm,
         'payment_method': selectedMethod ?? 'cash',
         'booking_type': isEmergency ? 'emergency' : 'scheduled',
+        'estimated_wait_minutes': waitingMinutes,
       };
       // Online payment (SSLCommerz sandbox): initiate → checkout → attach the
       // gateway's val_id + tran_id to the booking payload. Reuse an already

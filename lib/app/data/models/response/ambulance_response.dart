@@ -21,6 +21,7 @@ class AmbulanceType {
     required this.baseFare,
     required this.perKmFare,
     required this.waitingFarePerMin,
+    required this.freeWaitMinutes,
     required this.emergencySurcharge,
     required this.nightSurcharge,
     required this.taxRate,
@@ -35,6 +36,10 @@ class AmbulanceType {
   final int baseFare;
   final int perKmFare;
   final int waitingFarePerMin;
+
+  /// Minutes of waiting the customer gets free before [waitingFarePerMin]
+  /// starts applying (server default: 45).
+  final int freeWaitMinutes;
   final int emergencySurcharge;
   final int nightSurcharge;
   final int taxRate;
@@ -57,6 +62,7 @@ class AmbulanceType {
       baseFare: _int(json['base_fare']),
       perKmFare: _int(json['per_km_fare']),
       waitingFarePerMin: _int(json['waiting_fare_per_min']),
+      freeWaitMinutes: _int(json['free_wait_minutes']),
       emergencySurcharge: _int(json['emergency_surcharge']),
       nightSurcharge: _int(json['night_surcharge']),
       taxRate: _int(json['tax_rate']),

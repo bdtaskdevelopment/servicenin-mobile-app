@@ -224,7 +224,37 @@ class BookingConfirmedView extends GetView<AmbulanceController> {
                           ],
                         ),
                       ),
-                      const SizedBox(height: 18),
+                      if (b.status.toLowerCase() == 'completed') ...[
+                        const SizedBox(height: 12),
+                        GetBuilder<AmbulanceController>(
+                          builder: (con) =>
+                              (b.isRated || con.ratedBookingIds.contains(b.id))
+                              ? _RatedBanner()
+                              : SizedBox(
+                                  width: double.infinity,
+                                  height: 52,
+                                  child: ElevatedButton.icon(
+                                    onPressed: () =>
+                                        Get.toNamed(Routes.AMBULANCE_RATE),
+                                    icon: const Icon(Icons.star_rounded,
+                                        size: 20),
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: _navy,
+                                      foregroundColor: Colors.white,
+                                      elevation: 0,
+                                      shape: RoundedRectangleBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(14)),
+                                    ),
+                                    label: Text('Rate this trip'.tr,
+                                        style: const TextStyle(
+                                            fontSize: 15,
+                                            fontWeight: FontWeight.w800)),
+                                  ),
+                                ),
+                        ),
+                      ],
+                      const SizedBox(height: 12),
                       SizedBox(
                         width: double.infinity,
                         height: 52,
@@ -340,6 +370,33 @@ class _InfoRow extends StatelessWidget {
                     fontWeight: FontWeight.w700,
                     color: Color(0xFF0F172A))),
           ),
+        ],
+      ),
+    );
+  }
+}
+
+class _RatedBanner extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(vertical: 14),
+      decoration: BoxDecoration(
+        color: const Color(0xFFDCFCE7),
+        borderRadius: BorderRadius.circular(14),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const Icon(Icons.check_circle_rounded,
+              size: 18, color: Color(0xFF15803D)),
+          const SizedBox(width: 8),
+          Text('Thanks for your feedback'.tr,
+              style: const TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w700,
+                  color: Color(0xFF15803D))),
         ],
       ),
     );

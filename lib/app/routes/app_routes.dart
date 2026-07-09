@@ -92,6 +92,7 @@ abstract class Routes {
   static const AMBULANCE_BOOKINGS = _Paths.AMBULANCE_BOOKINGS;
   static const AMBULANCE_ALL = _Paths.AMBULANCE_ALL;
   static const AMBULANCE_CONFIRMED = _Paths.AMBULANCE_CONFIRMED;
+  static const AMBULANCE_RATE = _Paths.AMBULANCE_RATE;
   static const EMERGENCY_CONTACTS = _Paths.EMERGENCY_CONTACTS;
   static const BLOOD_REQUESTS = _Paths.BLOOD_REQUESTS;
   static const BLOOD_REQUEST_DETAIL = _Paths.BLOOD_REQUEST_DETAIL;
@@ -230,6 +231,7 @@ abstract class _Paths {
   static const AMBULANCE_BOOKINGS = '/ambulance-bookings';
   static const AMBULANCE_ALL = '/ambulance-all';
   static const AMBULANCE_CONFIRMED = '/ambulance-confirmed';
+  static const AMBULANCE_RATE = '/ambulance-rate';
   static const EMERGENCY_CONTACTS = '/emergency-contacts';
   static const BLOOD_REQUESTS = '/blood-requests';
   static const BLOOD_REQUEST_DETAIL = '/blood-request-detail';

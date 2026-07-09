@@ -3,6 +3,7 @@ import 'dart:convert';
 import '../../core/values/app_url.dart';
 import '../models/response/ambulance_booking_response.dart';
 import '../models/response/ambulance_response.dart';
+import '../models/response/auth_response.dart';
 import '../models/response/fare_estimate_response.dart';
 import '../providers/ambulance.provider.dart';
 
@@ -84,6 +85,28 @@ class AmbulanceRepository {
       Map<String, dynamic> payload) async {
     final res = await provider.postData(ApiURL.ambulanceBookings, payload);
     return AmbulanceBookingEntry.fromResponse(_payload(res));
+  }
+
+  /// POST /api/v1/ambulance/bookings/:id/rate — rate a completed trip, or
+  /// flag it as a complaint.
+  Future<AuthSimpleResponse> rateBooking(
+    String id, {
+    required int driverRating,
+    required int ambulanceConditionRating,
+    required int serviceRating,
+    String comment = '',
+    bool isComplaint = false,
+    String complaintNote = '',
+  }) async {
+    final res = await provider.postData(ApiURL.ambulanceBookingRate(id), {
+      'driver_rating': driverRating,
+      'ambulance_condition_rating': ambulanceConditionRating,
+      'service_rating': serviceRating,
+      'comment': comment,
+      'is_complaint': isComplaint,
+      'complaint_note': complaintNote,
+    });
+    return AuthSimpleResponse.fromMap(_payload(res));
   }
 
   /// Parses `{ data: { <key>: [..] } }` (or a bare list) into a string list.

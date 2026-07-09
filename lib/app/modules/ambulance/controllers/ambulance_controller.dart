@@ -31,6 +31,11 @@ class AmbulanceController extends GetxController {
   /// The most recently confirmed booking — shown on the confirmed screen.
   AmbulanceBookingEntry? lastBooking;
 
+  /// Bookings rated this session (the API doesn't echo a rated flag back on
+  /// the booking list, so this is a best-effort local record).
+  final Set<String> ratedBookingIds = {};
+  bool submittingRating = false;
+
   // ── Pickup / destination (address search) ────────────────────────────
   SnPlace? pickupPlace;
   SnPlace? dropPlace;
@@ -148,6 +153,47 @@ class AmbulanceController extends GetxController {
       from.longitude + (to.longitude - from.longitude) * 0.3,
     );
     update();
+  }
+
+  /// Rates a completed trip, or files it as a complaint. Returns whether the
+  /// submission succeeded (a snackbar reports the outcome either way).
+  Future<bool> submitRating(
+    String bookingId, {
+    required int driverRating,
+    required int ambulanceConditionRating,
+    required int serviceRating,
+    String comment = '',
+    bool isComplaint = false,
+    String complaintNote = '',
+  }) async {
+    if (submittingRating) return false;
+    submittingRating = true;
+    update();
+    try {
+      final res = await _repo.rateBooking(
+        bookingId,
+        driverRating: driverRating,
+        ambulanceConditionRating: ambulanceConditionRating,
+        serviceRating: serviceRating,
+        comment: comment,
+        isComplaint: isComplaint,
+        complaintNote: complaintNote,
+      );
+      if (res.success) {
+        ratedBookingIds.add(bookingId);
+        SnackHelper.success(
+            res.message.isNotEmpty ? res.message : 'Thank you for your feedback'.tr);
+        return true;
+      }
+      SnackHelper.error(res.message);
+      return false;
+    } catch (e) {
+      SnackHelper.error(e.toString().replaceFirst('Exception: ', ''));
+      return false;
+    } finally {
+      submittingRating = false;
+      update();
+    }
   }
 
   // ── Navigation ──────────────────────────────────────────────────────

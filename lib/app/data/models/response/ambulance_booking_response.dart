@@ -39,6 +39,7 @@ class AmbulanceBookingEntry {
     required this.status,
     this.createdAt,
     this.type,
+    this.isRated = false,
   });
 
   final String id;
@@ -65,6 +66,10 @@ class AmbulanceBookingEntry {
   final String status;
   final DateTime? createdAt;
   final AmbulanceType? type;
+
+  /// Whether the customer has already submitted a rating for this trip
+  /// (from the server — persists across sessions, unlike a local flag).
+  final bool isRated;
 
   String get typeName => type?.name ?? 'Ambulance';
 
@@ -128,6 +133,7 @@ class AmbulanceBookingEntry {
       type: json['type'] is Map
           ? AmbulanceType.fromMap((json['type'] as Map).cast<String, dynamic>())
           : null,
+      isRated: json['is_rated'] == true,
     );
   }
 
