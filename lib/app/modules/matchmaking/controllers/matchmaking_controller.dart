@@ -426,7 +426,7 @@ class MatchmakingController extends GetxController {
       // Upload any picked files now that the profile exists.
       await _uploadPickedFiles();
       await fetchMyProfile();
-      Get.back();
+      Get.back(closeOverlays: true);
     } catch (e) {
       SnackHelper.error(e.toString().replaceFirst('Exception: ', ''));
     } finally {
@@ -560,7 +560,7 @@ class MatchmakingController extends GetxController {
       final res = await _repo.expressInterest(p.id);
       if (res.success) {
         SnackHelper.success(res.message.isNotEmpty ? res.message : 'Interest sent');
-        Get.back();
+        Get.back(closeOverlays: true);
       } else {
         SnackHelper.error(res.message);
       }

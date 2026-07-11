@@ -50,7 +50,12 @@ class _RateAmbulanceViewState extends State<RateAmbulanceView> {
       isComplaint: _isComplaint,
       complaintNote: _isComplaint ? _complaintNote.text.trim() : '',
     );
-    if (ok && mounted) Get.back();
+    if (ok && mounted) {
+      await con.fetchBookings();
+      // The success snackbar can still be open here — plain Get.back() only
+      // dismisses it and returns without popping the route in that case.
+      Get.back(closeOverlays: true);
+    }
   }
 
   @override

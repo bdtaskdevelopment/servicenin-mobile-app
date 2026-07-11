@@ -219,7 +219,16 @@ class AmbulanceController extends GetxController {
       SnackHelper.error(res.message);
       return false;
     } catch (e) {
-      SnackHelper.error(e.toString().replaceFirst('Exception: ', ''));
+      final msg = e.toString().replaceFirst('Exception: ', '');
+      // The backend rejects a second rating for the same booking — treat
+      // that as an already-successful outcome instead of a hard error, so
+      // the user isn't stuck on the rating form for something already done.
+      if (msg.toLowerCase().contains('already submitted')) {
+        ratedBookingIds.add(bookingId);
+        SnackHelper.success('You have already rated this trip'.tr);
+        return true;
+      }
+      SnackHelper.error(msg);
       return false;
     } finally {
       submittingRating = false;

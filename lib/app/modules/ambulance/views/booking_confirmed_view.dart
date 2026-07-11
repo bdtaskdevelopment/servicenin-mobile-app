@@ -53,8 +53,9 @@ class BookingConfirmedView extends GetView<AmbulanceController> {
                     child: Padding(
                       padding: const EdgeInsets.all(8),
                       child: InkWell(
-                        onTap: () => Get.offNamedUntil(
-                            Routes.AMBULANCE, (r) => r.isFirst),
+                        onTap: () => Navigator.of(context).canPop()
+                            ? Get.back()
+                            : Get.offAllNamed(Routes.AMBULANCE),
                         customBorder: const CircleBorder(),
                         child: Container(
                           width: 40,
@@ -268,8 +269,7 @@ class BookingConfirmedView extends GetView<AmbulanceController> {
                         width: double.infinity,
                         height: 52,
                         child: OutlinedButton(
-                          onPressed: () => Get.offNamedUntil(
-                              Routes.AMBULANCE, (r) => r.isFirst),
+                          onPressed: () => Get.offAllNamed(Routes.AMBULANCE),
                           style: OutlinedButton.styleFrom(
                             foregroundColor: _navy,
                             side: const BorderSide(color: Color(0xFFE2E8F0)),

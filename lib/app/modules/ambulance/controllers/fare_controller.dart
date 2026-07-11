@@ -232,11 +232,11 @@ class FareController extends GetxController {
       _paidPayment = null; // booking succeeded — payment consumed
       _amb.lastBooking = created;
       _amb.fetchBookings(); // refresh the recent-bookings list
+      Get.toNamed(Routes.AMBULANCE_CONFIRMED);
       await Get.dialog(
         BookingThankYouDialog(bookingNo: created.bookingNo),
         barrierDismissible: false,
       );
-      Get.toNamed(Routes.AMBULANCE_CONFIRMED);
     } catch (e) {
       SnackHelper.error(e.toString().replaceFirst('Exception: ', ''));
     } finally {

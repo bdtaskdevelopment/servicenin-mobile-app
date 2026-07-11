@@ -285,7 +285,7 @@ class JobsController extends GetxController {
       if (res.success) {
         SnackHelper.success(
             res.message.isNotEmpty ? res.message : 'Profile saved');
-        Get.back();
+        Get.back(closeOverlays: true);
       } else {
         SnackHelper.error(res.message);
       }
@@ -391,7 +391,7 @@ class JobsController extends GetxController {
       if (res.success) {
         SnackHelper.success(
             res.message.isNotEmpty ? res.message : 'Employer registered');
-        Get.back();
+        Get.back(closeOverlays: true);
       } else {
         SnackHelper.error(res.message);
       }

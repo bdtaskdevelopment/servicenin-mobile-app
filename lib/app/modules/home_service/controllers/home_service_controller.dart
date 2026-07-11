@@ -250,7 +250,7 @@ class HomeServiceController extends GetxController {
     update();
     if (_cart.isEmpty) {
       SnackHelper.error('কার্টে কোনো সার্ভিস নেই', title: _moduleTitle);
-      Get.back();
+      Get.back(closeOverlays: true);
     }
   }
 
