@@ -5,6 +5,7 @@ import '../../../core/values/app_colors.dart';
 import '../../../global_widget/sn_map.dart';
 import '../../../routes/app_pages.dart';
 import '../controllers/ambulance_controller.dart';
+import '../controllers/fare_controller.dart';
 
 const _navy = Color(0xFF1E2A4A);
 const _red = Color(0xFFE23744);
@@ -269,7 +270,23 @@ class BookingConfirmedView extends GetView<AmbulanceController> {
                         width: double.infinity,
                         height: 52,
                         child: OutlinedButton(
-                          onPressed: () => Get.offAllNamed(Routes.AMBULANCE),
+                          onPressed: () {
+                            // Reset the previous trip's destination/route so
+                            // this reads as a fresh booking, and replace only
+                            // the current route (not the whole stack) —
+                            // offAllNamed here was recreating
+                            // AmbulanceController/FareController mid-flow,
+                            // leaving stale widgets bound to an instance the
+                            // confirm button's fresh Get.find() no longer saw.
+                            final amb = Get.find<AmbulanceController>();
+                            amb.dropPlace = null;
+                            amb.routePoints = [];
+                            amb.routeDistanceKm = 0;
+                            amb.routeDurationMin = 0;
+                            amb.update();
+                            Get.find<FareController>().initFor(null);
+                            Get.offNamed(Routes.AMBULANCE_FARE);
+                          },
                           style: OutlinedButton.styleFrom(
                             foregroundColor: _navy,
                             side: const BorderSide(color: Color(0xFFE2E8F0)),

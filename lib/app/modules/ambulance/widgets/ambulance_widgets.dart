@@ -67,7 +67,7 @@ class BookingThankYouDialog extends StatelessWidget {
                   shape:
                       RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
                 ),
-                child: Text('Done'.tr,
+                child: Text('Close'.tr,
                     style: const TextStyle(
                         fontSize: 15.5, fontWeight: FontWeight.w800)),
               ),

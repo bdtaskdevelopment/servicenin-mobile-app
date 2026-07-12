@@ -25,6 +25,8 @@ const Map<String, String> commonBn = {
   'Next': 'পরবর্তী',
   'Back': 'পিছনে',
   'Done': 'সম্পন্ন',
+  'Close': 'বন্ধ করুন',
+  'Finding your location…': 'আপনার অবস্থান খুঁজছি…',
   'Retry': 'আবার চেষ্টা করুন',
   'See all': 'সব দেখুন',
   'See all →': 'সব দেখুন →',

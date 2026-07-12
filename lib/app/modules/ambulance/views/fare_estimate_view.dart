@@ -41,9 +41,17 @@ class FareEstimateView extends GetView<FareController> {
         child: Column(
           children: [
             // Map fills the top of the screen; the pickup/destination
-            // search card floats on top of it.
-            SizedBox(
-              height: MediaQuery.of(context).size.height * 0.44,
+            // search card floats on top of it. Collapsed while the keyboard
+            // is open (e.g. typing the patient name/phone below) so those
+            // fields have room to scroll into view instead of being pushed
+            // off-screen under the keyboard.
+            AnimatedContainer(
+              duration: const Duration(milliseconds: 200),
+              clipBehavior: Clip.hardEdge,
+              decoration: const BoxDecoration(),
+              height: MediaQuery.of(context).viewInsets.bottom > 0
+                  ? 0
+                  : MediaQuery.of(context).size.height * 0.44,
               child: Stack(
                 children: [
                   Positioned.fill(
@@ -93,26 +101,33 @@ class FareEstimateView extends GetView<FareController> {
               child: SizedBox(
                 width: double.infinity,
                 height: 54,
-                child: GetBuilder<FareController>(
-                  builder: (c) => ElevatedButton(
-                    onPressed: c.booking ? null : c.confirm,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: _navy,
-                      foregroundColor: Colors.white,
-                      elevation: 0,
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(14)),
+                child: GetBuilder<AmbulanceController>(
+                  builder: (amb) => GetBuilder<FareController>(
+                    builder: (c) => ElevatedButton(
+                      onPressed:
+                          (c.booking || amb.loadingPickup) ? null : c.confirm,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: _navy,
+                        foregroundColor: Colors.white,
+                        elevation: 0,
+                        disabledBackgroundColor: _navy.withValues(alpha: 0.5),
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(14)),
+                      ),
+                      child: c.booking
+                          ? const SizedBox(
+                              width: 22,
+                              height: 22,
+                              child: CircularProgressIndicator(
+                                  strokeWidth: 2.4, color: Colors.white),
+                            )
+                          : Text(
+                              amb.loadingPickup
+                                  ? 'Finding your location…'.tr
+                                  : 'Confirm & dispatch'.tr,
+                              style: const TextStyle(
+                                  fontSize: 16, fontWeight: FontWeight.w800)),
                     ),
-                    child: c.booking
-                        ? const SizedBox(
-                            width: 22,
-                            height: 22,
-                            child: CircularProgressIndicator(
-                                strokeWidth: 2.4, color: Colors.white),
-                          )
-                        : Text('Confirm & dispatch'.tr,
-                            style: const TextStyle(
-                                fontSize: 16, fontWeight: FontWeight.w800)),
                   ),
                 ),
               ),
