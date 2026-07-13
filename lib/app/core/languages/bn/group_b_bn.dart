@@ -62,6 +62,8 @@ const Map<String, String> groupBBn = {
   'TRIP STATUS': 'ট্রিপের অবস্থা',
   'No booking found': 'কোনো বুকিং পাওয়া যায়নি',
   'Ambulance booked': 'অ্যাম্বুলেন্স বুক হয়েছে',
+  'Your ambulance booking has been submitted successfully. A driver will be assigned soon.':
+      'আপনার অ্যাম্বুলেন্স বুকিং সফলভাবে সম্পন্ন হয়েছে। কিছুক্ষণের মধ্যেই একজন ড্রাইভার নিযুক্ত করা হবে।',
   'PICKUP': 'পিকআপ',
   'DESTINATION': 'গন্তব্য',
   'Distance': 'দূরত্ব',

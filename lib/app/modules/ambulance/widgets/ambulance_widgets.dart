@@ -48,8 +48,8 @@ class BookingThankYouDialog extends StatelessWidget {
             const SizedBox(height: 8),
             Text(
               bookingNo.isNotEmpty
-                  ? '${'Your ambulance booking has been confirmed.'.tr} ($bookingNo)'
-                  : 'Your ambulance booking has been confirmed.'.tr,
+                  ? '${'Your ambulance booking has been submitted successfully. A driver will be assigned soon.'.tr} ($bookingNo)'
+                  : 'Your ambulance booking has been submitted successfully. A driver will be assigned soon.'.tr,
               textAlign: TextAlign.center,
               style: const TextStyle(
                   fontSize: 13.5, color: Color(0xFF64748B), height: 1.4),
@@ -228,7 +228,9 @@ class BookingCard extends StatelessWidget {
                   decoration: BoxDecoration(
                       color: ongoing
                           ? const Color(0xFFFEF3C7)
-                          : const Color(0xFFDCFCE7),
+                          : (_isCancelled(booking.status)
+                              ? const Color(0xFFFEE2E2)
+                              : const Color(0xFFDCFCE7)),
                       borderRadius: BorderRadius.circular(20)),
                   child: Text(_statusLabel(booking.status),
                       style: TextStyle(
@@ -236,7 +238,9 @@ class BookingCard extends StatelessWidget {
                           fontWeight: FontWeight.w700,
                           color: ongoing
                               ? const Color(0xFFB45309)
-                              : const Color(0xFF15803D))),
+                              : (_isCancelled(booking.status)
+                                  ? const Color(0xFFDC2626)
+                                  : const Color(0xFF15803D)))),
                 ),
               ],
             ),
@@ -272,6 +276,11 @@ class BookingCard extends StatelessWidget {
   String _statusLabel(String s) {
     if (s.isEmpty) return 'Pending'.tr;
     return s[0].toUpperCase() + s.substring(1).replaceAll('_', ' ');
+  }
+
+  bool _isCancelled(String s) {
+    final v = s.toLowerCase();
+    return v == 'cancelled' || v == 'canceled';
   }
 }
 

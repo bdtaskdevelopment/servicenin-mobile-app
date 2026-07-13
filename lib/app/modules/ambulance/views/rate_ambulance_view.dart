@@ -5,10 +5,9 @@ import '../../../core/values/app_colors.dart';
 import '../controllers/ambulance_controller.dart';
 
 const _navy = Color(0xFF1E2A4A);
-const _red = Color(0xFFE23744);
 
 /// Rate a completed trip — driver, ambulance condition and overall service,
-/// each 1-5, plus an optional comment. Can also be filed as a complaint.
+/// each 1-5, plus an optional comment.
 /// Rates whichever booking `AmbulanceController.lastBooking` currently holds
 /// (set by `trackBooking`/`createBooking`), same as `BookingConfirmedView`.
 class RateAmbulanceView extends StatefulWidget {
@@ -22,14 +21,11 @@ class _RateAmbulanceViewState extends State<RateAmbulanceView> {
   int _driverRating = 5;
   int _conditionRating = 5;
   int _serviceRating = 5;
-  bool _isComplaint = false;
   final _comment = TextEditingController();
-  final _complaintNote = TextEditingController();
 
   @override
   void dispose() {
     _comment.dispose();
-    _complaintNote.dispose();
     super.dispose();
   }
 
@@ -37,18 +33,12 @@ class _RateAmbulanceViewState extends State<RateAmbulanceView> {
     final con = Get.find<AmbulanceController>();
     final bookingId = con.lastBooking?.id;
     if (bookingId == null || bookingId.isEmpty) return;
-    if (_isComplaint && _complaintNote.text.trim().isEmpty) {
-      Get.snackbar('', 'Please describe the issue'.tr);
-      return;
-    }
     final ok = await con.submitRating(
       bookingId,
       driverRating: _driverRating,
       ambulanceConditionRating: _conditionRating,
       serviceRating: _serviceRating,
       comment: _comment.text.trim(),
-      isComplaint: _isComplaint,
-      complaintNote: _isComplaint ? _complaintNote.text.trim() : '',
     );
     if (ok && mounted) {
       await con.fetchBookings();
@@ -127,57 +117,6 @@ class _RateAmbulanceViewState extends State<RateAmbulanceView> {
                         border: InputBorder.none,
                         isCollapsed: true,
                       ),
-                    ),
-                  ),
-                  const SizedBox(height: 18),
-                  Container(
-                    padding: const EdgeInsets.all(14),
-                    decoration: BoxDecoration(
-                        color: AppColors.white,
-                        borderRadius: BorderRadius.circular(14),
-                        border: Border.all(color: const Color(0xFFE2E8F0))),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            const Icon(Icons.flag_outlined,
-                                size: 18, color: _red),
-                            const SizedBox(width: 10),
-                            Expanded(
-                              child: Text('Report an issue instead'.tr,
-                                  style: const TextStyle(
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.w700,
-                                      color: Color(0xFF0F172A))),
-                            ),
-                            Switch.adaptive(
-                              value: _isComplaint,
-                              onChanged: (v) => setState(() => _isComplaint = v),
-                              activeTrackColor: _red,
-                              activeThumbColor: Colors.white,
-                            ),
-                          ],
-                        ),
-                        if (_isComplaint) ...[
-                          const SizedBox(height: 10),
-                          TextField(
-                            controller: _complaintNote,
-                            maxLines: 3,
-                            decoration: InputDecoration(
-                              hintText: 'Describe what went wrong…'.tr,
-                              hintStyle:
-                                  const TextStyle(color: Color(0xFF94A3B8)),
-                              filled: true,
-                              fillColor: const Color(0xFFF7F8FA),
-                              border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(10),
-                                  borderSide: BorderSide.none),
-                              contentPadding: const EdgeInsets.all(12),
-                            ),
-                          ),
-                        ],
-                      ],
                     ),
                   ),
                 ],
