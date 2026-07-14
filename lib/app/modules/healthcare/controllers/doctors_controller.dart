@@ -58,6 +58,8 @@ class DoctorsController extends GetxController {
     fetchDoctors();
   }
 
+  String? get _centerId => Get.find<HealthcareController>().selectedCenter?.id;
+
   Future<void> fetchDoctors() async {
     loading = true;
     _page = 1;
@@ -69,7 +71,8 @@ class DoctorsController extends GetxController {
           limit: _pageSize,
           specialization: _selectedSpecialization.isEmpty
               ? null
-              : _selectedSpecialization);
+              : _selectedSpecialization,
+          centerId: _centerId);
       doctors = list.map(HcDoctor.fromApi).toList();
       hasMore = list.length >= _pageSize;
     } catch (e) {
@@ -91,7 +94,8 @@ class DoctorsController extends GetxController {
           limit: _pageSize,
           specialization: _selectedSpecialization.isEmpty
               ? null
-              : _selectedSpecialization);
+              : _selectedSpecialization,
+          centerId: _centerId);
       doctors.addAll(list.map(HcDoctor.fromApi));
       _page = next;
       hasMore = list.length >= _pageSize;

@@ -37,13 +37,16 @@ class HealthcareView extends GetView<HealthcareController> {
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('PRAC Healthcare'.tr,
+                      Text(
+                          controller.selectedCenter?.name.isNotEmpty == true
+                              ? controller.selectedCenter!.name
+                              : 'Healthcare'.tr,
                           style: const TextStyle(
                               fontSize: 19,
                               fontWeight: FontWeight.w800,
                               color: Color(0xFF0F172A))),
                       const SizedBox(height: 1),
-                      Text('Verified BMDC doctors · Dhaka'.tr,
+                      Text(controller.selectedCenter?.address ?? '',
                           style: const TextStyle(
                               fontSize: 12, color: Color(0xFF94A3B8))),
                     ],
@@ -69,93 +72,14 @@ class HealthcareView extends GetView<HealthcareController> {
                       // _ModeToggle(con: con),
                       // const SizedBox(height: 14),
                       const _QuickGrid(),
-                      const SizedBox(height: 14),
                       // Upcoming-appointment card hidden for now.
                       // GestureDetector(
                       //   onTap: () =>
                       //       Get.toNamed(Routes.HEALTHCARE_APPOINTMENTS),
                       //   child: const _UpcomingCard(),
                       // ),
-                      // const SizedBox(height: 22),
-                      GestureDetector(
-                        onTap: () => Get.toNamed(Routes.HC_DOCTORS),
-                        child: _SectionHeader(
-                            title: 'Departments'.tr, action: 'See all →'.tr),
-                      ),
-                      const SizedBox(height: 12),
-                      if (con.loadingDepartments && con.departments.isEmpty)
-                        const SnGridSkeleton(
-                          count: 8,
-                          crossAxisCount: 4,
-                          childAspectRatio: 0.86,
-                          padding: EdgeInsets.zero,
-                        )
-                      else
-                        FadeInUp(
-                          from: 18,
-                          duration: const Duration(milliseconds: 350),
-                          child: GridView.count(
-                            crossAxisCount: 4,
-                            shrinkWrap: true,
-                            physics: const NeverScrollableScrollPhysics(),
-                            mainAxisSpacing: 12,
-                            crossAxisSpacing: 12,
-                            childAspectRatio: 0.86,
-                            children: con.departments
-                                .map((d) => GestureDetector(
-                                      onTap: () => con.openDepartment(d),
-                                      child: _DeptTile(dept: d),
-                                    ))
-                                .toList(),
-                          ),
-                        ),
-                      const SizedBox(height: 22),
-                      GestureDetector(
-                        onTap: () =>
-                            Get.toNamed(Routes.HC_AVAILABLE_TODAY),
-                        child: _SectionHeader(
-                            title: 'Available today'.tr, action: 'All →'.tr),
-                      ),
-                      const SizedBox(height: 12),
-                      if (con.loadingDoctors && con.doctors.isEmpty)
-                        const SnListSkeleton(
-                          count: 4,
-                          padding: EdgeInsets.zero,
-                        )
-                      else if (con.doctors.isEmpty)
-                        Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 8),
-                          child: Text('No doctors available today.'.tr,
-                              style: const TextStyle(
-                                  fontSize: 13, color: Color(0xFF94A3B8))),
-                        )
-                      else
-                        ...con.doctors.take(5).toList().asMap().entries.map(
-                              (e) => FadeInUp(
-                                from: 18,
-                                duration: const Duration(milliseconds: 350),
-                                delay: Duration(milliseconds: 70 * e.key),
-                                child: Padding(
-                                  padding: const EdgeInsets.only(bottom: 12),
-                                  child: GestureDetector(
-                                    onTap: () {
-                                      Get.find<BookingController>()
-                                          .setDoctor(e.value);
-                                      Get.toNamed(Routes.HC_DOCTOR_PROFILE);
-                                    },
-                                    child: HcDoctorCard(doctor: e.value),
-                                  ),
-                                ),
-                              ),
-                            ),
+                      const SizedBox(height: 14),
                       // ── All doctors ──────────────────────────────
-                      const SizedBox(height: 22),
-                      GestureDetector(
-                        onTap: () => Get.toNamed(Routes.HC_DOCTORS),
-                        child: _SectionHeader(
-                            title: 'All doctors'.tr, action: 'See all →'.tr),
-                      ),
-                      const SizedBox(height: 12),
                       if (con.loadingAllDoctors && con.allDoctors.isEmpty)
                         const SnListSkeleton(
                           count: 4,
@@ -487,71 +411,3 @@ class _UpcomingCard extends StatelessWidget {
   }
 }
 
-// ── Section header ──────────────────────────────────────────────────
-class _SectionHeader extends StatelessWidget {
-  const _SectionHeader({required this.title, required this.action});
-  final String title;
-  final String action;
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Text(title,
-            style: const TextStyle(
-                fontSize: 17,
-                fontWeight: FontWeight.w800,
-                color: Color(0xFF0F172A))),
-        Text(action,
-            style: const TextStyle(
-                fontSize: 13,
-                fontWeight: FontWeight.w700,
-                color: AppColors.brandOrange)),
-      ],
-    );
-  }
-}
-
-// ── Department tile (matches home "All Services" tile) ──────────────
-class _DeptTile extends StatelessWidget {
-  const _DeptTile({required this.dept});
-  final HcDepartment dept;
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      clipBehavior: Clip.antiAlias,
-      decoration: BoxDecoration(
-        color: AppColors.white,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFFEDEFF2)),
-      ),
-      padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 6),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(dept.icon, color: dept.color, size: 26),
-          const SizedBox(height: 6),
-          Flexible(
-            child: Builder(
-              builder: (_) {
-                final multiWord = dept.name.trim().contains(' ');
-                return Text(
-                  dept.name,
-                  textAlign: TextAlign.center,
-                  maxLines: multiWord ? 2 : 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
-                    fontSize: 11.5,
-                    fontWeight: FontWeight.w700,
-                    color: Color(0xFF1E293B),
-                    height: 1.1,
-                  ),
-                );
-              },
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}

@@ -20,7 +20,7 @@ class ServiceNav {
         Get.toNamed(Routes.AMBULANCE_FARE);
         break;
       case 'healthcare':
-        Get.toNamed(Routes.HEALTHCARE);
+        Get.toNamed(Routes.HEALTHCARE_CENTERS);
         break;
       case 'info':
         Get.toNamed(Routes.INFORMATION);
@@ -62,7 +62,7 @@ class ServiceNav {
         Get.toNamed(Routes.AMBULANCE_FARE);
         break;
       case 'Healthcare':
-        Get.toNamed(Routes.HEALTHCARE);
+        Get.toNamed(Routes.HEALTHCARE_CENTERS);
         break;
       case 'Information':
         Get.toNamed(Routes.INFORMATION);

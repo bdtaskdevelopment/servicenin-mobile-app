@@ -82,7 +82,7 @@ class _QuickItem extends StatelessWidget {
         Get.toNamed(Routes.AMBULANCE_FARE);
         break;
       case 'Find\nDoctor':
-        Get.toNamed(Routes.HEALTHCARE);
+        Get.toNamed(Routes.HEALTHCARE_CENTERS);
         break;
       case 'Track\nOrder':
         // Not a page — jump the dashboard to the "Orders" tab.

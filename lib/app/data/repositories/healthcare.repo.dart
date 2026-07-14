@@ -34,22 +34,36 @@ class HealthcareRepository {
     throw Exception('সংযোগে সমস্যা — আবার চেষ্টা করুন');
   }
 
+  // ── Centers ──────────────────────────────────────────────────────────
+  Future<List<HealthcareCenter>> fetchCenters() async {
+    final res = await provider.getData(ApiURL.hcCenters);
+    return HealthcareCenter.listFromResponse(_payload(res));
+  }
+
   // ── Departments & doctors ───────────────────────────────────────────
-  Future<List<Department>> fetchDepartments() async {
-    final res = await provider.getData(ApiURL.hcDepartments);
+  Future<List<Department>> fetchDepartments({String? centerId}) async {
+    final res = await provider
+        .getData(ApiURL.hcDepartmentsScoped(centerId: centerId));
     return Department.listFromResponse(_payload(res));
   }
 
   Future<List<Doctor>> fetchDoctors(
-      {String? specialization, int page = 1, int limit = 10}) async {
+      {String? specialization,
+      int page = 1,
+      int limit = 10,
+      String? centerId}) async {
     final res = await provider.getData(ApiURL.hcDoctorsPaged(
-        page: page, limit: limit, specialization: specialization));
+        page: page,
+        limit: limit,
+        specialization: specialization,
+        centerId: centerId));
     return Doctor.listFromResponse(_payload(res));
   }
 
-  Future<List<Doctor>> fetchAvailableToday({int page = 1, int limit = 10}) async {
-    final res = await provider
-        .getData(ApiURL.hcDoctorsAvailableTodayPaged(page: page, limit: limit));
+  Future<List<Doctor>> fetchAvailableToday(
+      {int page = 1, int limit = 10, String? centerId}) async {
+    final res = await provider.getData(ApiURL.hcDoctorsAvailableTodayPaged(
+        page: page, limit: limit, centerId: centerId));
     return Doctor.listFromResponse(_payload(res));
   }
 
@@ -131,8 +145,9 @@ class HealthcareRepository {
     return HcAppointment.fromResponse(_payload(res));
   }
 
-  Future<List<HcAppointment>> fetchMyAppointments() async {
-    final res = await provider.getData(ApiURL.hcAppointmentsMy);
+  Future<List<HcAppointment>> fetchMyAppointments({String? centerId}) async {
+    final res = await provider
+        .getData(ApiURL.hcAppointmentsMyScoped(centerId: centerId));
     return HcAppointment.listFromResponse(_payload(res));
   }
 
@@ -154,8 +169,9 @@ class HealthcareRepository {
   }
 
   // ── Prescriptions ───────────────────────────────────────────────────
-  Future<Prescription> fetchLatestPrescription() async {
-    final res = await provider.getData(ApiURL.hcPrescriptionLatest);
+  Future<Prescription> fetchLatestPrescription({String? centerId}) async {
+    final res = await provider
+        .getData(ApiURL.hcPrescriptionLatestScoped(centerId: centerId));
     return Prescription.fromResponse(_payload(res));
   }
 

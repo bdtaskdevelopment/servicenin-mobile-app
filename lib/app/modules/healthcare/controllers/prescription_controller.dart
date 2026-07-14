@@ -4,6 +4,7 @@ import 'package:open_filex/open_filex.dart';
 import '../../../core/helpers/snack_helper.dart';
 import '../../../data/models/response/healthcare_response.dart';
 import '../../../data/repositories/healthcare.repo.dart';
+import 'healthcare_controller.dart';
 
 class Medicine {
   const Medicine(this.name, this.dose, this.duration, this.timing);
@@ -15,6 +16,7 @@ class Medicine {
 
 class PrescriptionController extends GetxController {
   HealthcareRepository get _repo => Get.find<HealthcareRepository>();
+  String? get _centerId => Get.find<HealthcareController>().selectedCenter?.id;
 
   Prescription? rx;
   bool loading = false;
@@ -26,13 +28,17 @@ class PrescriptionController extends GetxController {
     fetchLatest();
   }
 
+  /// Fetches this center's latest prescription. Having none is a normal,
+  /// expected empty state (not an error) — the view already renders a
+  /// "no prescription" placeholder when `rx` is null, so failures here are
+  /// swallowed quietly instead of surfacing a scary error toast.
   Future<void> fetchLatest() async {
     loading = true;
     update();
     try {
-      rx = await _repo.fetchLatestPrescription();
-    } catch (e) {
-      SnackHelper.error(e.toString().replaceFirst('Exception: ', ''));
+      rx = await _repo.fetchLatestPrescription(centerId: _centerId);
+    } catch (_) {
+      rx = null;
     } finally {
       loading = false;
       update();

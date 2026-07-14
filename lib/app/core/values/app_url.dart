@@ -54,6 +54,7 @@ class ApiURL {
       'api/v1/locations/districts?division=$division';
 
   //===== Healthcare
+  static final String hcCenters = 'api/v1/healthcare/centers';
   static final String hcDepartments = 'api/v1/healthcare/departments';
   static final String hcDoctors = 'api/v1/healthcare/doctors';
   static String hcDoctorsBySpecialization(String spec) =>
@@ -61,19 +62,40 @@ class ApiURL {
   static final String hcDoctorsAvailableToday =
       'api/v1/healthcare/doctors/available-today';
 
-  /// Paginated doctors list, optionally filtered by specialization.
+  /// Departments list, optionally scoped to one center.
+  static String hcDepartmentsScoped({String? centerId}) {
+    if (centerId == null || centerId.isEmpty) return hcDepartments;
+    return '$hcDepartments?center_id=${Uri.encodeQueryComponent(centerId)}';
+  }
+
+  /// Paginated doctors list, optionally filtered by specialization and/or
+  /// scoped to one center.
   static String hcDoctorsPaged(
-      {int page = 1, int limit = 10, String? specialization}) {
+      {int page = 1,
+      int limit = 10,
+      String? specialization,
+      String? centerId}) {
     final q = StringBuffer('$hcDoctors?page=$page&limit=$limit');
     if (specialization != null && specialization.isNotEmpty) {
       q.write('&specialization=${Uri.encodeQueryComponent(specialization)}');
     }
+    if (centerId != null && centerId.isNotEmpty) {
+      q.write('&center_id=${Uri.encodeQueryComponent(centerId)}');
+    }
     return q.toString();
   }
 
-  /// Paginated "available today" doctors list.
-  static String hcDoctorsAvailableTodayPaged({int page = 1, int limit = 10}) =>
-      '$hcDoctorsAvailableToday?page=$page&limit=$limit';
+  /// Paginated "available today" doctors list, optionally scoped to one
+  /// center.
+  static String hcDoctorsAvailableTodayPaged(
+      {int page = 1, int limit = 10, String? centerId}) {
+    final q =
+        StringBuffer('$hcDoctorsAvailableToday?page=$page&limit=$limit');
+    if (centerId != null && centerId.isNotEmpty) {
+      q.write('&center_id=${Uri.encodeQueryComponent(centerId)}');
+    }
+    return q.toString();
+  }
   static String hcDoctorProfile(String id) =>
       'api/v1/healthcare/doctors/$id/profile';
   static String hcDoctorReviews(String id) =>
@@ -91,6 +113,13 @@ class ApiURL {
       'api/v1/healthcare/documents/upload';
   static final String hcAppointments = 'api/v1/healthcare/appointments';
   static final String hcAppointmentsMy = 'api/v1/healthcare/appointments/my';
+
+  /// "My appointments" list, optionally scoped to one center.
+  static String hcAppointmentsMyScoped({String? centerId}) {
+    if (centerId == null || centerId.isEmpty) return hcAppointmentsMy;
+    return '$hcAppointmentsMy?center_id=${Uri.encodeQueryComponent(centerId)}';
+  }
+
   static String hcAppointmentById(String id) =>
       'api/v1/healthcare/appointments/$id';
   static String hcAppointmentQueue(String id) =>
@@ -99,6 +128,13 @@ class ApiURL {
       'api/v1/healthcare/appointments/$id/reschedule';
   static final String hcPrescriptionLatest =
       'api/v1/healthcare/prescriptions/latest';
+
+  /// "Latest prescription" lookup, optionally scoped to one center.
+  static String hcPrescriptionLatestScoped({String? centerId}) {
+    if (centerId == null || centerId.isEmpty) return hcPrescriptionLatest;
+    return '$hcPrescriptionLatest?center_id=${Uri.encodeQueryComponent(centerId)}';
+  }
+
   static String hcPrescriptionsByDoctor(String doctorId) =>
       'api/v1/healthcare/prescriptions/by-doctor/$doctorId';
   static String hcPrescriptionDownload(String id) =>

@@ -39,6 +39,35 @@ class Department {
       .toList();
 }
 
+// ── Healthcare Center ────────────────────────────────────────────────
+class HealthcareCenter {
+  const HealthcareCenter({
+    required this.id,
+    required this.name,
+    required this.address,
+    required this.contactPhone,
+    required this.doctorCount,
+  });
+  final String id;
+  final String name;
+  final String address;
+  final String contactPhone;
+  final int doctorCount;
+
+  factory HealthcareCenter.fromMap(Map<String, dynamic> j) => HealthcareCenter(
+        id: _str(j['id']),
+        name: _str(j['name']),
+        address: _str(j['address']),
+        contactPhone: _str(j['contact_phone']),
+        doctorCount: _int(j['doctor_count']),
+      );
+
+  static List<HealthcareCenter> listFromResponse(dynamic src) => _dataList(src)
+      .whereType<Map>()
+      .map((e) => HealthcareCenter.fromMap(e.cast<String, dynamic>()))
+      .toList();
+}
+
 // ── Doctor ──────────────────────────────────────────────────────────
 class Doctor {
   Doctor({

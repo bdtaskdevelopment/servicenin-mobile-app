@@ -7,6 +7,7 @@ import '../modules/ambulance/bindings/ambulance_binding.dart';
 import '../modules/ambulance/views/ambulance_view.dart';
 import '../modules/healthcare/bindings/healthcare_binding.dart';
 import '../modules/healthcare/views/healthcare_view.dart';
+import '../modules/healthcare/views/healthcare_centers_view.dart';
 import '../modules/home_service/bindings/home_service_binding.dart';
 import '../modules/home_service/views/home_service_view.dart';
 import '../modules/home_service/views/hs_service_list_view.dart';
@@ -181,6 +182,11 @@ class AppPages {
     GetPage(
       name: _Paths.HEALTHCARE,
       page: () => const HealthcareView(),
+      binding: HealthcareBinding(),
+    ),
+    GetPage(
+      name: _Paths.HEALTHCARE_CENTERS,
+      page: () => const HealthcareCentersView(),
       binding: HealthcareBinding(),
     ),
     GetPage(

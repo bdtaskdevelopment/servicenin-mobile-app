@@ -6,7 +6,9 @@ import '../../../core/values/app_config.dart';
 import '../../../data/models/response/healthcare_response.dart';
 import '../../../data/repositories/healthcare.repo.dart';
 import '../../../routes/app_pages.dart';
+import 'appointments_controller.dart';
 import 'doctors_controller.dart';
+import 'prescription_controller.dart';
 
 /// Build an absolute image URL from a doctor `photo_url`, which may already be
 /// absolute (`https://…`) or a server-relative path (`/uploads/…`). Returns ''
@@ -141,10 +143,6 @@ class HealthcareController extends GetxController {
   /// Page size for the paginated "see all" screens.
   static const int kPageSize = 10;
 
-  // ── Available-today doctors (home preview) ──────────────────────────
-  List<HcDoctor> doctors = [];
-  bool loadingDoctors = false;
-
   // ── Available-today doctors (paginated "see all" screen) ────────────
   List<HcDoctor> availableDoctors = [];
   bool loadingAvailable = false;
@@ -162,12 +160,36 @@ class HealthcareController extends GetxController {
   bool loadingFamily = false;
   bool addingFamily = false;
 
+  // ── Selected center ───────────────────────────────────────────────────
+  /// The center this screen is currently scoped to — set by
+  /// `HealthcareCentersController.openCenter()` before navigating here.
+  HealthcareCenter? selectedCenter;
+
+  /// Switches the currently-browsed center, clears the previous center's
+  /// data, and reloads departments/doctors/appointments/prescriptions for
+  /// the new one — so a screen already visited under the previous center
+  /// never keeps showing that center's data once the user switches.
+  void selectCenter(HealthcareCenter c) {
+    selectedCenter = c;
+    departments = [];
+    allDoctors = [];
+    update();
+    fetchDepartments();
+    fetchAllDoctors();
+    if (Get.isRegistered<DoctorsController>()) {
+      Get.find<DoctorsController>().fetchDoctors();
+    }
+    if (Get.isRegistered<AppointmentsController>()) {
+      Get.find<AppointmentsController>().fetchMine();
+    }
+    if (Get.isRegistered<PrescriptionController>()) {
+      Get.find<PrescriptionController>().fetchLatest();
+    }
+  }
+
   @override
   void onInit() {
     super.onInit();
-    fetchDepartments();
-    fetchAvailableToday();
-    fetchAllDoctors();
     fetchFamily();
     availableScrollCtrl.addListener(_onAvailableScroll);
   }
@@ -183,7 +205,8 @@ class HealthcareController extends GetxController {
     loadingAllDoctors = true;
     update();
     try {
-      final list = await _repo.fetchDoctors(limit: kPreviewCount);
+      final list = await _repo.fetchDoctors(
+          limit: kPreviewCount, centerId: selectedCenter?.id);
       allDoctors = list.map(HcDoctor.fromApi).toList();
     } catch (e) {
       SnackHelper.error(e.toString().replaceFirst('Exception: ', ''));
@@ -197,26 +220,12 @@ class HealthcareController extends GetxController {
     loadingDepartments = true;
     update();
     try {
-      final list = await _repo.fetchDepartments();
+      final list = await _repo.fetchDepartments(centerId: selectedCenter?.id);
       departments = list.map(HcDepartment.fromApi).toList();
     } catch (e) {
       SnackHelper.error(e.toString().replaceFirst('Exception: ', ''));
     } finally {
       loadingDepartments = false;
-      update();
-    }
-  }
-
-  Future<void> fetchAvailableToday() async {
-    loadingDoctors = true;
-    update();
-    try {
-      final list = await _repo.fetchAvailableToday(limit: kPreviewCount);
-      doctors = list.map(HcDoctor.fromApi).toList();
-    } catch (e) {
-      SnackHelper.error(e.toString().replaceFirst('Exception: ', ''));
-    } finally {
-      loadingDoctors = false;
       update();
     }
   }
@@ -237,7 +246,7 @@ class HealthcareController extends GetxController {
     update();
     try {
       final list = await _repo.fetchAvailableToday(
-          page: _availablePage, limit: kPageSize);
+          page: _availablePage, limit: kPageSize, centerId: selectedCenter?.id);
       availableDoctors = list.map(HcDoctor.fromApi).toList();
       availableHasMore = list.length >= kPageSize;
     } catch (e) {
@@ -254,8 +263,8 @@ class HealthcareController extends GetxController {
     update();
     try {
       final next = _availablePage + 1;
-      final list =
-          await _repo.fetchAvailableToday(page: next, limit: kPageSize);
+      final list = await _repo.fetchAvailableToday(
+          page: next, limit: kPageSize, centerId: selectedCenter?.id);
       availableDoctors.addAll(list.map(HcDoctor.fromApi));
       _availablePage = next;
       availableHasMore = list.length >= kPageSize;

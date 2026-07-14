@@ -5,9 +5,11 @@ import '../../../core/helpers/snack_helper.dart';
 import '../../../data/models/response/healthcare_response.dart';
 import '../../../data/repositories/healthcare.repo.dart';
 import '../../../routes/app_pages.dart';
+import 'healthcare_controller.dart';
 
 class AppointmentsController extends GetxController {
   HealthcareRepository get _repo => Get.find<HealthcareRepository>();
+  String? get _centerId => Get.find<HealthcareController>().selectedCenter?.id;
 
   List<HcAppointment> all = [];
   bool loading = false;
@@ -63,7 +65,7 @@ class AppointmentsController extends GetxController {
     loading = true;
     update();
     try {
-      all = await _repo.fetchMyAppointments();
+      all = await _repo.fetchMyAppointments(centerId: _centerId);
       _resolveDoctorNames();
     } catch (e) {
       SnackHelper.error(e.toString().replaceFirst('Exception: ', ''));
