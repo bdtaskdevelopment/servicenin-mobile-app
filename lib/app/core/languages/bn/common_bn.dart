@@ -20,7 +20,7 @@ const Map<String, String> commonBn = {
   'Confirm': 'নিশ্চিত করুন',
   'Save': 'সংরক্ষণ',
   'Continue': 'চালিয়ে যান',
-  'Continue booking': 'বুকিং চালিয়ে যান',
+  'Continue booking': 'বুকিং করুন',
   'Continue to payment': 'পেমেন্টে যান',
   'Next': 'পরবর্তী',
   'Back': 'পিছনে',

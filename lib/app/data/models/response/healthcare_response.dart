@@ -39,6 +39,46 @@ class Department {
       .toList();
 }
 
+// ── Direct Telemedicine support desk ──────────────────────────────────
+class TelemedicineSupport {
+  const TelemedicineSupport({
+    required this.id,
+    required this.name,
+    required this.timeLabel,
+    required this.isOpenNow,
+    required this.phone,
+    required this.whatsapp,
+    required this.whatsappUrl,
+    required this.note,
+  });
+  final String id;
+  final String name;
+  final String timeLabel;
+  final bool isOpenNow;
+  final String phone;
+  final String whatsapp;
+  final String whatsappUrl;
+  final String note;
+
+  factory TelemedicineSupport.fromMap(Map<String, dynamic> j) =>
+      TelemedicineSupport(
+        id: _str(j['id']),
+        name: _str(j['name']),
+        timeLabel: _str(j['time_label']),
+        isOpenNow: j['is_open_now'] == true,
+        phone: _str(j['phone']),
+        whatsapp: _str(j['whatsapp']),
+        whatsappUrl: _str(j['whatsapp_url']),
+        note: _str(j['note']),
+      );
+
+  static List<TelemedicineSupport> listFromResponse(dynamic src) =>
+      _dataList(src)
+          .whereType<Map>()
+          .map((e) => TelemedicineSupport.fromMap(e.cast<String, dynamic>()))
+          .toList();
+}
+
 // ── Healthcare Center ────────────────────────────────────────────────
 class HealthcareCenter {
   const HealthcareCenter({

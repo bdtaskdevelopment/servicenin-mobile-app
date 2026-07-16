@@ -40,6 +40,12 @@ class HealthcareRepository {
     return HealthcareCenter.listFromResponse(_payload(res));
   }
 
+  // ── Direct Telemedicine support ─────────────────────────────────────
+  Future<List<TelemedicineSupport>> fetchTelemedicineSupport() async {
+    final res = await provider.getData(ApiURL.hcTelemedicineSupport);
+    return TelemedicineSupport.listFromResponse(_payload(res));
+  }
+
   // ── Departments & doctors ───────────────────────────────────────────
   Future<List<Department>> fetchDepartments({String? centerId}) async {
     final res = await provider

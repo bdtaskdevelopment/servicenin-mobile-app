@@ -4,7 +4,13 @@ import 'package:get/get.dart';
 
 import '../../../data/models/response/healthcare_response.dart';
 import '../../../global_widget/sn_shimmer.dart';
+import '../../../routes/app_pages.dart';
 import '../controllers/centers_controller.dart';
+
+/// Gradient for the "Telemedicine Call Center" card — a solid, saturated red
+/// (unlike the pastel tints below) so it reads as its own section, not just
+/// another center in the list.
+const _telemedGradient = [Color(0xFFEF4444), Color(0xFFB91C1C)];
 
 /// One accent per card — (card background, icon-tile/badge background, icon
 /// & badge text color). Four medical-themed tints, cycled by index so
@@ -59,36 +65,105 @@ class HealthcareCentersView extends GetView<HealthcareCentersController> {
                   if (con.loading && con.centers.isEmpty) {
                     return const SnListSkeleton(count: 5);
                   }
-                  if (con.centers.isEmpty) {
-                    return Center(
-                      child: Text('No centers available.'.tr,
-                          style: const TextStyle(
-                              fontSize: 13, color: Color(0xFF94A3B8))),
-                    );
-                  }
                   return RefreshIndicator(
                     onRefresh: con.fetchCenters,
                     child: ListView.builder(
                       padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
-                      itemCount: con.centers.length,
-                      itemBuilder: (_, i) => FadeInUp(
-                        from: 18,
-                        duration: const Duration(milliseconds: 300),
-                        delay: Duration(milliseconds: 60 * i),
-                        child: Padding(
-                          padding: const EdgeInsets.only(bottom: 12),
-                          child: _CenterCard(
-                            center: con.centers[i],
-                            accent: _cardAccents[i % _cardAccents.length],
-                            onTap: () => con.openCenter(con.centers[i]),
+                      itemCount:
+                          con.centers.isEmpty ? 2 : con.centers.length + 1,
+                      itemBuilder: (_, i) {
+                        if (i == 0) {
+                          return const Padding(
+                            padding: EdgeInsets.only(bottom: 12),
+                            child: _TelemedicineCard(),
+                          );
+                        }
+                        if (con.centers.isEmpty) {
+                          return Padding(
+                            padding: const EdgeInsets.only(top: 24),
+                            child: Center(
+                              child: Text('No centers available.'.tr,
+                                  style: const TextStyle(
+                                      fontSize: 13,
+                                      color: Color(0xFF94A3B8))),
+                            ),
+                          );
+                        }
+                        final ci = i - 1;
+                        return FadeInUp(
+                          from: 18,
+                          duration: const Duration(milliseconds: 300),
+                          delay: Duration(milliseconds: 60 * ci),
+                          child: Padding(
+                            padding: const EdgeInsets.only(bottom: 12),
+                            child: _CenterCard(
+                              center: con.centers[ci],
+                              accent: _cardAccents[ci % _cardAccents.length],
+                              onTap: () => con.openCenter(con.centers[ci]),
+                            ),
                           ),
-                        ),
-                      ),
+                        );
+                      },
                     ),
                   );
                 },
               ),
             ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _TelemedicineCard extends StatelessWidget {
+  const _TelemedicineCard();
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: () => Get.toNamed(Routes.HEALTHCARE_TELEMEDICINE),
+      child: Container(
+        padding: const EdgeInsets.all(14),
+        decoration: BoxDecoration(
+          gradient: const LinearGradient(
+            colors: _telemedGradient,
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 52,
+              height: 52,
+              decoration: BoxDecoration(
+                  color: Colors.white, borderRadius: BorderRadius.circular(14)),
+              child: const Icon(Icons.support_agent_rounded,
+                  color: Color(0xFFB91C1C), size: 28),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('Telemedicine Call Center'.tr,
+                      style: const TextStyle(
+                          fontSize: 14.5,
+                          fontWeight: FontWeight.w800,
+                          color: Colors.white)),
+                  const SizedBox(height: 3),
+                  Text('Call or WhatsApp a support desk directly'.tr,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                          fontSize: 12, color: Colors.white.withValues(alpha: 0.9))),
+                ],
+              ),
+            ),
+            const SizedBox(width: 6),
+            const Icon(Icons.chevron_right_rounded, color: Colors.white),
           ],
         ),
       ),

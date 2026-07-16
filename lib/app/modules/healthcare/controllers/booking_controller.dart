@@ -69,14 +69,11 @@ class BookingController extends GetxController {
   String get bmdc => profile?.doctor.licenseNo ?? '';
   String get experience =>
       '${profile?.experienceYears ?? _doctor?.reviews ?? 0} yrs';
-  String get reviewsCount => '${profile?.reviewsTotal ?? 0}';
   String get ratingLabel =>
       (profile?.rating ?? 0) > 0 ? profile!.rating.toStringAsFixed(1) : (_doctor?.rating ?? '0.0');
-  String get avgWait => '~10 min';
   String get about =>
       (profile?.bio.isNotEmpty ?? false) ? profile!.bio : 'No bio available.';
   String get speaks => 'Speaks বাংলা · English';
-  List<DoctorReview> get docReviews => profile?.reviews ?? [];
 
   bool submittingReview = false;
   Future<void> submitReview(int rating, String comment) async {
@@ -176,8 +173,9 @@ class BookingController extends GetxController {
     loadingSlots = true;
     update();
     try {
-      _slots = await _repo.fetchTimeSlots(
-          doctorId, vid, _dates[selectedDate].date);
+      final date = _dates[selectedDate].date;
+      final all = await _repo.fetchTimeSlots(doctorId, vid, date);
+      _slots = _dropPastSlots(date, all);
       final firstFree = _slots.firstWhere((s) => !s.isBooked,
           orElse: () => _slots.isNotEmpty ? _slots.first : TimeSlot(time: '', label: '', isBooked: true));
       selectedTime = firstFree.label;
@@ -187,6 +185,25 @@ class BookingController extends GetxController {
       loadingSlots = false;
       update();
     }
+  }
+
+  /// Drops slots that have already passed when `date` (the selected day,
+  /// "yyyy-MM-dd") is today — a doctor's morning slots shouldn't still show
+  /// as bookable once it's afternoon. Other days are returned unfiltered.
+  List<TimeSlot> _dropPastSlots(String date, List<TimeSlot> slots) {
+    final now = DateTime.now();
+    final today =
+        '${now.year.toString().padLeft(4, '0')}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}';
+    if (date != today) return slots;
+    final nowMinutes = now.hour * 60 + now.minute;
+    return slots.where((s) {
+      final parts = s.time.split(':');
+      if (parts.length != 2) return true;
+      final h = int.tryParse(parts[0]);
+      final m = int.tryParse(parts[1]);
+      if (h == null || m == null) return true;
+      return h * 60 + m >= nowMinutes;
+    }).toList();
   }
 
   void selectTime(String label) {

@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../../core/values/app_colors.dart';
-import '../../../data/models/response/healthcare_response.dart';
 import '../../../global_widget/sn_shimmer.dart';
 import '../controllers/booking_controller.dart';
 
@@ -115,16 +114,8 @@ class DoctorProfileView extends GetView<BookingController> {
                                     fontSize: 12.5,
                                     color: Color(0xFF94A3B8))),
                             const SizedBox(height: 8),
-                            Row(
-                              children: [
-                                _pill('● ${con.bmdc}', const Color(0xFFDCFCE7),
-                                    const Color(0xFF15803D)),
-                                const SizedBox(width: 8),
-                                _pill('Video available'.tr,
-                                    const Color(0xFFEDE9FE),
-                                    const Color(0xFF7C3AED)),
-                              ],
-                            ),
+                            _pill('● ${con.bmdc}', const Color(0xFFDCFCE7),
+                                const Color(0xFF15803D)),
                           ],
                         ),
                       ),
@@ -135,9 +126,7 @@ class DoctorProfileView extends GetView<BookingController> {
                   Row(
                     children: [
                       _stat(con.experience, 'Experience'.tr),
-                      _stat('4.9', '${con.reviewsCount} reviews'),
                       _stat(con.doctorFee, 'Consult fee'.tr),
-                      _stat(con.avgWait, 'Avg wait'.tr),
                     ],
                   ),
                   const SizedBox(height: 20),
@@ -163,32 +152,6 @@ class DoctorProfileView extends GetView<BookingController> {
                         child:
                             _VenueCard(name: v.venueName, schedule: v.scheduleLabel),
                       )),
-                  const SizedBox(height: 8),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      _Head('Patient reviews'.tr),
-                      // Write-review action hidden for now.
-                      // GestureDetector(
-                      //   onTap: () => _showReviewDialog(context, con),
-                      //   child: Text('Write a review →'.tr,
-                      //       style: const TextStyle(
-                      //           fontSize: 13,
-                      //           fontWeight: FontWeight.w700,
-                      //           color: AppColors.brandOrange)),
-                      // ),
-                    ],
-                  ),
-                  const SizedBox(height: 12),
-                  if (con.docReviews.isEmpty)
-                    Padding(
-                      padding: const EdgeInsets.only(bottom: 8),
-                      child: Text('No reviews yet — be the first to review.'.tr,
-                          style:
-                              const TextStyle(fontSize: 13, color: Color(0xFF94A3B8))),
-                    )
-                  else
-                    ...con.docReviews.map((r) => _ReviewCard(review: r)),
                 ],
               ),
               ),
@@ -479,50 +442,3 @@ class _ProfileSkeleton extends StatelessWidget {
   }
 }
 
-class _ReviewCard extends StatelessWidget {
-  const _ReviewCard({required this.review});
-  final DoctorReview review;
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-          color: AppColors.white,
-          borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: const Color(0xFFEDEFF2))),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Container(
-                width: 34,
-                height: 34,
-                decoration: BoxDecoration(
-                    color: _tile, borderRadius: BorderRadius.circular(10)),
-                alignment: Alignment.center,
-                child: Text(review.patientInitials,
-                    style: const TextStyle(
-                        color: _green,
-                        fontSize: 12,
-                        fontWeight: FontWeight.w800)),
-              ),
-              const SizedBox(width: 10),
-              Text(review.patientName,
-                  style: const TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w700,
-                      color: Color(0xFF0F172A))),
-              const Spacer(),
-              const Icon(Icons.star_rounded, size: 18, color: Color(0xFF0F172A)),
-            ],
-          ),
-          const SizedBox(height: 8),
-          Text(review.comment,
-              style: const TextStyle(
-                  fontSize: 12.5, color: Color(0xFF475569), height: 1.4)),
-        ],
-      ),
-    );
-  }
-}

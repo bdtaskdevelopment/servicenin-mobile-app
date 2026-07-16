@@ -55,6 +55,8 @@ class ApiURL {
 
   //===== Healthcare
   static final String hcCenters = 'api/v1/healthcare/centers';
+  static final String hcTelemedicineSupport =
+      'api/v1/healthcare/telemedicine-support';
   static final String hcDepartments = 'api/v1/healthcare/departments';
   static final String hcDoctors = 'api/v1/healthcare/doctors';
   static String hcDoctorsBySpecialization(String spec) =>

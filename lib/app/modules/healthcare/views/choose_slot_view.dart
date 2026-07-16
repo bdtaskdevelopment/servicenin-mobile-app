@@ -258,7 +258,7 @@ class ChooseSlotView extends GetView<BookingController> {
                 _BottomBar(
                   left: con.slotSummary,
                   price: con.doctorFee,
-                  label: 'Continue →'.tr,
+                  label: 'Next step'.tr,
                   onTap: con.slotContinue,
                 ),
               ],

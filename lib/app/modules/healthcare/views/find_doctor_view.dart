@@ -280,37 +280,21 @@ class _DoctorCard extends StatelessWidget {
                   Text('${doctor.specialty} · ${doctor.degree}',
                       style: const TextStyle(
                           fontSize: 12, color: Color(0xFF94A3B8))),
-                  const SizedBox(height: 6),
-                  Row(
-                    children: [
-                      const Icon(Icons.star_rounded,
-                          size: 15, color: Color(0xFFF59E0B)),
-                      const SizedBox(width: 2),
-                      Text(doctor.rating,
+                  if (doctor.video) ...[
+                    const SizedBox(height: 6),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 8, vertical: 3),
+                      decoration: BoxDecoration(
+                          color: const Color(0xFFEDE9FE),
+                          borderRadius: BorderRadius.circular(6)),
+                      child: Text('Video'.tr,
                           style: const TextStyle(
-                              fontSize: 12,
+                              fontSize: 10.5,
                               fontWeight: FontWeight.w700,
-                              color: Color(0xFF334155))),
-                      Text(' (${doctor.reviews})',
-                          style: const TextStyle(
-                              fontSize: 12, color: Color(0xFF94A3B8))),
-                      if (doctor.video) ...[
-                        const SizedBox(width: 8),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 8, vertical: 3),
-                          decoration: BoxDecoration(
-                              color: const Color(0xFFEDE9FE),
-                              borderRadius: BorderRadius.circular(6)),
-                          child: Text('Video'.tr,
-                              style: const TextStyle(
-                                  fontSize: 10.5,
-                                  fontWeight: FontWeight.w700,
-                                  color: Color(0xFF7C3AED))),
-                        ),
-                      ],
-                    ],
-                  ),
+                              color: Color(0xFF7C3AED))),
+                    ),
+                  ],
                 ],
               ),
             ),

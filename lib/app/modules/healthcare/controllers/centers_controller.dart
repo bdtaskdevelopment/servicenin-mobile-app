@@ -24,7 +24,10 @@ class HealthcareCentersController extends GetxController {
     loading = true;
     update();
     try {
-      centers = await _repo.fetchCenters();
+      // A center with no doctors assigned yet has nothing for a citizen to
+      // book, so it's hidden from the picker rather than shown as a dead end.
+      final list = await _repo.fetchCenters();
+      centers = list.where((c) => c.doctorCount > 0).toList();
     } catch (e) {
       SnackHelper.error(e.toString().replaceFirst('Exception: ', ''));
     } finally {

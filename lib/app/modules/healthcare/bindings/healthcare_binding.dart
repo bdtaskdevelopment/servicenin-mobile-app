@@ -7,6 +7,7 @@ import '../controllers/chat_controller.dart';
 import '../controllers/doctors_controller.dart';
 import '../controllers/healthcare_controller.dart';
 import '../controllers/prescription_controller.dart';
+import '../controllers/telemedicine_controller.dart';
 
 class HealthcareBinding extends Bindings {
   @override
@@ -21,5 +22,7 @@ class HealthcareBinding extends Bindings {
         fenix: true);
     Get.lazyPut<DoctorsController>(() => DoctorsController(), fenix: true);
     Get.lazyPut<BookingController>(() => BookingController(), fenix: true);
+    Get.lazyPut<TelemedicineController>(() => TelemedicineController(),
+        fenix: true);
   }
 }

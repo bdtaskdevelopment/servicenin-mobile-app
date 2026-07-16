@@ -103,108 +103,7 @@ class AppointmentQueueView extends GetView<AppointmentsController> {
                           ],
                         ),
                       ),
-                      const SizedBox(height: 14),
-                      // Serial + queue hero
-                      Container(
-                        width: double.infinity,
-                        padding: const EdgeInsets.all(20),
-                        decoration: BoxDecoration(
-                          gradient: const LinearGradient(
-                              colors: [Color(0xFF0F7A52), Color(0xFF0B5E3F)],
-                              begin: Alignment.topLeft,
-                              end: Alignment.bottomRight),
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        child: Column(
-                          children: [
-                            Text('YOUR SERIAL'.tr,
-                                style: const TextStyle(
-                                    color: Color(0xFFCDEDE0),
-                                    fontSize: 11,
-                                    fontWeight: FontWeight.w700,
-                                    letterSpacing: 0.6)),
-                            const SizedBox(height: 4),
-                            Text(a.serialNo > 0 ? '${a.serialNo}' : '—',
-                                style: const TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 44,
-                                    fontWeight: FontWeight.w800)),
-                            const SizedBox(height: 6),
-                            if (upcoming)
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  _heroStat('Now serving'.tr, con.nowServingLabel),
-                                  Container(
-                                    width: 1,
-                                    height: 30,
-                                    color:
-                                        Colors.white.withValues(alpha: 0.2),
-                                    margin: const EdgeInsets.symmetric(
-                                        horizontal: 18),
-                                  ),
-                                  _heroStat('Ahead of you'.tr, '${con.aheadCount}'),
-                                ],
-                              )
-                            else
-                              Text('Visit completed'.tr,
-                                  style: TextStyle(
-                                      color:
-                                          Colors.white.withValues(alpha: 0.9),
-                                      fontSize: 13)),
-                          ],
-                        ),
-                      ),
                       if (upcoming) ...[
-                        const SizedBox(height: 14),
-                        Container(
-                          padding: const EdgeInsets.all(16),
-                          decoration: BoxDecoration(
-                              color: AppColors.white,
-                              borderRadius: BorderRadius.circular(16),
-                              border:
-                                  Border.all(color: const Color(0xFFEDEFF2))),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
-                                children: [
-                                  Text('Queue progress'.tr,
-                                      style: const TextStyle(
-                                          fontSize: 15,
-                                          fontWeight: FontWeight.w800,
-                                          color: Color(0xFF0F172A))),
-                                  const Spacer(),
-                                  Text('~${con.estimatedWaitMin} min wait',
-                                      style: const TextStyle(
-                                          fontSize: 12.5,
-                                          fontWeight: FontWeight.w700,
-                                          color: _green)),
-                                ],
-                              ),
-                              const SizedBox(height: 12),
-                              ClipRRect(
-                                borderRadius: BorderRadius.circular(8),
-                                child: LinearProgressIndicator(
-                                  value: _progress(a.serialNo, con.aheadCount),
-                                  minHeight: 8,
-                                  backgroundColor: const Color(0xFFE9ECF1),
-                                  valueColor:
-                                      const AlwaysStoppedAnimation<Color>(
-                                          _green),
-                                ),
-                              ),
-                              const SizedBox(height: 10),
-                              Text(
-                                  con.aheadCount == 0
-                                      ? 'You are next — please be ready.'.tr
-                                      : '${'Now serving serial'.tr} ${con.nowServingLabel} · ${'you are'.tr} ${con.aheadCount} ${'away.'.tr}',
-                                  style: const TextStyle(
-                                      fontSize: 12.5,
-                                      color: Color(0xFF64748B))),
-                            ],
-                          ),
-                        ),
                         const SizedBox(height: 14),
                         Container(
                           padding: const EdgeInsets.symmetric(
@@ -304,12 +203,6 @@ class AppointmentQueueView extends GetView<AppointmentsController> {
     );
   }
 
-  double _progress(int mine, int ahead) {
-    if (mine <= 0) return 0.04;
-    final served = (mine - ahead).clamp(0, mine);
-    return (served / mine).clamp(0.04, 1.0);
-  }
-
   Future<void> _pickAndReschedule(
       BuildContext context, AppointmentsController con) async {
     final now = DateTime.now();
@@ -337,21 +230,6 @@ class AppointmentQueueView extends GetView<AppointmentsController> {
     return '${d.year}-${two(d.month)}-${two(d.day)}'
         'T${two(d.hour)}:${two(d.minute)}:00+06:00';
   }
-
-  Widget _heroStat(String label, String value) => Column(
-        children: [
-          Text(value,
-              style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 18,
-                  fontWeight: FontWeight.w800)),
-          const SizedBox(height: 2),
-          Text(label,
-              style: TextStyle(
-                  color: Colors.white.withValues(alpha: 0.85),
-                  fontSize: 11.5)),
-        ],
-      );
 
   Widget _row(IconData icon, String label, String value) => Padding(
         padding: const EdgeInsets.symmetric(vertical: 12),

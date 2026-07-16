@@ -11,6 +11,7 @@ abstract class Routes {
   static const AMBULANCE = _Paths.AMBULANCE;
   static const HEALTHCARE = _Paths.HEALTHCARE;
   static const HEALTHCARE_CENTERS = _Paths.HEALTHCARE_CENTERS;
+  static const HEALTHCARE_TELEMEDICINE = _Paths.HEALTHCARE_TELEMEDICINE;
   static const INFORMATION = _Paths.INFORMATION;
   static const HOME_SERVICE = _Paths.HOME_SERVICE;
   static const HOME_SERVICE_LIST = _Paths.HOME_SERVICE_LIST;
@@ -152,6 +153,7 @@ abstract class _Paths {
   static const AMBULANCE = '/ambulance';
   static const HEALTHCARE = '/healthcare';
   static const HEALTHCARE_CENTERS = '/healthcare-centers';
+  static const HEALTHCARE_TELEMEDICINE = '/healthcare-telemedicine';
   static const INFORMATION = '/information';
   static const HOME_SERVICE = '/home-service';
   static const HOME_SERVICE_LIST = '/home-service-list';

@@ -189,6 +189,19 @@ const Map<String, String> groupABn = {
   'No messages yet — say hello 👋': 'এখনও কোনো মেসেজ নেই — হ্যালো বলুন 👋',
   'Type a message…': 'একটি মেসেজ লিখুন…',
 
+  // ── Healthcare: centers list ─────────────────────────────────────
+  'Choose a center to continue': 'একটি সেন্টার নির্বাচন করুন',
+  'Telemedicine Call Center': 'টেলিমেডিসিন কল সেন্টার',
+  'Call or WhatsApp a support desk directly': 'সরাসরি কল করুন অথবা হোয়াটসঅ্যাপ করুন',
+  'No centers available.': 'কোনো সেন্টার পাওয়া যায়নি।',
+  'doctors': 'ডাক্তার',
+
+  // ── Healthcare: telemedicine support ──────────────────────────────
+  'No support desk available.': 'কোনো সাপোর্ট ডেস্ক পাওয়া যায়নি।',
+  'Open now': 'ওপেন',
+  'Closed': 'বন্ধ',
+  'WhatsApp': 'হোয়াটসঅ্যাপ',
+
   // ── Healthcare: home ─────────────────────────────────────────────
   'PRAC Healthcare': 'PRAC হেলথকেয়ার',
   'Verified BMDC doctors · Dhaka': 'যাচাইকৃত BMDC ডাক্তার · ঢাকা',
@@ -222,7 +235,7 @@ const Map<String, String> groupABn = {
   'Serial assigned at booking': 'বুকিংয়ে সিরিয়াল নির্ধারিত হয়',
   'Serial, not a fixed time — arrive 15 min early.':
       'সিরিয়াল, নির্দিষ্ট সময় নয় — ১৫ মিনিট আগে আসুন।',
-  'Continue →': 'এগিয়ে যান →',
+  'Next step': 'পরবর্তী ধাপ',
 
   // ── Healthcare: review & confirm ─────────────────────────────────
   'Review & confirm': 'পর্যালোচনা ও নিশ্চিত করুন',
@@ -303,8 +316,8 @@ const Map<String, String> groupABn = {
   'Attach reports': 'রিপোর্ট সংযুক্ত করুন',
   'Prescriptions, lab tests (optional)':
       'প্রেসক্রিপশন, ল্যাব টেস্ট (ঐচ্ছিক)',
-  'Continue to payment →': 'পেমেন্টে এগিয়ে যান →',
-  'Continue booking': 'বুকিং চালিয়ে যান',
+  'Continue to payment →': 'পেমেন্ট করুন',
+  'Continue booking': 'বুকিং করুন',
   'e.g. Rokeya Begum': 'যেমন রোকেয়া বেগম',
   'e.g. Mother, Son': 'যেমন মা, ছেলে',
   'e.g. 61': 'যেমন ৬১',
