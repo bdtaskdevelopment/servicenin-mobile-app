@@ -54,7 +54,7 @@ class AccountView extends GetView<AccountController> {
                       icon: Icons.chat_bubble_outline_rounded,
                       title: 'Help & support'.tr,
                       subtitle: 'FAQ · contact us'.tr,
-                      onTap: () => Get.toNamed(Routes.INFORMATION),
+                      onTap: () => Get.toNamed(Routes.ACCOUNT_HELP_SUPPORT),
                     ),
                   ],
                 ),
@@ -158,7 +158,7 @@ class _ProfileHeader extends StatelessWidget {
                         ),
                         const SizedBox(height: 2),
                         Text(
-                          con.maskedPhone,
+                          con.phone,
                           style: TextStyle(
                             color: Colors.white.withValues(alpha: 0.85),
                             fontSize: 13,
@@ -170,30 +170,6 @@ class _ProfileHeader extends StatelessWidget {
                     ),
                   ),
                 ],
-              ),
-              const SizedBox(height: 16),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-                decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.08),
-                  borderRadius: BorderRadius.circular(14),
-                ),
-                child: Row(
-                  children: [
-                    Icon(Icons.verified_user_outlined,
-                        size: 18, color: Colors.white.withValues(alpha: 0.9)),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: Text(
-                        'One ServiceNin ID powers all 12 services — no separate logins.'.tr,
-                        style: TextStyle(
-                            fontSize: 12.5,
-                            height: 1.4,
-                            color: Colors.white.withValues(alpha: 0.9)),
-                      ),
-                    ),
-                  ],
-                ),
               ),
             ],
           ),

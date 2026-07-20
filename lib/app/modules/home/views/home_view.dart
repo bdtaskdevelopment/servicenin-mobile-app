@@ -13,6 +13,12 @@ import '../../../global_widget/sn_service_tile.dart';
 import '../../../global_widget/sn_shimmer.dart';
 import '../controllers/home_controller.dart';
 
+/// Home-page grid, minus services hidden for now (still fully wired up —
+/// routes/bindings untouched — just not shown here until re-enabled).
+final _homeServices =
+    SnCatalog.services.where((s) => !_hiddenOnHome.contains(s.name)).toList();
+const _hiddenOnHome = {'Marriage', 'Jobs'};
+
 class HomeView extends GetView<HomeController> {
   const HomeView({super.key});
 
@@ -46,7 +52,7 @@ class HomeView extends GetView<HomeController> {
                     shrinkWrap: true,
                     physics: const NeverScrollableScrollPhysics(),
                     padding: EdgeInsets.zero,
-                    itemCount: SnCatalog.services.length,
+                    itemCount: _homeServices.length,
                     gridDelegate:
                         const SliverGridDelegateWithFixedCrossAxisCount(
                       crossAxisCount: 4,
@@ -55,8 +61,8 @@ class HomeView extends GetView<HomeController> {
                       childAspectRatio: 0.86,
                     ),
                     itemBuilder: (_, i) => SnServiceTile(
-                      service: SnCatalog.services[i],
-                      onTap: () => ServiceNav.open(SnCatalog.services[i]),
+                      service: _homeServices[i],
+                      onTap: () => ServiceNav.open(_homeServices[i]),
                     ),
                   ),
                 ),

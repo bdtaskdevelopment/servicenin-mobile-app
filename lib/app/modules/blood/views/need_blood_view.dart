@@ -64,6 +64,10 @@ class NeedBloodView extends GetView<NeedBloodController> {
                       const SizedBox(height: 12),
                       _LocationCard(con: con),
                       const SizedBox(height: 22),
+                      _SectionLabel('ALERT DONORS WITHIN'.tr),
+                      const SizedBox(height: 12),
+                      _RadiusRow(con: con),
+                      const SizedBox(height: 22),
                       _SectionLabel('CONTACT DETAILS'.tr),
                       const SizedBox(height: 12),
                       _LabeledInput(
@@ -328,6 +332,46 @@ class _UrgencyRow extends StatelessWidget {
                             color: sel ? s.color : const Color(0xFF334155))),
                   ],
                 ),
+              ),
+            ),
+          ),
+        );
+      }).toList(),
+    );
+  }
+}
+
+// ── Alert radius row ────────────────────────────────────────────────
+class _RadiusRow extends StatelessWidget {
+  const _RadiusRow({required this.con});
+  final NeedBloodController con;
+
+  @override
+  Widget build(BuildContext context) {
+    final options = NeedBloodController.radiusOptions;
+    return Row(
+      children: options.map((km) {
+        final sel = con.radiusKm == km;
+        return Expanded(
+          child: Padding(
+            padding: EdgeInsets.only(right: km == options.last ? 0 : 10),
+            child: GestureDetector(
+              onTap: () => con.setRadius(km),
+              child: Container(
+                height: 46,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  color: sel ? _red : AppColors.white,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: sel ? _red : const Color(0xFFE2E8F0),
+                  ),
+                ),
+                child: Text(con.radiusLabel(km),
+                    style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w700,
+                        color: sel ? Colors.white : const Color(0xFF334155))),
               ),
             ),
           ),

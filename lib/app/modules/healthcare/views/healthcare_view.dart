@@ -64,6 +64,7 @@ class HealthcareView extends GetView<HealthcareController> {
               child: GetBuilder<HealthcareController>(
                 builder: (con) {
                   return ListView(
+                    controller: con.allDoctorsScrollCtrl,
                     padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
                     children: [
                       _Hero(),
@@ -80,6 +81,33 @@ class HealthcareView extends GetView<HealthcareController> {
                       // ),
                       const SizedBox(height: 14),
                       // ── All doctors ──────────────────────────────
+                      if (con.allDoctors.isNotEmpty) ...[
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text('Doctors'.tr,
+                                style: const TextStyle(
+                                    fontSize: 17,
+                                    fontWeight: FontWeight.w800,
+                                    color: Color(0xFF0F172A))),
+                            // Fetched with a capped preview limit, so hitting
+                            // that cap means there may be more — offer the
+                            // full searchable list rather than silently
+                            // hiding them.
+                            if (con.allDoctors.length >=
+                                HealthcareController.kPreviewCount)
+                              GestureDetector(
+                                onTap: () => Get.toNamed(Routes.HC_DOCTORS),
+                                child: Text('See all →'.tr,
+                                    style: const TextStyle(
+                                        fontSize: 13,
+                                        fontWeight: FontWeight.w700,
+                                        color: _green)),
+                              ),
+                          ],
+                        ),
+                        const SizedBox(height: 12),
+                      ],
                       if (con.loadingAllDoctors && con.allDoctors.isEmpty)
                         const SnListSkeleton(
                           count: 4,
@@ -93,7 +121,7 @@ class HealthcareView extends GetView<HealthcareController> {
                                   fontSize: 13, color: Color(0xFF94A3B8))),
                         )
                       else
-                        ...con.allDoctors.take(5).toList().asMap().entries.map(
+                        ...con.allDoctors.toList().asMap().entries.map(
                               (e) => FadeInUp(
                                 from: 18,
                                 duration: const Duration(milliseconds: 350),
@@ -111,6 +139,18 @@ class HealthcareView extends GetView<HealthcareController> {
                                 ),
                               ),
                             ),
+                      if (con.loadingMoreAllDoctors)
+                        const Padding(
+                          padding: EdgeInsets.symmetric(vertical: 14),
+                          child: Center(
+                            child: SizedBox(
+                              width: 22,
+                              height: 22,
+                              child: CircularProgressIndicator(
+                                  strokeWidth: 2.4, color: _green),
+                            ),
+                          ),
+                        ),
                     ],
                   );
                 },

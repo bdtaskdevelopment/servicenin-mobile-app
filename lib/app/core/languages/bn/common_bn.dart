@@ -44,6 +44,7 @@ const Map<String, String> commonBn = {
   'Add photo': 'ছবি যোগ করুন',
   'Remove': 'সরান',
   'Edit': 'সম্পাদনা',
+  'Delete': 'মুছে ফেলুন',
   'Apply': 'আবেদন করুন',
   'Send': 'পাঠান',
   'Reschedule': 'পুনঃনির্ধারণ',
@@ -99,7 +100,19 @@ const Map<String, String> commonBn = {
   'Funeral': 'ফিউনারেল',
   'Education': 'শিক্ষা',
   'Nagarik Sheba': 'নাগরিক সেবা',
+  'Our Work': 'আমাদের কাজ',
+  'Our News': 'আমাদের খবর',
+  'All': 'সব',
+  'Modified date': 'পরিবর্তনের তারিখ',
   'More': 'আরও',
+
+  // ── Our Work / Our News ──
+  'See what we\'ve been up to': 'আমরা কী করছি দেখুন',
+  'No posts yet — check back soon.': 'এখনো কোনো পোস্ট নেই — শীঘ্রই দেখুন।',
+  'Watch video': 'ভিডিও দেখুন',
+  'Latest updates from ServiceNin': 'সার্ভিসনিন থেকে সর্বশেষ খবর',
+  'No news yet — check back soon.': 'এখনো কোনো খবর নেই — শীঘ্রই দেখুন।',
+  'Read full story': 'সম্পূর্ণ খবর পড়ুন',
 
   // ── Service names (API: /home/services, popular, recent, trending) ──
   'Doctor / Healthcare': 'ডাক্তার / স্বাস্থ্যসেবা',

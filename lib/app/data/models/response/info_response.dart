@@ -23,6 +23,22 @@ class InfoEntry {
     required this.isActive,
     required this.verified,
     required this.sortOrder,
+    required this.logoUrl,
+    required this.contactPerson,
+    required this.phone2,
+    required this.fax,
+    required this.email,
+    required this.website,
+    required this.facebookPage,
+    required this.whatsapp,
+    required this.upazila,
+    required this.wardNo,
+    required this.mapUrl,
+    required this.ministry,
+    required this.emergencyContact,
+    required this.specialization,
+    required this.serviceArea,
+    required this.availableServices,
   });
 
   final String id;
@@ -43,6 +59,25 @@ class InfoEntry {
   final bool isActive;
   final bool verified;
   final int sortOrder;
+
+  // ── Richer fields (detail page only — the list endpoint omits most of
+  // these when empty, but they're always parsed if present) ────────────
+  final String logoUrl;
+  final String contactPerson;
+  final String phone2;
+  final String fax;
+  final String email;
+  final String website;
+  final String facebookPage;
+  final String whatsapp;
+  final String upazila;
+  final String wardNo;
+  final String mapUrl;
+  final String ministry;
+  final String emergencyContact;
+  final String specialization;
+  final String serviceArea;
+  final String availableServices;
 
   bool get isNationalEmergency => subtype == 'national_emergency';
 
@@ -79,6 +114,22 @@ class InfoEntry {
       sortOrder: json['sort_order'] is int
           ? json['sort_order'] as int
           : int.tryParse(str(json['sort_order'])) ?? 0,
+      logoUrl: str(json['logo_url']),
+      contactPerson: str(json['contact_person']),
+      phone2: str(json['phone2']),
+      fax: str(json['fax']),
+      email: str(json['email']),
+      website: str(json['website']),
+      facebookPage: str(json['facebook_page']),
+      whatsapp: str(json['whatsapp']),
+      upazila: str(json['upazila']),
+      wardNo: str(json['ward_no']),
+      mapUrl: str(json['map_url']),
+      ministry: str(json['ministry']),
+      emergencyContact: str(json['emergency_contact']),
+      specialization: str(json['specialization']),
+      serviceArea: str(json['service_area']),
+      availableServices: str(json['available_services']),
     );
   }
 
@@ -103,5 +154,47 @@ class InfoEntry {
         ? decoded['data'] as Map
         : decoded as Map;
     return InfoEntry.fromMap(data.cast<String, dynamic>());
+  }
+}
+
+/// A directory category ("domain") from `/api/v1/info/domains` — e.g.
+/// Emergency, Government, Health, Utility, Other.
+class InfoDomain {
+  InfoDomain({
+    required this.key,
+    required this.label,
+    required this.labelBn,
+    required this.emoji,
+    required this.sortOrder,
+  });
+
+  final String key;
+  final String label;
+  final String labelBn;
+  final String emoji;
+  final int sortOrder;
+
+  factory InfoDomain.fromMap(Map<String, dynamic> json) {
+    String str(dynamic v) => v?.toString().trim() ?? '';
+    return InfoDomain(
+      key: str(json['key']),
+      label: str(json['label']),
+      labelBn: str(json['label_bn']),
+      emoji: str(json['emoji']),
+      sortOrder: json['sort_order'] is int
+          ? json['sort_order'] as int
+          : int.tryParse(str(json['sort_order'])) ?? 0,
+    );
+  }
+
+  static List<InfoDomain> listFromResponse(dynamic src) {
+    final decoded = _decode(src);
+    final list = decoded is Map
+        ? (decoded['data'] is List ? decoded['data'] as List : const [])
+        : (decoded is List ? decoded : const []);
+    return list
+        .whereType<Map>()
+        .map((e) => InfoDomain.fromMap(e.cast<String, dynamic>()))
+        .toList();
   }
 }

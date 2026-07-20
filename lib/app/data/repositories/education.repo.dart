@@ -15,13 +15,15 @@ class EducationRepository {
     throw Exception('সংযোগে সমস্যা — আবার চেষ্টা করুন');
   }
 
-  Future<List<EduCategory>> fetchCategories() async {
-    final res = await provider.getData(ApiURL.educationCategories);
-    return EduCategory.listFromResponse(_payload(res));
+  Future<List<EduInstituteType>> fetchInstituteTypes() async {
+    final res = await provider.getData(ApiURL.educationInstituteTypes);
+    return EduInstituteType.listFromResponse(_payload(res));
   }
 
-  Future<List<EduCenter>> fetchCentersNear() async {
-    final res = await provider.getData(ApiURL.educationCentersNear);
+  /// "Centers near you", optionally filtered to one institute type (slug).
+  Future<List<EduCenter>> fetchCentersNear({String? instituteType}) async {
+    final res = await provider.getData(
+        ApiURL.educationCentersNear(instituteType: instituteType));
     return EduCenter.listFromResponse(_payload(res));
   }
 

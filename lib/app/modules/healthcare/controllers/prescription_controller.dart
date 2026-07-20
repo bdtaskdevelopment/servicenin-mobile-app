@@ -1,9 +1,9 @@
 import 'package:get/get.dart';
-import 'package:open_filex/open_filex.dart';
 
 import '../../../core/helpers/snack_helper.dart';
 import '../../../data/models/response/healthcare_response.dart';
 import '../../../data/repositories/healthcare.repo.dart';
+import '../../../global_widget/pdf_preview_view.dart';
 import 'healthcare_controller.dart';
 
 class Medicine {
@@ -50,7 +50,7 @@ class PrescriptionController extends GetxController {
   String get date => rx?.dateLabel ?? '';
   String get doctor => (rx?.doctorName.isNotEmpty ?? false) ? rx!.doctorName : 'Doctor';
   String get degree => rx?.doctorSpecialty ?? '';
-  String get patient => rx?.patientName ?? '';
+  String get patient => rx?.visitorName ?? '';
   String get diagnosis => rx?.diagnosis ?? '';
   String get advice => rx?.advice ?? '';
 
@@ -66,20 +66,17 @@ class PrescriptionController extends GetxController {
         );
       }).toList();
 
+  /// Opens the prescription PDF in-app (view), from where the citizen can
+  /// save or share it via the preview screen's built-in actions — no
+  /// dependency on a device-installed PDF viewer.
   Future<void> download() async {
     final id = rx?.id;
     if (id == null || id.isEmpty || downloading) return;
     downloading = true;
     update();
     try {
-      SnackHelper.success('প্রেসক্রিপশন ডাউনলোড হচ্ছে…');
-      final path = await _repo.downloadPrescription(id);
-      final result = await OpenFilex.open(path);
-      if (result.type != ResultType.done) {
-        SnackHelper.error(result.type == ResultType.noAppToOpen
-            ? 'PDF খোলার কোনো অ্যাপ পাওয়া যায়নি'
-            : 'ফাইলটি খোলা যায়নি');
-      }
+      final bytes = await _repo.fetchPrescriptionPdfBytes(id);
+      Get.to(() => PdfPreviewView(bytes: bytes, title: 'Prescription'.tr));
     } catch (e) {
       SnackHelper.error(e.toString().replaceFirst('Exception: ', ''));
     } finally {

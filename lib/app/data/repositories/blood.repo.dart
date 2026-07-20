@@ -1,5 +1,6 @@
 import '../../core/values/app_url.dart';
 import '../models/response/auth_response.dart';
+import '../models/response/blood_content_response.dart';
 import '../models/response/blood_request_response.dart';
 import '../models/response/blood_responder_response.dart';
 import '../models/response/blood_response_response.dart';
@@ -128,5 +129,26 @@ class BloodRepository {
     final res = await provider.postData(
         ApiURL.bloodFulfillmentChat(id), {'message': message});
     return ChatMessage.fromResponse(_payload(res));
+  }
+
+  /// GET /api/v1/blood/articles — paginated blog list.
+  Future<List<BloodArticle>> fetchArticles(
+      {int page = 1, int limit = 10}) async {
+    final res = await provider
+        .getData(ApiURL.bloodArticlesPaged(page: page, limit: limit));
+    return BloodArticle.listFromResponse(_payload(res));
+  }
+
+  /// GET /api/v1/blood/articles/:id — full blog post.
+  Future<BloodArticle?> fetchArticle(String id) async {
+    final res = await provider.getData(ApiURL.bloodArticleById(id));
+    return BloodArticle.fromResponse(_payload(res));
+  }
+
+  /// GET /api/v1/blood/faqs — all active FAQs (API returns the full list;
+  /// there's no pagination or per-item detail route).
+  Future<List<BloodFaq>> fetchFaqs() async {
+    final res = await provider.getData(ApiURL.bloodFaqs);
+    return BloodFaq.listFromResponse(_payload(res));
   }
 }

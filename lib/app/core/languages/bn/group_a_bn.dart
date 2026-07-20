@@ -85,6 +85,8 @@ const Map<String, String> groupABn = {
   'e.g. Dhaka Medical College Hospital': 'যেমন ঢাকা মেডিকেল কলেজ হাসপাতাল',
   'HOSPITAL ADDRESS': 'হাসপাতালের ঠিকানা',
   'Area, city, postcode': 'এলাকা, শহর, পোস্টকোড',
+  'ALERT DONORS WITHIN': 'যত দূর পর্যন্ত ডোনারদের জানানো হবে',
+  'All over': 'সব জায়গায়',
   'CONTACT DETAILS': 'যোগাযোগের তথ্য',
   'NAME': 'নাম',
   'Full name': 'পুরো নাম',
@@ -105,11 +107,23 @@ const Map<String, String> groupABn = {
   'We\'ll send a one-time code to verify your account.':
       'আপনার অ্যাকাউন্ট যাচাই করতে আমরা একটি ওয়ান-টাইম কোড পাঠাব।',
   'YOUR BLOOD GROUP': 'আপনার রক্তের গ্রুপ',
+  'YOUR DETAILS': 'আপনার তথ্য',
   'YOUR LOCATION': 'আপনার অবস্থান',
   'NOTES (OPTIONAL)': 'নোট (ঐচ্ছিক)',
   'Anything donors should know — availability, conditions…':
       'ডোনারদের জানা দরকার এমন কিছু — উপলব্ধতা, শর্ত…',
   'Register as donor →': 'ডোনার হিসেবে নিবন্ধন করুন →',
+
+  // ── Blood: blog & FAQ ────────────────────────────────────────────
+  'LEARN & FAQ': 'জানুন ও প্রশ্নোত্তর',
+  'Blog': 'ব্লগ',
+  'Tips & stories about donating': 'রক্তদান নিয়ে টিপস ও গল্প',
+  'FAQ': 'সাধারণ জিজ্ঞাসা',
+  'Common questions answered': 'সাধারণ প্রশ্নের উত্তর',
+  'No articles yet — check back soon.':
+      'এখনো কোনো আর্টিকেল নেই — শীঘ্রই দেখুন।',
+  'No FAQs yet — check back soon.':
+      'এখনো কোনো প্রশ্ন নেই — শীঘ্রই দেখুন।',
 
   // ── Blood: OTP ───────────────────────────────────────────────────
   'Verify your account': 'আপনার অ্যাকাউন্ট যাচাই করুন',
@@ -268,8 +282,8 @@ const Map<String, String> groupABn = {
   'Digital · signed': 'ডিজিটাল · স্বাক্ষরিত',
   'Diagnosis': 'রোগ নির্ণয়',
   'ADVICE': 'পরামর্শ',
-  'Downloading…': 'ডাউনলোড হচ্ছে…',
-  'Download PDF': 'পিডিএফ ডাউনলোড করুন',
+  'Opening…': 'খোলা হচ্ছে…',
+  'View PDF': 'পিডিএফ দেখুন',
 
   // ── Healthcare: doctor profile ───────────────────────────────────
   'Doctor profile': 'ডাক্তারের প্রোফাইল',
@@ -296,6 +310,9 @@ const Map<String, String> groupABn = {
   'Family members': 'পরিবারের সদস্য',
   'Book & manage care for your family': 'পরিবারের যত্ন বুক ও পরিচালনা করুন',
   'Add family member': 'পরিবারের সদস্য যোগ করুন',
+  'Edit family member': 'পরিবারের সদস্য সম্পাদনা করুন',
+  'Remove family member?': 'পরিবারের সদস্য সরাবেন?',
+  'from your family list?': 'কে আপনার পরিবারের তালিকা থেকে সরাতে চান?',
   'FULL NAME': 'পুরো নাম',
   'e.g. Ayesha Ahmed': 'যেমন আয়েশা আহমেদ',
   'RELATION': 'সম্পর্ক',

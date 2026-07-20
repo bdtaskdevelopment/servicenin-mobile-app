@@ -15,6 +15,9 @@ class HealthcareProvider extends BaseProvider {
   Future<Response> patchData(String path, dynamic data) =>
       patch(path, jsonEncode(data));
 
+  Future<Response> putData(String path, dynamic data) =>
+      put(path, jsonEncode(data));
+
   /// Multipart upload of a report/attachment. The API reads the `file` field.
   Future<Response> uploadFile(String path, File file) {
     final name = p.basename(file.path);

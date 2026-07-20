@@ -19,6 +19,8 @@ class DonorRegisterController extends GetxController {
   // lat/lng auto-detected (GPS) in a full build; default to Dhaka for now.
   double lat = 23.8103;
   double lng = 90.4125;
+  final TextEditingController age = TextEditingController();
+  final TextEditingController profession = TextEditingController();
   final TextEditingController notes = TextEditingController();
 
   // ── OTP step ────────────────────────────────────────────────────────
@@ -53,6 +55,9 @@ class DonorRegisterController extends GetxController {
         'lat': lat,
         'lng': lng,
         'notes': notes.text.trim(),
+        if (int.tryParse(age.text.trim()) != null)
+          'age': int.parse(age.text.trim()),
+        'profession': profession.text.trim(),
       };
       final res = await Get.find<BloodRepository>().registerDonor(payload);
       if (Get.isDialogOpen ?? false) Get.back();
@@ -109,6 +114,8 @@ class DonorRegisterController extends GetxController {
 
   @override
   void onClose() {
+    age.dispose();
+    profession.dispose();
     notes.dispose();
     super.onClose();
   }

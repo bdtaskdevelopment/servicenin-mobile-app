@@ -259,7 +259,7 @@ class ChooseSlotView extends GetView<BookingController> {
                   left: con.slotSummary,
                   price: con.doctorFee,
                   label: 'Next step'.tr,
-                  onTap: con.slotContinue,
+                  onTap: con.slotSelected ? con.slotContinue : null,
                 ),
               ],
             );
@@ -312,7 +312,7 @@ class _BottomBar extends StatelessWidget {
   final String left;
   final String price;
   final String label;
-  final VoidCallback onTap;
+  final VoidCallback? onTap;
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -343,6 +343,8 @@ class _BottomBar extends StatelessWidget {
                 style: ElevatedButton.styleFrom(
                   backgroundColor: _green,
                   foregroundColor: Colors.white,
+                  disabledBackgroundColor: const Color(0xFFE2E8F0),
+                  disabledForegroundColor: const Color(0xFF94A3B8),
                   elevation: 0,
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(14)),

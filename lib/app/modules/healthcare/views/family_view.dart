@@ -90,7 +90,7 @@ class FamilyView extends GetView<HealthcareController> {
                                 milliseconds: 70 * (e.key < 6 ? e.key : 6)),
                             child: Padding(
                               padding: const EdgeInsets.only(bottom: 12),
-                              child: _MemberCard(member: e.value),
+                              child: _MemberCard(member: e.value, con: con),
                             ),
                           ),
                         ),
@@ -119,8 +119,18 @@ class FamilyView extends GetView<HealthcareController> {
 }
 
 class _MemberCard extends StatelessWidget {
-  const _MemberCard({required this.member});
+  const _MemberCard({required this.member, required this.con});
   final HcFamilyMember member;
+  final HealthcareController con;
+
+  void _showEditSheet() {
+    Get.bottomSheet(
+      _AddFamilySheet(con: con, existing: member),
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final color =
@@ -183,6 +193,12 @@ class _MemberCard extends StatelessWidget {
                       color: Color(0xFFE11D48))),
             ),
           ],
+          IconButton(
+            onPressed: _showEditSheet,
+            tooltip: 'Edit'.tr,
+            icon: const Icon(Icons.edit_outlined,
+                color: Color(0xFF334155), size: 20),
+          ),
         ],
       ),
     );
@@ -220,21 +236,35 @@ class DottedAddTile extends StatelessWidget {
   }
 }
 
-// ── Add family member bottom sheet ──────────────────────────────────
+// ── Add/edit family member bottom sheet ──────────────────────────────
 class _AddFamilySheet extends StatefulWidget {
-  const _AddFamilySheet({required this.con});
+  const _AddFamilySheet({required this.con, this.existing});
   final HealthcareController con;
+
+  /// When set, the sheet edits this member instead of creating a new one.
+  final HcFamilyMember? existing;
 
   @override
   State<_AddFamilySheet> createState() => _AddFamilySheetState();
 }
 
 class _AddFamilySheetState extends State<_AddFamilySheet> {
-  final _name = TextEditingController();
-  final _relation = TextEditingController();
-  final _age = TextEditingController();
-  String _gender = 'M';
-  String _blood = 'B+';
+  late final _name = TextEditingController(text: widget.existing?.name);
+  late final _relation =
+      TextEditingController(text: widget.existing?.relation);
+  late final _age = TextEditingController(
+      text:
+          widget.existing != null && widget.existing!.age > 0
+              ? '${widget.existing!.age}'
+              : null);
+  late String _gender =
+      widget.existing?.gender.toLowerCase() == 'female' ? 'F' : 'M';
+  late String _blood =
+      widget.existing?.bloodGroup.isNotEmpty == true
+          ? widget.existing!.bloodGroup
+          : 'B+';
+
+  bool get _isEdit => widget.existing != null;
 
   static const _groups = ['A+', 'A-', 'B+', 'B-', 'O+', 'O-', 'AB+', 'AB-'];
 
@@ -250,15 +280,29 @@ class _AddFamilySheetState extends State<_AddFamilySheet> {
 
   void _save() {
     if (!_valid) return;
-    widget.con.addFamilyMember(
-      name: _name.text.trim(),
-      relation: _relation.text.trim().isEmpty
-          ? 'Family'
-          : _relation.text.trim(),
-      age: _age.text.trim(),
-      gender: _gender == 'M' ? 'male' : 'female',
-      bloodGroup: _blood,
-    );
+    final name = _name.text.trim();
+    final relation =
+        _relation.text.trim().isEmpty ? 'Family' : _relation.text.trim();
+    final age = _age.text.trim();
+    final gender = _gender == 'M' ? 'male' : 'female';
+    if (_isEdit) {
+      widget.con.updateFamilyMember(
+        id: widget.existing!.id,
+        name: name,
+        relation: relation,
+        age: age,
+        gender: gender,
+        bloodGroup: _blood,
+      );
+    } else {
+      widget.con.addFamilyMember(
+        name: name,
+        relation: relation,
+        age: age,
+        gender: gender,
+        bloodGroup: _blood,
+      );
+    }
     Get.back();
   }
 
@@ -309,7 +353,7 @@ class _AddFamilySheetState extends State<_AddFamilySheet> {
               ),
             ),
             const SizedBox(height: 18),
-            Text('Add family member'.tr,
+            Text(_isEdit ? 'Edit family member'.tr : 'Add family member'.tr,
                 style: const TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.w800,
@@ -401,7 +445,7 @@ class _AddFamilySheetState extends State<_AddFamilySheet> {
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(14)),
                 ),
-                child: Text('Add member'.tr,
+                child: Text(_isEdit ? 'Save changes'.tr : 'Add member'.tr,
                     style:
                         const TextStyle(fontSize: 16, fontWeight: FontWeight.w800)),
               ),

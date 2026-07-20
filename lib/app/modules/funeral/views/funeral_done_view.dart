@@ -79,9 +79,9 @@ class FuneralDoneView extends GetView<FuneralController> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                      con.lastRequest?.registrationNo.isNotEmpty ==
+                                      con.lastRequest?.serviceName.isNotEmpty ==
                                               true
-                                          ? con.lastRequest!.registrationNo
+                                          ? con.lastRequest!.serviceName
                                           : 'Funeral request'.tr,
                                       style: const TextStyle(
                                           fontSize: 15,
@@ -89,9 +89,8 @@ class FuneralDoneView extends GetView<FuneralController> {
                                           color: Color(0xFF0F172A))),
                                   const SizedBox(height: 2),
                                   Text(
-                                      con.lastRequest?.deceasedName.isNotEmpty ==
-                                              true
-                                          ? con.lastRequest!.deceasedName
+                                      con.lastRequest?.name.isNotEmpty == true
+                                          ? con.lastRequest!.name
                                           : 'A coordinator is being assigned'.tr,
                                       style: const TextStyle(
                                           fontSize: 12,

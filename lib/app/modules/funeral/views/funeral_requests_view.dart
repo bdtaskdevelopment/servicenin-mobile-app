@@ -137,8 +137,8 @@ class _RequestCard extends StatelessWidget {
             children: [
               Expanded(
                 child: Text(
-                  req.registrationNo.isNotEmpty
-                      ? req.registrationNo
+                  req.serviceName.isNotEmpty
+                      ? req.serviceName
                       : 'Funeral request'.tr,
                   style: const TextStyle(
                     fontSize: 13,
@@ -171,7 +171,7 @@ class _RequestCard extends StatelessWidget {
           ),
           const SizedBox(height: 10),
           Text(
-            req.deceasedName,
+            req.name,
             style: const TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w800,
@@ -208,18 +208,10 @@ class _RequestCard extends StatelessWidget {
             ),
             child: Column(
               children: [
-                _row('Service'.tr, _serviceLabel(req.serviceType)),
-                if (req.scheduledAt.isNotEmpty) ...[
+                _row('Phone'.tr, req.phone),
+                if (req.notes.isNotEmpty) ...[
                   const SizedBox(height: 8),
-                  _row('Scheduled'.tr, req.scheduledAt),
-                ],
-                if (req.contactPhone.isNotEmpty) ...[
-                  const SizedBox(height: 8),
-                  _row('Contact'.tr, req.contactPhone),
-                ],
-                if (req.workflowStatus.isNotEmpty) ...[
-                  const SizedBox(height: 8),
-                  _row('Stage'.tr, _label(req.workflowStatus)),
+                  _row('Notes'.tr, req.notes),
                 ],
               ],
             ),
@@ -262,11 +254,4 @@ class _RequestCard extends StatelessWidget {
       ),
     ],
   );
-
-  static String _serviceLabel(String key) => key.isEmpty ? '—' : _label(key);
-
-  static String _label(String s) {
-    final t = s.replaceAll('_', ' ');
-    return t.isEmpty ? '—' : t[0].toUpperCase() + t.substring(1);
-  }
 }

@@ -18,7 +18,7 @@ class BloodView extends GetView<BloodController> {
       body: SafeArea(
         child: Column(
           children: [
-            _Header(),
+            _Header(con: controller),
             Expanded(
               child: RefreshIndicator(
                 onRefresh: controller.refreshHome,
@@ -43,12 +43,15 @@ class BloodView extends GetView<BloodController> {
                         ),
                         const SizedBox(width: 12),
                         Expanded(
-                          child: _ActionCard(
-                            onTap: controller.openDonate,
-                            isPrimary: false,
-                            icon: Icons.favorite_rounded,
-                            title: 'Donate'.tr,
-                            subtitle: 'Give blood · save lives'.tr,
+                          child: GetBuilder<BloodController>(
+                            builder: (con) => _ActionCard(
+                              onTap: con.openDonate,
+                              isPrimary: false,
+                              icon: Icons.favorite_rounded,
+                              title: 'Donate'.tr,
+                              subtitle: 'Give blood · save lives'.tr,
+                              badgeCount: con.openRequestsCount,
+                            ),
                           ),
                         ),
                       ],
@@ -61,10 +64,6 @@ class BloodView extends GetView<BloodController> {
                   GestureDetector(
                     onTap: () => Get.toNamed(Routes.BLOOD_DONOR_REGISTER),
                     child: const _RegisterDonorCard(),
-                  ),
-                  const SizedBox(height: 12),
-                  GetBuilder<BloodController>(
-                    builder: (con) => _AvailabilityCard(con: con),
                   ),
                   const SizedBox(height: 12),
                   GetBuilder<BloodController>(
@@ -96,6 +95,40 @@ class BloodView extends GetView<BloodController> {
                       ),
                     ),
                   ),
+                  const SizedBox(height: 22),
+                  Text('LEARN & FAQ'.tr,
+                      style: const TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w700,
+                          color: Color(0xFF94A3B8),
+                          letterSpacing: 0.8)),
+                  const SizedBox(height: 12),
+                  SizedBox(
+                    height: 124,
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: _ActionCard(
+                            onTap: () => Get.toNamed(Routes.BLOOD_BLOG),
+                            isPrimary: false,
+                            icon: Icons.menu_book_rounded,
+                            title: 'Blog'.tr,
+                            subtitle: 'Tips & stories about donating'.tr,
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: _ActionCard(
+                            onTap: () => Get.toNamed(Routes.BLOOD_FAQ),
+                            isPrimary: false,
+                            icon: Icons.quiz_rounded,
+                            title: 'FAQ'.tr,
+                            subtitle: 'Common questions answered'.tr,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
                 ],
               ),
               ),
@@ -109,6 +142,9 @@ class BloodView extends GetView<BloodController> {
 
 // ── Header ──────────────────────────────────────────────────────────
 class _Header extends StatelessWidget {
+  const _Header({required this.con});
+  final BloodController con;
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -136,12 +172,35 @@ class _Header extends StatelessWidget {
             ],
           ),
           const Spacer(),
-          GestureDetector(
-            onTap: () => Get.toNamed(Routes.BLOOD_LEADERBOARD),
-            child: const Icon(Icons.emoji_events_rounded,
-                color: Color(0xFF1A1A1A), size: 24),
+          GetBuilder<BloodController>(
+            builder: (c) => _AvailabilityToggleSwitch(con: c),
           ),
         ],
+      ),
+    );
+  }
+}
+
+// ── Available-for-donation toggle (header, top-right) ───────────────
+class _AvailabilityToggleSwitch extends StatelessWidget {
+  const _AvailabilityToggleSwitch({required this.con});
+  final BloodController con;
+
+  @override
+  Widget build(BuildContext context) {
+    final on = con.isAvailable;
+    return Tooltip(
+      message: on
+          ? 'You\'ll receive nearby blood requests'.tr
+          : 'You\'re paused — no requests for now'.tr,
+      child: Transform.scale(
+        scale: 0.85,
+        child: Switch(
+          value: on,
+          onChanged: con.toggleAvailable,
+          activeThumbColor: Colors.white,
+          activeTrackColor: const Color(0xFF16A34A),
+        ),
       ),
     );
   }
@@ -155,6 +214,7 @@ class _ActionCard extends StatelessWidget {
     required this.icon,
     required this.title,
     required this.subtitle,
+    this.badgeCount,
   });
 
   final VoidCallback onTap;
@@ -162,6 +222,10 @@ class _ActionCard extends StatelessWidget {
   final IconData icon;
   final String title;
   final String subtitle;
+
+  /// Small count badge in the top-right corner — e.g. how many open blood
+  /// requests are waiting for a donor. Hidden when null or 0.
+  final int? badgeCount;
 
   @override
   Widget build(BuildContext context) {
@@ -183,93 +247,60 @@ class _ActionCard extends StatelessWidget {
               ? null
               : Border.all(color: const Color(0xFFEDEFF2)),
         ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+        child: Stack(
           children: [
-            Icon(icon,
-                color: isPrimary ? Colors.white : const Color(0xFF0F172A),
-                size: isPrimary ? 26 : 24),
-            const Spacer(),
-            Text(title,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(
-                    color: isPrimary ? Colors.white : const Color(0xFF0F172A),
-                    fontSize: 17,
-                    fontWeight: FontWeight.w800)),
-            const SizedBox(height: 2),
-            Text(subtitle,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(
-                    color: isPrimary
-                        ? const Color(0xFFFFE0E2)
-                        : const Color(0xFF94A3B8),
-                    fontSize: 12)),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-// ── Available-for-donation switch card ──────────────────────────────
-class _AvailabilityCard extends StatelessWidget {
-  const _AvailabilityCard({required this.con});
-  final BloodController con;
-
-  @override
-  Widget build(BuildContext context) {
-    final on = con.isAvailable;
-    return Container(
-      padding: const EdgeInsets.fromLTRB(14, 12, 8, 12),
-      decoration: BoxDecoration(
-        color: AppColors.white,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFFEDEFF2)),
-      ),
-      child: Row(
-        children: [
-          Container(
-            width: 44,
-            height: 44,
-            decoration: BoxDecoration(
-              color: on ? const Color(0xFFDCFCE7) : const Color(0xFFF1F5F9),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Icon(
-              on ? Icons.volunteer_activism_rounded : Icons.pause_circle_outline,
-              color: on ? const Color(0xFF16A34A) : const Color(0xFF94A3B8),
-              size: 22,
-            ),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
+            Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Available for donation'.tr,
-                    style: const TextStyle(
-                        fontSize: 14.5,
-                        fontWeight: FontWeight.w800,
-                        color: Color(0xFF0F172A))),
+                Icon(icon,
+                    color: isPrimary ? Colors.white : const Color(0xFF0F172A),
+                    size: isPrimary ? 26 : 24),
+                const Spacer(),
+                Text(title,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                        color: isPrimary
+                            ? Colors.white
+                            : const Color(0xFF0F172A),
+                        fontSize: 17,
+                        fontWeight: FontWeight.w800)),
                 const SizedBox(height: 2),
-                Text(
-                  on
-                      ? 'You\'ll receive nearby blood requests'.tr
-                      : 'You\'re paused — no requests for now'.tr,
-                  style: const TextStyle(fontSize: 12, color: Color(0xFF94A3B8)),
-                ),
+                Text(subtitle,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                        color: isPrimary
+                            ? const Color(0xFFFFE0E2)
+                            : const Color(0xFF94A3B8),
+                        fontSize: 12)),
               ],
             ),
-          ),
-          Switch(
-            value: on,
-            onChanged: con.toggleAvailable,
-            activeThumbColor: Colors.white,
-            activeTrackColor: const Color(0xFF16A34A),
-          ),
-        ],
+            if ((badgeCount ?? 0) > 0)
+              Positioned(
+                top: 0,
+                right: 0,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 7, vertical: 3),
+                  constraints: const BoxConstraints(minWidth: 22),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFE11D48),
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(color: Colors.white, width: 1.5),
+                  ),
+                  child: Text(
+                    badgeCount! > 99 ? '99+' : '$badgeCount',
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w800,
+                        color: Colors.white),
+                  ),
+                ),
+              ),
+          ],
+        ),
       ),
     );
   }

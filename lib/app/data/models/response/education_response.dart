@@ -12,28 +12,32 @@ dynamic _data(dynamic src) {
   return d is Map && d.containsKey('data') ? d['data'] : d;
 }
 
-// ── Category ────────────────────────────────────────────────────────
-class EduCategory {
-  EduCategory({required this.key, required this.label, required this.icon});
-  final String key;
+// ── Institute type (admin-managed — /api/v1/education/institute-types) ──
+class EduInstituteType {
+  EduInstituteType({
+    required this.id,
+    required this.slug,
+    required this.label,
+    required this.sortOrder,
+  });
+  final String id;
+  final String slug;
   final String label;
-  final String icon;
+  final int sortOrder;
 
-  factory EduCategory.fromMap(Map<String, dynamic> j) => EduCategory(
-        key: _str(j['key']),
+  factory EduInstituteType.fromMap(Map<String, dynamic> j) => EduInstituteType(
+        id: _str(j['id']),
+        slug: _str(j['slug']),
         label: _str(j['label']),
-        icon: _str(j['icon']),
+        sortOrder: _int(j['sort_order']),
       );
 
-  /// Parses `{ data: { categories: [...] } }`.
-  static List<EduCategory> listFromResponse(dynamic src) {
+  static List<EduInstituteType> listFromResponse(dynamic src) {
     final d = _data(src);
-    final list = d is Map && d['categories'] is List
-        ? d['categories'] as List
-        : (d is List ? d : const []);
+    final list = d is List ? d : const [];
     return list
         .whereType<Map>()
-        .map((e) => EduCategory.fromMap(e.cast<String, dynamic>()))
+        .map((e) => EduInstituteType.fromMap(e.cast<String, dynamic>()))
         .toList();
   }
 }

@@ -20,6 +20,8 @@ class SnCatalog {
     SnService(name: 'Funeral', icon: Icons.local_florist_rounded, color: Color(0xFF475569)),
     SnService(name: 'Education', icon: Icons.menu_book_rounded, color: Color(0xFF7C3AED)),
     SnService(name: 'Nagarik Sheba', icon: Icons.account_balance_rounded, color: Color(0xFFF15A24)),
+    SnService(name: 'Our Work', icon: Icons.video_camera_back_rounded, color: Color(0xFF0891B2)),
+    SnService(name: 'Our News', icon: Icons.newspaper_rounded, color: Color(0xFF16A34A)),
     SnService(name: 'More', icon: Icons.more_horiz_rounded, color: Color(0xFF94A3B8)),
   ];
 

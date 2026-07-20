@@ -1,15 +1,16 @@
-import 'package:animate_do/animate_do.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../../core/values/app_colors.dart';
-import '../../../data/models/response/info_response.dart';
 import '../../../global_widget/sn_shimmer.dart';
-import '../../../routes/app_pages.dart';
 import '../controllers/information_controller.dart';
 
 const _purple = Color(0xFF6366F1);
 
+/// Information home — search + a grid of categories ("domains"). Tapping a
+/// tile (or submitting a search) opens [InformationCategoryView] with the
+/// matching paginated list; tapping an entry there opens the full detail
+/// page.
 class InformationView extends GetView<InformationController> {
   const InformationView({super.key});
 
@@ -55,36 +56,39 @@ class InformationView extends GetView<InformationController> {
                       ),
                     ],
                   ),
-                  const Spacer(),
-                  GestureDetector(
-                    onTap: () => Get.toNamed(Routes.INFORMATION_HOTLINES),
-                    child: const Icon(
-                      Icons.call_outlined,
-                      color: Color(0xFF1A1A1A),
-                      size: 22,
-                    ),
-                  ),
                 ],
               ),
             ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: _SearchBar(con: controller),
+            ),
+            const SizedBox(height: 20),
             Expanded(
               child: GetBuilder<InformationController>(
-                builder: (con) => RefreshIndicator(
-                  color: _purple,
-                  onRefresh: () async {
-                    await con.fetchInfo();
-                    await con.fetchEmergency();
-                  },
-                  child: ListView(
-                    padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
-                    children: [
-                      _NationalEmergencyCard(con: con),
-                      const SizedBox(height: 18),
-                      _EmergencySection(con: con),
-                      _DirectorySection(con: con),
-                    ],
-                  ),
-                ),
+                builder: (con) {
+                  if (con.loadingDomains && con.domains.isEmpty) {
+                    return const SnListSkeleton();
+                  }
+                  return RefreshIndicator(
+                    color: _purple,
+                    onRefresh: () => con.fetchDomains(),
+                    child: ListView(
+                      physics: const AlwaysScrollableScrollPhysics(),
+                      padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
+                      children: [
+                        Text('CATEGORIES'.tr,
+                            style: const TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w700,
+                                color: Color(0xFF94A3B8),
+                                letterSpacing: 0.8)),
+                        const SizedBox(height: 12),
+                        _CategoryGrid(con: con),
+                      ],
+                    ),
+                  );
+                },
               ),
             ),
           ],
@@ -94,580 +98,133 @@ class InformationView extends GetView<InformationController> {
   }
 }
 
-// ── National emergency hero card (driven by /api/v1/info/emergency) ──
-class _NationalEmergencyCard extends StatelessWidget {
-  const _NationalEmergencyCard({required this.con});
+// ── Search bar — submitting navigates to the category-list page ─────
+class _SearchBar extends StatelessWidget {
+  const _SearchBar({required this.con});
   final InformationController con;
 
   @override
   Widget build(BuildContext context) {
-    final entry = con.nationalEmergency;
-    final label = (entry?.title.isNotEmpty ?? false)
-        ? entry!.title.toUpperCase()
-        : 'NATIONAL EMERGENCY'.tr;
-    final number = (entry?.hotline.isNotEmpty ?? false)
-        ? entry!.hotline
-        : '999';
-    final subtitle = (entry?.titleBn.isNotEmpty ?? false)
-        ? entry!.titleBn
-        : 'Police · Fire · Ambulance'.tr;
-
-    return FadeInDown(
-      duration: const Duration(milliseconds: 300),
-      child: GestureDetector(
-        onTap: () => con.callHotline(number),
-        child: Container(
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            gradient: const LinearGradient(
-              colors: [Color(0xFFE8333A), Color(0xFFC2182B)],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
+    return Container(
+      height: 48,
+      padding: const EdgeInsets.symmetric(horizontal: 14),
+      decoration: BoxDecoration(
+        color: const Color(0xFFEDEFF2),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Row(
+        children: [
+          const Icon(Icons.search_rounded, color: Color(0xFF94A3B8)),
+          const SizedBox(width: 10),
+          Expanded(
+            child: TextField(
+              controller: con.searchCtrl,
+              onChanged: con.onMainSearchChanged,
+              onSubmitted: (_) => con.openSearchResults(),
+              textInputAction: TextInputAction.search,
+              decoration: InputDecoration(
+                hintText: 'Search hospitals, offices, hotlines…'.tr,
+                hintStyle: const TextStyle(
+                    color: Color(0xFF94A3B8), fontSize: 13.5),
+                border: InputBorder.none,
+                isCollapsed: true,
+              ),
+              style:
+                  const TextStyle(fontSize: 13.5, color: Color(0xFF0F172A)),
             ),
-            borderRadius: BorderRadius.circular(18),
           ),
-          child: Row(
-            children: [
-              Container(
-                width: 54,
-                height: 54,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  border: Border.all(
-                    color: Colors.white.withValues(alpha: 0.6),
-                    width: 2,
+          GetBuilder<InformationController>(
+            builder: (con) => con.search.isEmpty
+                ? const SizedBox.shrink()
+                : GestureDetector(
+                    onTap: con.searchCtrl.clear,
+                    child: const Icon(Icons.close_rounded,
+                        size: 18, color: Color(0xFF94A3B8)),
                   ),
-                ),
-                child: const Icon(
-                  Icons.call_rounded,
-                  color: Colors.white,
-                  size: 24,
-                ),
-              ),
-              const SizedBox(width: 14),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      label,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                        color: Color(0xFFFFDADE),
-                        fontSize: 11,
-                        fontWeight: FontWeight.w700,
-                        letterSpacing: 0.5,
-                      ),
-                    ),
-                    Text(
-                      number,
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 30,
-                        fontWeight: FontWeight.w800,
-                        height: 1.1,
-                      ),
-                    ),
-                    Text(
-                      subtitle,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        color: Colors.white.withValues(alpha: 0.9),
-                        fontSize: 12,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const Icon(Icons.call_rounded, color: Colors.white, size: 22),
-            ],
           ),
-        ),
+        ],
       ),
     );
   }
 }
 
-// ── Emergency hotlines preview (driven by /api/v1/info/emergency) ────
-class _EmergencySection extends StatelessWidget {
-  const _EmergencySection({required this.con});
+// ── Category grid — GET /api/v1/info/domains ─────────────────────────
+class _CategoryGrid extends StatelessWidget {
+  const _CategoryGrid({required this.con});
   final InformationController con;
 
   @override
   Widget build(BuildContext context) {
-    final cards = con.emergencyCards;
-    if (con.loadingEmergency && cards.isEmpty) {
-      return const SnListSkeleton(padding: EdgeInsets.zero, count: 4);
-    }
-    if (cards.isEmpty) return const SizedBox.shrink();
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+    return GridView.count(
+      crossAxisCount: 3,
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      mainAxisSpacing: 12,
+      crossAxisSpacing: 12,
+      childAspectRatio: 0.95,
       children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              'Emergency hotlines'.tr,
-              style: const TextStyle(
-                fontSize: 17,
-                fontWeight: FontWeight.w800,
-                color: Color(0xFF0F172A),
-              ),
-            ),
-            GestureDetector(
-              onTap: () => Get.toNamed(Routes.INFORMATION_HOTLINES),
-              child: Text(
-                'All →'.tr,
-                style: const TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w700,
-                  color: _purple,
-                ),
-              ),
-            ),
-          ],
+        _CategoryTile(
+          emoji: '📋',
+          label: 'All'.tr,
+          onTap: con.openAllInfo,
         ),
-        const SizedBox(height: 12),
-        ...cards
-            .take(4)
-            .toList()
-            .asMap()
-            .entries
-            .map(
-              (e) => FadeInUp(
-                from: 18,
-                duration: const Duration(milliseconds: 350),
-                delay: Duration(milliseconds: 70 * e.key),
-                child: Padding(
-                  padding: const EdgeInsets.only(bottom: 12),
-                  child: _HotlineRow(entry: e.value, con: con),
-                ),
-              ),
-            ),
-        const SizedBox(height: 10),
+        ...con.domains.map((d) => _CategoryTile(
+              emoji: d.emoji.isNotEmpty ? d.emoji : '📌',
+              label: d.label,
+              onTap: () => con.openInfoCategory(d),
+            )),
       ],
     );
   }
 }
 
-// ── Directory list (driven by /api/v1/info) ─────────────────────────
-class _DirectorySection extends StatelessWidget {
-  const _DirectorySection({required this.con});
-  final InformationController con;
-
-  @override
-  Widget build(BuildContext context) {
-    final cards = con.infoCards;
-
-    if (con.loadingInfo && cards.isEmpty) {
-      return const SnListSkeleton(padding: EdgeInsets.zero, count: 4);
-    }
-
-    if (cards.isEmpty) return const SizedBox.shrink();
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'Directory'.tr,
-          style: const TextStyle(
-            fontSize: 17,
-            fontWeight: FontWeight.w800,
-            color: Color(0xFF0F172A),
-          ),
-        ),
-        const SizedBox(height: 12),
-        ...cards.toList().asMap().entries.map(
-          (e) => FadeInUp(
-            from: 18,
-            duration: const Duration(milliseconds: 350),
-            delay: Duration(milliseconds: 70 * e.key),
-            child: Padding(
-              padding: const EdgeInsets.only(bottom: 12),
-              child: _InfoCard(entry: e.value, con: con),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-// ── Compact emergency call row ──────────────────────────────────────
-class _HotlineRow extends StatelessWidget {
-  const _HotlineRow({required this.entry, required this.con});
-  final InfoEntry entry;
-  final InformationController con;
+class _CategoryTile extends StatelessWidget {
+  const _CategoryTile({
+    required this.emoji,
+    required this.label,
+    required this.onTap,
+  });
+  final String emoji;
+  final String label;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () => con.callHotline(entry.callNumber),
+      onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.all(12),
-        decoration: BoxDecoration(
-          color: AppColors.white,
-          borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: const Color(0xFFEDEFF2)),
-        ),
-        child: Row(
-          children: [
-            Container(
-              width: 44,
-              height: 44,
-              decoration: BoxDecoration(
-                color: const Color(0xFFFDECEC),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: const Icon(
-                Icons.emergency_share_rounded,
-                color: Color(0xFFE8333A),
-                size: 21,
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    entry.title,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                      fontSize: 15,
-                      fontWeight: FontWeight.w700,
-                      color: Color(0xFF0F172A),
-                    ),
-                  ),
-                  if (entry.callNumber.isNotEmpty) ...[
-                    const SizedBox(height: 2),
-                    Text(
-                      entry.callNumber,
-                      style: const TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w600,
-                        color: Color(0xFFE07A1F),
-                      ),
-                    ),
-                  ],
-                ],
-              ),
-            ),
-            Container(
-              width: 40,
-              height: 40,
-              decoration: const BoxDecoration(
-                color: Color(0xFFD9F7E6),
-                shape: BoxShape.circle,
-              ),
-              child: const Icon(
-                Icons.call_rounded,
-                color: Color(0xFF16A34A),
-                size: 20,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-// ── Directory entry card (tap → detail sheet) ───────────────────────
-class _InfoCard extends StatelessWidget {
-  const _InfoCard({required this.entry, required this.con});
-  final InfoEntry entry;
-  final InformationController con;
-
-  @override
-  Widget build(BuildContext context) {
-    final subtitle = [
-      entry.typeLabel,
-      entry.address,
-    ].where((s) => s.isNotEmpty).join(' · ');
-    return GestureDetector(
-      onTap: () async {
-        final detail = await con.fetchInfoById(entry.id);
-        if (detail != null) {
-          Get.bottomSheet(
-            _InfoDetailSheet(entry: detail, con: con),
-            isScrollControlled: true,
-            backgroundColor: Colors.transparent,
-          );
-        }
-      },
-      child: Container(
-        padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
           color: AppColors.white,
           borderRadius: BorderRadius.circular(16),
           border: Border.all(color: const Color(0xFFEDEFF2)),
         ),
-        child: Row(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Container(
-              width: 44,
-              height: 44,
+              width: 46,
+              height: 46,
+              alignment: Alignment.center,
               decoration: BoxDecoration(
-                color: entry.isEmergency
-                    ? const Color(0xFFFDECEC)
-                    : const Color(0xFFEEF0FB),
-                borderRadius: BorderRadius.circular(12),
+                color: const Color(0xFFEEF0FB),
+                shape: BoxShape.circle,
               ),
-              child: Icon(
-                entry.isEmergency
-                    ? Icons.emergency_share_rounded
-                    : Icons.account_balance_outlined,
-                color: entry.isEmergency ? const Color(0xFFE8333A) : _purple,
-                size: 22,
-              ),
+              child: Text(emoji, style: const TextStyle(fontSize: 22)),
             ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Text(
-                          entry.title,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(
-                            fontSize: 14.5,
-                            fontWeight: FontWeight.w800,
-                            color: Color(0xFF0F172A),
-                          ),
-                        ),
-                      ),
-                      if (entry.verified) ...[
-                        const SizedBox(width: 6),
-                        const Icon(
-                          Icons.verified_rounded,
-                          size: 15,
-                          color: Color(0xFF16A34A),
-                        ),
-                      ],
-                    ],
-                  ),
-                  if (subtitle.isNotEmpty) ...[
-                    const SizedBox(height: 2),
-                    Text(
-                      subtitle,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                        fontSize: 12,
-                        color: Color(0xFF94A3B8),
-                      ),
-                    ),
-                  ],
-                ],
-              ),
+            const SizedBox(height: 10),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 6),
+              child: Text(label,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                      fontSize: 12.5,
+                      fontWeight: FontWeight.w700,
+                      color: Color(0xFF0F172A))),
             ),
-            const SizedBox(width: 10),
-            if (entry.callNumber.isNotEmpty)
-              GestureDetector(
-                onTap: () => con.callHotline(entry.callNumber),
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 8,
-                  ),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFD9F7E6),
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: const Icon(
-                    Icons.call_rounded,
-                    size: 18,
-                    color: Color(0xFF16A34A),
-                  ),
-                ),
-              ),
           ],
         ),
-      ),
-    );
-  }
-}
-
-// ── Detail bottom sheet (driven by /api/v1/info/{id}) ───────────────
-class _InfoDetailSheet extends StatelessWidget {
-  const _InfoDetailSheet({required this.entry, required this.con});
-  final InfoEntry entry;
-  final InformationController con;
-
-  @override
-  Widget build(BuildContext context) {
-    final location = [
-      entry.district,
-      entry.division,
-    ].where((s) => s.isNotEmpty).join(', ');
-    return Container(
-      padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
-      decoration: const BoxDecoration(
-        color: AppColors.white,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Center(
-            child: Container(
-              width: 42,
-              height: 4,
-              margin: const EdgeInsets.only(bottom: 16),
-              decoration: BoxDecoration(
-                color: const Color(0xFFE2E8F0),
-                borderRadius: BorderRadius.circular(4),
-              ),
-            ),
-          ),
-          Row(
-            children: [
-              if (entry.isEmergency)
-                _Tag(
-                  'Emergency'.tr,
-                  const Color(0xFFFDECEC),
-                  const Color(0xFFE8333A),
-                ),
-              if (entry.verified) ...[
-                const SizedBox(width: 8),
-                _Tag(
-                  'Verified'.tr,
-                  const Color(0xFFDCFCE7),
-                  const Color(0xFF15803D),
-                ),
-              ],
-              if (entry.typeLabel.isNotEmpty) ...[
-                const SizedBox(width: 8),
-                _Tag(entry.typeLabel, const Color(0xFFEEF0FB), _purple),
-              ],
-            ],
-          ),
-          const SizedBox(height: 12),
-          Text(
-            entry.title,
-            style: const TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.w800,
-              color: Color(0xFF0F172A),
-            ),
-          ),
-          if (entry.titleBn.isNotEmpty) ...[
-            const SizedBox(height: 2),
-            Text(
-              entry.titleBn,
-              style: const TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
-                color: Color(0xFF64748B),
-              ),
-            ),
-          ],
-          if (entry.description.isNotEmpty) ...[
-            const SizedBox(height: 14),
-            Text(
-              entry.description,
-              style: const TextStyle(
-                fontSize: 14,
-                height: 1.5,
-                color: Color(0xFF334155),
-              ),
-            ),
-          ],
-          const SizedBox(height: 16),
-          if (entry.address.isNotEmpty)
-            _DetailRow(Icons.location_on_outlined, entry.address),
-          if (location.isNotEmpty) _DetailRow(Icons.map_outlined, location),
-          if (entry.officeHours.isNotEmpty)
-            _DetailRow(Icons.schedule_rounded, entry.officeHours),
-          if (entry.phone.isNotEmpty && entry.hotline.isEmpty)
-            _DetailRow(Icons.call_outlined, entry.phone),
-          const SizedBox(height: 12),
-          if (entry.callNumber.isNotEmpty)
-            SizedBox(
-              width: double.infinity,
-              height: 52,
-              child: ElevatedButton.icon(
-                onPressed: () => con.callHotline(entry.callNumber),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFFE8333A),
-                  foregroundColor: Colors.white,
-                  elevation: 0,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(14),
-                  ),
-                ),
-                icon: const Icon(Icons.call_rounded, size: 20),
-                label: Text(
-                  'Call ${entry.callNumber}',
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w800,
-                  ),
-                ),
-              ),
-            ),
-        ],
-      ),
-    );
-  }
-}
-
-class _DetailRow extends StatelessWidget {
-  const _DetailRow(this.icon, this.text);
-  final IconData icon;
-  final String text;
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 10),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Icon(icon, size: 18, color: const Color(0xFF94A3B8)),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Text(
-              text,
-              style: const TextStyle(
-                fontSize: 13.5,
-                height: 1.4,
-                fontWeight: FontWeight.w600,
-                color: Color(0xFF334155),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _Tag extends StatelessWidget {
-  const _Tag(this.text, this.bg, this.fg);
-  final String text;
-  final Color bg;
-  final Color fg;
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-      decoration: BoxDecoration(
-        color: bg,
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: Text(
-        text,
-        style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: fg),
       ),
     );
   }

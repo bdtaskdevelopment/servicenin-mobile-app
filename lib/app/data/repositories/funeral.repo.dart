@@ -15,19 +15,9 @@ class FuneralRepository {
     throw Exception('সংযোগে সমস্যা — আবার চেষ্টা করুন');
   }
 
-  Future<FuneralCoordinator> fetchCoordinator() async {
-    final res = await provider.getData(ApiURL.funeralCoordinator);
-    return FuneralCoordinator.fromResponse(_payload(res));
-  }
-
-  Future<List<FuneralServiceOption>> fetchServices() async {
+  Future<List<FuneralService>> fetchServices() async {
     final res = await provider.getData(ApiURL.funeralServices);
-    return FuneralServiceOption.listFromResponse(_payload(res));
-  }
-
-  Future<List<FuneralUnitModel>> fetchAvailableUnits() async {
-    final res = await provider.getData(ApiURL.funeralUnitsAvailable);
-    return FuneralUnitModel.listFromResponse(_payload(res));
+    return FuneralService.listFromResponse(_payload(res));
   }
 
   Future<FuneralRequest> createRequest(Map<String, dynamic> payload) async {

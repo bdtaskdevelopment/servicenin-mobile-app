@@ -43,3 +43,8 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+/android/build/
+
+# Local Gradle/Java home redirected into the project root - never commit these
+.gradle-home/
+.javatmp/

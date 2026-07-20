@@ -277,7 +277,7 @@ class _Timeline extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final titles = [
-      'Submitted to DNCC'.tr,
+      'Submitted to Nagarik Sheba'.tr,
       'Acknowledged & in progress'.tr,
       'Resolved & verified'.tr,
     ];
@@ -375,29 +375,53 @@ class _VerificationSection extends StatelessWidget {
         decoration: BoxDecoration(
             color: const Color(0xFFDCFCE7),
             borderRadius: BorderRadius.circular(16)),
-        child: Row(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Icon(Icons.verified_rounded,
-                color: Color(0xFF16A34A), size: 24),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text('You verified this resolution'.tr,
-                      style: const TextStyle(
-                          fontSize: 14.5,
-                          fontWeight: FontWeight.w800,
-                          color: Color(0xFF15803D))),
-                  if (g.ratingAverage > 0)
-                    Text(
-                        '${g.ratingAverage.toStringAsFixed(1)} ★ '
-                        '(${g.ratingCount} ${'ratings'.tr})',
-                        style: const TextStyle(
-                            fontSize: 12.5, color: Color(0xFF15803D))),
-                ],
-              ),
+            Row(
+              children: [
+                const Icon(Icons.verified_rounded,
+                    color: Color(0xFF16A34A), size: 24),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('You verified this resolution'.tr,
+                          style: const TextStyle(
+                              fontSize: 14.5,
+                              fontWeight: FontWeight.w800,
+                              color: Color(0xFF15803D))),
+                      if (g.ratingAverage > 0)
+                        Text(
+                            '${g.ratingAverage.toStringAsFixed(1)} ★ '
+                            '(${g.ratingCount} ${'ratings'.tr})',
+                            style: const TextStyle(
+                                fontSize: 12.5, color: Color(0xFF15803D))),
+                    ],
+                  ),
+                ),
+              ],
             ),
+            if (g.verificationPhotoUrl.isNotEmpty) ...[
+              const SizedBox(height: 12),
+              Text('Your proof photo'.tr,
+                  style: const TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w700,
+                      color: Color(0xFF15803D))),
+              const SizedBox(height: 8),
+              ClipRRect(
+                borderRadius: BorderRadius.circular(12),
+                child: Image.network(
+                  g.verificationPhotoUrl,
+                  height: 160,
+                  width: double.infinity,
+                  fit: BoxFit.cover,
+                  errorBuilder: (_, _, _) => const _PhotoPlaceholder(),
+                ),
+              ),
+            ],
           ],
         ),
       );

@@ -1,11 +1,30 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import '../../../data/services/settings.service.dart';
+
+/// Privacy policy — content sourced from the admin's Settings → App
+/// Configuration → "Privacy Policy (full text)" (GET /api/v1/settings,
+/// already loaded by [SettingsService] at app startup). Falls back to a
+/// short default while the admin hasn't set custom content yet.
 class PrivacyPolicyView extends StatelessWidget {
   const PrivacyPolicyView({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final content = SettingsService.to.settings.privacyContent.trim();
+    final paragraphs = content.isEmpty
+        ? const [
+            'What we collect: Your name, phone number, email and NID verification status, plus the service requests you make across all 12 ServiceNin modules.',
+            'How we use it: To verify your identity once, route bookings to providers, and show a single activity history. We never sell your data to third parties.',
+            'Sharing with providers: When you book, only the details a provider needs to serve you — name, location and contact — are shared, for that request only.',
+            'Your data rights: You can edit your profile anytime, export your activity, or permanently delete your account from Settings → Account.',
+          ]
+        : content
+            .split(RegExp(r'\n\s*\n'))
+            .map((p) => p.trim())
+            .where((p) => p.isNotEmpty)
+            .toList();
     return Scaffold(
       backgroundColor: const Color(0xFFF1F3F6),
       body: SafeArea(
@@ -46,7 +65,7 @@ class PrivacyPolicyView extends StatelessWidget {
                         const SizedBox(width: 10),
                         Expanded(
                           child: Text(
-                              'One ServiceNin ID, one privacy promise. Last updated 1 June 2026.'.tr,
+                              'One ServiceNin ID, one privacy promise.'.tr,
                               style: const TextStyle(
                                   fontSize: 12.5,
                                   height: 1.45,
@@ -56,26 +75,15 @@ class PrivacyPolicyView extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 20),
-                  _Section(
-                    title: 'What we collect'.tr,
-                    body:
-                        'Your name, phone number, email and NID verification status, plus the service requests you make across all 12 ServiceNin modules.'.tr,
-                  ),
-                  _Section(
-                    title: 'How we use it'.tr,
-                    body:
-                        'To verify your identity once, route bookings to providers, and show a single activity history. We never sell your data to third parties.'.tr,
-                  ),
-                  _Section(
-                    title: 'Sharing with providers'.tr,
-                    body:
-                        'When you book, only the details a provider needs to serve you — name, location and contact — are shared, for that request only.'.tr,
-                  ),
-                  _Section(
-                    title: 'Your data rights'.tr,
-                    body:
-                        'You can edit your profile anytime, export your activity, or permanently delete your account from Settings → Account.'.tr,
-                  ),
+                  for (final p in paragraphs)
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 16),
+                      child: Text(p,
+                          style: const TextStyle(
+                              fontSize: 13.5,
+                              height: 1.5,
+                              color: Color(0xFF475569))),
+                    ),
                   const SizedBox(height: 8),
                   RichText(
                     text: TextSpan(
@@ -101,32 +109,6 @@ class PrivacyPolicyView extends StatelessWidget {
             ),
           ],
         ),
-      ),
-    );
-  }
-}
-
-class _Section extends StatelessWidget {
-  const _Section({required this.title, required this.body});
-  final String title;
-  final String body;
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 20),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(title,
-              style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w800,
-                  color: Color(0xFF0F172A))),
-          const SizedBox(height: 6),
-          Text(body,
-              style: const TextStyle(
-                  fontSize: 13.5, height: 1.5, color: Color(0xFF475569))),
-        ],
       ),
     );
   }

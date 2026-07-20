@@ -69,6 +69,7 @@ import '../modules/account/views/edit_profile_view.dart';
 import '../modules/account/views/my_activity_view.dart';
 import '../modules/account/views/settings_view.dart';
 import '../modules/account/views/privacy_policy_view.dart';
+import '../modules/account/views/help_support_view.dart';
 import '../modules/account/views/terms_view.dart';
 import '../modules/account/views/delete_account_view.dart';
 import '../modules/information/bindings/information_binding.dart';
@@ -76,6 +77,8 @@ import '../modules/information/views/information_view.dart';
 import '../modules/information/views/emergency_hotlines_view.dart';
 import '../modules/information/views/guide_list_view.dart';
 import '../modules/information/views/guide_detail_view.dart';
+import '../modules/information/views/information_detail_view.dart';
+import '../modules/information/views/information_category_view.dart';
 import '../modules/healthcare/views/appointments_view.dart';
 import '../modules/healthcare/views/chat_view.dart';
 import '../modules/healthcare/views/prescription_view.dart';
@@ -120,6 +123,15 @@ import '../modules/blood/views/blood_chat_view.dart';
 import '../modules/blood/views/donor_chat_view.dart';
 import '../modules/blood/views/donor_register_view.dart';
 import '../modules/blood/views/donor_verify_otp_view.dart';
+import '../modules/blood/views/blog_view.dart';
+import '../modules/blood/views/blog_detail_view.dart';
+import '../modules/blood/views/blood_faq_view.dart';
+import '../modules/blood/views/blood_faq_detail_view.dart';
+import '../modules/content/bindings/content_binding.dart';
+import '../modules/content/views/works_view.dart';
+import '../modules/content/views/work_detail_view.dart';
+import '../modules/content/views/news_view.dart';
+import '../modules/content/views/news_detail_view.dart';
 import '../modules/dashboard/bindings/dashboard_binding.dart';
 import '../modules/dashboard/views/dashboard_view.dart';
 import '../modules/notifications/bindings/notifications_binding.dart';
@@ -466,6 +478,11 @@ class AppPages {
       binding: AccountBinding(),
     ),
     GetPage(
+      name: _Paths.ACCOUNT_HELP_SUPPORT,
+      page: () => const HelpSupportView(),
+      binding: AccountBinding(),
+    ),
+    GetPage(
       name: _Paths.ACCOUNT_DELETE,
       page: () => const DeleteAccountView(),
       binding: AccountBinding(),
@@ -483,6 +500,16 @@ class AppPages {
     GetPage(
       name: _Paths.INFORMATION_GUIDE_DETAIL,
       page: () => const GuideDetailView(),
+      binding: InformationBinding(),
+    ),
+    GetPage(
+      name: _Paths.INFORMATION_DETAIL,
+      page: () => const InformationDetailView(),
+      binding: InformationBinding(),
+    ),
+    GetPage(
+      name: _Paths.INFORMATION_CATEGORY,
+      page: () => const InformationCategoryView(),
       binding: InformationBinding(),
     ),
     GetPage(
@@ -694,6 +721,46 @@ class AppPages {
       name: _Paths.BLOOD_DONOR_VERIFY_OTP,
       page: () => const DonorVerifyOtpView(),
       binding: BloodBinding(),
+    ),
+    GetPage(
+      name: _Paths.BLOOD_BLOG,
+      page: () => const BlogView(),
+      binding: BloodBinding(),
+    ),
+    GetPage(
+      name: _Paths.BLOOD_BLOG_DETAIL,
+      page: () => const BlogDetailView(),
+      binding: BloodBinding(),
+    ),
+    GetPage(
+      name: _Paths.BLOOD_FAQ,
+      page: () => const BloodFaqView(),
+      binding: BloodBinding(),
+    ),
+    GetPage(
+      name: _Paths.BLOOD_FAQ_DETAIL,
+      page: () => const BloodFaqDetailView(),
+      binding: BloodBinding(),
+    ),
+    GetPage(
+      name: _Paths.OUR_WORK,
+      page: () => const WorksView(),
+      binding: ContentBinding(),
+    ),
+    GetPage(
+      name: _Paths.OUR_WORK_DETAIL,
+      page: () => const WorkDetailView(),
+      binding: ContentBinding(),
+    ),
+    GetPage(
+      name: _Paths.OUR_NEWS,
+      page: () => const NewsView(),
+      binding: ContentBinding(),
+    ),
+    GetPage(
+      name: _Paths.OUR_NEWS_DETAIL,
+      page: () => const NewsDetailView(),
+      binding: ContentBinding(),
     ),
   ];
 }

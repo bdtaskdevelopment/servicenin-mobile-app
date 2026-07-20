@@ -88,6 +88,12 @@ class ServiceNav {
       case 'Nagarik Sheba':
         Get.toNamed(Routes.NAGARIK);
         break;
+      case 'Our Work':
+        Get.toNamed(Routes.OUR_WORK);
+        break;
+      case 'Our News':
+        Get.toNamed(Routes.OUR_NEWS);
+        break;
       case 'More':
         // Not a page — jump the dashboard to the "Services" tab.
         if (Get.isRegistered<DashboardController>()) {

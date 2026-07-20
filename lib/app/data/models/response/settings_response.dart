@@ -21,6 +21,10 @@ class AppSettings {
     this.contactPhone = '',
     this.contactEmail = '',
     this.contactWebsite = '',
+    this.contactAddress = '',
+    this.contactHours = '',
+    this.termsContent = '',
+    this.privacyContent = '',
     this.appName = 'ServiceNin',
     this.appVersion = '',
     this.minAppVersion = '',
@@ -55,6 +59,10 @@ class AppSettings {
   final String contactPhone;
   final String contactEmail;
   final String contactWebsite;
+  final String contactAddress;
+  final String contactHours;
+  final String termsContent;
+  final String privacyContent;
   final String appName;
   final String appVersion;
   final String minAppVersion;
@@ -96,6 +104,10 @@ class AppSettings {
         contactPhone: _str(data, 'contact_phone'),
         contactEmail: _str(data, 'contact_email'),
         contactWebsite: _str(data, 'contact_website'),
+        contactAddress: _str(data, 'contact_address'),
+        contactHours: _str(data, 'contact_hours'),
+        termsContent: _str(data, 'terms_content'),
+        privacyContent: _str(data, 'privacy_content'),
         appName: _str(data, 'app_name', 'ServiceNin'),
         appVersion: _str(data, 'app_version'),
         minAppVersion: _str(data, 'min_app_version'),

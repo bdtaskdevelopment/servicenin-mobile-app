@@ -511,6 +511,8 @@ class HcAppointment {
     this.doctor,
     this.venue,
     this.patientName = '',
+    this.familyMemberName = '',
+    this.familyMemberRelation = '',
   });
 
   final String id;
@@ -528,7 +530,17 @@ class HcAppointment {
   final String familyMemberId;
   final Doctor? doctor;
   final Venue? venue;
+
+  /// The account holder's own name — NOT who the visit is for when booked
+  /// for a family member. Use [visitorName] to show who the patient is.
   final String patientName;
+  final String familyMemberName;
+  final String familyMemberRelation;
+
+  /// Who this visit is actually for: the family member booked for, if any,
+  /// otherwise the account holder.
+  String get visitorName =>
+      familyMemberName.isNotEmpty ? familyMemberName : patientName;
 
   bool get isVideo => type == 'video';
   bool get upcoming {
@@ -561,6 +573,8 @@ class HcAppointment {
     final patient = j['patient'] is Map ? j['patient'] as Map : const {};
     final patientProfile =
         patient['profile'] is Map ? patient['profile'] as Map : const {};
+    final familyMember =
+        j['family_member'] is Map ? j['family_member'] as Map : const {};
     return HcAppointment(
       id: _str(j['id']),
       doctorId: _str(j['doctor_id']),
@@ -582,6 +596,8 @@ class HcAppointment {
           ? Venue.fromMap((j['venue'] as Map).cast<String, dynamic>())
           : null,
       patientName: _str(patientProfile['full_name']),
+      familyMemberName: _str(familyMember['name']),
+      familyMemberRelation: _str(familyMember['relation']),
     );
   }
 
@@ -671,6 +687,7 @@ class Prescription {
     required this.items,
     this.createdAt,
     this.followUpDate,
+    this.familyMemberName = '',
   });
 
   final String id;
@@ -685,10 +702,19 @@ class Prescription {
   final String weight;
   final String doctorName;
   final String doctorSpecialty;
+
+  /// The account holder's own name — NOT who the visit is for when booked
+  /// for a family member. Use [visitorName] to show who the patient is.
   final String patientName;
+  final String familyMemberName;
   final List<PrescriptionItem> items;
   final DateTime? createdAt;
   final DateTime? followUpDate;
+
+  /// Who this prescription is actually for: the family member booked for,
+  /// if any, otherwise the account holder.
+  String get visitorName =>
+      familyMemberName.isNotEmpty ? familyMemberName : patientName;
 
   String get dateLabel {
     final dt = createdAt?.toLocal();
@@ -721,6 +747,7 @@ class Prescription {
       doctorName: _str(doctorProfile['full_name']),
       doctorSpecialty: _str(doctorMap['specialization']),
       patientName: _str(patientProfile['full_name']),
+      familyMemberName: _str(j['family_member_name']),
       items: itemsRaw
           .whereType<Map>()
           .map((e) => PrescriptionItem.fromMap(e.cast<String, dynamic>()))

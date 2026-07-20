@@ -260,8 +260,8 @@ class PrescriptionView extends GetView<PrescriptionController> {
                 height: 54,
                 child: ElevatedButton.icon(
                   onPressed: con.downloading ? null : con.download,
-                  icon: const Icon(Icons.download_rounded, size: 20),
-                  label: Text(con.downloading ? 'Downloading…'.tr : 'Download PDF'.tr,
+                  icon: const Icon(Icons.picture_as_pdf_outlined, size: 20),
+                  label: Text(con.downloading ? 'Opening…'.tr : 'View PDF'.tr,
                       style:
                           const TextStyle(fontSize: 16, fontWeight: FontWeight.w800)),
                   style: ElevatedButton.styleFrom(

@@ -151,14 +151,21 @@ class HealthcareController extends GetxController {
   int _availablePage = 1;
   final ScrollController availableScrollCtrl = ScrollController();
 
-  // ── All doctors (home preview) ──────────────────────────────────────
+  // ── All doctors (center dashboard, infinite-scroll) ──────────────────
+  /// Shows `kPreviewCount` doctors by default; scrolling the dashboard
+  /// loads and appends the rest, `kPreviewCount` at a time.
   List<HcDoctor> allDoctors = [];
   bool loadingAllDoctors = false;
+  bool loadingMoreAllDoctors = false;
+  bool allDoctorsHasMore = true;
+  int _allDoctorsPage = 1;
+  final ScrollController allDoctorsScrollCtrl = ScrollController();
 
   // ── Family ──────────────────────────────────────────────────────────
   List<HcFamilyMember> family = [];
   bool loadingFamily = false;
   bool addingFamily = false;
+  bool updatingFamily = false;
 
   // ── Selected center ───────────────────────────────────────────────────
   /// The center this screen is currently scoped to — set by
@@ -192,26 +199,60 @@ class HealthcareController extends GetxController {
     super.onInit();
     fetchFamily();
     availableScrollCtrl.addListener(_onAvailableScroll);
+    allDoctorsScrollCtrl.addListener(_onAllDoctorsScroll);
   }
 
   @override
   void onClose() {
     availableScrollCtrl.removeListener(_onAvailableScroll);
     availableScrollCtrl.dispose();
+    allDoctorsScrollCtrl.removeListener(_onAllDoctorsScroll);
+    allDoctorsScrollCtrl.dispose();
     super.onClose();
+  }
+
+  void _onAllDoctorsScroll() {
+    final pos = allDoctorsScrollCtrl.position;
+    if (pos.pixels >= pos.maxScrollExtent - 300) loadMoreAllDoctors();
   }
 
   Future<void> fetchAllDoctors() async {
     loadingAllDoctors = true;
+    _allDoctorsPage = 1;
+    allDoctorsHasMore = true;
     update();
     try {
       final list = await _repo.fetchDoctors(
-          limit: kPreviewCount, centerId: selectedCenter?.id);
+          page: _allDoctorsPage,
+          limit: kPreviewCount,
+          centerId: selectedCenter?.id);
       allDoctors = list.map(HcDoctor.fromApi).toList();
+      allDoctorsHasMore = list.length >= kPreviewCount;
     } catch (e) {
       SnackHelper.error(e.toString().replaceFirst('Exception: ', ''));
     } finally {
       loadingAllDoctors = false;
+      update();
+    }
+  }
+
+  Future<void> loadMoreAllDoctors() async {
+    if (loadingMoreAllDoctors || loadingAllDoctors || !allDoctorsHasMore) {
+      return;
+    }
+    loadingMoreAllDoctors = true;
+    update();
+    try {
+      final next = _allDoctorsPage + 1;
+      final list = await _repo.fetchDoctors(
+          page: next, limit: kPreviewCount, centerId: selectedCenter?.id);
+      allDoctors.addAll(list.map(HcDoctor.fromApi));
+      _allDoctorsPage = next;
+      allDoctorsHasMore = list.length >= kPreviewCount;
+    } catch (e) {
+      SnackHelper.error(e.toString().replaceFirst('Exception: ', ''));
+    } finally {
+      loadingMoreAllDoctors = false;
       update();
     }
   }
@@ -315,6 +356,38 @@ class HealthcareController extends GetxController {
       return false;
     } finally {
       addingFamily = false;
+      update();
+    }
+  }
+
+  Future<bool> updateFamilyMember({
+    required String id,
+    required String name,
+    required String relation,
+    required String age,
+    required String gender,
+    required String bloodGroup,
+  }) async {
+    if (updatingFamily) return false;
+    updatingFamily = true;
+    update();
+    try {
+      final updated = await _repo.updateFamilyMember(id, {
+        'name': name,
+        'relation': relation,
+        'gender': gender,
+        'age': int.tryParse(age.trim()) ?? 0,
+        'blood_group': bloodGroup,
+      });
+      final i = family.indexWhere((m) => m.id == id);
+      if (i != -1) family[i] = updated;
+      SnackHelper.success('Family member updated');
+      return true;
+    } catch (e) {
+      SnackHelper.error(e.toString().replaceFirst('Exception: ', ''));
+      return false;
+    } finally {
+      updatingFamily = false;
       update();
     }
   }

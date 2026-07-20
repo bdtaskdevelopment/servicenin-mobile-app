@@ -46,6 +46,8 @@ class NagarikHotlinesData {
     required this.dnccPhone,
     required this.dnccEmail,
     required this.dnccWebsite,
+    required this.bannerTitle,
+    required this.bannerSubtitle,
     required this.hotlines,
   });
 
@@ -54,6 +56,8 @@ class NagarikHotlinesData {
   final String dnccPhone;
   final String dnccEmail;
   final String dnccWebsite;
+  final String bannerTitle;
+  final String bannerSubtitle;
   final List<NagarikHotline> hotlines;
 
   factory NagarikHotlinesData.fromResponse(dynamic src) {
@@ -67,6 +71,8 @@ class NagarikHotlinesData {
       dnccPhone: _str(dncc['phone']),
       dnccEmail: _str(dncc['email']),
       dnccWebsite: _str(dncc['website']),
+      bannerTitle: _str(m['banner_title']),
+      bannerSubtitle: _str(m['banner_subtitle']),
       hotlines: list
           .whereType<Map>()
           .map((e) => NagarikHotline.fromMap(e.cast<String, dynamic>()))
@@ -155,6 +161,9 @@ class NagarikGrievance {
 
   /// Whether the reporter has confirmed the resolution.
   bool get verified => raw['verified'] == true;
+
+  /// The "after fix" proof photo the citizen attached when verifying.
+  String get verificationPhotoUrl => _str(raw['my_verification_photo_url']);
 
   /// Resolved but waiting for the reporter to confirm.
   bool get awaitingCitizenVerification =>

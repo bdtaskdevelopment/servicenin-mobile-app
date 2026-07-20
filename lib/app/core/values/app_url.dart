@@ -36,6 +36,36 @@ class ApiURL {
       'api/v1/blood/donors/me/availability';
   static final String bloodDonorRegister = 'api/v1/blood/donors/register';
   static final String bloodDonorVerifyOtp = 'api/v1/blood/donors/verify-otp';
+  static final String bloodFaqs = 'api/v1/blood/faqs';
+  static final String bloodArticles = 'api/v1/blood/articles';
+  static String bloodArticlesPaged({int page = 1, int limit = 10}) =>
+      'api/v1/blood/articles?page=$page&limit=$limit';
+  static String bloodArticleById(String id) => 'api/v1/blood/articles/$id';
+
+  //===== Our Work (video showcase) / Our News (articles)
+  static final String worksCategories = 'api/v1/works/categories';
+  static String worksPostsPaged(
+      {int page = 1, int limit = 10, String? categoryId}) {
+    final q = StringBuffer('api/v1/works/posts?page=$page&limit=$limit');
+    if (categoryId != null && categoryId.isNotEmpty) {
+      q.write('&category_id=${Uri.encodeQueryComponent(categoryId)}');
+    }
+    return q.toString();
+  }
+
+  static String worksPostById(String id) => 'api/v1/works/posts/$id';
+
+  static final String newsCategories = 'api/v1/news/categories';
+  static String newsPostsPaged(
+      {int page = 1, int limit = 10, String? categoryId}) {
+    final q = StringBuffer('api/v1/news/posts?page=$page&limit=$limit');
+    if (categoryId != null && categoryId.isNotEmpty) {
+      q.write('&category_id=${Uri.encodeQueryComponent(categoryId)}');
+    }
+    return q.toString();
+  }
+
+  static String newsPostById(String id) => 'api/v1/news/posts/$id';
 
   //===== Ambulance
   static final String ambulanceAvailable = 'api/v1/ambulance/available';
@@ -111,6 +141,7 @@ class ApiURL {
   static final String hcPaymentMethods =
       'api/v1/healthcare/payment-methods';
   static final String hcFamily = 'api/v1/healthcare/family';
+  static String hcFamilyById(String id) => 'api/v1/healthcare/family/$id';
   static final String hcDocumentsUpload =
       'api/v1/healthcare/documents/upload';
   static final String hcAppointments = 'api/v1/healthcare/appointments';
@@ -126,8 +157,6 @@ class ApiURL {
       'api/v1/healthcare/appointments/$id';
   static String hcAppointmentQueue(String id) =>
       'api/v1/healthcare/appointments/$id/queue';
-  static String hcAppointmentReschedule(String id) =>
-      'api/v1/healthcare/appointments/$id/reschedule';
   static final String hcPrescriptionLatest =
       'api/v1/healthcare/prescriptions/latest';
 
@@ -260,17 +289,22 @@ class ApiURL {
       'api/v1/jobs/employers/register';
 
   //===== Funeral
-  static final String funeralCoordinator = 'api/v1/funeral/coordinator';
   static final String funeralServices = 'api/v1/funeral/services';
-  static final String funeralUnitsAvailable =
-      'api/v1/funeral/units/available';
   static final String funeralRequests = 'api/v1/funeral/requests';
   static final String funeralRequestsMy = 'api/v1/funeral/requests/my';
 
   //===== Education
   static final String educationCategories = 'api/v1/education/categories';
-  static final String educationCentersNear =
-      'api/v1/education/centers/near';
+  static final String educationInstituteTypes =
+      'api/v1/education/institute-types';
+
+  /// "Centers near you", optionally filtered to one institute type (slug).
+  static String educationCentersNear({String? instituteType}) {
+    const base = 'api/v1/education/centers/near';
+    if (instituteType == null || instituteType.isEmpty) return base;
+    return '$base?institute_type=${Uri.encodeQueryComponent(instituteType)}';
+  }
+
   static String educationCenter(String id) => 'api/v1/education/centers/$id';
   static String educationCenterCourses(String id) =>
       'api/v1/education/centers/$id/courses';
@@ -319,7 +353,21 @@ class ApiURL {
   //===== Information / hotlines (ServiceNin)
   static final String info = 'api/v1/info';
   static final String infoEmergency = 'api/v1/info/emergency';
+  static final String infoDomains = 'api/v1/info/domains';
   static String infoById(String id) => 'api/v1/info/$id';
+
+  /// Paginated, optionally category- and search-filtered directory list.
+  static String infoPaged(
+      {int page = 1, int limit = 10, String? domain, String? search}) {
+    final q = StringBuffer('$info?page=$page&limit=$limit');
+    if (domain != null && domain.isNotEmpty) {
+      q.write('&domain=${Uri.encodeQueryComponent(domain)}');
+    }
+    if (search != null && search.isNotEmpty) {
+      q.write('&search=${Uri.encodeQueryComponent(search)}');
+    }
+    return q.toString();
+  }
 
   //===== profile (ServiceNin — no leading slash, appends to base ending "/")
   static final String usersMe = 'api/v1/users/me';

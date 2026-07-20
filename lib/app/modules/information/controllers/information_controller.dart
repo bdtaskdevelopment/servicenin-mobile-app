@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -53,12 +55,10 @@ class PopularGuide {
 class InformationController extends GetxController {
   InfoRepository get _infoRepo => Get.find<InfoRepository>();
 
-  // ── Live info / hotline entries from /api/v1/info ─────────────────
-  List<InfoEntry> infoEntries = [];
-  bool loadingInfo = false;
   bool detailLoading = false;
 
   // ── Emergency contacts from /api/v1/info/emergency ────────────────
+  // (kept for the National Emergency hero + the separate Hotlines screen)
   List<InfoEntry> emergencyEntries = [];
   bool loadingEmergency = false;
 
@@ -68,37 +68,175 @@ class InformationController extends GetxController {
     for (final e in emergencyEntries) {
       if (e.isNationalEmergency) return e;
     }
-    for (final e in infoEntries) {
+    for (final e in directoryEntries) {
       if (e.isNationalEmergency) return e;
     }
     return null;
   }
 
-  /// Emergency contacts minus the national-emergency hero.
+  /// Looks up a domain's label/emoji by its key, for rendering an entry's
+  /// category icon/pill. Returns null if [domains] hasn't loaded yet or the
+  /// key doesn't match any active domain.
+  InfoDomain? domainFor(String key) {
+    for (final d in domains) {
+      if (d.key == key) return d;
+    }
+    return null;
+  }
+
+  /// Emergency contacts minus the national-emergency hero (used by the
+  /// separate "Hotlines" screen).
   List<InfoEntry> get emergencyCards =>
       emergencyEntries.where((e) => !e.isNationalEmergency).toList();
 
-  /// The full directory from /api/v1/info (hospitals, offices, etc.).
-  List<InfoEntry> get infoCards =>
-      infoEntries.where((e) => !e.isNationalEmergency).toList();
+  // ── Categories ("domains") from /api/v1/info/domains ───────────────
+  List<InfoDomain> domains = [];
+  bool loadingDomains = false;
+
+  /// The domain the category-list page is currently scoped to; null means
+  /// either "All" or a plain search (see [categoryListTitle]).
+  InfoDomain? selectedDomainForList;
+
+  String? get selectedDomainKey => selectedDomainForList?.key;
+
+  /// Header title for the category-list page.
+  String get categoryListTitle =>
+      selectedDomainForList?.label ?? (search.isNotEmpty ? 'Search results'.tr : 'All'.tr);
+
+  /// Opens the category-list page scoped to [domain]. Clears any leftover
+  /// search text so the list starts as a clean category browse.
+  void openInfoCategory(InfoDomain domain) {
+    selectedDomainForList = domain;
+    searchCtrl.clear();
+    update();
+    fetchDirectory(reset: true);
+    Get.toNamed(Routes.INFORMATION_CATEGORY);
+  }
+
+  /// Opens the category-list page showing every active entry (no domain
+  /// filter) — the grid's "All" tile.
+  void openAllInfo() {
+    selectedDomainForList = null;
+    searchCtrl.clear();
+    update();
+    fetchDirectory(reset: true);
+    Get.toNamed(Routes.INFORMATION_CATEGORY);
+  }
+
+  /// Opens the category-list page for a free-text search (from the main
+  /// page's search bar) — no domain filter, keeps the typed query.
+  void openSearchResults() {
+    selectedDomainForList = null;
+    update();
+    fetchDirectory(reset: true);
+    Get.toNamed(Routes.INFORMATION_CATEGORY);
+  }
+
+  // ── Directory (paginated, category + search filtered) ──────────────
+  List<InfoEntry> directoryEntries = [];
+  bool loadingDirectory = false;
+  bool loadingMoreDirectory = false;
+  bool hasMoreDirectory = true;
+  int _page = 1;
+  static const _limit = 10;
+  final TextEditingController searchCtrl = TextEditingController();
+  String get search => searchCtrl.text.trim();
+  Timer? _searchDebounce;
+
+  /// Directory entries minus the national-emergency hero (already shown
+  /// separately at the top of the page).
+  List<InfoEntry> get directoryCards =>
+      directoryEntries.where((e) => !e.isNationalEmergency).toList();
 
   @override
   void onInit() {
     super.onInit();
-    fetchInfo();
+    fetchDomains();
     fetchEmergency();
   }
 
-  /// GET /api/v1/info — load all entries.
-  Future<void> fetchInfo() async {
-    loadingInfo = true;
+  Future<void> fetchDomains() async {
+    loadingDomains = true;
     update();
     try {
-      infoEntries = await _infoRepo.fetchAll();
+      domains = await _infoRepo.fetchDomains();
+    } catch (_) {
+    } finally {
+      loadingDomains = false;
+      update();
+    }
+  }
+
+  /// Search-bar submit while already on the category-list page — refetches
+  /// in place (no navigation). The main page's search bar uses
+  /// [openSearchResults] instead, which navigates first.
+  void onSearchSubmitted(String _) {
+    _searchDebounce?.cancel();
+    fetchDirectory(reset: true);
+  }
+
+  /// Debounced live search as the user types — category-list page only.
+  void onSearchChanged(String _) {
+    update(); // refresh the clear (×) affordance
+    _searchDebounce?.cancel();
+    _searchDebounce = Timer(
+        const Duration(milliseconds: 400), () => fetchDirectory(reset: true));
+  }
+
+  /// Main page's search bar just tracks the clear (×) affordance — it
+  /// doesn't fetch anything itself; submitting navigates via
+  /// [openSearchResults] instead.
+  void onMainSearchChanged(String _) => update();
+
+  void clearSearch() {
+    searchCtrl.clear();
+    _searchDebounce?.cancel();
+    fetchDirectory(reset: true);
+  }
+
+  /// GET /api/v1/info — load the directory list.
+  Future<void> fetchDirectory({bool reset = false}) async {
+    if (reset) {
+      _page = 1;
+      hasMoreDirectory = true;
+    }
+    loadingDirectory = true;
+    update();
+    try {
+      final list = await _infoRepo.fetchDirectory(
+        page: _page,
+        limit: _limit,
+        domain: selectedDomainKey,
+        search: search,
+      );
+      directoryEntries = list;
+      hasMoreDirectory = list.length >= _limit;
     } catch (e) {
       SnackHelper.error(e.toString().replaceFirst('Exception: ', ''));
     } finally {
-      loadingInfo = false;
+      loadingDirectory = false;
+      update();
+    }
+  }
+
+  Future<void> loadMoreDirectory() async {
+    if (loadingMoreDirectory || loadingDirectory || !hasMoreDirectory) return;
+    loadingMoreDirectory = true;
+    update();
+    try {
+      _page += 1;
+      final list = await _infoRepo.fetchDirectory(
+        page: _page,
+        limit: _limit,
+        domain: selectedDomainKey,
+        search: search,
+      );
+      directoryEntries.addAll(list);
+      hasMoreDirectory = list.length >= _limit;
+    } catch (_) {
+      _page -= 1;
+    } finally {
+      loadingMoreDirectory = false;
       update();
     }
   }
@@ -132,6 +270,22 @@ class InformationController extends GetxController {
     }
   }
 
+  // ── Detail page (opened from a directory card tap) ──────────────────
+  InfoEntry? selected;
+
+  /// Opens the detail page immediately with the list's copy, then refreshes
+  /// it in the background with the fuller single-entry response.
+  void openInfo(InfoEntry entry) async {
+    selected = entry;
+    update();
+    Get.toNamed(Routes.INFORMATION_DETAIL);
+    final fresh = await fetchInfoById(entry.id);
+    if (fresh != null) {
+      selected = fresh;
+      update();
+    }
+  }
+
   /// Open the phone dialer for a hotline number.
   Future<void> callHotline(String number) async {
     final digits = number.trim();
@@ -142,6 +296,33 @@ class InformationController extends GetxController {
     } catch (_) {
       SnackHelper.error('ডায়াল করা যায়নি');
     }
+  }
+
+  /// Open a website/map link externally (browser or the relevant app).
+  Future<void> openExternal(String url) async {
+    final trimmed = url.trim();
+    if (trimmed.isEmpty) return;
+    try {
+      final ok = await launchUrl(Uri.parse(trimmed),
+          mode: LaunchMode.externalApplication);
+      if (!ok) SnackHelper.error('খুলতে সমস্যা হয়েছে');
+    } catch (_) {
+      SnackHelper.error('খুলতে সমস্যা হয়েছে');
+    }
+  }
+
+  /// Compose an email to the given address.
+  Future<void> openEmail(String email) async {
+    final trimmed = email.trim();
+    if (trimmed.isEmpty) return;
+    await openExternal('mailto:$trimmed');
+  }
+
+  /// Open a WhatsApp chat with the given number.
+  Future<void> openWhatsapp(String number) async {
+    final digits = number.replaceAll(RegExp(r'[^0-9]'), '');
+    if (digits.isEmpty) return;
+    await openExternal('https://wa.me/$digits');
   }
 
   final List<Hotline> hotlines = const [
@@ -226,5 +407,12 @@ class InformationController extends GetxController {
   void openGuideByTitle(String title) {
     openGuide(guides.firstWhere((g) => g.title == title,
         orElse: () => guides.first));
+  }
+
+  @override
+  void onClose() {
+    _searchDebounce?.cancel();
+    searchCtrl.dispose();
+    super.onClose();
   }
 }

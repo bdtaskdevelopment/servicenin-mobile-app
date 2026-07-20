@@ -34,6 +34,28 @@ class DonorRegisterView extends GetView<DonorRegisterController> {
                       const SizedBox(height: 12),
                       _GroupGrid(con: con),
                       const SizedBox(height: 22),
+                      _SectionLabel('YOUR DETAILS'.tr),
+                      const SizedBox(height: 12),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: _InputCard(
+                              controller: con.age,
+                              hint: 'Age'.tr,
+                              keyboard: TextInputType.number,
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            flex: 2,
+                            child: _InputCard(
+                              controller: con.profession,
+                              hint: 'Profession'.tr,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 22),
                       _SectionLabel('YOUR LOCATION'.tr),
                       const SizedBox(height: 12),
                       _LocationCard(con: con),
@@ -294,10 +316,12 @@ class _InputCard extends StatelessWidget {
     required this.controller,
     required this.hint,
     this.maxLines = 1,
+    this.keyboard,
   });
   final TextEditingController controller;
   final String hint;
   final int maxLines;
+  final TextInputType? keyboard;
 
   @override
   Widget build(BuildContext context) {
@@ -310,6 +334,7 @@ class _InputCard extends StatelessWidget {
       ),
       child: TextField(
         controller: controller,
+        keyboardType: keyboard,
         maxLines: maxLines,
         style: const TextStyle(
             fontSize: 14.5,

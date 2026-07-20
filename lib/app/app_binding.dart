@@ -19,6 +19,7 @@ import 'data/providers/home.provider.dart';
 import 'data/providers/app.provider.dart';
 import 'data/providers/auth.provider.dart';
 import 'data/providers/blood.provider.dart';
+import 'data/providers/content.provider.dart';
 import 'data/providers/info.provider.dart';
 import 'data/providers/profile.provider.dart';
 import 'data/providers/payment.provider.dart';
@@ -35,6 +36,7 @@ import 'data/repositories/home.repo.dart';
 import 'data/repositories/app.repo.dart';
 import 'data/repositories/auth.repo.dart';
 import 'data/repositories/blood.repo.dart';
+import 'data/repositories/content.repo.dart';
 import 'data/repositories/info.repo.dart';
 import 'data/repositories/profile.repo.dart';
 import 'data/repositories/payment.repo.dart';
@@ -68,6 +70,12 @@ class AppDependencyInjection {
     Get.lazyPut<BloodProvider>(() => BloodProvider(), fenix: true);
     Get.lazyPut<BloodRepository>(
       () => BloodRepository(provider: Get.find()),
+      fenix: true,
+    );
+
+    Get.lazyPut<ContentProvider>(() => ContentProvider(), fenix: true);
+    Get.lazyPut<ContentRepository>(
+      () => ContentRepository(provider: Get.find()),
       fenix: true,
     );
 

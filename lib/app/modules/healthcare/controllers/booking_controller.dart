@@ -39,15 +39,28 @@ class BookingController extends GetxController {
   }
 
   /// Whether this doctor charges for a visit. Source of truth is the API's
-  /// `is_paid` flag (NOT the fee amount): `true` → paid, show the fee and the
-  /// payment step; `false` → free, skip payment and book directly.
+  /// `is_paid` flag: `true` → paid, show the fee and the payment step;
+  /// `false` → free, skip payment and book directly.
   ///
   /// The doctors-list value is reliable, while the profile endpoint may omit
   /// the flag (parsing to `false`), so a doctor counts as paid when *either*
   /// source reports paid — this prevents the profile response from wrongly
   /// downgrading a paid doctor to free.
-  bool get isPaid =>
-      (_doctor?.isPaid ?? false) || (profile?.doctor.isPaid ?? false);
+  ///
+  /// One more fallback: some admin-entered doctors have `is_paid: true` but
+  /// a ৳0 consultation fee (a data-entry gap, not an intentional "paid ৳0"
+  /// visit) — there's nothing to actually charge, so once the fee is known
+  /// treat it as free too. This also keeps the booking flow consistent with
+  /// the doctor list/profile, which already show "Free" for a ৳0 fee via
+  /// [Doctor.feeLabel] regardless of the `is_paid` flag.
+  bool get isPaid {
+    final flagged =
+        (_doctor?.isPaid ?? false) || (profile?.doctor.isPaid ?? false);
+    if (!flagged) return false;
+    final fee = profile?.doctor.consultationFee;
+    if (fee != null && fee <= 0) return false;
+    return true;
+  }
 
   void setDoctor(HcDoctor d) {
     _doctor = d;
@@ -223,6 +236,11 @@ class BookingController extends GetxController {
     if (selectedDate >= _dates.length) return '';
     return '${_dates[selectedDate].dayShort} · $selectedTime';
   }
+
+  /// Whether a real date + time slot is selected, so "Next step" can be
+  /// enabled. False while slots are loading or none are available.
+  bool get slotSelected =>
+      selectedDate < _dates.length && selectedTime.trim().isNotEmpty;
 
   String get whenSummary {
     if (selectedDate >= _dates.length) return selectedTime;

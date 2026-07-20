@@ -1,3 +1,6 @@
+import 'dart:convert';
+
+import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 
 import '../../core/values/app_url.dart';
@@ -24,7 +27,16 @@ class SettingsService extends GetxService {
   Future<void> load() async {
     try {
       final res = await _provider.getData(ApiURL.settings);
-      final body = res.body;
+      // res.body isn't always auto-parsed to a Map (depends on the response's
+      // content-type header) — fall back to decoding the raw bodyString, the
+      // same pattern every other repo in this app uses.
+      dynamic body = res.body;
+      if (body is! Map) {
+        final raw = res.bodyString;
+        if (raw != null && raw.trim().isNotEmpty) {
+          body = jsonDecode(raw);
+        }
+      }
       final data = (body is Map && body['data'] is Map)
           ? body['data'] as Map
           : (body is Map ? body : null);
@@ -32,8 +44,11 @@ class SettingsService extends GetxService {
         settings = AppSettings.fromMap(data);
         loaded = true;
       }
-    } catch (_) {
-      // Keep defaults on any failure — booking/payment still work.
+    } catch (e, st) {
+      // Keep defaults on any failure — booking/payment still work. Logged
+      // (not silent) so a broken fetch is diagnosable instead of just
+      // showing up as "settings are all empty" downstream.
+      debugPrint('SettingsService.load failed: $e\n$st');
     }
   }
 

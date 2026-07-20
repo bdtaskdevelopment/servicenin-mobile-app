@@ -29,20 +29,11 @@ class ReportIssueView extends GetView<NagarikController> {
                       icon: const Icon(Icons.arrow_back_ios_new_rounded,
                           size: 20, color: Color(0xFF1A1A1A)),
                     ),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text('Report an issue'.tr,
-                            style: const TextStyle(
-                                fontSize: 19,
-                                fontWeight: FontWeight.w800,
-                                color: Color(0xFF0F172A))),
-                        const SizedBox(height: 1),
-                        Text('Goes directly to DNCC'.tr,
-                            style: const TextStyle(
-                                fontSize: 12, color: Color(0xFF94A3B8))),
-                      ],
-                    ),
+                    Text('Report an issue'.tr,
+                        style: const TextStyle(
+                            fontSize: 19,
+                            fontWeight: FontWeight.w800,
+                            color: Color(0xFF0F172A))),
                   ],
                 ),
               ),
@@ -201,7 +192,7 @@ class ReportIssueView extends GetView<NagarikController> {
                             child: CircularProgressIndicator(
                                 strokeWidth: 2.4, color: Colors.white),
                           )
-                        : Text('Submit to DNCC'.tr,
+                        : Text('Submit your Issue'.tr,
                             style: const TextStyle(
                                 fontSize: 16, fontWeight: FontWeight.w800)),
                   ),

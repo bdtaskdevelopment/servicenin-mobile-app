@@ -169,6 +169,7 @@ const Map<String, String> extraBn = {
   'Not fixed': 'সমাধান হয়নি',
   'Not verified': 'যাচাই করা হয়নি',
   'You verified this resolution': 'আপনি এই সমাধান যাচাই করেছেন',
+  'Your proof photo': 'আপনার প্রমাণ ছবি',
   'Awaiting reporter verification.': 'রিপোর্টকারীর যাচাইয়ের অপেক্ষায়।',
   'What\'s wrong, how long it\'s been there…':
       'সমস্যাটি কী, কতদিন ধরে আছে…',

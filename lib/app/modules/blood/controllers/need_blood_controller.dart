@@ -19,9 +19,20 @@ class NeedBloodController extends GetxController {
     'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
   ];
 
+  /// Alert-radius options in km; 0 means "all over" (no distance limit).
+  static const List<int> radiusOptions = [10, 20, 50, 0];
+
   String group = 'O+';
   int units = 2;
   BloodSeverity severity = BloodSeverity.critical;
+  int radiusKm = 10;
+
+  void setRadius(int km) {
+    radiusKm = km;
+    update();
+  }
+
+  String radiusLabel(int km) => km == 0 ? 'All over'.tr : '$km km';
 
   bool busy = false;
 
@@ -122,6 +133,7 @@ class NeedBloodController extends GetxController {
         'hospital_address': hospitalAddress.text.trim(),
         'lat': lat,
         'lng': lng,
+        'search_radius_km': radiusKm,
         'contact_name': name.text.trim(),
         'contact_email': email.text.trim(),
         'contact_phone': phone.text.trim(),

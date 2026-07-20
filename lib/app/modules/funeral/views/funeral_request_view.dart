@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../../core/values/app_colors.dart';
-import '../../../global_widget/sn_date_field.dart';
 import '../controllers/funeral_controller.dart';
 
 const _charcoal = Color(0xFF332F2C);
@@ -37,7 +36,7 @@ class FuneralRequestView extends GetView<FuneralController> {
                                 fontWeight: FontWeight.w800,
                                 color: Color(0xFF0F172A))),
                         const SizedBox(height: 1),
-                        Text('A coordinator will call you'.tr,
+                        Text('We\'ll reach out to confirm details'.tr,
                             style: const TextStyle(
                                 fontSize: 12, color: Color(0xFF94A3B8))),
                       ],
@@ -52,11 +51,11 @@ class FuneralRequestView extends GetView<FuneralController> {
                     _Label('SERVICE NEEDED'.tr),
                     const SizedBox(height: 10),
                     ...con.services.map((s) {
-                      final sel = con.selectedServiceKey == s.key;
+                      final sel = con.selectedServiceId == s.id;
                       return Padding(
                         padding: const EdgeInsets.only(bottom: 10),
                         child: GestureDetector(
-                          onTap: () => con.selectService(s.key),
+                          onTap: () => con.selectService(s.id),
                           child: Container(
                             padding: const EdgeInsets.all(14),
                             decoration: BoxDecoration(
@@ -84,18 +83,17 @@ class FuneralRequestView extends GetView<FuneralController> {
                                     crossAxisAlignment:
                                         CrossAxisAlignment.start,
                                     children: [
-                                      Text(s.label,
+                                      Text(s.name,
                                           style: const TextStyle(
                                               fontSize: 14.5,
                                               fontWeight: FontWeight.w800,
                                               color: Color(0xFF0F172A))),
-                                      if (s.priceLabel.isNotEmpty) ...[
+                                      if (s.description.isNotEmpty) ...[
                                         const SizedBox(height: 2),
-                                        Text(s.priceLabel,
+                                        Text(s.description,
                                             style: const TextStyle(
                                                 fontSize: 12,
-                                                fontWeight: FontWeight.w700,
-                                                color: Color(0xFFC2410C))),
+                                                color: Color(0xFF94A3B8))),
                                       ],
                                     ],
                                   ),
@@ -107,56 +105,21 @@ class FuneralRequestView extends GetView<FuneralController> {
                       );
                     }),
                     const SizedBox(height: 8),
-                    _Label('DECEASED DETAILS'.tr),
+                    _Label('YOUR DETAILS'.tr),
                     const SizedBox(height: 10),
-                    _Field(con.deceasedName, 'NAME OF THE DECEASED'.tr,
-                        'Full name'.tr),
+                    _Field(con.name, 'NAME'.tr, 'Your full name'.tr),
                     const SizedBox(height: 12),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: _Field(con.deceasedAge, 'AGE'.tr, 'e.g. 78'.tr,
-                              kb: TextInputType.number),
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(child: _GenderField(con: con)),
-                      ],
-                    ),
+                    _Field(con.phone, 'PHONE'.tr, '+8801XXXXXXXXX',
+                        kb: TextInputType.phone),
                     const SizedBox(height: 12),
-                    SnDateField(
-                        controller: con.deathTime,
-                        label: 'TIME OF DEATH'.tr,
-                        withTime: true,
-                        lastDate: DateTime.now()),
-                    const SizedBox(height: 12),
-                    _Field(con.placeOfDeath, 'PLACE OF DEATH'.tr,
-                        'e.g. Dhaka Medical College'.tr),
-                    const SizedBox(height: 12),
-                    _Field(con.causeOfDeath, 'CAUSE OF DEATH (OPTIONAL)'.tr,
-                        'e.g. Old age'.tr),
-                    const SizedBox(height: 16),
-                    _Label('LOCATION OF BODY'.tr),
-                    const SizedBox(height: 10),
                     _Field(con.address, 'ADDRESS'.tr,
                         'Home / hospital address'.tr),
                     const SizedBox(height: 12),
-                    _Field(con.wardNo, 'WARD NO (OPTIONAL)'.tr, 'e.g. 10'.tr),
-                    const SizedBox(height: 12),
-                    SnDateField(
-                        controller: con.scheduledAt,
-                        label: 'PREFERRED TIME (OPTIONAL)'.tr,
-                        withTime: true),
-                    const SizedBox(height: 16),
-                    _Label('YOUR CONTACT'.tr),
-                    const SizedBox(height: 10),
-                    _Field(con.contactName, 'CONTACT NAME'.tr, 'Your name'.tr),
-                    const SizedBox(height: 12),
-                    _Field(con.contactPhone, 'CONTACT PHONE'.tr,
-                        '+8801XXXXXXXXX',
-                        kb: TextInputType.phone),
+                    _Field(con.notes, 'NOTES (OPTIONAL)'.tr,
+                        'Anything else we should know'.tr),
                     const SizedBox(height: 16),
                     Text(
-                        'A coordinator will call within minutes to confirm timing, costs and arrange everything. No payment is taken online.'
+                        'A coordinator will call you shortly to confirm details. No payment is taken online.'
                             .tr,
                         style: TextStyle(
                             fontSize: 12.5,
@@ -253,64 +216,6 @@ class _Field extends StatelessWidget {
                   fontWeight: FontWeight.w500,
                   color: Color(0xFFB0AEB8)),
             ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _GenderField extends StatelessWidget {
-  const _GenderField({required this.con});
-  final FuneralController con;
-  @override
-  Widget build(BuildContext context) {
-    Widget btn(String g, String label) {
-      final sel = con.gender == g;
-      return Expanded(
-        child: GestureDetector(
-          onTap: () => con.setGender(g),
-          child: Container(
-            height: 40,
-            alignment: Alignment.center,
-            decoration: BoxDecoration(
-              color: sel ? _charcoal : Colors.transparent,
-              borderRadius: BorderRadius.circular(10),
-              border: Border.all(
-                  color: sel ? _charcoal : const Color(0xFFE2E8F0)),
-            ),
-            child: Text(label,
-                style: TextStyle(
-                    fontSize: 13.5,
-                    fontWeight: FontWeight.w800,
-                    color: sel ? Colors.white : const Color(0xFF334155))),
-          ),
-        ),
-      );
-    }
-
-    return Container(
-      padding: const EdgeInsets.fromLTRB(12, 10, 12, 8),
-      decoration: BoxDecoration(
-          color: AppColors.white,
-          borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: const Color(0xFFEDEFF2))),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text('GENDER'.tr,
-              style: const TextStyle(
-                  fontSize: 11,
-                  fontWeight: FontWeight.w700,
-                  color: Color(0xFF94A3B8),
-                  letterSpacing: 0.6)),
-          const SizedBox(height: 6),
-          Row(
-            children: [
-              btn('male', 'Male'.tr),
-              const SizedBox(width: 8),
-              btn('female', 'Female'.tr),
-            ],
           ),
         ],
       ),

@@ -53,6 +53,28 @@ class NagarikController extends GetxController {
   NagarikHotlinesData? hotlines;
   bool loadingHotlines = false;
 
+  /// The Nagarik Sheba hotline number, set by admin in the web dashboard
+  /// (falls back to 16106 until it loads or if left empty).
+  String get hotlineNumber {
+    final h = hotlines?.dnccHotline ?? '';
+    return h.isNotEmpty ? h : '16106';
+  }
+
+  /// Banner title/subtitle, admin-editable alongside the hotline number
+  /// (falls back to the translated default copy until they load).
+  String get bannerTitle {
+    final t = hotlines?.bannerTitle ?? '';
+    return t.isNotEmpty ? t : 'Your city, your responsibility'.tr;
+  }
+
+  String get bannerSubtitle {
+    final t = hotlines?.bannerSubtitle ?? '';
+    return t.isNotEmpty
+        ? t
+        : 'Report civic issues straight to DNCC officials · track to resolution'
+            .tr;
+  }
+
   // ── Report categories ───────────────────────────────────────────────
   List<NagarikReportCategory> categories = [];
   bool loadingCategories = false;
@@ -243,8 +265,7 @@ class NagarikController extends GetxController {
     update();
     try {
       tickets = await _repo.fetchMyTickets();
-    } catch (e) {
-      SnackHelper.error(e.toString().replaceFirst('Exception: ', ''));
+    } catch (_) {
     } finally {
       loadingTickets = false;
       update();

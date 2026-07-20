@@ -17,10 +17,20 @@ class InfoRepository {
     throw Exception('সংযোগে সমস্যা — আবার চেষ্টা করুন');
   }
 
-  /// GET /api/v1/info — all active information / hotline entries.
-  Future<List<InfoEntry>> fetchAll() async {
-    final res = await provider.getData(ApiURL.info);
+  /// GET /api/v1/info — paginated directory, optionally filtered to one
+  /// category (domain) and/or a search term.
+  Future<List<InfoEntry>> fetchDirectory(
+      {int page = 1, int limit = 10, String? domain, String? search}) async {
+    final res = await provider.getData(
+        ApiURL.infoPaged(page: page, limit: limit, domain: domain, search: search));
     return InfoEntry.listFromResponse(_payload(res));
+  }
+
+  /// GET /api/v1/info/domains — the directory's categories (Emergency,
+  /// Government, Health, Utility, Other, …).
+  Future<List<InfoDomain>> fetchDomains() async {
+    final res = await provider.getData(ApiURL.infoDomains);
+    return InfoDomain.listFromResponse(_payload(res));
   }
 
   /// GET /api/v1/info/emergency — emergency contacts only.

@@ -68,48 +68,60 @@ class EducationView extends GetView<EducationController> {
                 ],
               ),
             ),
-            // Categories
+            // Institute types
             GetBuilder<EducationController>(
-              builder: (con) => SizedBox(
-                height: 36,
-                child: ListView.separated(
-                  scrollDirection: Axis.horizontal,
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  itemCount: con.categories.length,
-                  separatorBuilder: (_, _) => const SizedBox(width: 8),
-                  itemBuilder: (_, i) {
-                    final sel = con.categoryIndex == i;
-                    return GestureDetector(
-                      onTap: () => con.setCategory(i),
-                      child: Container(
-                        alignment: Alignment.center,
-                        padding: const EdgeInsets.symmetric(horizontal: 18),
-                        decoration: BoxDecoration(
-                          color: sel ? _purple : AppColors.white,
-                          borderRadius: BorderRadius.circular(20),
-                          border: Border.all(
-                            color: sel ? _purple : const Color(0xFFE2E8F0),
+              builder: (con) {
+                if (con.loadingInstituteTypes && con.instituteTypes.isEmpty) {
+                  return const Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 16),
+                    child: Align(
+                      alignment: Alignment.centerLeft,
+                      child: SnChipsSkeleton(count: 4),
+                    ),
+                  );
+                }
+                final count = 1 + con.instituteTypes.length; // + "All"
+                return SizedBox(
+                  height: 36,
+                  child: ListView.separated(
+                    scrollDirection: Axis.horizontal,
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    itemCount: count,
+                    separatorBuilder: (_, _) => const SizedBox(width: 8),
+                    itemBuilder: (_, i) {
+                      final sel = con.typeIndex == i;
+                      return GestureDetector(
+                        onTap: () => con.setInstituteType(i),
+                        child: Container(
+                          alignment: Alignment.center,
+                          padding: const EdgeInsets.symmetric(horizontal: 18),
+                          decoration: BoxDecoration(
+                            color: sel ? _purple : AppColors.white,
+                            borderRadius: BorderRadius.circular(20),
+                            border: Border.all(
+                              color: sel ? _purple : const Color(0xFFE2E8F0),
+                            ),
+                          ),
+                          child: Text(
+                            con.typeLabel(i),
+                            style: TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w700,
+                              color: sel ? Colors.white : const Color(0xFF334155),
+                            ),
                           ),
                         ),
-                        child: Text(
-                          con.categories[i].label,
-                          style: TextStyle(
-                            fontSize: 13,
-                            fontWeight: FontWeight.w700,
-                            color: sel ? Colors.white : const Color(0xFF334155),
-                          ),
-                        ),
-                      ),
-                    );
-                  },
-                ),
-              ),
+                      );
+                    },
+                  ),
+                );
+              },
             ),
             const SizedBox(height: 12),
             Expanded(
               child: GetBuilder<EducationController>(
                 builder: (con) {
-                  final list = con.filteredCenters;
+                  final list = con.centers;
                   return RefreshIndicator(
                     color: _purple,
                     onRefresh: con.fetchCentersNear,

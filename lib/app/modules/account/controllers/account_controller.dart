@@ -66,6 +66,11 @@ class AccountController extends GetxController {
     return '$start•••$end';
   }
 
+  /// Full, unmasked phone number — falls back to the stored login number.
+  String get phone => (profile?.phone.trim().isNotEmpty ?? false)
+      ? profile!.phone.trim()
+      : (StorageService.read(StorageConstants.phoneNumber) as String? ?? '');
+
   // ---- Edit profile selections ----
   final List<String> genders = const ['Male', 'Female', 'Other'];
   String gender = 'Male';

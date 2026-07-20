@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:dio/dio.dart';
 import 'package:path_provider/path_provider.dart';
@@ -113,6 +114,12 @@ class HealthcareRepository {
     return HcFamilyMember.fromResponse(_payload(res));
   }
 
+  Future<HcFamilyMember> updateFamilyMember(
+      String id, Map<String, dynamic> payload) async {
+    final res = await provider.putData(ApiURL.hcFamilyById(id), payload);
+    return HcFamilyMember.fromResponse(_payload(res));
+  }
+
   // ── Booking: venues / dates / slots ─────────────────────────────────
   Future<List<Venue>> fetchVenues(String doctorId) async {
     final res = await provider.getData(ApiURL.hcDoctorVenues(doctorId));
@@ -167,13 +174,6 @@ class HealthcareRepository {
     return QueueInfo.fromResponse(_payload(res));
   }
 
-  Future<AuthSimpleResponse> reschedule(
-      String id, String scheduledAt, String venueId) async {
-    final res = await provider.patchData(ApiURL.hcAppointmentReschedule(id),
-        {'scheduled_at': scheduledAt, 'venue_id': venueId});
-    return AuthSimpleResponse.fromMap(_payload(res));
-  }
-
   // ── Prescriptions ───────────────────────────────────────────────────
   Future<Prescription> fetchLatestPrescription({String? centerId}) async {
     final res = await provider
@@ -199,5 +199,20 @@ class HealthcareRepository {
     }));
     await dio.download(ApiURL.hcPrescriptionDownload(id), savePath);
     return savePath;
+  }
+
+  /// Fetches the prescription PDF (auth required) as raw bytes, for in-app
+  /// preview — the citizen sees it rendered inline and can save/share/print
+  /// from there, instead of relying on a device-installed PDF viewer.
+  Future<Uint8List> fetchPrescriptionPdfBytes(String id) async {
+    final token = StorageService.read(StorageConstants.accessToken);
+    final dio = Dio(BaseOptions(baseUrl: AppConfig.baseUrl, headers: {
+      if (token != null) 'Authorization': 'Bearer $token',
+    }));
+    final res = await dio.get<List<int>>(
+      ApiURL.hcPrescriptionDownload(id),
+      options: Options(responseType: ResponseType.bytes),
+    );
+    return Uint8List.fromList(res.data ?? const []);
   }
 }

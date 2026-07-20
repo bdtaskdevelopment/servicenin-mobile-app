@@ -82,6 +82,7 @@ class BloodController extends GetxController {
     fetchMyRank();
     fetchMyDonorStatus();
     fetchMyRequests();
+    fetchRequests();
   }
 
   /// Pull-to-refresh for the Blood Bank home page — reloads the nearby donors,
@@ -93,6 +94,7 @@ class BloodController extends GetxController {
       fetchMyRank(),
       fetchMyDonorStatus(),
       fetchMyRequests(),
+      fetchRequests(),
     ]);
   }
 
@@ -159,6 +161,11 @@ class BloodController extends GetxController {
   // ── Blood requests (GET /api/v1/blood/requests) — the Donate section ──
   List<BloodRequestEntry> requestList = [];
   bool loadingRequests = false;
+
+  /// Open requests still needing a donor — shown as a count badge on the
+  /// dashboard's "Donate" card.
+  int get openRequestsCount =>
+      requestList.where((r) => !r.isFulfilled).length;
 
   /// Requests filtered by the "compatible groups only" toggle.
   List<BloodRequestEntry> get visibleRequestEntries => compatibleOnly

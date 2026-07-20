@@ -1,11 +1,31 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import '../../../data/services/settings.service.dart';
+
+/// Terms of service — content sourced from the admin's Settings → App
+/// Configuration → "Terms of Service (full text)" (GET /api/v1/settings,
+/// already loaded by [SettingsService] at app startup). Falls back to a
+/// short default while the admin hasn't set custom content yet.
 class TermsView extends StatelessWidget {
   const TermsView({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final content = SettingsService.to.settings.termsContent.trim();
+    final paragraphs = content.isEmpty
+        ? const [
+            'Using ServiceNin: One verified ServiceNin ID lets you access all 12 modules. You agree to provide accurate information and to use the services lawfully.',
+            'Bookings & providers: ServiceNin connects you with independent providers (hospitals, technicians, coaching centers and more). Service quality, pricing and timing are the provider\'s responsibility.',
+            'Payments: Most services are pay-after-service or paid directly to the provider. Any online payment fees and refund timelines are shown before you confirm.',
+            'Emergencies: For Blood, Ambulance and other emergency services we route your request as fast as possible, but cannot guarantee availability. In a life-threatening emergency, also call national hotlines.',
+            'Account & termination: You can delete your account anytime from Settings → Account. We may suspend accounts that misuse the platform or violate these terms.',
+          ]
+        : content
+            .split(RegExp(r'\n\s*\n'))
+            .map((p) => p.trim())
+            .where((p) => p.isNotEmpty)
+            .toList();
     return Scaffold(
       backgroundColor: const Color(0xFFF1F3F6),
       body: SafeArea(
@@ -46,7 +66,7 @@ class TermsView extends StatelessWidget {
                         const SizedBox(width: 10),
                         Expanded(
                           child: Text(
-                              'By using ServiceNin you agree to these terms. Last updated 1 June 2026.'.tr,
+                              'By using ServiceNin you agree to these terms.'.tr,
                               style: const TextStyle(
                                   fontSize: 12.5,
                                   height: 1.45,
@@ -56,31 +76,15 @@ class TermsView extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 20),
-                  _Section(
-                    title: 'Using ServiceNin'.tr,
-                    body:
-                        'One verified ServiceNin ID lets you access all 12 modules. You agree to provide accurate information and to use the services lawfully.'.tr,
-                  ),
-                  _Section(
-                    title: 'Bookings & providers'.tr,
-                    body:
-                        'ServiceNin connects you with independent providers (hospitals, technicians, coaching centers and more). Service quality, pricing and timing are the provider\'s responsibility.'.tr,
-                  ),
-                  _Section(
-                    title: 'Payments'.tr,
-                    body:
-                        'Most services are pay-after-service or paid directly to the provider. Any online payment fees and refund timelines are shown before you confirm.'.tr,
-                  ),
-                  _Section(
-                    title: 'Emergencies'.tr,
-                    body:
-                        'For Blood, Ambulance and other emergency services we route your request as fast as possible, but cannot guarantee availability. In a life-threatening emergency, also call national hotlines.'.tr,
-                  ),
-                  _Section(
-                    title: 'Account & termination'.tr,
-                    body:
-                        'You can delete your account anytime from Settings → Account. We may suspend accounts that misuse the platform or violate these terms.'.tr,
-                  ),
+                  for (final p in paragraphs)
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 16),
+                      child: Text(p,
+                          style: const TextStyle(
+                              fontSize: 13.5,
+                              height: 1.5,
+                              color: Color(0xFF475569))),
+                    ),
                   const SizedBox(height: 8),
                   RichText(
                     text: TextSpan(
@@ -104,32 +108,6 @@ class TermsView extends StatelessWidget {
             ),
           ],
         ),
-      ),
-    );
-  }
-}
-
-class _Section extends StatelessWidget {
-  const _Section({required this.title, required this.body});
-  final String title;
-  final String body;
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 20),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(title,
-              style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w800,
-                  color: Color(0xFF0F172A))),
-          const SizedBox(height: 6),
-          Text(body,
-              style: const TextStyle(
-                  fontSize: 13.5, height: 1.5, color: Color(0xFF475569))),
-        ],
       ),
     );
   }

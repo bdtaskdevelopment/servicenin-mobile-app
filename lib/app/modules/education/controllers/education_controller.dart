@@ -6,69 +6,32 @@ import '../../../data/models/response/education_response.dart';
 import '../../../data/repositories/education.repo.dart';
 import '../../../routes/app_pages.dart';
 
-IconData eduCategoryIcon(String icon) {
-  switch (icon.toLowerCase()) {
-    case 'book':
-    case 'books':
-      return Icons.menu_book_rounded;
-    case 'school':
-    case 'graduate':
-      return Icons.school_outlined;
-    case 'language':
-    case 'english':
-      return Icons.translate_rounded;
-    case 'science':
-    case 'medical':
-      return Icons.science_outlined;
-    case 'computer':
-    case 'code':
-      return Icons.computer_outlined;
-    case 'calculator':
-    case 'math':
-      return Icons.calculate_outlined;
-    default:
-      return Icons.menu_book_rounded;
-  }
-}
-
 class EducationController extends GetxController {
   EducationRepository get _repo => Get.find<EducationRepository>();
 
-  // ── Categories ──────────────────────────────────────────────────────
-  // Index 0 is a synthetic "All" entry; API categories follow.
-  List<EduCategory> categories = [
-    EduCategory(key: 'all', label: 'All', icon: 'book'),
-  ];
-  bool loadingCategories = false;
-  int categoryIndex = 0;
+  // ── Institute types (admin-managed) ──────────────────────────────────
+  // Index 0 is a synthetic "All" entry; API institute types follow.
+  List<EduInstituteType> instituteTypes = [];
+  bool loadingInstituteTypes = false;
+  int typeIndex = 0;
 
-  void setCategory(int i) {
-    categoryIndex = i;
+  String? get _selectedInstituteTypeSlug =>
+      (typeIndex > 0 && typeIndex <= instituteTypes.length)
+          ? instituteTypes[typeIndex - 1].slug
+          : null;
+
+  /// Chip label at [i] — index 0 is always "All".
+  String typeLabel(int i) => i == 0 ? 'All'.tr : instituteTypes[i - 1].label;
+
+  void setInstituteType(int i) {
+    typeIndex = i;
     update();
+    fetchCentersNear();
   }
 
-  // ── Centers ─────────────────────────────────────────────────────────
+  // ── Centers (server-filtered by institute type) ──────────────────────
   List<EduCenter> centers = [];
   bool loadingCenters = false;
-
-  List<EduCenter> get filteredCenters {
-    if (categoryIndex <= 0 || categoryIndex >= categories.length) {
-      return centers;
-    }
-    final cat = categories[categoryIndex];
-    final needle = cat.label.toLowerCase();
-    final key = cat.key.toLowerCase();
-    final hits = centers.where((c) {
-      final hay =
-          '${c.subjects} ${c.targetGrades} ${c.instituteType} ${c.name}'
-              .toLowerCase();
-      return hay.contains(needle) ||
-          hay.contains(key) ||
-          needle.split(' ').any((w) => w.length > 2 && hay.contains(w));
-    }).toList();
-    // Don't show an empty screen when the fuzzy match misses.
-    return hits.isEmpty ? centers : hits;
-  }
 
   // ── Center detail ───────────────────────────────────────────────────
   EduCenter? center;
@@ -106,22 +69,18 @@ class EducationController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    fetchCategories();
+    fetchInstituteTypes();
     fetchCentersNear();
   }
 
-  Future<void> fetchCategories() async {
-    loadingCategories = true;
+  Future<void> fetchInstituteTypes() async {
+    loadingInstituteTypes = true;
     update();
     try {
-      final fetched = await _repo.fetchCategories();
-      categories = [
-        EduCategory(key: 'all', label: 'All', icon: 'book'),
-        ...fetched,
-      ];
+      instituteTypes = await _repo.fetchInstituteTypes();
     } catch (_) {
     } finally {
-      loadingCategories = false;
+      loadingInstituteTypes = false;
       update();
     }
   }
@@ -130,7 +89,8 @@ class EducationController extends GetxController {
     loadingCenters = true;
     update();
     try {
-      centers = await _repo.fetchCentersNear();
+      centers =
+          await _repo.fetchCentersNear(instituteType: _selectedInstituteTypeSlug);
     } catch (e) {
       SnackHelper.error(e.toString().replaceFirst('Exception: ', ''));
     } finally {

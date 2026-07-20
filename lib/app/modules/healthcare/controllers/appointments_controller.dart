@@ -1,9 +1,9 @@
 import 'package:get/get.dart';
-import 'package:open_filex/open_filex.dart';
 
 import '../../../core/helpers/snack_helper.dart';
 import '../../../data/models/response/healthcare_response.dart';
 import '../../../data/repositories/healthcare.repo.dart';
+import '../../../global_widget/pdf_preview_view.dart';
 import '../../../routes/app_pages.dart';
 import 'healthcare_controller.dart';
 
@@ -23,14 +23,6 @@ class AppointmentsController extends GetxController {
   bool loadingQueue = false;
   List<Prescription> doctorPrescriptions = [];
   bool loadingPrescriptions = false;
-
-  /// True once the doctor has issued a prescription for the selected
-  /// appointment — reschedule is then locked.
-  bool get hasPrescriptionForSelected {
-    final id = selected?.id;
-    if (id == null || id.isEmpty) return false;
-    return doctorPrescriptions.any((p) => p.appointmentId == id);
-  }
 
   @override
   void onInit() {
@@ -151,54 +143,20 @@ class AppointmentsController extends GetxController {
   int get aheadCount => queue?.aheadCount ?? 0;
   int get estimatedWaitMin => queue?.estimatedWaitMin ?? 0;
 
-  Future<void> reschedule(String scheduledAtIso) async {
-    final a = selected;
-    if (a == null) return;
-    try {
-      final res = await _repo.reschedule(a.id, scheduledAtIso, a.venueId);
-      SnackHelper.success(res.message.isNotEmpty ? res.message : 'Rescheduled');
-      await fetchDetail(a.id);
-      await fetchMine();
-    } catch (e) {
-      SnackHelper.error(e.toString().replaceFirst('Exception: ', ''));
-    }
-  }
-
   void openPrescription() => Get.toNamed(Routes.HEALTHCARE_PRESCRIPTION);
 
-  // ── Review (for a completed appointment's doctor) ───────────────────
-  bool submittingReview = false;
-  Future<void> submitReview(int rating, String comment) async {
-    final docId = selected?.doctorId ?? '';
-    if (docId.isEmpty || submittingReview) return;
-    submittingReview = true;
-    update();
-    try {
-      final res = await _repo.submitReview(docId, rating, comment);
-      SnackHelper.success(
-          res.message.isNotEmpty ? res.message : 'Review submitted');
-    } catch (e) {
-      SnackHelper.error(e.toString().replaceFirst('Exception: ', ''));
-    } finally {
-      submittingReview = false;
-      update();
-    }
-  }
-
   bool downloading = false;
+
+  /// Opens the prescription PDF in-app (view), from where the citizen can
+  /// save or share it via the preview screen's built-in actions — no
+  /// dependency on a device-installed PDF viewer.
   Future<void> downloadPrescription(String id) async {
     if (downloading) return;
     downloading = true;
     update();
     try {
-      SnackHelper.success('প্রেসক্রিপশন ডাউনলোড হচ্ছে…');
-      final path = await _repo.downloadPrescription(id);
-      final result = await OpenFilex.open(path);
-      if (result.type != ResultType.done) {
-        SnackHelper.error(result.type == ResultType.noAppToOpen
-            ? 'PDF খোলার কোনো অ্যাপ পাওয়া যায়নি'
-            : 'ফাইলটি খোলা যায়নি');
-      }
+      final bytes = await _repo.fetchPrescriptionPdfBytes(id);
+      Get.to(() => PdfPreviewView(bytes: bytes, title: 'Prescription'.tr));
     } catch (e) {
       SnackHelper.error(e.toString().replaceFirst('Exception: ', ''));
     } finally {
