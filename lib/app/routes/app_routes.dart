@@ -19,6 +19,7 @@ abstract class Routes {
   static const HS_PLACED = _Paths.HS_PLACED;
   static const HS_TRACKING = _Paths.HS_TRACKING;
   static const HS_DETAILS = _Paths.HS_DETAILS;
+  static const HS_EDIT_ORDER = _Paths.HS_EDIT_ORDER;
   static const HS_RATE = _Paths.HS_RATE;
   static const HS_SUBSCRIPTIONS = _Paths.HS_SUBSCRIPTIONS;
   static const HS_PROVIDER = _Paths.HS_PROVIDER;
@@ -172,6 +173,7 @@ abstract class _Paths {
   static const HS_PLACED = '/hs-placed';
   static const HS_TRACKING = '/hs-tracking';
   static const HS_DETAILS = '/hs-details';
+  static const HS_EDIT_ORDER = '/hs-edit-order';
   static const HS_RATE = '/hs-rate';
   static const HS_SUBSCRIPTIONS = '/hs-subscriptions';
   static const HS_PROVIDER = '/hs-provider';

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../../core/helpers/location_helper.dart';
 import '../../../core/helpers/snack_helper.dart';
@@ -349,11 +350,18 @@ class HomeServiceController extends GetxController {
   int get cartVat => (totalPrice * _vatFraction).round();
   int get cartPayable => totalPrice + cartVat;
 
-  // Provider details are not in these endpoints yet (coming later).
-  String get techName => 'Service provider';
-  String get techInitials => 'SP';
-  String get techRating => '—';
-  String get techJobs => '';
+  // Assigned provider — sourced from the tracked/last booking's own
+  // `provider` object (ServiceBookingProvider), which the booking-detail
+  // and jobs endpoints have carried for a while now.
+  ServiceBookingProvider? get _provider =>
+      (trackedBooking ?? lastBooking)?.provider;
+  String get techName => _provider?.displayName ?? 'Service provider';
+  String get techInitials => _provider?.initials ?? 'SP';
+  String get techRating => _provider?.ratingLabel ?? '—';
+  String get techJobs => _provider != null ? '${_provider!.totalJobs} jobs' : '';
+  String get techPhotoUrl =>
+      (_provider?.photoUrl.isNotEmpty ?? false) ? _provider!.photoUrl : '';
+  String get techPhone => _provider?.phone ?? '';
 
   // ── Booking ─────────────────────────────────────────────────────────
   ServiceBooking? lastBooking;
@@ -605,6 +613,12 @@ class HomeServiceController extends GetxController {
       trackedBooking = await _repo.fetchBooking(id);
       lastBooking = trackedBooking;
       timeline = await _repo.fetchTimeline(id);
+      paymentSummary = await _repo.fetchPaymentSummary(id);
+      // Only a completed booking can carry a review — skip the extra
+      // round-trip otherwise.
+      if (trackedBooking?.status.toLowerCase() == 'completed') {
+        await loadMyReview();
+      }
     } catch (e) {
       SnackHelper.error(e.toString().replaceFirst('Exception: ', ''));
     } finally {
@@ -614,6 +628,99 @@ class HomeServiceController extends GetxController {
     // Compute the distance from the user to the provider (best-effort, after
     // the main load so a slow GPS fix doesn't block the screen).
     _updateProviderDistance();
+  }
+
+  // ── Paying an outstanding balance online ────────────────────────────
+  //
+  // Independent of how the booking was originally paid — cash, bkash,
+  // whatever — the customer can always top up what's still owed via the
+  // gateway. This never touches the provider's side: only a customer's own
+  // action here can produce an online-method ServicePayment row, and the
+  // provider app's cash-collection flow is a completely separate action.
+
+  /// Ledger for the currently tracked booking (amount / paid_so_far /
+  /// outstanding). Null until the first successful _loadTrack.
+  ServicePaymentSummary? paymentSummary;
+  bool isPayingOnline = false;
+
+  Future<void> payOutstandingOnline() async {
+    final booking = trackedBooking ?? lastBooking;
+    final summary = paymentSummary;
+    if (booking == null || summary == null || !summary.hasOutstanding) return;
+    if (isPayingOnline) return;
+    isPayingOnline = true;
+    update();
+
+    try {
+      final pay = await SslcommerzPay.checkout(
+        amount: summary.outstanding,
+        productName: bookingSummary.isNotEmpty
+            ? bookingSummary
+            : 'Home service balance',
+        category: 'homeservice',
+      );
+      if (!pay.success) {
+        SnackHelper.error('পেমেন্ট সম্পন্ন হয়নি', title: _moduleTitle);
+        return;
+      }
+      paymentSummary = await _repo.payBookingOnline(
+        booking.id,
+        method: 'sslcommerz',
+        amount: summary.outstanding,
+        valId: pay.valId,
+        tranId: pay.tranId,
+      );
+      // The booking's own payment_status may have flipped (e.g. to paid) —
+      // refresh it so the invoice card and status note stay in sync with
+      // the ledger we just updated.
+      trackedBooking = await _repo.fetchBooking(booking.id);
+      lastBooking = trackedBooking;
+      SnackHelper.success('পেমেন্ট সম্পন্ন হয়েছে', title: _moduleTitle);
+    } catch (e) {
+      SnackHelper.error(e.toString().replaceFirst('Exception: ', ''));
+    } finally {
+      isPayingOnline = false;
+      update();
+    }
+  }
+
+  // ── Promo code on an existing booking ───────────────────────────────
+  //
+  // Separate from a provider's own discount (applied only at final cash
+  // collection, from the provider app) — this is the citizen's own
+  // checkout-time-style discount, just redeemed after the booking already
+  // exists instead of during it. Reduces Subtotal/Amount server-side, which
+  // is why it's offered before the outstanding balance: the balance the
+  // customer is about to pay should already reflect it.
+
+  bool isApplyingPromo = false;
+
+  Future<void> applyPromoCode(String code) async {
+    final booking = trackedBooking ?? lastBooking;
+    if (booking == null || isApplyingPromo) return;
+    final trimmed = code.trim();
+    if (trimmed.isEmpty) {
+      SnackHelper.error('প্রোমো কোড লিখুন', title: _moduleTitle);
+      return;
+    }
+    isApplyingPromo = true;
+    update();
+
+    try {
+      trackedBooking = await _repo.applyPromoCode(booking.id, trimmed);
+      lastBooking = trackedBooking;
+      // The discount changed Amount/Subtotal server-side — refresh the
+      // ledger too so the outstanding figure (and the "Pay online" button)
+      // reflect the new, lower balance immediately.
+      paymentSummary = await _repo.fetchPaymentSummary(booking.id);
+      SnackHelper.success('প্রোমো কোড প্রয়োগ হয়েছে', title: _moduleTitle);
+    } catch (e) {
+      SnackHelper.error(e.toString().replaceFirst('Exception: ', ''),
+          title: _moduleTitle);
+    } finally {
+      isApplyingPromo = false;
+      update();
+    }
   }
 
   /// Get the user's location and compute the straight-line distance to the
@@ -660,6 +767,40 @@ class HomeServiceController extends GetxController {
   }
 
   // ── Rating / dispute ────────────────────────────────────────────────
+
+  /// True once the customer has submitted their review — locks the review
+  /// form (see RateServiceView) against a second submission.
+  bool hasReviewed = false;
+  int? myReviewStars;
+  String myReviewComment = '';
+
+  /// pending | approved | rejected, as set by the admin moderation queue.
+  String myReviewStatus = '';
+
+  /// The provider's phone + chat stay available until an admin APPROVES
+  /// the review — not merely until it's submitted. A review sitting in the
+  /// moderation queue may still need the customer and provider to talk
+  /// (and the admin may reject it), so contact is only withdrawn once the
+  /// review is final. Drives the contact card on the tracking screen and
+  /// the chat/call actions on the details screen.
+  bool get reviewApproved => myReviewStatus == 'approved';
+
+  Future<void> loadMyReview() async {
+    final id = trackedBooking?.id ?? lastBooking?.id;
+    if (id == null) return;
+    try {
+      final r = await _repo.fetchMyReview(id);
+      hasReviewed = r != null;
+      myReviewStars = r?['stars'] as int?;
+      myReviewComment = (r?['comment'] as String?) ?? '';
+      myReviewStatus = (r?['moderation_status'] as String?) ?? '';
+      update();
+    } catch (_) {
+      // Silent — the form just won't pre-lock; a genuine second submit
+      // still gets rejected server-side.
+    }
+  }
+
   Future<bool> submitRating(int stars, String comment) async {
     final id = trackedBooking?.id ?? lastBooking?.id;
     if (id == null) return false;
@@ -667,6 +808,13 @@ class HomeServiceController extends GetxController {
       final res = await _repo.rate(id, stars, comment);
       if (res.success) {
         SnackHelper.success(res.message.isNotEmpty ? res.message : 'Thank you');
+        hasReviewed = true;
+        myReviewStars = stars;
+        myReviewComment = comment;
+        // A fresh review always lands in the moderation queue — contact
+        // options stay open until an admin approves it.
+        myReviewStatus = 'pending';
+        update();
         return true;
       }
       SnackHelper.error(res.message);
@@ -675,6 +823,18 @@ class HomeServiceController extends GetxController {
       SnackHelper.error(e.toString().replaceFirst('Exception: ', ''));
       return false;
     }
+  }
+
+  /// Answers the post-review "will you book this service again?" popup.
+  /// Fire-and-forget from the UI's point of view — either answer just
+  /// closes the dialog, so failures are swallowed rather than shown as an
+  /// error (this is a courtesy prompt, not a required step).
+  Future<void> submitReorderInterest(bool wantsReorder) async {
+    final id = trackedBooking?.id ?? lastBooking?.id;
+    if (id == null) return;
+    try {
+      await _repo.submitReorderInterest(id, wantsReorder);
+    } catch (_) {}
   }
 
   Future<bool> submitDispute(String reason, String description) async {
@@ -694,8 +854,203 @@ class HomeServiceController extends GetxController {
     }
   }
 
+  // ── Editing a placed order ──────────────────────────────────────────
+  // The booking is the source of truth: every mutation returns the whole
+  // booking with server-recomputed totals, and we swap our copy for it
+  // rather than adjusting quantities locally. That way the invoice on
+  // screen is always the invoice the server will bill.
+
+  /// Set while a line is being changed, so the row can show a spinner and
+  /// reject a second tap. Holds the item id, or `_busyAll` for whole-order
+  /// operations.
+  String? mutatingItemId;
+  static const String _busyAll = '*';
+
+  bool get orderBusy => mutatingItemId != null;
+  bool isMutating(String itemId) => mutatingItemId == itemId;
+
+  /// The booking currently open in the details screen.
+  ServiceBooking? get orderBooking => trackedBooking ?? lastBooking;
+
+  bool get canEditOrder {
+    final b = orderBooking;
+    return b != null && !b.locked;
+  }
+
+  /// Parts catalogue for the open booking's category, loaded lazily the
+  /// first time the user opens the "add part" sheet.
+  List<ServiceItem> categoryItems = [];
+  bool loadingCategoryItems = false;
+
+  /// Sub-services offered in the "add a service" sheet. Deliberately
+  /// separate from [subServices], which backs the browse-and-book list —
+  /// loading into that would wipe the list the user came from.
+  List<HsServiceItem> addableServices = [];
+  bool loadingAddableServices = false;
+
+  Future<void> loadAddableServices() async {
+    final b = orderBooking;
+    if (b == null || b.categoryId.isEmpty) return;
+    loadingAddableServices = true;
+    addableServices = [];
+    update();
+    try {
+      final list = await _repo.fetchSubServices(b.categoryId);
+      // Jobs already on the order are filtered out — changing an existing
+      // line's quantity is what the stepper on the row is for, and showing
+      // it twice invites the user to add a duplicate line instead.
+      final present = b.items.map((i) => i.subServiceId).toSet();
+      addableServices = list
+          .where((s) => !present.contains(s.id))
+          .map((s) => HsServiceItem.fromApi(s, categoryName: b.categoryName))
+          .toList();
+    } catch (e) {
+      SnackHelper.error(e.toString().replaceFirst('Exception: ', ''));
+    } finally {
+      loadingAddableServices = false;
+      update();
+    }
+  }
+
+  /// Runs an edit and adopts the returned booking. Errors surface as a
+  /// snack and leave the previous booking untouched — a failed edit must
+  /// never leave a half-applied invoice on screen.
+  Future<bool> _mutateOrder(
+    String busyKey,
+    Future<ServiceBooking> Function() action,
+  ) async {
+    if (orderBusy) return false;
+    mutatingItemId = busyKey;
+    update();
+    try {
+      final updated = await action();
+      trackedBooking = updated;
+      lastBooking = updated;
+      return true;
+    } catch (e) {
+      SnackHelper.error(e.toString().replaceFirst('Exception: ', ''));
+      return false;
+    } finally {
+      mutatingItemId = null;
+      update();
+    }
+  }
+
+  Future<void> changeTaskQuantity(ServiceBookingItem item, int delta) async {
+    final b = orderBooking;
+    if (b == null) return;
+    final next = item.quantity + delta;
+    // Dropping to zero means "remove", which has its own endpoint and its
+    // own last-job guard on the server.
+    if (next < 1) {
+      await removeTask(item);
+      return;
+    }
+    await _mutateOrder(
+      item.id,
+      () => _repo.updateBookingTask(b.id, item.id, quantity: next),
+    );
+  }
+
+  Future<void> removeTask(ServiceBookingItem item) async {
+    final b = orderBooking;
+    if (b == null) return;
+    final ok = await _mutateOrder(
+      item.id,
+      () => _repo.removeBookingTask(b.id, item.id),
+    );
+    if (ok) SnackHelper.success('${item.name} removed'.tr);
+  }
+
+  /// Adds sub-services chosen in the "add job" sheet. Quantities come from
+  /// the same cart map the booking flow uses, so the picker can reuse the
+  /// existing stepper widgets.
+  Future<bool> addTasks(Map<String, int> selection) async {
+    final b = orderBooking;
+    if (b == null || selection.isEmpty) return false;
+    final items = selection.entries
+        .where((e) => e.value > 0)
+        .map((e) => {'sub_service_id': e.key, 'quantity': e.value})
+        .toList();
+    if (items.isEmpty) return false;
+    final ok = await _mutateOrder(
+      _busyAll,
+      () => _repo.addBookingTasks(b.id, items),
+    );
+    if (ok) SnackHelper.success('Services added to your order'.tr);
+    return ok;
+  }
+
+  Future<void> loadCategoryItems() async {
+    final b = orderBooking;
+    if (b == null || b.categoryId.isEmpty) return;
+    loadingCategoryItems = true;
+    update();
+    try {
+      categoryItems = await _repo.fetchCategoryItems(b.categoryId);
+    } catch (e) {
+      // A missing parts catalogue is not an error worth blocking on — the
+      // sheet simply shows its empty state.
+      categoryItems = [];
+    } finally {
+      loadingCategoryItems = false;
+      update();
+    }
+  }
+
+  Future<bool> addPart(ServiceItem item, double quantity) async {
+    final b = orderBooking;
+    if (b == null) return false;
+    final ok = await _mutateOrder(
+      _busyAll,
+      () => _repo.addExtraItem(b.id, item.id, quantity),
+    );
+    if (ok) SnackHelper.success('${item.name} added'.tr);
+    return ok;
+  }
+
+  Future<void> removePart(ServiceBookingExtraItem part) async {
+    final b = orderBooking;
+    if (b == null) return;
+    final ok = await _mutateOrder(
+      part.id,
+      () => _repo.removeExtraItem(b.id, part.id),
+    );
+    if (ok) SnackHelper.success('${part.name} removed'.tr);
+  }
+
+  /// Re-pulls the open booking after an external change (provider added a
+  /// part, status moved on). Also refreshes the payment ledger — the
+  /// details screen renders the outstanding balance from paymentSummary,
+  /// which would otherwise stay stale after the provider collects cash.
+  ///
+  /// [showSpinner] drives the details screen's manual refresh button; the
+  /// silent (default) form is used by the post-mutation reloads.
+  bool refreshingOrder = false;
+
+  Future<void> refreshOrder({bool showSpinner = false}) async {
+    final id = orderBooking?.id ?? '';
+    if (id.isEmpty || refreshingOrder) return;
+    if (showSpinner) {
+      refreshingOrder = true;
+      update();
+    }
+    try {
+      final b = await _repo.fetchBooking(id);
+      trackedBooking = b;
+      lastBooking = b;
+      paymentSummary = await _repo.fetchPaymentSummary(id);
+    } catch (_) {
+      // Silent — the screen keeps showing the last good copy.
+    } finally {
+      refreshingOrder = false;
+      update();
+    }
+  }
+
   // ── Navigation (misc) ───────────────────────────────────────────────
   void viewBookingDetails() => Get.toNamed(Routes.HS_DETAILS);
+  void openEditOrder() => Get.toNamed(Routes.HS_EDIT_ORDER);
   void rateService() => Get.toNamed(Routes.HS_RATE);
   void openChat() {
     final id = trackedBooking?.id ?? lastBooking?.id;
@@ -704,6 +1059,39 @@ class HomeServiceController extends GetxController {
   }
 
   void openSubscriptions() => Get.toNamed(Routes.HS_SUBSCRIPTIONS);
+
+  /// Dial the assigned provider directly from the tracking screen — same
+  /// tel: launch pattern the ambulance module uses for its hotline.
+  Future<void> callProvider() async {
+    final phone = trackedBooking?.provider?.phone ?? '';
+    if (phone.isEmpty) {
+      SnackHelper.error('ফোন নম্বর পাওয়া যায়নি', title: _moduleTitle);
+      return;
+    }
+    try {
+      await launchUrl(Uri.parse('tel:$phone'),
+          mode: LaunchMode.externalApplication);
+    } catch (_) {
+      SnackHelper.error('ডায়াল করা যায়নি', title: _moduleTitle);
+    }
+  }
+
+  /// Opens the device's SMS app addressed to the provider — a plain SMS,
+  /// distinct from the in-app chat (openChat), for when the citizen wants
+  /// to reach the provider outside the app.
+  Future<void> messageProvider() async {
+    final phone = trackedBooking?.provider?.phone ?? '';
+    if (phone.isEmpty) {
+      SnackHelper.error('ফোন নম্বর পাওয়া যায়নি', title: _moduleTitle);
+      return;
+    }
+    try {
+      await launchUrl(Uri.parse('sms:$phone'),
+          mode: LaunchMode.externalApplication);
+    } catch (_) {
+      SnackHelper.error('মেসেজ পাঠানো যায়নি', title: _moduleTitle);
+    }
+  }
 
   void backToHomeService() =>
       Get.until((route) => route.settings.name == Routes.HOME_SERVICE);

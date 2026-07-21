@@ -196,6 +196,21 @@ class ApiURL {
   static String serviceBookingChat(String id) =>
       'api/v1/services/bookings/$id/chat';
 
+  //===== Post-booking order editing.
+  // Two kinds of line: "items" are service jobs (sub-services, labour) and
+  // "extra-items" are stock-tracked parts drawn from the ServiceItem
+  // catalogue. Both feed the same invoice subtotal.
+  static String serviceBookingTasks(String id) =>
+      'api/v1/services/bookings/$id/items';
+  static String serviceBookingTask(String bookingId, String itemId) =>
+      'api/v1/services/bookings/$bookingId/items/$itemId';
+  static String serviceBookingExtraItems(String id) =>
+      'api/v1/services/bookings/$id/extra-items';
+  static String serviceBookingExtraItem(String bookingId, String itemId) =>
+      'api/v1/services/bookings/$bookingId/extra-items/$itemId';
+  static String servicesCategoryItems(String categoryId) =>
+      'api/v1/services/categories/$categoryId/items';
+
   //===== Payments (SSLCommerz) — create a checkout session
   static final String paymentsSslcommerzInitiate =
       'api/v1/payments/sslcommerz/initiate';
