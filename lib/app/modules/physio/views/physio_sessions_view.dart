@@ -59,10 +59,10 @@ class PhysioSessionsView extends GetView<PhysioController> {
               duration: const Duration(milliseconds: 350),
               child: ListView(
                 padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
-                children: con.sessions
-                    .map((s) => Padding(
+                children: con.sessionGroups
+                    .map((g) => Padding(
                           padding: const EdgeInsets.only(bottom: 12),
-                          child: _SessionCard(session: s),
+                          child: _SessionCard(group: g),
                         ))
                     .toList(),
               ),
@@ -75,12 +75,22 @@ class PhysioSessionsView extends GetView<PhysioController> {
 }
 
 class _SessionCard extends StatelessWidget {
-  const _SessionCard({required this.session});
-  final PhysioSession session;
+  const _SessionCard({required this.group});
+  final List<PhysioSession> group;
 
   @override
   Widget build(BuildContext context) {
-    final upcoming = session.status == SessionStatus.upcoming;
+    final first = group.first;
+    // A group is still "open" as a whole as long as any day in it is —
+    // the card only reflects a finished state once every day is done.
+    final upcoming = group.any((s) => s.isOpen);
+    // The day to headline: the first not-yet-finished one, or the last
+    // day if the whole group is done.
+    final current = group.indexWhere((s) => s.isOpen);
+    final headlineIndex = current == -1 ? group.length - 1 : current;
+    final headline = group[headlineIndex];
+    final completedCount =
+        group.where((s) => s.status.toLowerCase() == 'completed').length;
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
@@ -110,20 +120,52 @@ class _SessionCard extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(session.doctor,
-                        style: const TextStyle(
-                            fontSize: 15,
-                            fontWeight: FontWeight.w800,
-                            color: Color(0xFF0F172A))),
+                    Row(
+                      children: [
+                        Flexible(
+                          child: Text(first.doctor,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.w800,
+                                  color: Color(0xFF0F172A))),
+                        ),
+                        if (group.length > 1) ...[
+                          const SizedBox(width: 6),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 7, vertical: 2),
+                            decoration: BoxDecoration(
+                                color: _tile,
+                                borderRadius: BorderRadius.circular(6)),
+                            child: Text(
+                                '${'Day'.tr} ${headlineIndex + 1}/${group.length}',
+                                style: const TextStyle(
+                                    fontSize: 10.5,
+                                    fontWeight: FontWeight.w800,
+                                    color: _orange)),
+                          ),
+                        ],
+                      ],
+                    ),
                     const SizedBox(height: 2),
-                    Text(session.center,
+                    Text(first.center,
                         style: const TextStyle(
                             fontSize: 12.5, color: Color(0xFF94A3B8))),
+                    if (group.length > 1) ...[
+                      const SizedBox(height: 3),
+                      Text(
+                          '$completedCount/${group.length} ${'days completed'.tr}',
+                          style: const TextStyle(
+                              fontSize: 11,
+                              fontWeight: FontWeight.w700,
+                              color: Color(0xFF16A34A))),
+                    ],
                   ],
                 ),
               ),
               const SizedBox(width: 8),
-              _StatusPill(upcoming: upcoming),
+              _StatusPill(status: headline.status),
             ],
           ),
           const Padding(
@@ -135,7 +177,7 @@ class _SessionCard extends StatelessWidget {
               const Icon(Icons.calendar_today_outlined,
                   size: 15, color: Color(0xFF94A3B8)),
               const SizedBox(width: 6),
-              Text(session.when,
+              Text(headline.when,
                   style: TextStyle(
                       fontSize: 12.5,
                       fontWeight: FontWeight.w600,
@@ -143,13 +185,13 @@ class _SessionCard extends StatelessWidget {
                           ? const Color(0xFF2563EB)
                           : const Color(0xFF64748B))),
               const Spacer(),
-              if (session.progress != null)
+              if (headline.progress != null)
                 Container(
                   padding:
                       const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                   decoration: BoxDecoration(
                       color: _tile, borderRadius: BorderRadius.circular(8)),
-                  child: Text(session.progress!,
+                  child: Text(headline.progress!,
                       style: const TextStyle(
                           fontSize: 11.5,
                           fontWeight: FontWeight.w700,
@@ -157,12 +199,14 @@ class _SessionCard extends StatelessWidget {
                 ),
             ],
           ),
-          if (session.id.isNotEmpty) ...[
+          if (first.id.isNotEmpty) ...[
             const SizedBox(height: 12),
             InvoiceActions(
-              viewPath: ApiURL.physioInvoicePdf(session.id),
-              downloadPath: ApiURL.physioInvoicePdfDownload(session.id),
-              fileName: 'invoice-${session.id}',
+              // Any single day's appointment id resolves the whole group's
+              // invoice on the backend, so day 1's id is enough here.
+              viewPath: ApiURL.physioInvoicePdf(first.id),
+              downloadPath: ApiURL.physioInvoicePdfDownload(first.id),
+              fileName: 'invoice-${first.id}',
               accent: _orange,
             ),
           ],
@@ -172,41 +216,56 @@ class _SessionCard extends StatelessWidget {
   }
 }
 
+// Status pill — mirrors the admin web panel's badge colors 1:1 so the
+// app never shows a different state than what the admin set:
+// pending=amber, assigned=indigo, in_progress=blue, completed=emerald,
+// cancelled=rose.
 class _StatusPill extends StatelessWidget {
-  const _StatusPill({required this.upcoming});
-  final bool upcoming;
+  const _StatusPill({required this.status});
+  final String status;
+
+  static const _labels = {
+    'pending': 'Pending',
+    'assigned': 'Assigned',
+    'in_progress': 'In progress',
+    'completed': 'Completed',
+    'cancelled': 'Cancelled',
+  };
+
+  static const _bg = {
+    'pending': Color(0xFFFEF3C7),
+    'assigned': Color(0xFFE0E7FF),
+    'in_progress': Color(0xFFDBEAFE),
+    'completed': Color(0xFFDCFCE7),
+    'cancelled': Color(0xFFFFE4E6),
+  };
+
+  static const _fg = {
+    'pending': Color(0xFF92400E),
+    'assigned': Color(0xFF3730A3),
+    'in_progress': Color(0xFF1D4ED8),
+    'completed': Color(0xFF15803D),
+    'cancelled': Color(0xFFBE123C),
+  };
+
   @override
   Widget build(BuildContext context) {
-    if (upcoming) {
-      return Container(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-        decoration: BoxDecoration(
-            color: const Color(0xFFDCFCE7),
-            borderRadius: BorderRadius.circular(20)),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Icon(Icons.circle, size: 7, color: Color(0xFF16A34A)),
-            const SizedBox(width: 4),
-            Text('Upcoming'.tr,
-                style: const TextStyle(
-                    fontSize: 11,
-                    fontWeight: FontWeight.w700,
-                    color: Color(0xFF15803D))),
-          ],
-        ),
-      );
-    }
+    final key = status.toLowerCase();
+    final label = _labels[key] ?? status;
+    final bg = _bg[key] ?? const Color(0xFFEDF1EE);
+    final fg = _fg[key] ?? const Color(0xFF475569);
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-      decoration: BoxDecoration(
-          color: const Color(0xFFEDF1EE),
-          borderRadius: BorderRadius.circular(20)),
-      child: Text('Completed'.tr,
-          style: const TextStyle(
-              fontSize: 11,
-              fontWeight: FontWeight.w700,
-              color: Color(0xFF475569))),
+      decoration: BoxDecoration(color: bg, borderRadius: BorderRadius.circular(20)),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(Icons.circle, size: 7, color: fg),
+          const SizedBox(width: 4),
+          Text(label.tr,
+              style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: fg)),
+        ],
+      ),
     );
   }
 }

@@ -12,35 +12,39 @@ dynamic _data(dynamic src) {
   return d is Map && d.containsKey('data') ? d['data'] : d;
 }
 
-// ── Concern ─────────────────────────────────────────────────────────
-class PhysioConcernModel {
-  PhysioConcernModel({
-    required this.key,
-    required this.label,
+// ── Service (day-rate catalogue item) ────────────────────────────────
+class PhysioServiceItem {
+  PhysioServiceItem({
+    required this.id,
+    required this.name,
     required this.description,
-    required this.icon,
+    required this.centerPricePerDay,
+    required this.homePricePerDay,
+    required this.isActive,
   });
-  final String key;
-  final String label;
+  final String id;
+  final String name;
   final String description;
-  final String icon;
+  final int centerPricePerDay;
+  final int homePricePerDay;
+  final bool isActive;
 
-  factory PhysioConcernModel.fromMap(Map<String, dynamic> j) =>
-      PhysioConcernModel(
-        key: _str(j['key']),
-        label: _str(j['label']),
+  factory PhysioServiceItem.fromMap(Map<String, dynamic> j) =>
+      PhysioServiceItem(
+        id: _str(j['id']),
+        name: _str(j['name']),
         description: _str(j['description']),
-        icon: _str(j['icon']),
+        centerPricePerDay: _int(j['center_price_per_day']),
+        homePricePerDay: _int(j['home_price_per_day']),
+        isActive: j['is_active'] == true,
       );
 
-  /// Parses `{ data: { concerns: [...] } }`.
-  static List<PhysioConcernModel> listFromResponse(dynamic src) {
+  static List<PhysioServiceItem> listFromResponse(dynamic src) {
     final d = _data(src);
-    final list =
-        d is Map && d['concerns'] is List ? d['concerns'] as List : const [];
+    final list = d is List ? d : const [];
     return list
         .whereType<Map>()
-        .map((e) => PhysioConcernModel.fromMap(e.cast<String, dynamic>()))
+        .map((e) => PhysioServiceItem.fromMap(e.cast<String, dynamic>()))
         .toList();
   }
 }
@@ -151,17 +155,6 @@ class PhysioCenterModel {
   static List<PhysioCenterModel> listFromResponse(dynamic src) {
     final d = _data(src);
     final list = d is List ? d : const [];
-    return list
-        .whereType<Map>()
-        .map((e) => PhysioCenterModel.fromMap(e.cast<String, dynamic>()))
-        .toList();
-  }
-
-  /// Parses `{ data: { centers: [...] } }` (concern-centers endpoint).
-  static List<PhysioCenterModel> centersFromResponse(dynamic src) {
-    final d = _data(src);
-    final list =
-        d is Map && d['centers'] is List ? d['centers'] as List : (d is List ? d : const []);
     return list
         .whereType<Map>()
         .map((e) => PhysioCenterModel.fromMap(e.cast<String, dynamic>()))
@@ -282,6 +275,10 @@ class PhysioAppointment {
     required this.staffName,
     required this.centerName,
     this.scheduledAt,
+    this.serviceId = '',
+    this.dayCount = 1,
+    this.bookingGroupId = '',
+    this.groupTotalAmount = 0,
   });
 
   final String id;
@@ -297,6 +294,12 @@ class PhysioAppointment {
   final String staffName;
   final String centerName;
   final DateTime? scheduledAt;
+  // Day-wise multi-day booking fields — all additive/nullable-safe so a
+  // response that doesn't send them (or an older server) still parses.
+  final String serviceId;
+  final int dayCount;
+  final String bookingGroupId;
+  final int groupTotalAmount;
 
   bool get upcoming {
     final s = status.toLowerCase();
@@ -328,6 +331,10 @@ class PhysioAppointment {
       staffName: _str(staff['full_name']),
       centerName: _str(center['name']),
       scheduledAt: iso.isEmpty ? null : DateTime.tryParse(iso),
+      serviceId: _str(j['service_id']),
+      dayCount: j['day_count'] != null ? _int(j['day_count']) : 1,
+      bookingGroupId: _str(j['booking_group_id']),
+      groupTotalAmount: _int(j['group_total_amount']),
     );
   }
 

@@ -15,14 +15,16 @@ class PhysioRepository {
     throw Exception('সংযোগে সমস্যা — আবার চেষ্টা করুন');
   }
 
-  Future<List<PhysioConcernModel>> fetchConcerns() async {
-    final res = await provider.getData(ApiURL.physioConcerns);
-    return PhysioConcernModel.listFromResponse(_payload(res));
+  Future<List<PhysioServiceItem>> fetchServices() async {
+    final res = await provider.getData(ApiURL.physioServices);
+    return PhysioServiceItem.listFromResponse(_payload(res));
   }
 
-  Future<List<PhysioCenterModel>> fetchCentersForConcern(String key) async {
-    final res = await provider.getData(ApiURL.physioConcernCenters(key));
-    return PhysioCenterModel.centersFromResponse(_payload(res));
+  Future<List<PhysioCenterModel>> fetchCentersForService(
+      String serviceId) async {
+    final res =
+        await provider.getData(ApiURL.physioServiceCenters(serviceId));
+    return PhysioCenterModel.listFromResponse(_payload(res));
   }
 
   Future<List<PhysioCenterModel>> fetchCenters() async {

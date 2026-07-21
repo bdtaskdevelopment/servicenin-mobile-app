@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../../core/values/app_colors.dart';
+import '../../../core/values/app_url.dart';
+import '../../../global_widget/invoice_actions.dart';
 import '../controllers/physio_controller.dart';
 
 const _brown = Color(0xFF8A3E12);
@@ -74,9 +76,54 @@ class PhysioBookedView extends GetView<PhysioController> {
                             con.sessionType == 1
                                 ? '${'Home visit'.tr} · ${con.selectedPaymentKey}'
                                 : '${'At center'.tr} · ${con.selectedPaymentKey}'),
+                        if ((con.lastAppointment?.dayCount ?? con.dayCount) >
+                            1) ...[
+                          const SizedBox(height: 14),
+                          _row(Icons.event_repeat_rounded,
+                              '${con.lastAppointment?.dayCount ?? con.dayCount} ${'Days'.tr}'),
+                        ],
                       ],
                     ),
                   ),
+                  if (con.perDayRate > 0) ...[
+                    const SizedBox(height: 16),
+                    Container(
+                      padding: const EdgeInsets.all(18),
+                      decoration: BoxDecoration(
+                          color: AppColors.white,
+                          borderRadius: BorderRadius.circular(18)),
+                      child: Column(
+                        children: [
+                          _billRow('Per day'.tr, '৳${con.perDayRate}'),
+                          const SizedBox(height: 8),
+                          _billRow('Days'.tr,
+                              '${con.lastAppointment?.dayCount ?? con.dayCount}'),
+                          const Padding(
+                            padding: EdgeInsets.symmetric(vertical: 10),
+                            child: Divider(height: 1, color: Color(0xFFE2E8F0)),
+                          ),
+                          _billRow(
+                            'Total'.tr,
+                            '৳${con.lastAppointment?.groupTotalAmount ?? con.totalPrice}',
+                            emphasize: true,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                  if (con.lastAppointment?.id.isNotEmpty ?? false) ...[
+                    const SizedBox(height: 16),
+                    InvoiceActions(
+                      // The backend resolves the whole booking group from
+                      // any single day's appointment id, so day 1's id
+                      // (returned by book()) is all we need here.
+                      viewPath: ApiURL.physioInvoicePdf(con.lastAppointment!.id),
+                      downloadPath:
+                          ApiURL.physioInvoicePdfDownload(con.lastAppointment!.id),
+                      fileName: 'invoice-${con.lastAppointment!.id}',
+                      accent: _brown,
+                    ),
+                  ],
                 ],
               ),
             ),
@@ -130,6 +177,24 @@ class PhysioBookedView extends GetView<PhysioController> {
                     fontWeight: FontWeight.w700,
                     color: Color(0xFF0F172A))),
           ),
+        ],
+      );
+
+  Widget _billRow(String label, String value, {bool emphasize = false}) => Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(label,
+              style: TextStyle(
+                  fontSize: emphasize ? 15 : 13.5,
+                  fontWeight: emphasize ? FontWeight.w800 : FontWeight.w600,
+                  color: emphasize
+                      ? const Color(0xFF0F172A)
+                      : const Color(0xFF64748B))),
+          Text(value,
+              style: TextStyle(
+                  fontSize: emphasize ? 17 : 13.5,
+                  fontWeight: FontWeight.w800,
+                  color: emphasize ? _brown : const Color(0xFF0F172A))),
         ],
       );
 }

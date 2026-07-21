@@ -49,7 +49,10 @@ class PhysioCenterView extends GetView<PhysioController> {
                 builder: (con) {
                   final center = con.center;
                   if (center == null) return const SizedBox.shrink();
-                  return ListView(
+                  return RefreshIndicator(
+                    color: _brown,
+                    onRefresh: con.refreshCenter,
+                    child: ListView(
                     padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
                     children: [
                       // Center identity
@@ -158,6 +161,7 @@ class PhysioCenterView extends GetView<PhysioController> {
                                 color: Color(0xFF475569))),
                       ],
                     ],
+                    ),
                   );
                 },
               ),

@@ -37,6 +37,7 @@ const Map<String, String> groupBBn = {
 
   // ── Ambulance ──
   'Ambulance': 'অ্যাম্বুলেন্স',
+  'Book ambulance': 'অ্যাম্বুলেন্স বুক করুন',
   'Available ambulances': 'অ্যাভেইলেবল অ্যাম্বুলেন্স',
   'Tap one to estimate the fare': 'ভাড়া হিসাব করতে একটিতে ট্যাপ করুন',
   'No ambulances available right now.': 'এই মুহূর্তে কোনো অ্যাম্বুলেন্স উপলব্ধ নেই।',
@@ -157,6 +158,9 @@ const Map<String, String> groupBBn = {
   'Certified physiotherapists · home & in-center sessions':
       'সার্টিফায়েড ফিজিওথেরাপিস্ট · বাসায় ও কেন্দ্রে সেশন',
   "What's bothering you?": 'কোথায় সমস্যা হচ্ছে?',
+  'Choose a service': 'সার্ভিস পছন্দ করুন',
+  'Select a service above to see its centers':
+      'কেন্দ্র দেখতে উপরে থেকে একটি সার্ভিস নির্বাচন করুন',
   'Physio centers': 'ফিজিও কেন্দ্র',
   'centers for': 'কেন্দ্র —',
   'centers near you': 'কেন্দ্র আপনার কাছে',
@@ -166,7 +170,14 @@ const Map<String, String> groupBBn = {
   'Pick one to book a session': 'সেশন বুক করতে একজনকে বেছে নিন',
   'No therapists available.': 'কোনো থেরাপিস্ট উপলব্ধ নেই।',
   'About': 'সম্পর্কে',
-  'Book a session': 'একটি সেশন বুক করুন',
+  'Book a session': 'সেশন বুক করুন',
+  // Deliberately separate from the 'days' key — that one is a full
+  // sentence fragment for the "No activity in the last N days" screen
+  // (see group_c_bn.dart), not a literal word-for-word "days" translation.
+  'day': 'দিন',
+  'Day': 'দিন',
+  'Days': 'দিন',
+  'days completed': 'দিন সম্পন্ন',
   'SESSION TYPE': 'সেশনের ধরন',
   'At center': 'কেন্দ্রে',
   'Home visit': 'হোম ভিজিট',

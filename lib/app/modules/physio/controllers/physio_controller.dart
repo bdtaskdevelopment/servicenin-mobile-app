@@ -6,35 +6,6 @@ import '../../../data/models/response/physio_response.dart';
 import '../../../data/repositories/physio.repo.dart';
 import '../../../routes/app_pages.dart';
 
-IconData physioConcernIcon(String iconOrKey) {
-  final s = iconOrKey.toLowerCase();
-  if (s.contains('spine') || s.contains('back')) {
-    return Icons.airline_seat_recline_normal_rounded;
-  }
-  if (s.contains('sport')) return Icons.sports_handball_rounded;
-  if (s.contains('surg') || s.contains('heal')) return Icons.healing_rounded;
-  if (s.contains('neuro') || s.contains('brain')) {
-    return Icons.psychology_rounded;
-  }
-  if (s.contains('knee') || s.contains('joint') || s.contains('arth')) {
-    return Icons.accessibility_new_rounded;
-  }
-  if (s.contains('neck')) return Icons.self_improvement_rounded;
-  if (s.contains('stroke')) return Icons.favorite_rounded;
-  return Icons.healing_rounded;
-}
-
-class PhysioConcern {
-  const PhysioConcern(this.label, this.icon, {this.key = ''});
-  final String label;
-  final IconData icon;
-  final String key;
-
-  factory PhysioConcern.fromApi(PhysioConcernModel c) =>
-      PhysioConcern(c.label, physioConcernIcon(c.icon.isNotEmpty ? c.icon : c.key),
-          key: c.key);
-}
-
 class PhysioTherapist {
   const PhysioTherapist({
     required this.initials,
@@ -106,8 +77,6 @@ class PhysioCenter {
   }
 }
 
-enum SessionStatus { upcoming, completed }
-
 class PhysioSession {
   const PhysioSession({
     required this.id,
@@ -115,22 +84,37 @@ class PhysioSession {
     required this.center,
     required this.when,
     required this.status,
+    required this.bookingGroupId,
+    this.scheduledAt,
     this.progress,
   });
   final String id;
   final String doctor;
   final String center;
   final String when;
-  final SessionStatus status;
+  // Raw backend status: pending / assigned / in_progress / completed /
+  // cancelled — shown as-is so the app always matches whatever the admin
+  // web panel set, instead of collapsing everything into "Upcoming".
+  final String status;
+  final String bookingGroupId;
+  final DateTime? scheduledAt;
   final String? progress;
+
+  // Still "open" (not finished) as long as it isn't completed/cancelled —
+  // used only for grouping/headline logic, not for the status label itself.
+  bool get isOpen {
+    final s = status.toLowerCase();
+    return s != 'completed' && s != 'cancelled' && s != 'canceled';
+  }
 
   factory PhysioSession.fromApi(PhysioAppointment a) => PhysioSession(
         id: a.id,
         doctor: a.staffName.isNotEmpty ? a.staffName : 'Therapist',
         center: a.centerName,
         when: a.whenLabel,
-        status:
-            a.upcoming ? SessionStatus.upcoming : SessionStatus.completed,
+        status: a.status,
+        bookingGroupId: a.bookingGroupId,
+        scheduledAt: a.scheduledAt,
         progress: null,
       );
 }
@@ -138,56 +122,43 @@ class PhysioSession {
 class PhysioController extends GetxController {
   PhysioRepository get _repo => Get.find<PhysioRepository>();
 
-  // ── Home: concerns + centers ────────────────────────────────────────
-  List<PhysioConcern> concerns = [];
+  // ── Home: services + centers ─────────────────────────────────────────
+  List<PhysioServiceItem> services = [];
   List<PhysioCenter> centers = [];
-  bool loadingConcerns = false;
+  bool loadingServices = false;
   bool loadingCenters = false;
-  String selectedConcernKey = '';
-  String selectedConcernLabel = '';
+  PhysioServiceItem? selectedService;
 
   @override
   void onInit() {
     super.onInit();
-    fetchConcerns();
-    fetchCenters();
+    fetchServices();
   }
 
-  Future<void> fetchConcerns() async {
-    loadingConcerns = true;
+  Future<void> fetchServices() async {
+    loadingServices = true;
     update();
     try {
-      final list = await _repo.fetchConcerns();
-      concerns = list.map(PhysioConcern.fromApi).toList();
+      services = await _repo.fetchServices();
     } catch (e) {
       SnackHelper.error(e.toString().replaceFirst('Exception: ', ''));
     } finally {
-      loadingConcerns = false;
+      loadingServices = false;
       update();
     }
   }
 
-  Future<void> fetchCenters() async {
+  /// Selecting a service is mandatory before any center shows up — the
+  /// center list only ever loads for the chosen service, re-filtered to
+  /// actually have an available, accepted therapist right now. Services
+  /// are a global catalog (no per-center assignment), so this isn't a
+  /// service→center mapping — it's just "who can take this booking".
+  Future<void> selectService(PhysioServiceItem s) async {
+    selectedService = s;
     loadingCenters = true;
     update();
     try {
-      final list = await _repo.fetchCenters();
-      centers = list.map(PhysioCenter.fromApi).toList();
-    } catch (e) {
-      SnackHelper.error(e.toString().replaceFirst('Exception: ', ''));
-    } finally {
-      loadingCenters = false;
-      update();
-    }
-  }
-
-  Future<void> selectConcern(PhysioConcern c) async {
-    selectedConcernKey = c.key;
-    selectedConcernLabel = c.label;
-    loadingCenters = true;
-    update();
-    try {
-      final list = await _repo.fetchCentersForConcern(c.key);
+      final list = await _repo.fetchCentersForService(s.id);
       centers = list.map(PhysioCenter.fromApi).toList();
     } catch (e) {
       SnackHelper.error(e.toString().replaceFirst('Exception: ', ''));
@@ -205,6 +176,14 @@ class PhysioController extends GetxController {
     center = c;
     update();
     Get.toNamed(Routes.PHYSIO_CENTER);
+    await refreshCenter();
+  }
+
+  /// Re-fetches the current center's detail + staff list — used both
+  /// right after opening it and by the center page's pull-to-refresh.
+  Future<void> refreshCenter() async {
+    final c = center;
+    if (c == null) return;
     loadingCenter = true;
     update();
     try {
@@ -278,12 +257,33 @@ class PhysioController extends GetxController {
     return s?.time ?? '';
   }
 
+  // Day-count (multi-day booking): books the same therapist, same time,
+  // for N consecutive days starting at the picked date. Full 1-30 range so
+  // the dropdown offers every day count, not just a handful of presets.
+  int dayCount = 1;
+  static final List<int> dayCountOptions =
+      List<int>.generate(30, (i) => i + 1);
+
+  void setDayCount(int n) {
+    dayCount = n;
+    update();
+  }
+
+  int get perDayRate => selectedService == null
+      ? 0
+      : (sessionType == 1
+          ? selectedService!.homePricePerDay
+          : selectedService!.centerPricePerDay);
+
+  int get totalPrice => perDayRate * dayCount;
+
   Future<void> bookTherapist(PhysioTherapist t) async {
     therapist = t;
     sessionType = 0;
     dateIndex = 0;
     selectedSlotAt = '';
     slots = [];
+    dayCount = 1;
     notesCtrl.clear();
     update();
     Get.toNamed(Routes.PHYSIO_BOOK);
@@ -297,6 +297,27 @@ class PhysioController extends GetxController {
     try {
       _dates = await _repo.fetchScheduleDates();
       dateIndex = 0;
+      if (_dates.isNotEmpty) await loadSlotsForSelectedDate();
+    } catch (e) {
+      SnackHelper.error(e.toString().replaceFirst('Exception: ', ''));
+    } finally {
+      loadingDates = false;
+      update();
+    }
+  }
+
+  /// Pull-to-refresh on the book-a-session page — re-fetches dates + the
+  /// currently selected date's slots (keeping the user's date selection,
+  /// unlike the initial load which always starts at day 0). Picks up any
+  /// slot that just freed up, e.g. once an appointment there is marked
+  /// completed/cancelled.
+  Future<void> refreshBookView() async {
+    loadingDates = true;
+    update();
+    try {
+      final prevIndex = dateIndex;
+      _dates = await _repo.fetchScheduleDates();
+      dateIndex = prevIndex < _dates.length ? prevIndex : 0;
       if (_dates.isNotEmpty) await loadSlotsForSelectedDate();
     } catch (e) {
       SnackHelper.error(e.toString().replaceFirst('Exception: ', ''));
@@ -354,6 +375,10 @@ class PhysioController extends GetxController {
       SnackHelper.error('থেরাপিস্ট নির্বাচন করুন');
       return;
     }
+    if (selectedService == null) {
+      SnackHelper.error('সার্ভিস নির্বাচন করুন');
+      return;
+    }
     if (selectedSlotAt.isEmpty) {
       SnackHelper.error('সময় নির্বাচন করুন');
       return;
@@ -369,7 +394,8 @@ class PhysioController extends GetxController {
         'staff_id': staffId,
         'center_id': centerId,
         'appointment_type': sessionType == 1 ? 'home' : 'center',
-        'concern': selectedConcernKey,
+        'service_id': selectedService!.id,
+        'day_count': dayCount,
         'scheduled_at': selectedSlotAt,
         'payment_method':
             selectedPaymentKey.isNotEmpty ? selectedPaymentKey : 'cash',
@@ -399,6 +425,25 @@ class PhysioController extends GetxController {
     fetchMySessions();
     Get.until((r) => r.settings.name == Routes.PHYSIO);
     Get.toNamed(Routes.PHYSIO_SESSIONS);
+  }
+
+  /// Groups [sessions] by bookingGroupId so a multi-day booking renders as
+  /// one card ("Day X of N") instead of N disconnected rows. Sessions with
+  /// no group id (the single-day majority) are each their own singleton
+  /// group — a shared empty key would otherwise wrongly merge them.
+  List<List<PhysioSession>> get sessionGroups {
+    final byGroup = <String, List<PhysioSession>>{};
+    var soloIdx = 0;
+    for (final s in sessions) {
+      final key =
+          s.bookingGroupId.isNotEmpty ? s.bookingGroupId : 'solo-${soloIdx++}';
+      byGroup.putIfAbsent(key, () => []).add(s);
+    }
+    for (final g in byGroup.values) {
+      g.sort((a, b) =>
+          (a.scheduledAt ?? DateTime(0)).compareTo(b.scheduledAt ?? DateTime(0)));
+    }
+    return byGroup.values.toList();
   }
 
   Future<void> fetchMySessions() async {
