@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../../core/values/app_colors.dart';
+import '../../../data/models/response/physio_response.dart';
 import '../../../global_widget/sn_shimmer.dart';
 import '../controllers/physio_controller.dart';
 
@@ -99,37 +100,38 @@ class PhysioView extends GetView<PhysioController> {
                     ),
                   ),
                   const SizedBox(height: 22),
-                  Text("What's bothering you?".tr,
+                  Text('Choose a service'.tr,
                       style: const TextStyle(
                           fontSize: 17,
                           fontWeight: FontWeight.w800,
                           color: Color(0xFF0F172A))),
                   const SizedBox(height: 14),
-                  if (con.loadingConcerns && con.concerns.isEmpty)
-                    const SnStripSkeleton(
-                      count: 5,
-                      itemWidth: 88,
-                      height: 96,
-                      padding: EdgeInsets.zero,
+                  if (con.loadingServices && con.services.isEmpty)
+                    const SnListSkeleton(count: 2, padding: EdgeInsets.zero)
+                  else if (con.services.isEmpty)
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 8),
+                      child: Text('No services available right now.'.tr,
+                          style: const TextStyle(
+                              fontSize: 13, color: Color(0xFF94A3B8))),
                     )
                   else
                     FadeInUp(
                       from: 18,
                       duration: const Duration(milliseconds: 350),
-                      child: SizedBox(
-                        height: 96,
-                        child: ListView.separated(
-                          scrollDirection: Axis.horizontal,
-                          itemCount: con.concerns.length,
-                          separatorBuilder: (_, _) => const SizedBox(width: 12),
-                          itemBuilder: (_, i) {
-                            final c = con.concerns[i];
-                            return GestureDetector(
-                              onTap: () => con.selectConcern(c),
-                              child: _ConcernTile(concern: c),
-                            );
-                          },
-                        ),
+                      child: Column(
+                        children: con.services
+                            .map((s) => Padding(
+                                  padding: const EdgeInsets.only(bottom: 12),
+                                  child: GestureDetector(
+                                    onTap: () => con.selectService(s),
+                                    child: _ServiceCard(
+                                      service: s,
+                                      selected: con.selectedService?.id == s.id,
+                                    ),
+                                  ),
+                                ))
+                            .toList(),
                       ),
                     ),
                   const SizedBox(height: 24),
@@ -139,13 +141,34 @@ class PhysioView extends GetView<PhysioController> {
                           fontWeight: FontWeight.w800,
                           color: Color(0xFF0F172A))),
                   const SizedBox(height: 2),
-                  Text(
-                      con.selectedConcernLabel.isNotEmpty
-                          ? '${con.centers.length} ${'centers for'.tr} ${con.selectedConcernLabel}'
-                          : '${con.centers.length} ${'centers near you'.tr}',
-                      style: const TextStyle(fontSize: 12.5, color: _orange)),
+                  if (con.selectedService != null)
+                    Text(
+                        '${con.centers.length} ${'centers for'.tr} ${con.selectedService!.name}',
+                        style: const TextStyle(fontSize: 12.5, color: _orange)),
                   const SizedBox(height: 14),
-                  if (con.loadingCenters && con.centers.isEmpty)
+                  if (con.selectedService == null)
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 16, vertical: 20),
+                      decoration: BoxDecoration(
+                        color: AppColors.white,
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(color: const Color(0xFFEDEFF2)),
+                      ),
+                      child: Column(
+                        children: [
+                          Icon(Icons.arrow_upward_rounded,
+                              color: _orange.withValues(alpha: 0.6), size: 22),
+                          const SizedBox(height: 8),
+                          Text('Select a service above to see its centers'.tr,
+                              textAlign: TextAlign.center,
+                              style: const TextStyle(
+                                  fontSize: 13, color: Color(0xFF94A3B8))),
+                        ],
+                      ),
+                    )
+                  else if (con.loadingCenters && con.centers.isEmpty)
                     const SnListSkeleton(
                       count: 3,
                       padding: EdgeInsets.zero,
@@ -181,36 +204,70 @@ class PhysioView extends GetView<PhysioController> {
   }
 }
 
-class _ConcernTile extends StatelessWidget {
-  const _ConcernTile({required this.concern});
-  final PhysioConcern concern;
+class _ServiceCard extends StatelessWidget {
+  const _ServiceCard({required this.service, required this.selected});
+  final PhysioServiceItem service;
+  final bool selected;
   @override
   Widget build(BuildContext context) {
+    final fromPrice = [service.centerPricePerDay, service.homePricePerDay]
+        .where((p) => p > 0)
+        .fold<int?>(null, (min, p) => min == null || p < min ? p : min);
     return Container(
-      width: 88,
+      padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-          color: AppColors.white,
+          color: selected ? _tile : AppColors.white,
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: const Color(0xFFEDEFF2))),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
+          border: Border.all(
+              color: selected ? _brown : const Color(0xFFEDEFF2),
+              width: selected ? 1.6 : 1.2)),
+      child: Row(
         children: [
           Container(
-            width: 40,
-            height: 40,
+            width: 44,
+            height: 44,
             decoration: BoxDecoration(
-                color: _tile, borderRadius: BorderRadius.circular(12)),
-            child: Icon(concern.icon, color: _orange, size: 21),
+                color: selected ? Colors.white : _tile,
+                borderRadius: BorderRadius.circular(12)),
+            child: Icon(Icons.healing_rounded, color: _orange, size: 22),
           ),
-          const SizedBox(height: 8),
-          Text(concern.label,
-              textAlign: TextAlign.center,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: const TextStyle(
-                  fontSize: 11.5,
-                  fontWeight: FontWeight.w700,
-                  color: Color(0xFF334155))),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(service.name,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                        fontSize: 14.5,
+                        fontWeight: FontWeight.w800,
+                        color: Color(0xFF0F172A))),
+                if (service.description.isNotEmpty) ...[
+                  const SizedBox(height: 2),
+                  Text(service.description,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                          fontSize: 12, color: Color(0xFF94A3B8))),
+                ],
+                if (fromPrice != null) ...[
+                  const SizedBox(height: 4),
+                  Text('${'From'.tr} ৳$fromPrice/${'day'.tr}',
+                      style: const TextStyle(
+                          fontSize: 12.5,
+                          fontWeight: FontWeight.w700,
+                          color: _orange)),
+                ],
+              ],
+            ),
+          ),
+          Icon(
+              selected
+                  ? Icons.radio_button_checked
+                  : Icons.radio_button_off,
+              size: 22,
+              color: selected ? _brown : const Color(0xFFCBD5E1)),
         ],
       ),
     );

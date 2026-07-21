@@ -135,7 +135,11 @@ class FuneralView extends GetView<FuneralController> {
                           delay: Duration(milliseconds: 70 * e.key),
                           child: Padding(
                             padding: const EdgeInsets.only(bottom: 12),
-                            child: _ServiceCard(service: e.value),
+                            child: GestureDetector(
+                              onTap: () =>
+                                  con.selectServiceAndRequest(e.value.id),
+                              child: _ServiceCard(service: e.value),
+                            ),
                           ),
                         ),
                       ),

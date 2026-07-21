@@ -219,9 +219,9 @@ class ApiURL {
       'api/v1/physio/appointments/$id/invoice/pdf/download';
 
   //===== Physiotherapy
-  static final String physioConcerns = 'api/v1/physio/concerns';
-  static String physioConcernCenters(String key) =>
-      'api/v1/physio/concerns/$key/centers';
+  static final String physioServices = 'api/v1/physio/services';
+  static String physioServiceCenters(String id) =>
+      'api/v1/physio/services/$id/centers';
   static final String physioCenters = 'api/v1/physio/centers';
   static String physioCenter(String id) => 'api/v1/physio/centers/$id';
   static String physioCenterStaff(String id) =>

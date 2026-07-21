@@ -31,6 +31,12 @@ class FuneralController extends GetxController {
     update();
   }
 
+  void selectServiceAndRequest(String id) {
+    selectedServiceId = id;
+    update();
+    Get.toNamed(Routes.FUNERAL_REQUEST);
+  }
+
   @override
   void onInit() {
     super.onInit();

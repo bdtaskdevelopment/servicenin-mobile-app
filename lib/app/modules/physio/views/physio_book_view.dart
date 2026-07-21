@@ -49,9 +49,12 @@ class PhysioBookView extends GetView<PhysioController> {
                     ],
                   ),
                 ),
-                const _Stepper(current: 1),
+                const _Stepper(current: 2),
                 Expanded(
-                  child: ListView(
+                  child: RefreshIndicator(
+                    color: _brown,
+                    onRefresh: con.refreshBookView,
+                    child: ListView(
                     padding: const EdgeInsets.fromLTRB(16, 6, 16, 16),
                     children: [
                       _Label('SESSION TYPE'.tr),
@@ -101,6 +104,50 @@ class PhysioBookView extends GetView<PhysioController> {
                             ),
                           ),
                         ),
+                      ],
+                      const SizedBox(height: 18),
+                      _Label('SESSION LENGTH'.tr),
+                      const SizedBox(height: 10),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 14),
+                        decoration: BoxDecoration(
+                          color: AppColors.white,
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: const Color(0xFFE2E8F0)),
+                        ),
+                        child: DropdownButtonHideUnderline(
+                          child: DropdownButton<int>(
+                            isExpanded: true,
+                            value: con.dayCount,
+                            icon: const Icon(Icons.keyboard_arrow_down_rounded,
+                                color: _brown),
+                            items: PhysioController.dayCountOptions
+                                .map((n) => DropdownMenuItem(
+                                      value: n,
+                                      child: Text(
+                                          n == 1
+                                              ? '1 ${'day'.tr}'
+                                              : '$n ${'Days'.tr}',
+                                          style: const TextStyle(
+                                              fontSize: 15,
+                                              fontWeight: FontWeight.w700,
+                                              color: Color(0xFF0F172A))),
+                                    ))
+                                .toList(),
+                            onChanged: (n) {
+                              if (n != null) con.setDayCount(n);
+                            },
+                          ),
+                        ),
+                      ),
+                      if (con.perDayRate > 0) ...[
+                        const SizedBox(height: 8),
+                        Text(
+                            '${con.dayCount} × ৳${con.perDayRate}/${'day'.tr} = ৳${con.totalPrice}',
+                            style: const TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w800,
+                                color: _brown)),
                       ],
                       const SizedBox(height: 18),
                       _Label('DATE'.tr),
@@ -265,71 +312,17 @@ class PhysioBookView extends GetView<PhysioController> {
                           ),
                         ),
                       ),
-                      const SizedBox(height: 18),
-                      _Label('PAYMENT'.tr),
-                      const SizedBox(height: 10),
-                      if (con.loadingPayments && con.paymentMethods.isEmpty)
-                        const SnListSkeleton(
-                          count: 3,
-                          padding: EdgeInsets.zero,
-                          showTrailing: false,
-                        )
-                      else
-                      FadeInUp(
-                        from: 18,
-                        duration: const Duration(milliseconds: 350),
-                        child: Column(
-                        children:
-                            con.paymentMethods.where((m) => m.enabled).map((m) {
-                          final sel = con.selectedPaymentKey == m.key;
-                          return Padding(
-                            padding: const EdgeInsets.only(bottom: 10),
-                            child: GestureDetector(
-                              onTap: () => con.selectPayment(m.key),
-                              child: Container(
-                                padding: const EdgeInsets.all(14),
-                                decoration: BoxDecoration(
-                                  color: AppColors.white,
-                                  borderRadius: BorderRadius.circular(12),
-                                  border: Border.all(
-                                      color: sel
-                                          ? _brown
-                                          : const Color(0xFFE2E8F0),
-                                      width: sel ? 1.6 : 1.2),
-                                ),
-                                child: Row(
-                                  children: [
-                                    Icon(
-                                        sel
-                                            ? Icons.radio_button_checked
-                                            : Icons.radio_button_off,
-                                        size: 20,
-                                        color: sel
-                                            ? _brown
-                                            : const Color(0xFFCBD5E1)),
-                                    const SizedBox(width: 10),
-                                    Expanded(
-                                      child: Text(m.label,
-                                          style: const TextStyle(
-                                              fontSize: 14,
-                                              fontWeight: FontWeight.w700,
-                                              color: Color(0xFF0F172A))),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          );
-                        }).toList(),
-                      ),
-                      ),
                     ],
+                    ),
                   ),
                 ),
                 _BottomBar(
-                  left: 'When'.tr,
-                  price:
-                      '${con.selectedDateLabel} · ${con.selectedTime}',
+                  left: con.perDayRate > 0
+                      ? '${'Total'.tr} (${con.dayCount} ${con.dayCount == 1 ? 'day'.tr : 'Days'.tr})'
+                      : 'When'.tr,
+                  price: con.perDayRate > 0
+                      ? '৳${con.totalPrice}'
+                      : '${con.selectedDateLabel} · ${con.selectedTime}',
                   loading: con.booking,
                   onTap: con.confirmBooking,
                 ),
@@ -353,9 +346,11 @@ class _Stepper extends StatelessWidget {
         children: [
           _node(0, 'Mode'.tr),
           _line(current >= 1),
-          _node(1, 'Slot'.tr),
+          _node(1, 'Days'.tr),
           _line(current >= 2),
-          _node(2, 'Confirm'.tr),
+          _node(2, 'Slot'.tr),
+          _line(current >= 3),
+          _node(3, 'Confirm'.tr),
         ],
       ),
     );
@@ -473,48 +468,62 @@ class _BottomBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: AppColors.white,
-      padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
-      child: Row(
+      decoration: BoxDecoration(
+        color: AppColors.white,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.06),
+            blurRadius: 16,
+            offset: const Offset(0, -4),
+          ),
+        ],
+      ),
+      padding: const EdgeInsets.fromLTRB(18, 14, 18, 18),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
         children: [
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(left,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                   style: const TextStyle(
-                      fontSize: 11.5, color: Color(0xFF94A3B8))),
+                      fontSize: 12, color: Color(0xFF94A3B8))),
               Text(price,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                   style: const TextStyle(
-                      fontSize: 18,
+                      fontSize: 19,
                       fontWeight: FontWeight.w800,
                       color: Color(0xFF0F172A))),
             ],
           ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: SizedBox(
-              height: 54,
-              child: ElevatedButton(
-                onPressed: loading ? null : onTap,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: _brown,
-                  foregroundColor: Colors.white,
-                  elevation: 0,
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(14)),
-                ),
-                child: loading
-                    ? const SizedBox(
-                        width: 22,
-                        height: 22,
-                        child: CircularProgressIndicator(
-                            strokeWidth: 2.4, color: Colors.white),
-                      )
-                    : Text('Confirm booking'.tr,
-                        style: const TextStyle(
-                            fontSize: 16, fontWeight: FontWeight.w800)),
+          const SizedBox(height: 12),
+          SizedBox(
+            width: double.infinity,
+            height: 54,
+            child: ElevatedButton(
+              onPressed: loading ? null : onTap,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: _brown,
+                foregroundColor: Colors.white,
+                elevation: 0,
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(14)),
               ),
+              child: loading
+                  ? const SizedBox(
+                      width: 22,
+                      height: 22,
+                      child: CircularProgressIndicator(
+                          strokeWidth: 2.4, color: Colors.white),
+                    )
+                  : Text('Confirm booking'.tr,
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(
+                          fontSize: 16, fontWeight: FontWeight.w800)),
             ),
           ),
         ],
