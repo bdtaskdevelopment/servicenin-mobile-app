@@ -233,29 +233,199 @@ class ServicePaymentMethod {
 }
 
 // ── Booking ─────────────────────────────────────────────────────────
+
+/// One service job on a booking (a sub-service line, e.g. "AC servicing ×2").
+///
+/// `id` is what the edit endpoints address — `PATCH`/`DELETE
+/// /bookings/{id}/items/{itemId}` take this, not `subServiceId`.
 class ServiceBookingItem {
   ServiceBookingItem({
+    required this.id,
     required this.subServiceId,
     required this.quantity,
     required this.unitPrice,
     required this.lineTotal,
     required this.name,
+    required this.status,
+    required this.notes,
+    required this.addedByRole,
+    required this.settled,
+    required this.createdAt,
   });
+  final String id;
   final String subServiceId;
   final int quantity;
   final int unitPrice;
   final int lineTotal;
   final String name;
 
+  /// Per-job lifecycle, independent of the booking's own status: a
+  /// provider can be mid-way through one job while another is still
+  /// pending.
+  final String status;
+  final String notes;
+
+  /// Empty for jobs placed with the original order; `customer`,
+  /// `provider` or `admin` for anything added afterwards.
+  final String addedByRole;
+  final bool settled;
+  final DateTime? createdAt;
+
+  bool get addedLater => addedByRole.isNotEmpty;
+
+  /// Mirrors the server's `taskEditable` guard. Once a provider starts a
+  /// job it is frozen — changing the quantity underneath them would
+  /// rewrite work already done. Kept in sync with serviceitem_repo.go.
+  bool get editable {
+    if (settled) return false;
+    switch (status) {
+      case '':
+      case 'pending':
+      case 'assigned':
+      case 'declined':
+        return true;
+      default:
+        return false;
+    }
+  }
+
   factory ServiceBookingItem.fromMap(Map<String, dynamic> j) {
     final sub = j['sub_service'] is Map ? j['sub_service'] as Map : const {};
     return ServiceBookingItem(
+      id: _str(j['id']),
       subServiceId: _str(j['sub_service_id']),
       quantity: _int(j['quantity']),
       unitPrice: _int(j['unit_price']),
       lineTotal: _int(j['line_total']),
       name: _str(sub['name']),
+      status: _str(j['status']),
+      notes: _str(j['notes']),
+      addedByRole: _str(j['added_by_role']),
+      settled: _str(j['settled_at']).isNotEmpty,
+      createdAt: DateTime.tryParse(_str(j['created_at'])),
     );
+  }
+}
+
+/// A stock-tracked part or consumable attached to a booking (engine oil,
+/// screws, water). Distinct from [ServiceBookingItem]: those are labour,
+/// these are materials drawn from the `ServiceItem` inventory catalogue.
+///
+/// Quantity is fractional because parts are sold by litre/metre/kg.
+class ServiceBookingExtraItem {
+  ServiceBookingExtraItem({
+    required this.id,
+    required this.itemId,
+    required this.quantity,
+    required this.unitPrice,
+    required this.lineTotal,
+    required this.name,
+    required this.unit,
+    required this.addedByRole,
+    required this.createdAt,
+  });
+  final String id;
+  final String itemId;
+  final double quantity;
+  final int unitPrice;
+  final int lineTotal;
+  final String name;
+  final String unit;
+  final String addedByRole;
+  final DateTime? createdAt;
+
+  /// Drops the trailing `.0` on whole quantities so "2 litre" doesn't
+  /// render as "2.0 litre".
+  String get quantityLabel =>
+      quantity == quantity.roundToDouble() ? '${quantity.round()}' : '$quantity';
+
+  String get quantityWithUnit =>
+      unit.isEmpty ? quantityLabel : '$quantityLabel $unit';
+
+  factory ServiceBookingExtraItem.fromMap(Map<String, dynamic> j) {
+    final it = j['item'] is Map ? j['item'] as Map : const {};
+    return ServiceBookingExtraItem(
+      id: _str(j['id']),
+      itemId: _str(j['item_id']),
+      quantity: _dbl(j['quantity']) ?? 0,
+      unitPrice: _int(j['unit_price']),
+      lineTotal: _int(j['line_total']),
+      name: _str(it['name']),
+      unit: _str(it['unit']),
+      addedByRole: _str(j['added_by_role']),
+      createdAt: DateTime.tryParse(_str(j['created_at'])),
+    );
+  }
+}
+
+/// Imposes a stable display order on booking lines.
+///
+/// The server preloads items without an ORDER BY, and every line created
+/// in the original booking shares one `created_at` (they are inserted in a
+/// single transaction). Postgres therefore returns them in heap order,
+/// which shifts when a row is UPDATEd — so changing one line's quantity
+/// can reorder the list. On a screen with per-row +/− buttons that is
+/// dangerous: the row under the user's finger moves between taps and the
+/// next tap edits a different service.
+///
+/// Sorting by (createdAt, id) is a total order that never changes, since
+/// id breaks the created_at tie deterministically.
+List<T> _stableOrder<T>(
+  List<T> items,
+  DateTime? Function(T) createdAt,
+  String Function(T) id,
+) {
+  final sorted = [...items];
+  sorted.sort((a, b) {
+    final ca = createdAt(a), cb = createdAt(b);
+    if (ca != null && cb != null) {
+      final c = ca.compareTo(cb);
+      if (c != 0) return c;
+    } else if (ca != null) {
+      return -1;
+    } else if (cb != null) {
+      return 1;
+    }
+    return id(a).compareTo(id(b));
+  });
+  return sorted;
+}
+
+/// A row in the parts catalogue, offered when adding materials to a
+/// booking. `stockQty` is live inventory — the server rejects an add that
+/// exceeds it, so the picker greys these out rather than letting the
+/// request fail.
+class ServiceItem {
+  ServiceItem({
+    required this.id,
+    required this.name,
+    required this.unit,
+    required this.unitPrice,
+    required this.stockQty,
+  });
+  final String id;
+  final String name;
+  final String unit;
+  final int unitPrice;
+  final double stockQty;
+
+  bool get inStock => stockQty > 0;
+
+  factory ServiceItem.fromMap(Map<String, dynamic> j) => ServiceItem(
+        id: _str(j['id']),
+        name: _str(j['name']),
+        unit: _str(j['unit']),
+        unitPrice: _int(j['unit_price']),
+        stockQty: _dbl(j['stock_qty']) ?? 0,
+      );
+
+  static List<ServiceItem> listFromResponse(dynamic src) {
+    final d = _data(src);
+    final list = d is List ? d : const [];
+    return list
+        .whereType<Map>()
+        .map((e) => ServiceItem.fromMap(e.cast<String, dynamic>()))
+        .toList();
   }
 }
 
@@ -321,6 +491,10 @@ class ServiceBooking {
     required this.categoryName,
     required this.subServiceName,
     required this.items,
+    required this.extraItems,
+    required this.baseAmount,
+    required this.promoDiscount,
+    required this.settled,
     required this.servicesSummary,
     required this.categoryNames,
     required this.isMultiCategory,
@@ -349,6 +523,13 @@ class ServiceBooking {
   final String categoryName;
   final String subServiceName;
   final List<ServiceBookingItem> items;
+  final List<ServiceBookingExtraItem> extraItems;
+
+  /// Flat call-out fee charged before any line items, frozen at booking
+  /// time. Part of the subtotal but not attributable to a job or part.
+  final int baseAmount;
+  final int promoDiscount;
+  final bool settled;
   final String servicesSummary;
   final List<String> categoryNames;
   final bool isMultiCategory;
@@ -403,10 +584,58 @@ class ServiceBooking {
     return s != 'completed' && s != 'cancelled' && s != 'canceled';
   }
 
+  /// Mirrors the server's `ServiceBooking.IsLocked()`. The server enforces
+  /// this regardless; the app checks it only to decide whether to offer
+  /// the edit affordance at all, rather than letting the user compose a
+  /// change that is guaranteed to be rejected.
+  ///
+  /// Note payment is deliberately *not* a lock: a fully-paid booking can
+  /// still grow, and the balance simply re-derives.
+  bool get locked {
+    if (settled) return true;
+    switch (status.toLowerCase()) {
+      case 'completed':
+      case 'closed':
+      case 'cancelled':
+      case 'canceled':
+      case 'declined':
+        return true;
+      default:
+        return false;
+    }
+  }
+
+  /// Why the order can't be changed, for display next to a disabled
+  /// button. Empty when it is editable.
+  String get lockReason {
+    if (!locked) return '';
+    if (settled) return 'This order has been settled and can no longer be changed.';
+    switch (status.toLowerCase()) {
+      case 'completed':
+      case 'closed':
+        return 'This order is complete. Contact support if something is wrong.';
+      case 'cancelled':
+      case 'canceled':
+        return 'This order was cancelled.';
+      case 'declined':
+        return 'This order was declined.';
+      default:
+        return 'This order can no longer be changed.';
+    }
+  }
+
+  /// What the customer still owes. The server exposes paid/outstanding
+  /// only on a separate payments endpoint, so bookings list screens
+  /// derive it from the status they already have.
+  bool get fullyPaid => paymentStatus == 'paid';
+  bool get partiallyPaid => paymentStatus == 'partial';
+
   factory ServiceBooking.fromMap(Map<String, dynamic> j) {
     final cat = j['category'] is Map ? j['category'] as Map : const {};
     final sub = j['sub_service'] is Map ? j['sub_service'] as Map : const {};
     final itemsRaw = j['items'] is List ? j['items'] as List : const [];
+    final extrasRaw =
+        j['extra_items'] is List ? j['extra_items'] as List : const [];
     final catNamesRaw =
         j['category_names'] is List ? j['category_names'] as List : const [];
     final prov = j['provider'] is Map ? j['provider'] as Map : null;
@@ -430,10 +659,26 @@ class ServiceBooking {
       joinCode: _str(j['join_code']),
       categoryName: _str(cat['name']),
       subServiceName: _str(sub['name']),
-      items: itemsRaw
-          .whereType<Map>()
-          .map((e) => ServiceBookingItem.fromMap(e.cast<String, dynamic>()))
-          .toList(),
+      items: _stableOrder(
+        itemsRaw
+            .whereType<Map>()
+            .map((e) => ServiceBookingItem.fromMap(e.cast<String, dynamic>()))
+            .toList(),
+        (i) => i.createdAt,
+        (i) => i.id,
+      ),
+      extraItems: _stableOrder(
+        extrasRaw
+            .whereType<Map>()
+            .map((e) =>
+                ServiceBookingExtraItem.fromMap(e.cast<String, dynamic>()))
+            .toList(),
+        (i) => i.createdAt,
+        (i) => i.id,
+      ),
+      baseAmount: _int(j['base_amount']),
+      promoDiscount: _int(j['promo_discount']),
+      settled: _str(j['settled_at']).isNotEmpty,
       servicesSummary: _str(j['services_summary']),
       categoryNames:
           catNamesRaw.map((e) => _str(e)).where((s) => s.isNotEmpty).toList(),
@@ -459,6 +704,58 @@ class ServiceBooking {
         .whereType<Map>()
         .map((e) => ServiceBooking.fromMap(e.cast<String, dynamic>()))
         .toList();
+  }
+}
+
+// ── Payment ledger / outstanding balance ───────────────────────────
+//
+// The booking response itself only carries a categorical payment_status
+// (paid|partial|unpaid|refunded) — no numeric paid-so-far figure. This
+// wraps GET .../bookings/:id/payments, the one endpoint that actually
+// computes "how much is still owed" (server-side, from the full payment
+// ledger — cash the provider collected, deposits, refunds, everything).
+class ServicePaymentSummary {
+  ServicePaymentSummary({
+    required this.amount,
+    required this.paidSoFar,
+    required this.outstanding,
+    this.discountTotal = 0,
+    this.cashReceived = 0,
+  });
+
+  final double amount;
+
+  /// Everything that has settled the invoice — money received PLUS any
+  /// discount the provider/admin granted at payment time. Shown on its own
+  /// it reads as though the customer paid the full amount, so the invoice
+  /// uses [discountTotal] and [cashReceived] instead:
+  ///   cashReceived + discountTotal = paidSoFar
+  final double paidSoFar;
+  final double outstanding;
+
+  /// Forgiven at payment time (provider at cash collection, or an admin).
+  /// Unlike a promo code this never changes the invoice total — it reduces
+  /// what the customer actually hands over.
+  final double discountTotal;
+  final double cashReceived;
+
+  bool get hasOutstanding => outstanding > 0.005;
+  bool get hasDiscount => discountTotal > 0.005;
+
+  static ServicePaymentSummary fromResponse(dynamic src) {
+    final d = (_data(src) as Map).cast<String, dynamic>();
+    double asDouble(dynamic v) => (v as num?)?.toDouble() ?? 0.0;
+    final paid = asDouble(d['paid_so_far']);
+    return ServicePaymentSummary(
+      amount: asDouble(d['amount']),
+      paidSoFar: paid,
+      outstanding: asDouble(d['outstanding']),
+      discountTotal: asDouble(d['discount_total']),
+      // Older responses (and the pay-online path) omit cash_received —
+      // fall back to the full settled figure rather than showing zero.
+      cashReceived:
+          d['cash_received'] == null ? paid : asDouble(d['cash_received']),
+    );
   }
 }
 

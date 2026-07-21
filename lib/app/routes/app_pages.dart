@@ -15,6 +15,7 @@ import '../modules/home_service/views/hs_service_list_view.dart';
 import '../modules/home_service/views/confirm_booking_view.dart';
 import '../modules/home_service/views/booking_placed_view.dart';
 import '../modules/home_service/views/hs_tracking_view.dart';
+import '../modules/home_service/views/edit_order_view.dart';
 import '../modules/home_service/views/hs_booking_details_view.dart';
 import '../modules/home_service/views/rate_service_view.dart';
 import '../modules/home_service/views/subscriptions_view.dart';
@@ -240,6 +241,11 @@ class AppPages {
     GetPage(
       name: _Paths.HS_DETAILS,
       page: () => const HsBookingDetailsView(),
+      binding: HomeServiceBinding(),
+    ),
+    GetPage(
+      name: _Paths.HS_EDIT_ORDER,
+      page: () => const EditOrderView(),
       binding: HomeServiceBinding(),
     ),
     GetPage(
