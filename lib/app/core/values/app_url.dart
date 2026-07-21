@@ -196,6 +196,19 @@ class ApiURL {
   static String serviceBookingChat(String id) =>
       'api/v1/services/bookings/$id/chat';
 
+  //===== Payments ledger, promo codes, reviews, reorder interest.
+  // Verified against routes.go: PATCH /bookings/:id/promo,
+  // GET+POST /bookings/:id/payments, GET /bookings/:id/ratings,
+  // POST /bookings/:id/reorder-interest.
+  static String serviceBookingPayments(String id) =>
+      'api/v1/services/bookings/$id/payments';
+  static String serviceBookingPromo(String id) =>
+      'api/v1/services/bookings/$id/promo';
+  static String serviceBookingRatings(String id) =>
+      'api/v1/services/bookings/$id/ratings';
+  static String serviceBookingReorderInterest(String id) =>
+      'api/v1/services/bookings/$id/reorder-interest';
+
   //===== Post-booking order editing.
   // Two kinds of line: "items" are service jobs (sub-services, labour) and
   // "extra-items" are stock-tracked parts drawn from the ServiceItem
