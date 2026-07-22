@@ -191,10 +191,18 @@ class ApiURL {
       'api/v1/services/bookings/$id/timeline';
   static String serviceBookingRating(String id) =>
       'api/v1/services/bookings/$id/rating';
+  static String serviceBookingRatings(String id) =>
+      'api/v1/services/bookings/$id/ratings';
   static String serviceBookingDispute(String id) =>
       'api/v1/services/bookings/$id/dispute';
   static String serviceBookingChat(String id) =>
       'api/v1/services/bookings/$id/chat';
+  static String serviceBookingPayments(String id) =>
+      'api/v1/services/bookings/$id/payments';
+  static String serviceBookingPromo(String id) =>
+      'api/v1/services/bookings/$id/promo';
+  static String serviceBookingReorderInterest(String id) =>
+      'api/v1/services/bookings/$id/reorder-interest';
 
   //===== Payments ledger, promo codes, reviews, reorder interest.
   // Verified against routes.go: PATCH /bookings/:id/promo,
