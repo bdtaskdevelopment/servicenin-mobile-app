@@ -1,8 +1,8 @@
 import 'package:dio/dio.dart';
 import 'package:latlong2/latlong.dart';
 
-import '../../core/values/app_config.dart';
 import '../models/sn_place.dart';
+import 'settings.service.dart';
 
 /// A place suggestion from Google Places Autocomplete. Doesn't carry
 /// coordinates yet — call [GeoSearchService.details] with [placeId] to
@@ -29,7 +29,7 @@ class GeoSearchService {
     receiveTimeout: const Duration(seconds: 8),
   ));
 
-  String get _key => AppConfig.googleMapsApiKey;
+  String get _key => SettingsService.to.googleMapsApiKey;
 
   /// Autocomplete predictions for [query]. Returns an empty list on any
   /// failure (offline, missing/invalid key, malformed response) — search is

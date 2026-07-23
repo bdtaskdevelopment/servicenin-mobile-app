@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "615611894331",
+    "project_id": "servicenin-app",
+    "storage_bucket": "servicenin-app.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:615611894331:android:4c49abf77cc2126f60ea1e",
+        "android_client_info": {
+          "package_name": "com.app.servicenin"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDdwXgmWGMaypiZlkH7fFcvx5EwMYmsizA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -3,7 +3,7 @@ import 'dart:math';
 import 'package:dio/dio.dart';
 import 'package:latlong2/latlong.dart';
 
-import '../../core/values/app_config.dart';
+import 'settings.service.dart';
 
 /// A driving route between two points.
 class SnRoute {
@@ -31,7 +31,7 @@ class RoutePlannerService {
   ));
 
   Future<SnRoute> route(LatLng from, LatLng to) async {
-    final key = AppConfig.googleMapsApiKey;
+    final key = SettingsService.to.googleMapsApiKey;
     if (key.isNotEmpty) {
       try {
         final res = await _dio.get(

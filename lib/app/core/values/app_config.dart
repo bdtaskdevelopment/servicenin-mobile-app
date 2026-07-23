@@ -4,8 +4,6 @@ class AppConfig {
   AppConfig._();
   static final String baseUrl = dotenv.get('BASE_URL', fallback: '');
   static final String imageUrl = dotenv.get('IMAGE_URL', fallback: '');
-  static final String googleMapsApiKey =
-      dotenv.get('GOOGLE_MAPS_API_KEY', fallback: '');
   // static final String imageUrl = dotenv.get('chat_image_url', fallback: null);
   // static final String appId = dotenv.get('app_id', fallback: null);
   // static final String socketBaseUrl =
