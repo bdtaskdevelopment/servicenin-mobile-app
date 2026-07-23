@@ -64,4 +64,8 @@ class SettingsService extends GetxService {
 
   bool get vatEnabled => settings.servicesVatEnabled;
   String get currencySymbol => settings.currencySymbol;
+
+  /// Google Maps API key (Places + Directions), server-driven — configured
+  /// under the "map" settings group in the admin panel.
+  String get googleMapsApiKey => settings.mapApiKey;
 }

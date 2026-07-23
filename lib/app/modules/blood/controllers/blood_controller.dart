@@ -104,6 +104,7 @@ class BloodController extends GetxController {
   Future<void> fetchMyDonorStatus() async {
     try {
       final me = await _repo.fetchMyDonor();
+      myDonor = me;
       if (me != null) {
         isDonor = true;
         isAvailable = me.isAvailable;
@@ -454,7 +455,7 @@ class BloodController extends GetxController {
   }
 
   // Donor profile
-  final String donorGroup = 'B+';
+  String get donorGroup => myDonor?.bloodGroup ?? '';
   final int donations = 12;
   final int livesSaved = 36;
   final String area = 'Gulshan area';
@@ -518,6 +519,9 @@ class BloodController extends GetxController {
   // seeded from /donors/me. `isDonor` is false until the user registers.
   bool isAvailable = true;
   bool isDonor = false;
+  // The logged-in user's own donor profile (drives _compatibleGroups below) —
+  // null until fetchMyDonorStatus() resolves, or forever if not a donor.
+  DonorEntry? myDonor;
 
   Future<void> toggleAvailable(bool value) async {
     
@@ -556,8 +560,25 @@ class BloodController extends GetxController {
     update();
   }
 
-  /// Groups this B+ donor is willing to match against (demo set).
-  static const Set<String> _compatibleGroups = {'O+', 'B+', 'A+', 'AB+'};
+  /// Standard donor→recipient donation compatibility (ABO/Rh), e.g. an O-
+  /// donor can give to anyone, while an AB+ donor can only give to AB+.
+  /// Keyed by the DONOR's own blood group.
+  static const Map<String, Set<String>> _donationCompatibility = {
+    'O-': {'O-', 'O+', 'A-', 'A+', 'B-', 'B+', 'AB-', 'AB+'},
+    'O+': {'O+', 'A+', 'B+', 'AB+'},
+    'A-': {'A-', 'A+', 'AB-', 'AB+'},
+    'A+': {'A+', 'AB+'},
+    'B-': {'B-', 'B+', 'AB-', 'AB+'},
+    'B+': {'B+', 'AB+'},
+    'AB-': {'AB-', 'AB+'},
+    'AB+': {'AB+'},
+  };
+
+  /// Request blood groups the logged-in donor can actually fulfill, based on
+  /// their own registered blood group — empty (matches nothing) until that's
+  /// known, rather than falling back to some other donor's compatibility set.
+  Set<String> get _compatibleGroups =>
+      _donationCompatibility[myDonor?.bloodGroup] ?? const {};
 
   List<BloodRequest> get visibleRequests => compatibleOnly
       ? requests.where((r) => _compatibleGroups.contains(r.group)).toList()

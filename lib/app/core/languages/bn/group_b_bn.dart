@@ -177,7 +177,6 @@ const Map<String, String> groupBBn = {
   'day': 'দিন',
   'Day': 'দিন',
   'Days': 'দিন',
-  'days completed': 'দিন সম্পন্ন',
   'SESSION TYPE': 'সেশনের ধরন',
   'At center': 'কেন্দ্রে',
   'Home visit': 'হোম ভিজিট',

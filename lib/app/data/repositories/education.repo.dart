@@ -9,7 +9,17 @@ class EducationRepository {
 
   dynamic _payload(dynamic res) {
     final body = res.body;
-    if (body is Map) return body;
+    if (body is Map) {
+      // A failed request (e.g. duplicate registration) still decodes as a
+      // Map — {success:false, message:...} — with no "data" key. Without
+      // this check that error body gets treated as valid response data
+      // (every field just reads back empty), so the app would silently
+      // "succeed" into the done screen while nothing was actually saved.
+      if (body['success'] == false) {
+        throw Exception((body['message'] ?? 'অনুরোধ ব্যর্থ হয়েছে').toString());
+      }
+      return body;
+    }
     final raw = res.bodyString;
     if (raw != null && raw.toString().trim().isNotEmpty) return raw;
     throw Exception('সংযোগে সমস্যা — আবার চেষ্টা করুন');

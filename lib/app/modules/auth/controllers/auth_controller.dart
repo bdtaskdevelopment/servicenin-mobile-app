@@ -6,6 +6,8 @@ import 'package:get/get.dart';
 import 'package:servicenin/app/core/helpers/app_helper.dart';
 
 import '../../../core/helpers/snack_helper.dart';
+import '../../../core/services/notification_socket_service.dart';
+import '../../../core/services/push_notification_service.dart';
 import '../../../core/values/storage.dart';
 import '../../../data/repositories/auth.repo.dart';
 import '../../../data/services/storage.service.dart';
@@ -162,6 +164,12 @@ class AuthController extends GetxController {
       await StorageService.save(
           StorageConstants.phoneNumber, phoneController.text.trim());
       _timer?.cancel();
+      // The device token may already exist from before this user signed
+      // in — nothing to attach it to until now, so (re-)send it.
+      unawaited(PushNotificationService.instance.syncToken());
+      // Realtime notification feed for this session (foreground delivery —
+      // works immediately, independent of FCM/push setup).
+      NotificationSocketService.instance.connect();
       // No success message on login — go straight home.
       Get.offAllNamed(Routes.HOME);
     } else {

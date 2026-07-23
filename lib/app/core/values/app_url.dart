@@ -358,6 +358,7 @@ class ApiURL {
       'api/v1/notifications/$id/read';
   static final String snNotificationsReadAll =
       'api/v1/notifications/read-all';
+  static final String snDeviceToken = 'api/v1/notifications/device-token';
 
   //===== Nagarik Seba (civic grievances + support)
   static final String nagarikHotlines = 'api/v1/nagarik/hotlines';
