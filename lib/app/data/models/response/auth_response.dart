@@ -1,5 +1,8 @@
 import 'dart:convert';
 
+import '../../../core/values/storage.dart';
+import '../../services/storage.service.dart';
+
 Map<String, dynamic> _asMap(dynamic src) =>
     src is String ? jsonDecode(src) as Map<String, dynamic> : src as Map<String, dynamic>;
 
@@ -89,6 +92,22 @@ class AuthUser {
   final String role;
   final bool isVerified;
   final String? name;
+
+  /// Matches the backend's `models.RoleProvider` constant.
+  bool get isProvider => role == 'provider';
+
+  /// Decodes the currently logged-in user from storage, same pattern as
+  /// used ad hoc across several controllers (e.g. fare_controller.dart).
+  /// Returns null if nothing is stored or it fails to parse.
+  static AuthUser? fromStorage() {
+    final raw = StorageService.read(StorageConstants.userInfo);
+    if (raw is! String || raw.trim().isEmpty) return null;
+    try {
+      final map = jsonDecode(raw);
+      if (map is Map) return AuthUser.fromMap(map);
+    } catch (_) {}
+    return null;
+  }
 
   factory AuthUser.fromMap(dynamic src) {
     final json = _asMap(src);

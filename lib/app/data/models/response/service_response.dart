@@ -534,9 +534,11 @@ class ServiceBooking {
   final List<String> categoryNames;
   final bool isMultiCategory;
   final ServiceBookingProvider? provider;
-  final double? providerLat;
-  final double? providerLng;
-  final DateTime? locationUpdatedAt;
+  // Mutable — patched in place from live WebSocket location pushes
+  // (HomeServiceSocketService) without re-fetching the whole booking.
+  double? providerLat;
+  double? providerLng;
+  DateTime? locationUpdatedAt;
   final DateTime? scheduledAt;
   final DateTime? createdAt;
 
@@ -847,6 +849,156 @@ class ServiceChatMessage {
     return list
         .whereType<Map>()
         .map((e) => ServiceChatMessage.fromMap(e.cast<String, dynamic>()))
+        .toList();
+  }
+}
+
+// ── Provider's own dashboard (GET /services/provider/dashboard) ─────
+class ProviderDashboardSummary {
+  ProviderDashboardSummary({
+    required this.fullName,
+    required this.photoUrl,
+    required this.rating,
+    required this.ratingCount,
+    required this.totalJobs,
+    required this.isAvailable,
+    required this.applicationStatus,
+    required this.balance,
+    required this.pending,
+    required this.withdrawn,
+    required this.jobCounts,
+  });
+
+  final String fullName;
+  final String photoUrl;
+  final double rating;
+  final int ratingCount;
+  final int totalJobs;
+  final bool isAvailable;
+  final String applicationStatus;
+  // Flattened from the `balance` object — only what the dashboard card
+  // shows today; the fuller ProviderBalance breakdown (settled/awaiting/
+  // withdrawal ledgers) is out of scope until earnings/withdrawals go real.
+  final double balance;
+  final double pending;
+  final double withdrawn;
+  final Map<String, int> jobCounts;
+
+  String get balanceLabel => '৳${balance.toStringAsFixed(0)}';
+  String get pendingLabel => '৳${pending.toStringAsFixed(0)}';
+  String get withdrawnLabel => '৳${withdrawn.toStringAsFixed(0)}';
+  String get ratingLabel => rating.toStringAsFixed(1);
+  int get jobsInProgress =>
+      (jobCounts['on_the_way'] ?? 0) + (jobCounts['in_progress'] ?? 0);
+
+  factory ProviderDashboardSummary.fromMap(Map<String, dynamic> j) {
+    final p = j['provider'] is Map
+        ? (j['provider'] as Map).cast<String, dynamic>()
+        : const <String, dynamic>{};
+    final bal = j['balance'] is Map
+        ? (j['balance'] as Map).cast<String, dynamic>()
+        : const <String, dynamic>{};
+    final countsRaw =
+        j['job_counts'] is Map ? j['job_counts'] as Map : const {};
+    return ProviderDashboardSummary(
+      fullName: _str(p['full_name']),
+      photoUrl: _str(p['photo_url']),
+      rating: _dbl(p['rating']) ?? 0,
+      ratingCount: _int(p['rating_count']),
+      totalJobs: _int(p['total_jobs']),
+      isAvailable: p['is_available'] == true,
+      applicationStatus: _str(p['application_status']),
+      balance: _dbl(bal['available']) ?? 0,
+      pending: _dbl(bal['pending_settlement_net']) ?? 0,
+      withdrawn: _dbl(bal['lifetime_paid']) ?? 0,
+      jobCounts: countsRaw.map((k, v) => MapEntry(_str(k), _int(v))),
+    );
+  }
+
+  static ProviderDashboardSummary fromResponse(dynamic src) =>
+      ProviderDashboardSummary.fromMap((_data(src) as Map).cast<String, dynamic>());
+}
+
+// ── Provider's own job list row (GET /services/provider/jobs[/today]) ──
+//
+// The backend returns the full booking JSON plus a few provider-specific
+// fields bolted on (my_status/my_amount/my_task_ids); this only parses what
+// the job-card UI needs rather than duplicating all of ServiceBooking.
+class ProviderJob {
+  ProviderJob({
+    required this.id,
+    required this.title,
+    required this.address,
+    required this.status,
+    required this.amount,
+    required this.taskIds,
+    this.scheduledAt,
+  });
+
+  final String id;
+  final String title;
+  final String address;
+  final String status; // my_status: assigned|accepted|on_the_way|arrived|in_progress|completed
+  final double amount; // my_amount
+  // my_task_ids — empty means the whole booking is theirs (not a split order).
+  final List<String> taskIds;
+  final DateTime? scheduledAt;
+
+  bool get isWholeBooking => taskIds.isEmpty;
+  String get amountLabel => '৳${amount.toStringAsFixed(0)}';
+
+  String get whenLabel {
+    final dt = scheduledAt?.toLocal();
+    return dt == null ? '' : DateFormat('d MMM, h:mm a').format(dt);
+  }
+
+  String get place =>
+      [address, whenLabel].where((s) => s.isNotEmpty).join(' · ');
+
+  /// The next status a provider can move this job to, following the
+  /// backend's forward-only provider transitions (homeservice_extra_handler
+  /// UpdateStatus) — null once there's nothing left to advance to from here.
+  String? get nextStatus {
+    const order = [
+      'accepted',
+      'on_the_way',
+      'arrived',
+      'in_progress',
+      'completed',
+    ];
+    final i = order.indexOf(status);
+    if (i == -1 || i == order.length - 1) return null;
+    return order[i + 1];
+  }
+
+  factory ProviderJob.fromMap(Map<String, dynamic> j) {
+    final cat = j['category'] is Map ? j['category'] as Map : const {};
+    final sub = j['sub_service'] is Map ? j['sub_service'] as Map : const {};
+    final summary = _str(j['services_summary']);
+    final subName = _str(sub['name']);
+    final catName = _str(cat['name']);
+    final sched = _str(j['scheduled_at']);
+    final taskIdsRaw =
+        j['my_task_ids'] is List ? j['my_task_ids'] as List : const [];
+    return ProviderJob(
+      id: _str(j['id']),
+      title: summary.isNotEmpty
+          ? summary
+          : (subName.isNotEmpty ? subName : (catName.isNotEmpty ? catName : 'Service')),
+      address: _str(j['address']),
+      status: _str(j['my_status']),
+      amount: _dbl(j['my_amount']) ?? 0,
+      taskIds: taskIdsRaw.map((e) => _str(e)).where((s) => s.isNotEmpty).toList(),
+      scheduledAt: sched.isEmpty ? null : DateTime.tryParse(sched),
+    );
+  }
+
+  static List<ProviderJob> listFromResponse(dynamic src) {
+    final d = _data(src);
+    final list = d is List ? d : const [];
+    return list
+        .whereType<Map>()
+        .map((e) => ProviderJob.fromMap(e.cast<String, dynamic>()))
         .toList();
   }
 }

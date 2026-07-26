@@ -203,19 +203,21 @@ class ApiURL {
       'api/v1/services/bookings/$id/promo';
   static String serviceBookingReorderInterest(String id) =>
       'api/v1/services/bookings/$id/reorder-interest';
+  static String serviceBookingStatus(String id) =>
+      'api/v1/services/bookings/$id/status';
+  static String serviceBookingLocation(String id) =>
+      'api/v1/services/bookings/$id/location';
 
-  //===== Payments ledger, promo codes, reviews, reorder interest.
-  // Verified against routes.go: PATCH /bookings/:id/promo,
-  // GET+POST /bookings/:id/payments, GET /bookings/:id/ratings,
-  // POST /bookings/:id/reorder-interest.
-  static String serviceBookingPayments(String id) =>
-      'api/v1/services/bookings/$id/payments';
-  static String serviceBookingPromo(String id) =>
-      'api/v1/services/bookings/$id/promo';
-  static String serviceBookingRatings(String id) =>
-      'api/v1/services/bookings/$id/ratings';
-  static String serviceBookingReorderInterest(String id) =>
-      'api/v1/services/bookings/$id/reorder-interest';
+  //===== Home-service provider (job management + GPS push).
+  static final String hsProviderDashboard =
+      'api/v1/services/provider/dashboard';
+  static String hsProviderJobs({String? status}) => status == null || status.isEmpty
+      ? 'api/v1/services/provider/jobs'
+      : 'api/v1/services/provider/jobs?status=$status';
+  static String hsProviderJobAccept(String id) =>
+      'api/v1/services/provider/jobs/$id/accept';
+  static String hsProviderJobDecline(String id) =>
+      'api/v1/services/provider/jobs/$id/decline';
 
   //===== Post-booking order editing.
   // Two kinds of line: "items" are service jobs (sub-services, labour) and

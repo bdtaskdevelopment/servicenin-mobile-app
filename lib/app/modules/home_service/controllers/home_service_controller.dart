@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
@@ -6,6 +8,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../../core/helpers/location_helper.dart';
 import '../../../core/helpers/snack_helper.dart';
 import '../../../core/helpers/sslcommerz_helper.dart';
+import '../../../core/services/home_service_socket_service.dart';
 import '../../../data/models/response/service_response.dart';
 import '../../../data/repositories/service.repo.dart';
 import '../../../data/services/settings.service.dart';
@@ -386,10 +389,12 @@ class HomeServiceController extends GetxController {
 
   bool get hasUserLocation => userLat != null && userLng != null;
 
-  /// "1.8 km away" label for the provider, or '' when not computable.
+  /// "1.8 Km" label for the technician's distance, or '' when not
+  /// computable. Bare value + unit — callers wrap it with their own
+  /// locale-ordered prefix/suffix (see hs_tracking_view.dart).
   String get providerDistanceLabel => providerDistanceKm == null
       ? ''
-      : '${providerDistanceKm!.toStringAsFixed(1)} km away';
+      : '${providerDistanceKm!.toStringAsFixed(1)} Km';
 
   // ── My bookings ─────────────────────────────────────────────────────
   List<ServiceBooking> myBookings = [];
@@ -588,7 +593,10 @@ class HomeServiceController extends GetxController {
     final id = (lastBooking?.id.isNotEmpty ?? false)
         ? lastBooking!.id
         : (trackedBooking?.id ?? '');
-    if (id.isNotEmpty) await _loadTrack(id);
+    if (id.isNotEmpty) {
+      _startLiveTracking(id);
+      await _loadTrack(id);
+    }
   }
 
   Future<void> openBooking(ServiceBooking b) async {
@@ -596,15 +604,74 @@ class HomeServiceController extends GetxController {
     lastBooking = b;
     update();
     Get.toNamed(Routes.HS_TRACKING);
+    _startLiveTracking(b.id);
     await _loadTrack(b.id);
   }
 
   /// Manual refresh from the tracking screen — re-pulls the booking (and the
-  /// provider's latest location) and recomputes the distance.
+  /// provider's latest location) and recomputes the distance. The live
+  /// WebSocket subscription (started in trackBooking/openBooking) keeps the
+  /// map current in between — this is just a belt-and-braces manual option.
   Future<void> refreshTracking() async {
     final id = trackedBooking?.id ?? lastBooking?.id ?? '';
     if (id.isNotEmpty) await _loadTrack(id);
   }
+
+  // ── Live provider location (WebSocket) ───────────────────────────────
+  //
+  // Backend pushes on booking:<id>:location (GPS pings) and
+  // booking:<id>:status (status transitions) — see
+  // internal/services/service_realtime_service.go. Subscribed for as long
+  // as the tracking screen is open; HsTrackingView already renders
+  // trackedBooking.providerLat/Lng reactively, so patching those fields +
+  // calling update() is all a location push needs to do.
+  StreamSubscription<Map<String, dynamic>>? _liveTrackSub;
+  String? _liveTrackBookingId;
+
+  void _startLiveTracking(String bookingId) {
+    _stopLiveTracking();
+    _liveTrackBookingId = bookingId;
+    final locationTopic = 'booking:$bookingId:location';
+    final statusTopic = 'booking:$bookingId:status';
+    final socket = HomeServiceSocketService.instance;
+    socket.subscribe(locationTopic);
+    socket.subscribe(statusTopic);
+    _liveTrackSub = socket.events.listen((env) {
+      final topic = env['topic']?.toString() ?? '';
+      if (trackedBooking?.id != bookingId) return;
+      final data = env['data'];
+      if (data is! Map) return;
+      if (topic == locationTopic) {
+        final lat = (data['lat'] as num?)?.toDouble();
+        final lng = (data['lng'] as num?)?.toDouble();
+        if (lat == null || lng == null) return;
+        trackedBooking!.providerLat = lat;
+        trackedBooking!.providerLng = lng;
+        _updateProviderDistance();
+        update();
+      } else if (topic == statusTopic) {
+        // Status transitions carry their own history/labels — simplest to
+        // just re-pull rather than duplicate that logic here.
+        _loadTrack(bookingId);
+      }
+    });
+  }
+
+  void _stopLiveTracking() {
+    if (_liveTrackBookingId != null) {
+      final socket = HomeServiceSocketService.instance;
+      socket.unsubscribe('booking:$_liveTrackBookingId:location');
+      socket.unsubscribe('booking:$_liveTrackBookingId:status');
+    }
+    _liveTrackSub?.cancel();
+    _liveTrackSub = null;
+    _liveTrackBookingId = null;
+  }
+
+  /// Called via the tracking screen's PopScope on any exit path (back
+  /// button, gesture, or system back) so the live subscription doesn't
+  /// linger once the user has left it.
+  void stopLiveTrackingOnLeave() => _stopLiveTracking();
 
   Future<void> _loadTrack(String id) async {
     loadingTrack = true;
@@ -1098,6 +1165,7 @@ class HomeServiceController extends GetxController {
 
   @override
   void onClose() {
+    _stopLiveTracking();
     addressCtrl.dispose();
     super.onClose();
   }

@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 
 import '../../../core/helpers/snack_helper.dart';
 import '../../../core/values/storage.dart';
+import '../../../data/models/response/auth_response.dart';
 import '../../../data/repositories/auth.repo.dart';
 import '../../../data/services/storage.service.dart';
 import '../../../routes/app_pages.dart';
@@ -240,7 +241,8 @@ class RegistrationController extends GetxController {
     if (phone.isNotEmpty) {
       StorageService.save(StorageConstants.phoneNumber, phone);
     }
-    Get.offAllNamed(Routes.HOME);
+    Get.offAllNamed(
+        AuthUser.fromStorage()?.isProvider == true ? Routes.HS_PROVIDER : Routes.HOME);
   }
 
   // NOTE: text/page controllers are intentionally NOT disposed here. This is a

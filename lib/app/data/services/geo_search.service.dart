@@ -97,6 +97,31 @@ class GeoSearchService {
     }
   }
 
+  /// Forward-geocodes a free-text address to coordinates, or `null` on
+  /// failure (offline, missing/invalid key, or no match) — used to show a
+  /// destination pin for an address string that has no stored lat/lng
+  /// (e.g. a booking's delivery address).
+  Future<LatLng?> forward(String address) async {
+    final q = address.trim();
+    if (q.isEmpty || _key.isEmpty) return null;
+    try {
+      final res = await _dio.get(
+        'https://maps.googleapis.com/maps/api/geocode/json',
+        queryParameters: {'address': q, 'components': 'country:BD', 'key': _key},
+      );
+      final results = res.data is Map ? res.data['results'] : null;
+      if (results is! List || results.isEmpty) return null;
+      final loc = (results.first['geometry'] as Map?)?['location'];
+      if (loc is! Map) return null;
+      final lat = (loc['lat'] as num?)?.toDouble();
+      final lng = (loc['lng'] as num?)?.toDouble();
+      if (lat == null || lng == null) return null;
+      return LatLng(lat, lng);
+    } catch (_) {
+      return null;
+    }
+  }
+
   /// Reverse-geocodes a point to a display address, or `null` on failure.
   Future<String?> reverse(LatLng point) async {
     if (_key.isEmpty) return null;

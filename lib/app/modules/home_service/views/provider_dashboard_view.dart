@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../../core/values/app_colors.dart';
+import '../../../data/models/response/service_response.dart';
 import '../controllers/provider_controller.dart';
 
 const _darkTeal = Color(0xFF0E7C6B);
@@ -12,10 +13,12 @@ class ProviderDashboardView extends GetView<ProviderController> {
 
   @override
   Widget build(BuildContext context) {
-    final con = controller;
     return Scaffold(
       backgroundColor: const Color(0xFFF7F8FA),
-      body: ListView(
+      body: GetBuilder<ProviderController>(
+        builder: (con) => RefreshIndicator(
+          onRefresh: con.loadDashboard,
+          child: ListView(
         padding: EdgeInsets.zero,
         children: [
           // Teal header + balance
@@ -49,9 +52,10 @@ class ProviderDashboardView extends GetView<ProviderController> {
                                     fontSize: 19,
                                     fontWeight: FontWeight.w800,
                                     color: Colors.white)),
-                            const Text('Jamal Uddin',
-                                style: TextStyle(
-                                    fontSize: 12, color: Color(0xFFCDEDE6))),
+                            if (con.name.isNotEmpty)
+                              Text(con.name,
+                                  style: const TextStyle(
+                                      fontSize: 12, color: Color(0xFFCDEDE6))),
                           ],
                         ),
                         const Spacer(),
@@ -153,12 +157,26 @@ class ProviderDashboardView extends GetView<ProviderController> {
             ),
           ),
           const SizedBox(height: 12),
-          ...con.jobs.map((j) => Padding(
-                padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
-                child: _JobCard(job: j, con: con),
-              )),
+          if (con.loading && con.jobs.isEmpty)
+            const Padding(
+              padding: EdgeInsets.symmetric(vertical: 24),
+              child: Center(child: CircularProgressIndicator()),
+            )
+          else if (con.jobs.isEmpty)
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              child: Text('No assigned jobs right now.'.tr,
+                  style: const TextStyle(fontSize: 13, color: Color(0xFF94A3B8))),
+            )
+          else
+            ...con.jobs.map((j) => Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+                  child: _JobCard(job: j, con: con),
+                )),
           const SizedBox(height: 16),
         ],
+      ),
+        ),
       ),
     );
   }
@@ -194,15 +212,15 @@ class _JobCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final inProgress = job.status == JobStatus.inProgress;
+    final isAssigned = job.status == 'assigned';
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
         color: AppColors.white,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-            color: inProgress ? _darkTeal : const Color(0xFFEDEFF2),
-            width: inProgress ? 1.4 : 1.2),
+            color: isAssigned ? const Color(0xFFEDEFF2) : _darkTeal,
+            width: isAssigned ? 1.2 : 1.4),
       ),
       child: Column(
         children: [
@@ -229,26 +247,26 @@ class _JobCard extends StatelessWidget {
                 padding:
                     const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
                 decoration: BoxDecoration(
-                    color: inProgress
-                        ? const Color(0xFFFEF3C7)
-                        : const Color(0xFFE6E7FB),
+                    color: isAssigned
+                        ? const Color(0xFFE6E7FB)
+                        : const Color(0xFFFEF3C7),
                     borderRadius: BorderRadius.circular(20)),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Icon(Icons.circle,
                         size: 7,
-                        color: inProgress
-                            ? const Color(0xFFD97706)
-                            : const Color(0xFF6366F1)),
+                        color: isAssigned
+                            ? const Color(0xFF6366F1)
+                            : const Color(0xFFD97706)),
                     const SizedBox(width: 4),
-                    Text(inProgress ? 'In progress'.tr : 'Assigned'.tr,
+                    Text(con.statusLabel(job.status),
                         style: TextStyle(
                             fontSize: 11,
                             fontWeight: FontWeight.w700,
-                            color: inProgress
-                                ? const Color(0xFFB45309)
-                                : const Color(0xFF4F46E5))),
+                            color: isAssigned
+                                ? const Color(0xFF4F46E5)
+                                : const Color(0xFFB45309))),
                   ],
                 ),
               ),
@@ -260,37 +278,20 @@ class _JobCard extends StatelessWidget {
           ),
           Row(
             children: [
-              Text(job.price,
+              Text(job.amountLabel,
                   style: const TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w800,
                       color: Color(0xFF0E7C6B))),
               const Spacer(),
-              if (inProgress)
-                SizedBox(
-                  height: 40,
-                  child: ElevatedButton.icon(
-                    onPressed: con.navigateJob,
-                    icon: const Icon(Icons.location_on_outlined, size: 16),
-                    label: Text('Navigate'.tr,
-                        style: const TextStyle(
-                            fontSize: 13.5, fontWeight: FontWeight.w800)),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: _navy,
-                      foregroundColor: Colors.white,
-                      elevation: 0,
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10)),
-                    ),
-                  ),
-                )
-              else ...[
-                _ghost('Decline'.tr, const Color(0xFF334155)),
+              if (isAssigned) ...[
+                _ghost('Decline'.tr, const Color(0xFF334155),
+                    () => con.declineJob(job)),
                 const SizedBox(width: 10),
                 SizedBox(
                   height: 40,
                   child: ElevatedButton(
-                    onPressed: () {},
+                    onPressed: () => con.acceptJob(job),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: _darkTeal,
                       foregroundColor: Colors.white,
@@ -304,7 +305,24 @@ class _JobCard extends StatelessWidget {
                             fontSize: 13.5, fontWeight: FontWeight.w800)),
                   ),
                 ),
-              ],
+              ] else
+                SizedBox(
+                  height: 40,
+                  child: ElevatedButton.icon(
+                    onPressed: () => con.openJobMap(job),
+                    icon: const Icon(Icons.map_outlined, size: 16),
+                    label: Text('View map'.tr,
+                        style: const TextStyle(
+                            fontSize: 13.5, fontWeight: FontWeight.w800)),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: _navy,
+                      foregroundColor: Colors.white,
+                      elevation: 0,
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10)),
+                    ),
+                  ),
+                ),
             ],
           ),
         ],
@@ -312,10 +330,10 @@ class _JobCard extends StatelessWidget {
     );
   }
 
-  Widget _ghost(String label, Color color) => SizedBox(
+  Widget _ghost(String label, Color color, VoidCallback onTap) => SizedBox(
         height: 40,
         child: OutlinedButton(
-          onPressed: () {},
+          onPressed: onTap,
           style: OutlinedButton.styleFrom(
             padding: const EdgeInsets.symmetric(horizontal: 18),
             side: const BorderSide(color: Color(0xFFE2E8F0)),

@@ -23,6 +23,7 @@ abstract class Routes {
   static const HS_RATE = _Paths.HS_RATE;
   static const HS_SUBSCRIPTIONS = _Paths.HS_SUBSCRIPTIONS;
   static const HS_PROVIDER = _Paths.HS_PROVIDER;
+  static const HS_PROVIDER_JOB_MAP = _Paths.HS_PROVIDER_JOB_MAP;
   static const HS_CHAT = _Paths.HS_CHAT;
   static const HS_MY_BOOKINGS = _Paths.HS_MY_BOOKINGS;
   static const HS_EARNINGS = _Paths.HS_EARNINGS;
@@ -177,6 +178,7 @@ abstract class _Paths {
   static const HS_RATE = '/hs-rate';
   static const HS_SUBSCRIPTIONS = '/hs-subscriptions';
   static const HS_PROVIDER = '/hs-provider';
+  static const HS_PROVIDER_JOB_MAP = '/hs-provider-job-map';
   static const HS_CHAT = '/hs-chat';
   static const HS_MY_BOOKINGS = '/hs-my-bookings';
   static const HS_EARNINGS = '/hs-earnings';

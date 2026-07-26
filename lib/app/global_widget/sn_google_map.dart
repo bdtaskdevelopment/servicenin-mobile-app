@@ -18,6 +18,7 @@ class SnGoogleMap extends StatefulWidget {
     this.interactive = true,
     this.fitToRoute = false,
     this.onTap,
+    this.showMyLocation = false,
   });
 
   final LatLng center;
@@ -26,6 +27,12 @@ class SnGoogleMap extends StatefulWidget {
   final List<LatLng> route;
   final Color routeColor;
   final bool interactive;
+
+  /// Shows the device's own live position as a native blue dot (requires
+  /// location permission — same as [LocationService.getCurrentPosition]).
+  /// Used on the provider's job map so their own movement is visible
+  /// without the app needing to draw/update a marker for it manually.
+  final bool showMyLocation;
 
   /// When true and [route] has 2+ points, frames the camera to show the
   /// whole route instead of using [center]/[zoom].
@@ -83,6 +90,7 @@ class _SnGoogleMapState extends State<SnGoogleMap> {
         target: gmap.LatLng(widget.center.latitude, widget.center.longitude),
         zoom: widget.zoom,
       ),
+      myLocationEnabled: widget.showMyLocation,
       myLocationButtonEnabled: false,
       zoomControlsEnabled: false,
       scrollGesturesEnabled: widget.interactive,

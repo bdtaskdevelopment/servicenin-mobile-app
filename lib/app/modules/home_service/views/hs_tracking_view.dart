@@ -4,7 +4,8 @@ import 'package:latlong2/latlong.dart';
 
 import '../../../core/values/app_colors.dart';
 import '../../../data/models/response/service_response.dart';
-import '../../../global_widget/sn_map.dart';
+import '../../../global_widget/sn_google_map.dart';
+import '../../../global_widget/sn_map.dart' show SnMapMarker;
 import '../../../global_widget/sn_shimmer.dart';
 import '../controllers/home_service_controller.dart';
 
@@ -16,10 +17,15 @@ class HsTrackingView extends GetView<HomeServiceController> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.white,
-      body: GetBuilder<HomeServiceController>(
-        builder: (con) {
+    return PopScope(
+      canPop: true,
+      onPopInvokedWithResult: (didPop, result) {
+        if (didPop) controller.stopLiveTrackingOnLeave();
+      },
+      child: Scaffold(
+        backgroundColor: AppColors.white,
+        body: GetBuilder<HomeServiceController>(
+          builder: (con) {
           final b = con.trackedBooking;
           // Provider location — prefer the booking's provider_lat/lng, else the
           // latest point shared on the timeline.
@@ -47,10 +53,9 @@ class HsTrackingView extends GetView<HomeServiceController> {
           return Stack(
             children: [
               Positioned.fill(
-                child: SnMap(
+                child: SnGoogleMap(
                   center: center,
                   zoom: zoom,
-                  interactive: false,
                   route: (providerPt != null && userPt != null)
                       ? [userPt, providerPt]
                       : const [],
@@ -86,9 +91,9 @@ class HsTrackingView extends GetView<HomeServiceController> {
                         child: Text(
                             hasLoc
                                 ? (con.providerDistanceLabel.isNotEmpty
-                                    ? '${'Provider'.tr} · ${con.providerDistanceLabel}'
-                                    : 'Provider location · live'.tr)
-                                : 'Waiting for provider location'.tr,
+                                    ? '${'Technician'.tr} · ${con.providerDistanceLabel}'
+                                    : 'Technician location · live'.tr)
+                                : 'Waiting for technician location'.tr,
                             style: const TextStyle(
                                 fontSize: 12.5,
                                 fontWeight: FontWeight.w700,
@@ -182,7 +187,7 @@ class HsTrackingView extends GetView<HomeServiceController> {
                                       size: 16, color: _darkTeal),
                                   const SizedBox(width: 8),
                                   Text(
-                                      '${'Provider is'.tr} ${con.providerDistanceLabel} ${'from you'.tr}',
+                                      '${'Technician is'.tr} ${con.providerDistanceLabel} ${'away from you'.tr}',
                                       style: const TextStyle(
                                           fontSize: 12.5,
                                           fontWeight: FontWeight.w700,
@@ -251,6 +256,7 @@ class HsTrackingView extends GetView<HomeServiceController> {
             ],
           );
         },
+        ),
       ),
     );
   }
