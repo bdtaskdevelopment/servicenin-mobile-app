@@ -350,6 +350,7 @@ class BloodController extends GetxController {
       chatId: r.id,
       partnerName: r.displayName,
       partnerPhone: r.donorPhone,
+      partnerPhoto: r.donorPhoto,
     );
     Get.toNamed(Routes.BLOOD_CHAT);
   }
@@ -435,6 +436,7 @@ class BloodController extends GetxController {
       chatId: r.requestId,
       partnerName: r.requesterName,
       partnerPhone: r.phone,
+      partnerPhoto: r.requesterPhoto,
     );
     Get.toNamed(Routes.BLOOD_CHAT);
   }

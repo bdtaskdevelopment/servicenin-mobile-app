@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
+import 'package:latlong2/latlong.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../core/helpers/location_helper.dart';
@@ -10,7 +11,9 @@ import '../../../core/helpers/snack_helper.dart';
 import '../../../core/helpers/sslcommerz_helper.dart';
 import '../../../core/services/home_service_socket_service.dart';
 import '../../../data/models/response/service_response.dart';
+import '../../../data/models/sn_place.dart';
 import '../../../data/repositories/service.repo.dart';
+import '../../../data/services/geo_search.service.dart';
 import '../../../data/services/settings.service.dart';
 import '../../../routes/app_pages.dart';
 
@@ -121,7 +124,20 @@ class HomeServiceController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    addressCtrl.text = address;
+    // If the customer types over a GPS/search-picked address by hand, the
+    // coordinates no longer match what's on screen — drop them so the
+    // booking sends the free-typed address with no (now-wrong) lat/lng
+    // rather than silently mismatched ones. Set order in
+    // _initDefaultAddress/setServiceAddress (address before addressCtrl.text)
+    // means this listener sees text == address right after either of those
+    // and correctly skips clearing.
+    addressCtrl.addListener(() {
+      if (addressCtrl.text != address) {
+        addressLat = null;
+        addressLng = null;
+      }
+    });
+    _initDefaultAddress();
     fetchCategories();
     fetchPopular();
   }
@@ -273,7 +289,43 @@ class HomeServiceController extends GetxController {
 
   // ── Address / schedule / slots / payment ────────────────────────────
   final TextEditingController addressCtrl = TextEditingController();
-  String address = 'House 32, Road 11, Gulshan-2';
+  String address = '';
+  double? addressLat;
+  double? addressLng;
+  bool loadingAddress = false;
+
+  /// Defaults the service address to the device's current GPS position,
+  /// reverse-geocoded to a readable address — same pattern the ambulance
+  /// module uses for its pickup field. Silently does nothing if location is
+  /// unavailable/denied; the user can still search or type one manually.
+  Future<void> _initDefaultAddress() async {
+    loadingAddress = true;
+    update();
+    try {
+      final pos = await LocationService.getCurrentPosition();
+      if (pos == null) return;
+      addressLat = pos.latitude;
+      addressLng = pos.longitude;
+      final resolved = await GeoSearchService.instance
+          .reverse(LatLng(pos.latitude, pos.longitude));
+      if (resolved != null && resolved.isNotEmpty) {
+        address = resolved;
+        addressCtrl.text = address;
+      }
+    } finally {
+      loadingAddress = false;
+      update();
+    }
+  }
+
+  /// Sets the service address from a Google Places search result.
+  void setServiceAddress(SnPlace place) {
+    address = place.address.isNotEmpty ? place.address : place.label;
+    addressCtrl.text = address;
+    addressLat = place.point.latitude;
+    addressLng = place.point.longitude;
+    update();
+  }
 
   List<ServiceScheduleDate> _dates = [];
   int selectedBookingDate = 0;
@@ -358,6 +410,7 @@ class HomeServiceController extends GetxController {
   // and jobs endpoints have carried for a while now.
   ServiceBookingProvider? get _provider =>
       (trackedBooking ?? lastBooking)?.provider;
+  bool get hasProvider => _provider != null;
   String get techName => _provider?.displayName ?? 'Service provider';
   String get techInitials => _provider?.initials ?? 'SP';
   String get techRating => _provider?.ratingLabel ?? '—';
@@ -532,6 +585,8 @@ class HomeServiceController extends GetxController {
       final payload = <String, dynamic>{
         'category_id': categoryId,
         'address': address,
+        if (addressLat != null) 'lat': addressLat,
+        if (addressLng != null) 'lng': addressLng,
         'scheduled_at': '${d.date}T00:00:00+06:00',
         'time_slot': selectedSlotKey,
         'payment_method':

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import '../../../core/helpers/app_helper.dart';
 import '../../../core/values/app_colors.dart';
 import '../../../data/models/response/ambulance_booking_response.dart';
 import '../../../data/models/response/ambulance_response.dart';
@@ -127,7 +128,7 @@ class AmbulanceCard extends StatelessWidget {
                   Text(
                       subtitle.isNotEmpty
                           ? subtitle
-                          : '৳${amb.baseFare} base · ৳${amb.perKmFare}/km',
+                          : '৳${Helpers.format(amb.baseFare)} base · ৳${Helpers.format(amb.perKmFare)}/km',
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: const TextStyle(

@@ -1,15 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-import '../values/app_colors.dart';
-
-/// App-wide snackbars: success uses the brand theme colour, error uses red.
+/// App-wide snackbars: success uses green, error uses red.
 /// Both always surface the API `message`. When no [title] is passed, the title
 /// is derived from the current module (route) — e.g. "Home Service", "Blood" —
 /// so messages read in context everywhere instead of a generic "ত্রুটি".
 class SnackHelper {
   SnackHelper._();
 
+  static const Color _successBg = Color(0xFF22C55E);
   static const Color _errorBg = Color(0xFFE11D48);
 
   /// Module name for the current route, used as the default snackbar title.
@@ -40,7 +39,7 @@ class SnackHelper {
       title ?? moduleTitle(),
       message.trim().isEmpty ? 'সফল হয়েছে' : message,
       snackPosition: SnackPosition.TOP,
-      backgroundColor: AppColors.brandOrange,
+      backgroundColor: _successBg,
       colorText: Colors.white,
       margin: const EdgeInsets.all(12),
       borderRadius: 12,

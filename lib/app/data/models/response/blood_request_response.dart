@@ -21,6 +21,7 @@ class BloodRequestEntry {
     required this.notes,
     required this.requesterName,
     required this.requesterPhone,
+    this.requesterPhoto = '',
     this.responseCount = 0,
     this.createdAt,
     this.expiresAt,
@@ -40,6 +41,7 @@ class BloodRequestEntry {
   final String notes;
   final String requesterName;
   final String requesterPhone;
+  final String requesterPhoto;
   final int responseCount;
   final DateTime? createdAt;
   final DateTime? expiresAt;
@@ -94,6 +96,7 @@ class BloodRequestEntry {
       expiresAt: date(json['expires_at']),
       requesterName: str(profile['full_name']),
       requesterPhone: str(requester['phone']),
+      requesterPhoto: str(profile['photo_url']),
       responseCount: asInt(json['response_count']),
     );
   }

@@ -2,6 +2,7 @@ import 'package:animate_do/animate_do.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import '../../../core/helpers/app_helper.dart';
 import '../../../core/values/app_colors.dart';
 import '../../../data/models/sn_place.dart';
 import '../../../global_widget/custom_app_bar.dart';
@@ -466,7 +467,8 @@ class _TypeSelector extends StatelessWidget {
                           fontWeight: FontWeight.w800,
                           color: Color(0xFF0F172A))),
                   const SizedBox(height: 2),
-                  Text('৳${t.baseFare} base · ৳${t.perKmFare}/km',
+                  Text(
+                      '৳${Helpers.format(t.baseFare)} base · ৳${Helpers.format(t.perKmFare)}/km',
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: const TextStyle(
@@ -564,7 +566,7 @@ class _WaitingTimeSelector extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.only(left: 30),
             child: Text(
-                '$freeMin ${'min free'.tr}, then ৳$rate/${'min'.tr}',
+                '$freeMin ${'min free'.tr}, then ৳${Helpers.format(rate)}/${'min'.tr}',
                 style: const TextStyle(fontSize: 12, color: Color(0xFF94A3B8))),
           ),
           const SizedBox(height: 12),
@@ -655,16 +657,17 @@ class _FareCard extends StatelessWidget {
                   child: Column(
                   children: [
                     _row('Distance'.tr, '${f.distanceKm} km'),
-                    _row('Base fare'.tr, '৳${f.baseFare}'),
-                    _row('${'Mileage'.tr} (৳${f.perKmFare}/km)', '৳${f.mileageCharge}'),
+                    _row('Base fare'.tr, f.baseLabel),
+                    _row('${'Mileage'.tr} (${f.perKmFareLabel}/km)',
+                        f.mileageLabel),
                     if (f.waitingCharge > 0)
                       _row(
                           '${'Waiting'.tr} (${f.estimatedWaitMinutes - f.waitingFreeMinutes} ${'min'.tr})',
                           f.waitingLabel),
                     if (f.emergencyCharge > 0)
-                      _row('Emergency'.tr, '৳${f.emergencyCharge}'),
-                    if (f.nightCharge > 0) _row('Night'.tr, '৳${f.nightCharge}'),
-                    if (f.taxAmount > 0) _row('Tax'.tr, '৳${f.taxAmount}'),
+                      _row('Emergency'.tr, f.emergencyLabel),
+                    if (f.nightCharge > 0) _row('Night'.tr, f.nightLabel),
+                    if (f.taxAmount > 0) _row('Tax'.tr, f.taxLabel),
                     const Padding(
                       padding: EdgeInsets.symmetric(vertical: 8),
                       child: Divider(height: 1, color: Color(0xFFF1F5F9)),

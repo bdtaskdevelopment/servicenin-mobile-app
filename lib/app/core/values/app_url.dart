@@ -76,6 +76,8 @@ class ApiURL {
       'api/v1/ambulance/payment-methods';
   static String ambulanceBookingRate(String id) =>
       'api/v1/ambulance/bookings/$id/rate';
+  static String ambulanceBookingDetail(String id) =>
+      'api/v1/ambulance/bookings/$id';
   static final String ambulanceHotlines = 'api/v1/ambulance/hotlines';
 
   //===== Locations

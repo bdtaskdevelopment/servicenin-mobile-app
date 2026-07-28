@@ -15,7 +15,10 @@ class AppointmentsController extends GetxController {
   bool loading = false;
 
   List<HcAppointment> get upcoming => all.where((a) => a.upcoming).toList();
-  List<HcAppointment> get completed => all.where((a) => !a.upcoming).toList();
+  List<HcAppointment> get completed =>
+      all.where((a) => !a.upcoming && !a.isCancelled).toList();
+  List<HcAppointment> get cancelled =>
+      all.where((a) => a.isCancelled).toList();
 
   // Selected appointment + its live queue + the doctor's prescriptions.
   HcAppointment? selected;

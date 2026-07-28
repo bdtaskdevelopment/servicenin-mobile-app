@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 import 'package:latlong2/latlong.dart';
@@ -248,28 +250,80 @@ class AmbulanceController extends GetxController {
     Get.toNamed(Routes.AMBULANCE_FARE);
   }
 
+  bool refreshingBooking = false;
+
+  /// Re-fetches [lastBooking]'s latest state from the server — backs the
+  /// pull-to-refresh on the booking details page.
+  Future<void> refreshBookingDetails() async {
+    final current = lastBooking;
+    if (current == null || current.id.isEmpty || refreshingBooking) return;
+    refreshingBooking = true;
+    update();
+    try {
+      lastBooking = await _repo.fetchBookingById(current.id);
+    } catch (e) {
+      SnackHelper.error(e.toString().replaceFirst('Exception: ', ''));
+    } finally {
+      refreshingBooking = false;
+      update();
+    }
+  }
+
+  /// The road-following route for the booking details/confirmed page — kept
+  /// separate from the live [routePoints] used while picking a trip, since
+  /// that gets cleared right after a booking is confirmed.
+  List<LatLng> lastBookingRoutePoints = [];
+  String? _lastBookingRouteFor;
+
+  LatLng _pickupPointOf(AmbulanceBookingEntry b) =>
+      (b.pickupLat != null && b.pickupLng != null)
+          ? LatLng(b.pickupLat!, b.pickupLng!)
+          : BdGeo.point(b.pickupZilla, b.pickupDivision);
+
+  LatLng _dropPointOf(AmbulanceBookingEntry b) =>
+      (b.destLat != null && b.destLng != null)
+          ? LatLng(b.destLat!, b.destLng!)
+          : BdGeo.point(b.dropZilla, b.dropDivision);
+
+  /// Adopts an already-known road route for [lastBooking] (e.g. the one just
+  /// computed while picking the trip) instead of fetching it again.
+  void useRouteForLastBooking(List<LatLng> points) {
+    final b = lastBooking;
+    if (b == null || points.length < 2) return;
+    lastBookingRoutePoints = points;
+    _lastBookingRouteFor = b.id;
+  }
+
+  /// Fetches the real road-following polyline for [lastBooking] (same routing
+  /// service the booking screen uses), so the details page map matches it
+  /// instead of drawing a straight line between the two pins. Safe to call
+  /// repeatedly — skips the network call once already loaded for this booking.
+  Future<void> loadLastBookingRoute() async {
+    final b = lastBooking;
+    if (b == null) return;
+    if (_lastBookingRouteFor == b.id && lastBookingRoutePoints.isNotEmpty) {
+      return;
+    }
+    _lastBookingRouteFor = b.id;
+    try {
+      final r = await RoutePlannerService.instance
+          .route(_pickupPointOf(b), _dropPointOf(b));
+      lastBookingRoutePoints = r.points;
+      update();
+    } catch (_) {
+      // Keep whatever was there before (the view falls back to a straight
+      // line when this list is empty) — a failed route fetch shouldn't
+      // block viewing the booking details.
+    }
+  }
+
   /// Open a past booking's summary/map.
   void trackBooking(AmbulanceBookingEntry b) {
     lastBooking = b;
-    pickupPlace = SnPlace(
-      label: b.pickupAddress.isNotEmpty
-          ? b.pickupAddress
-          : '${b.pickupZilla}, ${b.pickupDivision}',
-      address: b.pickupAddress,
-      point: (b.pickupLat != null && b.pickupLng != null)
-          ? LatLng(b.pickupLat!, b.pickupLng!)
-          : BdGeo.point(b.pickupZilla, b.pickupDivision),
-    );
-    dropPlace = SnPlace(
-      label:
-          b.destination.isNotEmpty ? b.destination : '${b.dropZilla}, ${b.dropDivision}',
-      address: b.destination,
-      point: (b.destLat != null && b.destLng != null)
-          ? LatLng(b.destLat!, b.destLng!)
-          : BdGeo.point(b.dropZilla, b.dropDivision),
-    );
-    routePoints = [pickupPlace!.point, dropPlace!.point];
+    lastBookingRoutePoints = [];
+    _lastBookingRouteFor = null;
     _livePos = null;
+    unawaited(loadLastBookingRoute());
     update();
     Get.toNamed(Routes.AMBULANCE_CONFIRMED);
   }

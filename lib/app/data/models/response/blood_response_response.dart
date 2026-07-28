@@ -34,6 +34,7 @@ class BloodResponseEntry {
         request?.hospitalAddress ?? '',
       ].where((s) => s.isNotEmpty).join(' · ');
   String get requesterName => request?.requesterName ?? '';
+  String get requesterPhoto => request?.requesterPhoto ?? '';
   String get phone => request?.phone ?? '';
 
   String get respondedLabel {

@@ -22,6 +22,7 @@ class BloodChatController extends GetxController {
   String partnerName = 'Requester';
   String partnerInitials = 'R';
   String? partnerPhone;
+  String? partnerPhoto;
 
   List<ChatMessage> messages = [];
   bool loading = false;
@@ -36,11 +37,13 @@ class BloodChatController extends GetxController {
     required String chatId,
     required String partnerName,
     String? partnerPhone,
+    String? partnerPhoto,
   }) {
     this.chatId = chatId;
     this.partnerName = partnerName.isNotEmpty ? partnerName : 'Requester';
     partnerInitials = _initialsOf(this.partnerName);
     this.partnerPhone = partnerPhone;
+    this.partnerPhoto = partnerPhoto;
     messages = [];
     _myUserId = _currentUserId();
     update();

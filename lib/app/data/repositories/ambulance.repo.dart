@@ -94,6 +94,13 @@ class AmbulanceRepository {
     return AmbulanceBookingEntry.fromResponse(_payload(res));
   }
 
+  /// GET /api/v1/ambulance/bookings/:id — a single booking's latest state
+  /// (used to pull-to-refresh the booking details page).
+  Future<AmbulanceBookingEntry> fetchBookingById(String id) async {
+    final res = await provider.getData(ApiURL.ambulanceBookingDetail(id));
+    return AmbulanceBookingEntry.fromResponse(_payload(res));
+  }
+
   /// POST /api/v1/ambulance/bookings/:id/rate — rate a completed trip, or
   /// flag it as a complaint.
   Future<AuthSimpleResponse> rateBooking(

@@ -1,10 +1,14 @@
 import 'dart:convert';
 
+import '../../../core/helpers/app_helper.dart';
+
 dynamic _decode(dynamic src) => src is String ? jsonDecode(src) : src;
 
 String _str(dynamic v) => v?.toString().trim() ?? '';
 int _int(dynamic v) =>
     v is int ? v : int.tryParse(_str(v)) ?? (v is num ? v.toInt() : 0);
+double _money(dynamic v) =>
+    v is num ? v.toDouble() : double.tryParse(_str(v)) ?? 0;
 
 /// Fare breakdown from `POST /api/v1/ambulance/fare/estimate`.
 class FareEstimate {
@@ -28,52 +32,50 @@ class FareEstimate {
 
   final int distanceKm;
   final String routeType;
-  final int baseFare;
-  final int perKmFare;
-  final int mileageCharge;
+  final double baseFare;
+  final double perKmFare;
+  final double mileageCharge;
   final int estimatedWaitMinutes;
   final int waitingFreeMinutes;
-  final int waitingRatePerMin;
-  final int waitingCharge;
-  final int emergencyCharge;
-  final int nightCharge;
-  final int subTotal;
+  final double waitingRatePerMin;
+  final double waitingCharge;
+  final double emergencyCharge;
+  final double nightCharge;
+  final double subTotal;
   final int taxRate;
-  final int taxAmount;
-  final int totalFare;
+  final double taxAmount;
+  final double totalFare;
 
-  static String fmt(int n) {
-    final s = n.toString();
-    final b = StringBuffer();
-    for (int i = 0; i < s.length; i++) {
-      if (i > 0 && (s.length - i) % 3 == 0) b.write(',');
-      b.write(s[i]);
-    }
-    return b.toString();
-  }
+  /// "1,059.00" style — two decimal places, matching the web app.
+  static String fmt(double n) => Helpers.format(n);
 
   String get totalLabel => '৳${fmt(totalFare)}';
   String get baseLabel => '৳${fmt(baseFare)}';
+  String get perKmFareLabel => '৳${fmt(perKmFare)}';
   String get mileageLabel => '৳${fmt(mileageCharge)}';
   String get waitingLabel => '৳${fmt(waitingCharge)}';
+  String get waitingRatePerMinLabel => '৳${fmt(waitingRatePerMin)}';
+  String get emergencyLabel => '৳${fmt(emergencyCharge)}';
+  String get nightLabel => '৳${fmt(nightCharge)}';
+  String get taxLabel => '৳${fmt(taxAmount)}';
 
   factory FareEstimate.fromMap(Map<String, dynamic> json) {
     return FareEstimate(
       distanceKm: _int(json['distance_km']),
       routeType: _str(json['route_type']),
-      baseFare: _int(json['base_fare']),
-      perKmFare: _int(json['per_km_fare']),
-      mileageCharge: _int(json['mileage_charge']),
+      baseFare: _money(json['base_fare']),
+      perKmFare: _money(json['per_km_fare']),
+      mileageCharge: _money(json['mileage_charge']),
       estimatedWaitMinutes: _int(json['estimated_wait_minutes']),
       waitingFreeMinutes: _int(json['waiting_free_minutes']),
-      waitingRatePerMin: _int(json['waiting_rate_per_min']),
-      waitingCharge: _int(json['waiting_charge']),
-      emergencyCharge: _int(json['emergency_charge']),
-      nightCharge: _int(json['night_charge']),
-      subTotal: _int(json['sub_total']),
+      waitingRatePerMin: _money(json['waiting_rate_per_min']),
+      waitingCharge: _money(json['waiting_charge']),
+      emergencyCharge: _money(json['emergency_charge']),
+      nightCharge: _money(json['night_charge']),
+      subTotal: _money(json['sub_total']),
       taxRate: _int(json['tax_rate']),
-      taxAmount: _int(json['tax_amount']),
-      totalFare: _int(json['total_fare']),
+      taxAmount: _money(json['tax_amount']),
+      totalFare: _money(json['total_fare']),
     );
   }
 
