@@ -12,6 +12,7 @@ import '../../../global_widget/sn_map.dart' show SnMapMarker;
 import '../../../routes/app_pages.dart';
 import '../controllers/ambulance_controller.dart';
 import '../controllers/fare_controller.dart';
+import '../widgets/ambulance_widgets.dart' show ambulanceStatusLabel;
 
 const _navy = Color(0xFF1E2A4A);
 const _red = Color(0xFFE23744);
@@ -370,8 +371,7 @@ class BookingConfirmedView extends GetView<AmbulanceController> {
     );
   }
 
-  String _cap(String s) =>
-      s.isEmpty ? '—' : s[0].toUpperCase() + s.substring(1).replaceAll('_', ' ');
+  String _cap(String s) => s.isEmpty ? '—' : ambulanceStatusLabel(s);
 }
 
 /// Shown once an admin assigns a driver — photo, name, and a tap-to-call
@@ -622,8 +622,7 @@ class _StatusBadge extends StatelessWidget {
         : done
             ? const Color(0xFF15803D)
             : const Color(0xFFB45309);
-    final label =
-        status.isEmpty ? 'Pending' : status[0].toUpperCase() + status.substring(1);
+    final label = ambulanceStatusLabel(status);
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       decoration:

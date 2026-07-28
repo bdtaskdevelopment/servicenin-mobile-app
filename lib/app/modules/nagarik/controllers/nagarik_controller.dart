@@ -389,6 +389,13 @@ class NagarikController extends GetxController {
     }
   }
 
+  /// Pull-to-refresh on the report status page.
+  Future<void> refreshGrievanceDetail() async {
+    final id = selectedGrievance?.id;
+    if (id == null || id.isEmpty) return;
+    await _loadGrievanceDetail(id);
+  }
+
   /// Reporter confirms (or rejects) a resolved grievance.
   /// `confirmed: true` → fixed; `false` → not fixed.
   Future<void> submitVerification({required bool confirmed}) async {

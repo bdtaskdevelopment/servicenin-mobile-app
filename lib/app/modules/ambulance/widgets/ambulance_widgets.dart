@@ -10,6 +10,17 @@ const _red = Color(0xFFE23744);
 const _navy = Color(0xFF1E2A4A);
 const _green = Color(0xFF16A34A);
 
+/// Turns a raw backend status like `driver_on_way` into `Driver On Way` —
+/// every word capitalized, underscores replaced with spaces.
+String ambulanceStatusLabel(String s) {
+  if (s.isEmpty) return 'Pending'.tr;
+  return s
+      .split('_')
+      .where((w) => w.isNotEmpty)
+      .map((w) => w[0].toUpperCase() + w.substring(1).toLowerCase())
+      .join(' ');
+}
+
 /// Popup shown right after a booking is created — a "Thank you" message
 /// with a single Done button the caller awaits before navigating on.
 class BookingThankYouDialog extends StatelessWidget {
@@ -274,10 +285,7 @@ class BookingCard extends StatelessWidget {
     );
   }
 
-  String _statusLabel(String s) {
-    if (s.isEmpty) return 'Pending'.tr;
-    return s[0].toUpperCase() + s.substring(1).replaceAll('_', ' ');
-  }
+  String _statusLabel(String s) => ambulanceStatusLabel(s);
 
   bool _isCancelled(String s) {
     final v = s.toLowerCase();
