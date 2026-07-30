@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
@@ -39,11 +40,11 @@ class FareController extends GetxController {
   FareEstimate? fare;
   bool loadingFare = false;
 
-  int get _fareTotal => fare?.totalFare ?? 0;
+  double get _fareTotal => fare?.totalFare ?? 0;
 
   /// The amount charged to the gateway and shown as the total (no VAT — the
   /// ambulance module doesn't add one on top of the fare estimate).
-  int get payableAmount => _fareTotal;
+  double get payableAmount => _fareTotal;
   String get payableLabel => '৳${FareEstimate.fmt(payableAmount)}';
 
   // ── Payment methods (GET /api/v1/ambulance/payment-methods) ─────────
@@ -232,7 +233,30 @@ class FareController extends GetxController {
       _paidPayment = null; // booking succeeded — payment consumed
       _amb.lastBooking = created;
       _amb.fetchBookings(); // refresh the recent-bookings list
+      // Road-following route for the confirmed page's map — reuse the one
+      // just computed while picking the trip if we have it, otherwise fetch
+      // it fresh (e.g. an emergency booking made without a full route calc).
+      if (_amb.routePoints.length >= 2) {
+        _amb.useRouteForLastBooking(_amb.routePoints);
+      } else {
+        unawaited(_amb.loadLastBookingRoute());
+      }
       Get.toNamed(Routes.AMBULANCE_CONFIRMED);
+      // Clear the chosen destination now that this trip is dispatched, so the
+      // next visit to "Book ambulance" starts with an empty destination field
+      // instead of the previous trip's stale address. The confirmed page reads
+      // the booking's own pickup/destination for its map, not the live
+      // pickup/dropPlace, so this is safe to clear immediately.
+      _amb.dropPlace = null;
+      _amb.routePoints = [];
+      _amb.routeDistanceKm = 0;
+      _amb.routeDurationMin = 0;
+      _amb.update();
+      // Also clear the stale fare breakdown — otherwise the fare card keeps
+      // showing the just-booked trip's numbers even though the destination
+      // field above it is now empty.
+      fare = null;
+      update();
       await Get.dialog(
         BookingThankYouDialog(bookingNo: created.bookingNo),
         barrierDismissible: false,

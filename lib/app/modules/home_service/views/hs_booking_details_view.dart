@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../../core/values/app_colors.dart';
+import '../../../core/values/app_config.dart';
 import '../../../core/values/app_url.dart';
 import '../../../data/models/response/service_response.dart';
 import '../../../global_widget/invoice_actions.dart';
@@ -10,6 +11,17 @@ import '../controllers/home_service_controller.dart';
 const _teal = Color(0xFF0E9F8E);
 const _darkTeal = Color(0xFF0E7C6B);
 const _tile = Color(0xFFE0F2EF);
+
+/// Build an absolute URL for a provider photo, which may be absolute or a
+/// server-relative path (`/static/uploads/...`).
+String _providerPhotoUrl(String path) {
+  if (path.isEmpty) return '';
+  if (path.startsWith('http')) return path;
+  final base = AppConfig.baseUrl.endsWith('/')
+      ? AppConfig.baseUrl.substring(0, AppConfig.baseUrl.length - 1)
+      : AppConfig.baseUrl;
+  return path.startsWith('/') ? '$base$path' : '$base/$path';
+}
 
 class HsBookingDetailsView extends GetView<HomeServiceController> {
   const HsBookingDetailsView({super.key});
@@ -117,6 +129,11 @@ class HsBookingDetailsView extends GetView<HomeServiceController> {
                       ],
                     ),
                   ),
+                  // ── Assigned provider ─────────────────────────────────
+                  if (con.hasProvider) ...[
+                    const SizedBox(height: 12),
+                    _ProviderCard(con: con),
+                  ],
                   // Status timeline & work proof hidden for now.
                   /*
                   const SizedBox(height: 18),
@@ -587,6 +604,102 @@ class _PromoCodeRowState extends State<_PromoCodeRow> {
       ),
     );
   }
+}
+
+/// Assigned provider: photo/initials, name, rating + a call button — same
+/// layout as the "My bookings" list card, shown here so the customer can
+/// see and reach the provider from the booking details page too.
+class _ProviderCard extends StatelessWidget {
+  const _ProviderCard({required this.con});
+  final HomeServiceController con;
+
+  @override
+  Widget build(BuildContext context) {
+    final photo = _providerPhotoUrl(con.techPhotoUrl);
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+          color: AppColors.white, borderRadius: BorderRadius.circular(16)),
+      child: Row(
+        children: [
+          ClipRRect(
+            borderRadius: BorderRadius.circular(12),
+            child: SizedBox(
+              width: 48,
+              height: 48,
+              child: photo.isNotEmpty
+                  ? Image.network(photo,
+                      fit: BoxFit.cover,
+                      errorBuilder: (_, _, _) => _initials())
+                  : _initials(),
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('Service provider'.tr,
+                    style: const TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w700,
+                        color: Color(0xFF94A3B8),
+                        letterSpacing: 0.3)),
+                const SizedBox(height: 2),
+                Text(con.techName,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w800,
+                        color: Color(0xFF0F172A))),
+                const SizedBox(height: 2),
+                Row(
+                  children: [
+                    const Icon(Icons.star_rounded,
+                        size: 14, color: Color(0xFFF59E0B)),
+                    const SizedBox(width: 2),
+                    Text(con.techRating,
+                        style: const TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w700,
+                            color: Color(0xFF64748B))),
+                    if (con.techJobs.isNotEmpty)
+                      Text('  ·  ${con.techJobs}',
+                          style: const TextStyle(
+                              fontSize: 12, color: Color(0xFF94A3B8))),
+                  ],
+                ),
+              ],
+            ),
+          ),
+          if (con.techPhone.isNotEmpty) ...[
+            const SizedBox(width: 8),
+            InkWell(
+              onTap: con.callProvider,
+              customBorder: const CircleBorder(),
+              child: Container(
+                width: 42,
+                height: 42,
+                decoration: const BoxDecoration(
+                    color: _darkTeal, shape: BoxShape.circle),
+                child: const Icon(Icons.call_rounded,
+                    size: 19, color: Colors.white),
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _initials() => Container(
+        color: _tile,
+        alignment: Alignment.center,
+        child: Text(con.techInitials,
+            style: const TextStyle(
+                color: _teal, fontSize: 16, fontWeight: FontWeight.w800)),
+      );
 }
 
 /// Status chip — same mapping as the bookings list and tracking sheet so the

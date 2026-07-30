@@ -132,14 +132,16 @@ class _SessionCard extends StatelessWidget {
                         ),
                         if (group.length > 1) ...[
                           const SizedBox(width: 6),
+                          // Counts completed days, not which day is being
+                          // shown — an "X/Y" fraction reads as progress to
+                          // anyone glancing at it, so it has to mean that.
                           Container(
                             padding: const EdgeInsets.symmetric(
                                 horizontal: 7, vertical: 2),
                             decoration: BoxDecoration(
                                 color: _tile,
                                 borderRadius: BorderRadius.circular(6)),
-                            child: Text(
-                                '${'Day'.tr} ${headlineIndex + 1}/${group.length}',
+                            child: Text('$completedCount/${group.length}',
                                 style: const TextStyle(
                                     fontSize: 10.5,
                                     fontWeight: FontWeight.w800,
@@ -152,15 +154,6 @@ class _SessionCard extends StatelessWidget {
                     Text(first.center,
                         style: const TextStyle(
                             fontSize: 12.5, color: Color(0xFF94A3B8))),
-                    if (group.length > 1) ...[
-                      const SizedBox(height: 3),
-                      Text(
-                          '$completedCount/${group.length} ${'days completed'.tr}',
-                          style: const TextStyle(
-                              fontSize: 11,
-                              fontWeight: FontWeight.w700,
-                              color: Color(0xFF16A34A))),
-                    ],
                   ],
                 ),
               ),

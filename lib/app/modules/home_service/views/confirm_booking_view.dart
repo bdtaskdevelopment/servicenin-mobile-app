@@ -3,8 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../../core/values/app_colors.dart';
+import '../../../data/models/sn_place.dart';
 import '../../../global_widget/sn_shimmer.dart';
 import '../controllers/home_service_controller.dart';
+import 'hs_address_search_view.dart';
 
 const _teal = Color(0xFF0E9F8E);
 const _darkTeal = Color(0xFF0E7C6B);
@@ -134,24 +136,51 @@ class ConfirmBookingView extends GetView<HomeServiceController> {
                             ),
                             const SizedBox(width: 12),
                             Expanded(
-                              child: TextField(
-                                controller: con.addressCtrl,
-                                minLines: 1,
-                                maxLines: 2,
-                                decoration: InputDecoration(
-                                  hintText: 'Enter your service address'.tr,
-                                  hintStyle:
-                                      const TextStyle(color: Color(0xFF94A3B8)),
-                                  border: InputBorder.none,
-                                  isCollapsed: true,
-                                  contentPadding:
-                                      const EdgeInsets.symmetric(vertical: 14),
-                                ),
-                                style: const TextStyle(
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w700,
-                                    color: Color(0xFF0F172A)),
-                              ),
+                              child: con.loadingAddress
+                                  ? Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                          vertical: 14),
+                                      child: Text(
+                                          'Finding your location…'.tr,
+                                          style: const TextStyle(
+                                              fontSize: 14,
+                                              color: Color(0xFF94A3B8)),
+                                      ),
+                                    )
+                                  : TextField(
+                                      controller: con.addressCtrl,
+                                      minLines: 1,
+                                      maxLines: 2,
+                                      decoration: InputDecoration(
+                                        hintText:
+                                            'Enter your service address'.tr,
+                                        hintStyle: const TextStyle(
+                                            color: Color(0xFF94A3B8)),
+                                        border: InputBorder.none,
+                                        isCollapsed: true,
+                                        contentPadding:
+                                            const EdgeInsets.symmetric(
+                                                vertical: 14),
+                                      ),
+                                      style: const TextStyle(
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.w700,
+                                          color: Color(0xFF0F172A)),
+                                    ),
+                            ),
+                            IconButton(
+                              splashRadius: 20,
+                              tooltip: 'Search address'.tr,
+                              onPressed: () async {
+                                final place = await Get.to<SnPlace>(() =>
+                                    const HsAddressSearchView(
+                                        title: 'Search your address'));
+                                if (place != null) {
+                                  con.setServiceAddress(place);
+                                }
+                              },
+                              icon: const Icon(Icons.search_rounded,
+                                  color: Color(0xFF94A3B8), size: 22),
                             ),
                           ],
                         ),

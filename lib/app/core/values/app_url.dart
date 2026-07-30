@@ -76,6 +76,8 @@ class ApiURL {
       'api/v1/ambulance/payment-methods';
   static String ambulanceBookingRate(String id) =>
       'api/v1/ambulance/bookings/$id/rate';
+  static String ambulanceBookingDetail(String id) =>
+      'api/v1/ambulance/bookings/$id';
   static final String ambulanceHotlines = 'api/v1/ambulance/hotlines';
 
   //===== Locations
@@ -358,6 +360,7 @@ class ApiURL {
       'api/v1/notifications/$id/read';
   static final String snNotificationsReadAll =
       'api/v1/notifications/read-all';
+  static final String snDeviceToken = 'api/v1/notifications/device-token';
 
   //===== Nagarik Seba (civic grievances + support)
   static final String nagarikHotlines = 'api/v1/nagarik/hotlines';

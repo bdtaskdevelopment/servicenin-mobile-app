@@ -70,4 +70,11 @@ class HomeRepository {
   Future<void> markAllRead() async {
     await provider.patchData(ApiURL.snNotificationsReadAll);
   }
+
+  /// Registers (or clears, if [token] is empty) this device's FCM token
+  /// against the signed-in user — called right after login and whenever
+  /// Firebase rotates the token, so push notifications reach this device.
+  Future<void> registerDeviceToken(String token) async {
+    await provider.postData(ApiURL.snDeviceToken, {'fcm_token': token});
+  }
 }

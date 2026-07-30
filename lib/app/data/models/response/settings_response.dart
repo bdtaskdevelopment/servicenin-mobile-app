@@ -28,6 +28,7 @@ class AppSettings {
     this.appName = 'ServiceNin',
     this.appVersion = '',
     this.minAppVersion = '',
+    this.mapApiKey = '',
   });
 
   // Services / VAT
@@ -66,6 +67,10 @@ class AppSettings {
   final String appName;
   final String appVersion;
   final String minAppVersion;
+
+  // Google Maps API key (Places + Directions), configured server-side
+  // under the "map" settings group.
+  final String mapApiKey;
 
   /// VAT as a fraction for math (0.05), honouring the enabled flag.
   double get vatFraction => servicesVatEnabled ? servicesVatRate / 100.0 : 0.0;
@@ -111,5 +116,6 @@ class AppSettings {
         appName: _str(data, 'app_name', 'ServiceNin'),
         appVersion: _str(data, 'app_version'),
         minAppVersion: _str(data, 'min_app_version'),
+        mapApiKey: _str(data, 'map_api_key'),
       );
 }

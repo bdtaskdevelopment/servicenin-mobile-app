@@ -4,6 +4,8 @@
     <!-- Required to read the device location (lat/long). -->
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
+    <!-- Runtime permission on Android 13+ to show push notifications. -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
     <application
         android:label="ServiceNin"
         android:name="${applicationName}"

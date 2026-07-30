@@ -18,7 +18,7 @@ class AppointmentsView extends GetView<AppointmentsController> {
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
-      length: 2,
+      length: 3,
       child: Scaffold(
         backgroundColor: const Color(0xFFF7F8FA),
         appBar: AppBar(
@@ -48,6 +48,7 @@ class AppointmentsView extends GetView<AppointmentsController> {
             tabs: [
               Tab(text: 'Upcoming'.tr),
               Tab(text: 'Completed'.tr),
+              Tab(text: 'Cancelled'.tr),
             ],
           ),
         ),
@@ -60,6 +61,7 @@ class AppointmentsView extends GetView<AppointmentsController> {
               children: [
                 _List(items: con.upcoming),
                 _List(items: con.completed),
+                _List(items: con.cancelled),
               ],
             );
           },
@@ -137,7 +139,6 @@ class _ApptCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isUpcoming = appt.upcoming;
     final line = [appt.whenLabel, appt.venueName]
         .where((s) => s.isNotEmpty)
         .join(' · ');
@@ -187,7 +188,7 @@ class _ApptCard extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 8),
-              _StatusPill(upcoming: isUpcoming),
+              _StatusPill(upcoming: appt.upcoming, cancelled: appt.isCancelled),
             ],
           ),
           const Padding(
@@ -242,11 +243,25 @@ class _ApptCard extends StatelessWidget {
 }
 
 class _StatusPill extends StatelessWidget {
-  const _StatusPill({required this.upcoming});
+  const _StatusPill({required this.upcoming, this.cancelled = false});
   final bool upcoming;
+  final bool cancelled;
 
   @override
   Widget build(BuildContext context) {
+    if (cancelled) {
+      return Container(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+        decoration: BoxDecoration(
+            color: const Color(0xFFFEE2E2),
+            borderRadius: BorderRadius.circular(20)),
+        child: Text('Cancelled'.tr,
+            style: const TextStyle(
+                fontSize: 11,
+                fontWeight: FontWeight.w700,
+                color: Color(0xFFB91C1C))),
+      );
+    }
     if (upcoming) {
       return Container(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),

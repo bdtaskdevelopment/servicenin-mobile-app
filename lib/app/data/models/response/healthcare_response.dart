@@ -543,9 +543,13 @@ class HcAppointment {
       familyMemberName.isNotEmpty ? familyMemberName : patientName;
 
   bool get isVideo => type == 'video';
+  bool get isCancelled {
+    final s = status.toLowerCase();
+    return s == 'cancelled' || s == 'canceled';
+  }
   bool get upcoming {
     final s = status.toLowerCase();
-    return s != 'completed' && s != 'cancelled' && s != 'canceled';
+    return s != 'completed' && !isCancelled;
   }
 
   String get doctorName => doctor?.displayName ?? 'Doctor';

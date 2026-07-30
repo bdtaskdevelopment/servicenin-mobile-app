@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../../core/values/app_colors.dart';
-import '../../../global_widget/sn_map.dart';
+import '../../../global_widget/sn_google_map.dart';
+import '../../../global_widget/sn_map.dart' show SnMapMarker;
 import '../controllers/ambulance_controller.dart';
 import '../controllers/emergency_controller.dart';
 
@@ -25,7 +26,7 @@ class AmbulanceTrackingView extends GetView<EmergencyController> {
             child: GetBuilder<AmbulanceController>(
               builder: (a) {
                 final ambPoint = a.liveAmbulancePoint;
-                return SnMap(
+                return SnGoogleMap(
                   center: ambPoint,
                   zoom: 13,
                   route: [ambPoint, destPoint],

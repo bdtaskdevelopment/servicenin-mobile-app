@@ -16,6 +16,7 @@ class BloodResponder {
     required this.donorName,
     required this.donorBloodGroup,
     required this.donorPhone,
+    this.donorPhoto = '',
   });
 
   /// The fulfillment id — used for chat and the "blood received" confirmation.
@@ -29,6 +30,7 @@ class BloodResponder {
   final String donorName;
   final String donorBloodGroup;
   final String donorPhone;
+  final String donorPhoto;
 
   String get displayName => donorName.isNotEmpty ? donorName : 'Donor';
 
@@ -64,6 +66,7 @@ class BloodResponder {
       donorName: str(profile['full_name']),
       donorBloodGroup: str(donor['blood_group']),
       donorPhone: str(user['phone']),
+      donorPhoto: str(profile['photo_url']),
     );
   }
 

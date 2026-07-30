@@ -1,93 +1,146 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:latlong2/latlong.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../../core/values/app_colors.dart';
-import '../../../global_widget/sn_map.dart';
+import '../../../core/values/app_config.dart';
+import '../../../core/values/bd_geo.dart';
+import '../../../data/models/response/ambulance_booking_response.dart';
+import '../../../global_widget/sn_google_map.dart';
+import '../../../global_widget/sn_map.dart' show SnMapMarker;
 import '../../../routes/app_pages.dart';
 import '../controllers/ambulance_controller.dart';
 import '../controllers/fare_controller.dart';
+import '../widgets/ambulance_widgets.dart' show ambulanceStatusLabel;
 
 const _navy = Color(0xFF1E2A4A);
 const _red = Color(0xFFE23744);
 const _green = Color(0xFF16A34A);
 const _routeBlue = Color(0xFF4285F4);
 
+/// Builds an absolute driver-photo URL — `photo_url` may already be absolute
+/// (`https://…`) or a server-relative path (`/uploads/…`).
+String _driverPhotoUrl(String path) {
+  if (path.isEmpty) return '';
+  if (path.startsWith('http')) return path;
+  final base = AppConfig.baseUrl.endsWith('/')
+      ? AppConfig.baseUrl.substring(0, AppConfig.baseUrl.length - 1)
+      : AppConfig.baseUrl;
+  return path.startsWith('/') ? '$base$path' : '$base/$path';
+}
+
 class BookingConfirmedView extends GetView<AmbulanceController> {
   const BookingConfirmedView({super.key});
 
+  /// The booking's own pickup point — falls back to its zilla/division
+  /// centroid, then the country centroid. Deliberately independent of the
+  /// live `AmbulanceController.pickupPlace` (which is cleared right after a
+  /// booking is confirmed so the next "Book ambulance" visit starts fresh).
+  LatLng _pickupOf(dynamic b) {
+    if (b.pickupLat != null && b.pickupLng != null) {
+      return LatLng(b.pickupLat as double, b.pickupLng as double);
+    }
+    return BdGeo.point(b.pickupZilla as String, b.pickupDivision as String);
+  }
+
+  LatLng _dropOf(dynamic b) {
+    if (b.destLat != null && b.destLng != null) {
+      return LatLng(b.destLat as double, b.destLng as double);
+    }
+    return BdGeo.point(b.dropZilla as String, b.dropDivision as String);
+  }
+
   @override
   Widget build(BuildContext context) {
-    final b = controller.lastBooking;
-    final pickup = controller.pickupPoint;
-    final drop = controller.destPoint;
-    final hasRoute = controller.routePoints.length >= 2;
+    return GetBuilder<AmbulanceController>(
+      builder: (con) {
+        final b = con.lastBooking;
+        final pickup = b == null ? BdGeo.country : _pickupOf(b);
+        final drop = b == null ? BdGeo.country : _dropOf(b);
+        final hasRoute = b != null;
+        // The real road-following route (matches the booking screen's map);
+        // falls back to a straight pickup→drop line while it's still loading.
+        final routeLine = con.lastBookingRoutePoints.length >= 2
+            ? con.lastBookingRoutePoints
+            : (hasRoute ? [pickup, drop] : const <LatLng>[]);
 
-    return Scaffold(
-      backgroundColor: const Color(0xFFF7F8FA),
-      body: Column(
-        children: [
-          // Map
-          SizedBox(
-            width: double.infinity,
-            height: Get.height * 0.34,
-            child: Stack(
-              fit: StackFit.expand,
-              children: [
-                Positioned.fill(
-                  child: SnMap(
-                    center: pickup,
-                    zoom: 13,
-                    interactive: false,
-                    fitToRoute: hasRoute,
-                    route: hasRoute ? controller.routePoints : [pickup, drop],
-                    routeColor: _routeBlue,
-                    markers: [
-                      SnMapMarker(pickup, _green, Icons.my_location_rounded),
-                      SnMapMarker(drop, _red, Icons.location_on_rounded),
-                    ],
-                  ),
-                ),
-                Positioned(
-                  top: 0,
-                  left: 0,
-                  child: SafeArea(
-                    child: Padding(
-                      padding: const EdgeInsets.all(8),
-                      child: InkWell(
-                        onTap: () => Navigator.of(context).canPop()
-                            ? Get.back()
-                            : Get.offAllNamed(Routes.AMBULANCE),
-                        customBorder: const CircleBorder(),
-                        child: Container(
-                          width: 40,
-                          height: 40,
-                          decoration: BoxDecoration(
-                            color: AppColors.white,
-                            shape: BoxShape.circle,
-                            boxShadow: [
-                              BoxShadow(
-                                  color: Colors.black.withValues(alpha: 0.12),
-                                  blurRadius: 6),
-                            ],
+        return Scaffold(
+          backgroundColor: const Color(0xFFF7F8FA),
+          body: Column(
+            children: [
+              // Map — real Google Maps roads (live traffic-aware tiles), not
+              // the plain OSM preview used elsewhere in the app.
+              SizedBox(
+                width: double.infinity,
+                height: Get.height * 0.34,
+                child: Stack(
+                  fit: StackFit.expand,
+                  children: [
+                    Positioned.fill(
+                      child: SnGoogleMap(
+                        center: pickup,
+                        zoom: 13,
+                        interactive: true,
+                        fitToRoute: hasRoute,
+                        route: routeLine,
+                        routeColor: _routeBlue,
+                        markers: [
+                          SnMapMarker(
+                              pickup, _green, Icons.my_location_rounded),
+                          if (b != null)
+                            SnMapMarker(
+                                drop, _red, Icons.location_on_rounded),
+                        ],
+                      ),
+                    ),
+                    Positioned(
+                      top: 0,
+                      left: 0,
+                      child: SafeArea(
+                        child: Padding(
+                          padding: const EdgeInsets.all(8),
+                          child: InkWell(
+                            onTap: () => Navigator.of(context).canPop()
+                                ? Get.back()
+                                : Get.offAllNamed(Routes.AMBULANCE),
+                            customBorder: const CircleBorder(),
+                            child: Container(
+                              width: 40,
+                              height: 40,
+                              decoration: BoxDecoration(
+                                color: AppColors.white,
+                                shape: BoxShape.circle,
+                                boxShadow: [
+                                  BoxShadow(
+                                      color:
+                                          Colors.black.withValues(alpha: 0.12),
+                                      blurRadius: 6),
+                                ],
+                              ),
+                              child: const Icon(
+                                  Icons.arrow_back_ios_new_rounded,
+                                  size: 18,
+                                  color: Color(0xFF1A1A1A)),
+                            ),
                           ),
-                          child: const Icon(Icons.arrow_back_ios_new_rounded,
-                              size: 18, color: Color(0xFF1A1A1A)),
                         ),
                       ),
                     ),
-                  ),
+                  ],
                 ),
-              ],
-            ),
-          ),
-          // Details
-          Expanded(
-            child: b == null
-                ? Center(
-                    child: Text('No booking found'.tr,
-                        style: const TextStyle(color: Color(0xFF94A3B8))),
-                  )
-                : ListView(
+              ),
+              // Details
+              Expanded(
+                child: b == null
+                    ? Center(
+                        child: Text('No booking found'.tr,
+                            style: const TextStyle(color: Color(0xFF94A3B8))),
+                      )
+                    : RefreshIndicator(
+                        color: _red,
+                        onRefresh: con.refreshBookingDetails,
+                        child: ListView(
                     padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
                     children: [
                       // Success banner
@@ -172,6 +225,11 @@ class BookingConfirmedView extends GetView<AmbulanceController> {
                                 icon: Icons.airport_shuttle_rounded,
                                 label: 'Ambulance'.tr,
                                 value: b.typeName),
+                            if (b.vehicleName.isNotEmpty)
+                              _InfoRow(
+                                  icon: Icons.local_shipping_outlined,
+                                  label: 'Vehicle'.tr,
+                                  value: b.vehicleName),
                             _InfoRow(
                                 icon: Icons.straighten_rounded,
                                 label: 'Distance'.tr,
@@ -197,6 +255,10 @@ class BookingConfirmedView extends GetView<AmbulanceController> {
                           ],
                         ),
                       ),
+                      if (b.hasDriverAssigned) ...[
+                        const SizedBox(height: 12),
+                        _DriverCard(driver: b.driver!),
+                      ],
                       const SizedBox(height: 12),
                       // Payment
                       _Card(
@@ -300,14 +362,127 @@ class BookingConfirmedView extends GetView<AmbulanceController> {
                       ),
                     ],
                   ),
+                      ),
+              ),
+            ],
           ),
+        );
+      },
+    );
+  }
+
+  String _cap(String s) => s.isEmpty ? '—' : ambulanceStatusLabel(s);
+}
+
+/// Shown once an admin assigns a driver — photo, name, and a tap-to-call
+/// button, plus the driver's phone number for reference.
+class _DriverCard extends StatelessWidget {
+  const _DriverCard({required this.driver});
+  final AssignedDriver driver;
+
+  Future<void> _call() async {
+    final digits = driver.phone.trim();
+    if (digits.isEmpty) return;
+    try {
+      await launchUrl(Uri.parse('tel:$digits'),
+          mode: LaunchMode.externalApplication);
+    } catch (_) {
+      // Silent — the phone number is also shown as text below.
+    }
+  }
+
+  String _initials() {
+    final parts =
+        driver.fullName.trim().split(RegExp(r'\s+')).where((s) => s.isNotEmpty);
+    if (parts.isEmpty) return '?';
+    return parts.take(2).map((s) => s[0].toUpperCase()).join();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final photo = _driverPhotoUrl(driver.photoUrl);
+    return _Card(
+      child: Row(
+        children: [
+          ClipRRect(
+            borderRadius: BorderRadius.circular(28),
+            child: SizedBox(
+              width: 52,
+              height: 52,
+              child: photo.isNotEmpty
+                  ? Image.network(
+                      photo,
+                      fit: BoxFit.cover,
+                      errorBuilder: (_, _, _) => _DriverInitials(_initials()),
+                      loadingBuilder: (_, child, progress) =>
+                          progress == null ? child : _DriverInitials(_initials()),
+                    )
+                  : _DriverInitials(_initials()),
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('Your driver'.tr,
+                    style: const TextStyle(
+                        fontSize: 11.5,
+                        fontWeight: FontWeight.w700,
+                        color: Color(0xFF94A3B8),
+                        letterSpacing: 0.3)),
+                const SizedBox(height: 2),
+                Text(
+                    driver.fullName.isEmpty
+                        ? 'Driver assigned'.tr
+                        : driver.fullName,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                        fontSize: 15.5,
+                        fontWeight: FontWeight.w800,
+                        color: Color(0xFF0F172A))),
+                if (driver.phone.isNotEmpty) ...[
+                  const SizedBox(height: 2),
+                  Text(driver.phone,
+                      style:
+                          const TextStyle(fontSize: 12.5, color: Color(0xFF64748B))),
+                ],
+              ],
+            ),
+          ),
+          if (driver.phone.isNotEmpty)
+            InkWell(
+              onTap: _call,
+              customBorder: const CircleBorder(),
+              child: Container(
+                width: 42,
+                height: 42,
+                decoration: const BoxDecoration(
+                    color: _green, shape: BoxShape.circle),
+                child: const Icon(Icons.call_rounded,
+                    color: Colors.white, size: 20),
+              ),
+            ),
         ],
       ),
     );
   }
+}
 
-  String _cap(String s) =>
-      s.isEmpty ? '—' : s[0].toUpperCase() + s.substring(1).replaceAll('_', ' ');
+class _DriverInitials extends StatelessWidget {
+  const _DriverInitials(this.text);
+  final String text;
+  @override
+  Widget build(BuildContext context) => Container(
+        color: const Color(0xFFE2E8F0),
+        alignment: Alignment.center,
+        child: Text(text,
+            style: const TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w800,
+                color: Color(0xFF475569))),
+      );
 }
 
 class _Card extends StatelessWidget {
@@ -447,8 +622,7 @@ class _StatusBadge extends StatelessWidget {
         : done
             ? const Color(0xFF15803D)
             : const Color(0xFFB45309);
-    final label =
-        status.isEmpty ? 'Pending' : status[0].toUpperCase() + status.substring(1);
+    final label = ambulanceStatusLabel(status);
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       decoration:

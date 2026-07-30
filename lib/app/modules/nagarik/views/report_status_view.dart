@@ -61,7 +61,10 @@ class ReportStatusView extends GetView<NagarikController> {
                   ),
                 ),
                 Expanded(
-                  child: ListView(
+                  child: RefreshIndicator(
+                    color: _orange,
+                    onRefresh: con.refreshGrievanceDetail,
+                    child: ListView(
                     padding: const EdgeInsets.fromLTRB(16, 10, 16, 16),
                     children: [
                       // Title row
@@ -158,6 +161,7 @@ class ReportStatusView extends GetView<NagarikController> {
                                 fontSize: 12, color: Color(0xFF94A3B8))),
                       ],
                     ],
+                    ),
                   ),
                 ),
               ],

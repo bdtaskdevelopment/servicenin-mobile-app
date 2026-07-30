@@ -8,6 +8,7 @@ int _int(dynamic v) =>
 double? _dbl(dynamic v) => v == null
     ? null
     : (v is num ? v.toDouble() : double.tryParse(v.toString()));
+double _money(dynamic v) => _dbl(v) ?? 0;
 
 /// An ambulance type/tier from `/api/v1/ambulance/types` (also embedded in the
 /// available-ambulance and booking payloads under `type`).
@@ -33,15 +34,15 @@ class AmbulanceType {
   final String slug;
   final String description;
   final String equipmentList;
-  final int baseFare;
-  final int perKmFare;
-  final int waitingFarePerMin;
+  final double baseFare;
+  final double perKmFare;
+  final double waitingFarePerMin;
 
   /// Minutes of waiting the customer gets free before [waitingFarePerMin]
   /// starts applying (server default: 45).
   final int freeWaitMinutes;
-  final int emergencySurcharge;
-  final int nightSurcharge;
+  final double emergencySurcharge;
+  final double nightSurcharge;
   final int taxRate;
   final int sortOrder;
 
@@ -59,12 +60,12 @@ class AmbulanceType {
       slug: _str(json['slug']),
       description: _str(json['description']),
       equipmentList: _str(json['equipment_list']),
-      baseFare: _int(json['base_fare']),
-      perKmFare: _int(json['per_km_fare']),
-      waitingFarePerMin: _int(json['waiting_fare_per_min']),
+      baseFare: _money(json['base_fare']),
+      perKmFare: _money(json['per_km_fare']),
+      waitingFarePerMin: _money(json['waiting_fare_per_min']),
       freeWaitMinutes: _int(json['free_wait_minutes']),
-      emergencySurcharge: _int(json['emergency_surcharge']),
-      nightSurcharge: _int(json['night_surcharge']),
+      emergencySurcharge: _money(json['emergency_surcharge']),
+      nightSurcharge: _money(json['night_surcharge']),
       taxRate: _int(json['tax_rate']),
       sortOrder: _int(json['sort_order']),
     );
@@ -114,8 +115,8 @@ class Ambulance {
   final AmbulanceType? type;
 
   String get typeName => type?.name ?? 'Ambulance';
-  int get baseFare => type?.baseFare ?? 0;
-  int get perKmFare => type?.perKmFare ?? 0;
+  double get baseFare => type?.baseFare ?? 0;
+  double get perKmFare => type?.perKmFare ?? 0;
   bool get isAvailable => availabilityStatus.toLowerCase() == 'available';
 
   factory Ambulance.fromMap(Map<String, dynamic> json) {

@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 
 import '../../../core/helpers/snack_helper.dart';
+import '../../../core/services/notification_socket_service.dart';
 import '../../../core/values/storage.dart';
 import '../../../data/models/response/activity_response.dart';
 import '../../../data/models/response/profile_response.dart';
@@ -261,11 +262,13 @@ class AccountController extends GetxController {
   void openDeleteAccount() => Get.toNamed(Routes.ACCOUNT_DELETE);
 
   void deleteAccount() {
+    NotificationSocketService.instance.disconnect();
     StorageService.remove(StorageConstants.accessToken);
     Get.offAllNamed(Routes.AUTH);
   }
 
   void logout() {
+    NotificationSocketService.instance.disconnect();
     StorageService.remove(StorageConstants.accessToken);
     Get.offAllNamed(Routes.AUTH);
   }

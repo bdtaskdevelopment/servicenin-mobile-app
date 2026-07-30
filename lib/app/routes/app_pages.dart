@@ -20,6 +20,7 @@ import '../modules/home_service/views/hs_booking_details_view.dart';
 import '../modules/home_service/views/rate_service_view.dart';
 import '../modules/home_service/views/subscriptions_view.dart';
 import '../modules/home_service/views/provider_dashboard_view.dart';
+import '../modules/home_service/views/provider_job_map_view.dart';
 import '../modules/home_service/views/hs_chat_view.dart';
 import '../modules/home_service/views/hs_my_bookings_view.dart';
 import '../modules/home_service/views/earnings_view.dart';
@@ -261,6 +262,11 @@ class AppPages {
     GetPage(
       name: _Paths.HS_PROVIDER,
       page: () => const ProviderDashboardView(),
+      binding: HomeServiceBinding(),
+    ),
+    GetPage(
+      name: _Paths.HS_PROVIDER_JOB_MAP,
+      page: () => const ProviderJobMapView(),
       binding: HomeServiceBinding(),
     ),
     GetPage(

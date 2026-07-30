@@ -240,7 +240,12 @@ class _RateServiceViewState extends State<RateServiceView> {
                       if (tagNote.isNotEmpty) '($tagNote)',
                     ].where((s) => s.isNotEmpty).join(' ');
                     final ok = await con.submitRating(rating, comment);
-                    if (ok) con.backToHomeService();
+                    if (!ok) return;
+                    await Get.dialog(
+                      const _ReorderInterestDialog(),
+                      barrierDismissible: false,
+                    );
+                    con.backToHomeService();
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: _darkTeal,
@@ -254,6 +259,105 @@ class _RateServiceViewState extends State<RateServiceView> {
                           const TextStyle(fontSize: 16, fontWeight: FontWeight.w800)),
                 ),
               ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Shown right after a successful review submit — a courtesy prompt, not a
+/// required step (see HomeServiceController.submitReorderInterest). Either
+/// answer just closes the dialog; the caller navigates back to Home Service
+/// afterward regardless.
+class _ReorderInterestDialog extends StatelessWidget {
+  const _ReorderInterestDialog();
+
+  @override
+  Widget build(BuildContext context) {
+    final con = Get.find<HomeServiceController>();
+    return Dialog(
+      backgroundColor: Colors.transparent,
+      insetPadding: const EdgeInsets.symmetric(horizontal: 28),
+      child: Container(
+        padding: const EdgeInsets.fromLTRB(24, 28, 24, 20),
+        decoration: BoxDecoration(
+          color: AppColors.white,
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 64,
+              height: 64,
+              decoration: const BoxDecoration(
+                color: _tile,
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(Icons.favorite_rounded, color: _darkTeal, size: 32),
+            ),
+            const SizedBox(height: 16),
+            Text('Thanks for your review!'.tr,
+                style: const TextStyle(
+                    fontSize: 19,
+                    fontWeight: FontWeight.w800,
+                    color: Color(0xFF0F172A))),
+            const SizedBox(height: 8),
+            Text(
+              'Would you book this service again?'.tr,
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                  fontSize: 13.5, color: Color(0xFF64748B), height: 1.4),
+            ),
+            const SizedBox(height: 22),
+            Row(
+              children: [
+                Expanded(
+                  child: SizedBox(
+                    height: 50,
+                    child: OutlinedButton(
+                      onPressed: () {
+                        con.submitReorderInterest(false);
+                        Get.back();
+                      },
+                      style: OutlinedButton.styleFrom(
+                        side: const BorderSide(color: Color(0xFFE2E8F0)),
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(14)),
+                      ),
+                      child: Text('No'.tr,
+                          style: const TextStyle(
+                              fontSize: 15.5,
+                              fontWeight: FontWeight.w800,
+                              color: Color(0xFF334155))),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: SizedBox(
+                    height: 50,
+                    child: ElevatedButton(
+                      onPressed: () {
+                        con.submitReorderInterest(true);
+                        Get.back();
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: _darkTeal,
+                        foregroundColor: Colors.white,
+                        elevation: 0,
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(14)),
+                      ),
+                      child: Text('Yes'.tr,
+                          style: const TextStyle(
+                              fontSize: 15.5, fontWeight: FontWeight.w800)),
+                    ),
+                  ),
+                ),
+              ],
             ),
           ],
         ),

@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:intl/intl.dart';
 
+import '../../../core/helpers/app_helper.dart';
 import 'ambulance_response.dart';
 
 dynamic _decode(dynamic src) => src is String ? jsonDecode(src) : src;
@@ -11,6 +12,30 @@ int _int(dynamic v) =>
     v is int ? v : int.tryParse(_str(v)) ?? (v is num ? v.toInt() : 0);
 double? _doubleOrNull(dynamic v) =>
     v is num ? v.toDouble() : double.tryParse(_str(v));
+double _money(dynamic v) => _doubleOrNull(v) ?? 0;
+
+/// The driver assigned to a booking (embedded `driver` object once an admin
+/// assigns one — absent/null before that).
+class AssignedDriver {
+  AssignedDriver({
+    required this.id,
+    required this.fullName,
+    required this.phone,
+    required this.photoUrl,
+  });
+
+  final String id;
+  final String fullName;
+  final String phone;
+  final String photoUrl;
+
+  factory AssignedDriver.fromMap(Map<String, dynamic> json) => AssignedDriver(
+        id: _str(json['id']),
+        fullName: _str(json['full_name']),
+        phone: _str(json['phone']),
+        photoUrl: _str(json['photo_url']),
+      );
+}
 
 /// A booking from `/api/v1/ambulance/bookings` (list + create response).
 class AmbulanceBookingEntry {
@@ -40,6 +65,8 @@ class AmbulanceBookingEntry {
     this.createdAt,
     this.type,
     this.isRated = false,
+    this.driver,
+    this.assignedVehicle,
   });
 
   final String id;
@@ -59,8 +86,8 @@ class AmbulanceBookingEntry {
   final double? destLat;
   final double? destLng;
   final int distanceKm;
-  final int estimatedFare;
-  final int totalFare;
+  final double estimatedFare;
+  final double totalFare;
   final String paymentMethod;
   final String paymentStatus;
   final String status;
@@ -70,6 +97,25 @@ class AmbulanceBookingEntry {
   /// Whether the customer has already submitted a rating for this trip
   /// (from the server — persists across sessions, unlike a local flag).
   final bool isRated;
+
+  /// The driver assigned to this trip (admin-assigned) — null until then.
+  final AssignedDriver? driver;
+
+  /// The specific vehicle assigned (distinct from [type], which is the
+  /// category e.g. "ICU Ambulance") — null until an admin assigns one.
+  final Ambulance? assignedVehicle;
+
+  bool get hasDriverAssigned => driver != null && driver!.fullName.isNotEmpty;
+
+  /// The assigned vehicle's display name, e.g. "Toyota HiAce (DHK-METRO-GA-1234)".
+  String get vehicleName {
+    final v = assignedVehicle;
+    if (v == null) return '';
+    if (v.vehicleModel.isNotEmpty && v.licensePlate.isNotEmpty) {
+      return '${v.vehicleModel} (${v.licensePlate})';
+    }
+    return v.vehicleModel.isNotEmpty ? v.vehicleModel : v.licensePlate;
+  }
 
   String get typeName => type?.name ?? 'Ambulance';
 
@@ -86,22 +132,13 @@ class AmbulanceBookingEntry {
     return s != 'completed' && s != 'cancelled' && s != 'canceled';
   }
 
-  String get fareLabel => '৳${_fmt(totalFare > 0 ? totalFare : estimatedFare)}';
+  String get fareLabel =>
+      '৳${Helpers.format(totalFare > 0 ? totalFare : estimatedFare)}';
 
   String get dateAmount {
     final dt = createdAt?.toLocal();
     final date = dt == null ? '' : DateFormat('d MMM, h:mm a').format(dt);
     return [date, fareLabel].where((s) => s.isNotEmpty).join(' · ');
-  }
-
-  static String _fmt(int n) {
-    final s = n.toString();
-    final b = StringBuffer();
-    for (int i = 0; i < s.length; i++) {
-      if (i > 0 && (s.length - i) % 3 == 0) b.write(',');
-      b.write(s[i]);
-    }
-    return b.toString();
   }
 
   factory AmbulanceBookingEntry.fromMap(Map<String, dynamic> json) {
@@ -124,8 +161,8 @@ class AmbulanceBookingEntry {
       destLat: _doubleOrNull(json['dest_lat']),
       destLng: _doubleOrNull(json['dest_lng']),
       distanceKm: _int(json['distance_km']),
-      estimatedFare: _int(json['estimated_fare']),
-      totalFare: _int(json['total_fare']),
+      estimatedFare: _money(json['estimated_fare']),
+      totalFare: _money(json['total_fare']),
       paymentMethod: _str(json['payment_method']),
       paymentStatus: _str(json['payment_status']),
       status: _str(json['status']),
@@ -134,6 +171,12 @@ class AmbulanceBookingEntry {
           ? AmbulanceType.fromMap((json['type'] as Map).cast<String, dynamic>())
           : null,
       isRated: json['is_rated'] == true,
+      driver: json['driver'] is Map
+          ? AssignedDriver.fromMap((json['driver'] as Map).cast<String, dynamic>())
+          : null,
+      assignedVehicle: json['ambulance'] is Map
+          ? Ambulance.fromMap((json['ambulance'] as Map).cast<String, dynamic>())
+          : null,
     );
   }
 

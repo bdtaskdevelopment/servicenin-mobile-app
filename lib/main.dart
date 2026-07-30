@@ -2,7 +2,7 @@ import 'dart:async';
 import 'dart:io';
 import 'package:internet_checker_plus/internet_checker_plus.dart';
 import 'package:servicenin/app/core/helpers/app_helper.dart';
-// import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -10,16 +10,28 @@ import 'package:get_storage/get_storage.dart';
 // import 'package:internet_checker_plus/internet_level.dart';
 
 import 'app/app_binding.dart';
+import 'app/core/services/notification_socket_service.dart';
+import 'app/core/services/push_notification_service.dart';
 import 'app/core/values/app_const.dart';
 import 'app/core/values/storage.dart';
 import 'app/data/services/storage.service.dart';
 import 'app/my_app.dart';
-// import 'firebase_options.dart';
+import 'firebase_options.dart';
 import 'package:flutter_log_console/flutter_log_console.dart';
 void main() async {
 
   // runZonedGuarded(() async{
     WidgetsFlutterBinding.ensureInitialized();
+
+    // Push notifications ride on Firebase — a failed/misconfigured init
+    // must not block the rest of startup, the app works fine without push.
+    try {
+      await Firebase.initializeApp(
+        options: DefaultFirebaseOptions.currentPlatform,
+      );
+    } catch (e) {
+      FlutterConsole.log("Firebase init failed, push notifications disabled: $e");
+    }
 
     // White system navigation bar (with dark buttons) from the very start —
     // applies on the splash and every page that follows.
@@ -56,6 +68,15 @@ void main() async {
     await GetStorage.init();
 
     AppDependencyInjection.init();
+
+    // Fire-and-forget — permission prompt + token fetch/registration
+    // shouldn't block reaching the splash screen.
+    unawaited(PushNotificationService.instance.init());
+
+    // Reconnects the realtime notification feed if a session is already
+    // stored (app relaunch while logged in) — connect() itself no-ops
+    // when there's no access token yet.
+    NotificationSocketService.instance.connect();
 
     // One-time: make Bangla the default language. This resets any stale value
     // left by earlier builds (e.g. English) so the app opens in Bangla. It runs

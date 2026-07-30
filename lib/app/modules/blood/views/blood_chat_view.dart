@@ -69,17 +69,10 @@ class _BloodChatViewState extends State<BloodChatView> {
                         icon: const Icon(Icons.arrow_back_ios_new_rounded,
                             size: 20, color: Color(0xFF1A1A1A)),
                       ),
-                      Container(
-                        width: 40,
-                        height: 40,
-                        decoration: BoxDecoration(
-                            color: _red.withValues(alpha: 0.12),
-                            shape: BoxShape.circle),
-                        alignment: Alignment.center,
-                        child: Text(c.partnerInitials,
-                            style: const TextStyle(
-                                color: _red, fontWeight: FontWeight.w800)),
-                      ),
+                      _Avatar(
+                          name: c.partnerName,
+                          photo: c.partnerPhoto,
+                          size: 40),
                       const SizedBox(width: 10),
                       Expanded(
                         child: Column(
@@ -256,17 +249,18 @@ class _Bubble extends StatelessWidget {
 }
 
 class _Avatar extends StatelessWidget {
-  const _Avatar({required this.name, this.photo});
+  const _Avatar({required this.name, this.photo, this.size = 30});
   final String name;
   final String? photo;
+  final double size;
 
   @override
   Widget build(BuildContext context) {
     final initial = name.trim().isNotEmpty ? name.trim()[0].toUpperCase() : 'U';
     final hasPhoto = photo != null && photo!.trim().isNotEmpty;
     return Container(
-      width: 30,
-      height: 30,
+      width: size,
+      height: size,
       decoration: BoxDecoration(
           color: _red.withValues(alpha: 0.12), shape: BoxShape.circle),
       clipBehavior: Clip.antiAlias,
@@ -274,8 +268,8 @@ class _Avatar extends StatelessWidget {
       child: hasPhoto
           ? CachedNetworkImage(
               imageUrl: photo!,
-              width: 30,
-              height: 30,
+              width: size,
+              height: size,
               fit: BoxFit.cover,
               errorWidget: (context, url, error) => _letter(initial),
             )
@@ -284,6 +278,6 @@ class _Avatar extends StatelessWidget {
   }
 
   Widget _letter(String initial) => Text(initial,
-      style: const TextStyle(
-          color: _red, fontSize: 12, fontWeight: FontWeight.w800));
+      style: TextStyle(
+          color: _red, fontSize: size * 0.4, fontWeight: FontWeight.w800));
 }

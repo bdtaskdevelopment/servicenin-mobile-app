@@ -272,4 +272,62 @@ class ServiceRepository {
         .postData(ApiURL.serviceBookingChat(id), {'message': message});
     return AuthSimpleResponse.fromMap(_payload(res));
   }
+
+  // ── Provider (job management + GPS push) ─────────────────────────────
+  Future<ProviderDashboardSummary> fetchProviderDashboard() async {
+    final res = await provider.getData(ApiURL.hsProviderDashboard);
+    return ProviderDashboardSummary.fromResponse(_payload(res));
+  }
+
+  Future<List<ProviderJob>> fetchProviderJobs({String? status}) async {
+    final res = await provider.getData(ApiURL.hsProviderJobs(status: status));
+    return ProviderJob.listFromResponse(_payload(res));
+  }
+
+  /// Accepts a whole booking, or just [taskId] on a split/multi-provider
+  /// order when the provider owns more than one task on it.
+  Future<void> acceptJob(String bookingId, {String? taskId}) async {
+    final res = await provider.postData(ApiURL.hsProviderJobAccept(bookingId),
+        {if (taskId != null && taskId.isNotEmpty) 'task_id': taskId});
+    _payload(res);
+  }
+
+  Future<void> declineJob(String bookingId,
+      {String? reason, String? taskId}) async {
+    final res = await provider.postData(ApiURL.hsProviderJobDecline(bookingId), {
+      if (reason != null && reason.isNotEmpty) 'reason': reason,
+      if (taskId != null && taskId.isNotEmpty) 'task_id': taskId,
+    });
+    _payload(res);
+  }
+
+  /// Advances a booking through the provider-facing status lifecycle
+  /// (accepted → on_the_way → arrived → in_progress → completed). [lat]/[lng]
+  /// are optional — the backend accepts a location alongside a transition
+  /// (e.g. when flipping to on_the_way) as well as via the standalone
+  /// [pushProviderLocation] ping.
+  Future<ServiceBooking> updateBookingStatus(
+    String bookingId,
+    String status, {
+    String? taskId,
+    double? lat,
+    double? lng,
+  }) async {
+    final res = await provider.postData(ApiURL.serviceBookingStatus(bookingId), {
+      'status': status,
+      if (taskId != null && taskId.isNotEmpty) 'task_id': taskId,
+      if (lat != null) 'lat': lat,
+      if (lng != null) 'lng': lng,
+    });
+    return ServiceBooking.fromResponse(_payload(res));
+  }
+
+  /// Pushes a GPS ping for the assigned provider — persisted and broadcast
+  /// live to the citizen's tracking screen via the booking's location topic.
+  Future<void> pushProviderLocation(
+      String bookingId, double lat, double lng) async {
+    final res = await provider
+        .postData(ApiURL.serviceBookingLocation(bookingId), {'lat': lat, 'lng': lng});
+    _payload(res);
+  }
 }

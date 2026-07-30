@@ -1,8 +1,8 @@
 import 'package:dio/dio.dart';
 import 'package:latlong2/latlong.dart';
 
-import '../../core/values/app_config.dart';
 import '../models/sn_place.dart';
+import 'settings.service.dart';
 
 /// A place suggestion from Google Places Autocomplete. Doesn't carry
 /// coordinates yet — call [GeoSearchService.details] with [placeId] to
@@ -29,7 +29,7 @@ class GeoSearchService {
     receiveTimeout: const Duration(seconds: 8),
   ));
 
-  String get _key => AppConfig.googleMapsApiKey;
+  String get _key => SettingsService.to.googleMapsApiKey;
 
   /// Autocomplete predictions for [query]. Returns an empty list on any
   /// failure (offline, missing/invalid key, malformed response) — search is
@@ -92,6 +92,31 @@ class GeoSearchService {
         address: address,
         point: LatLng(lat, lng),
       );
+    } catch (_) {
+      return null;
+    }
+  }
+
+  /// Forward-geocodes a free-text address to coordinates, or `null` on
+  /// failure (offline, missing/invalid key, or no match) — used to show a
+  /// destination pin for an address string that has no stored lat/lng
+  /// (e.g. a booking's delivery address).
+  Future<LatLng?> forward(String address) async {
+    final q = address.trim();
+    if (q.isEmpty || _key.isEmpty) return null;
+    try {
+      final res = await _dio.get(
+        'https://maps.googleapis.com/maps/api/geocode/json',
+        queryParameters: {'address': q, 'components': 'country:BD', 'key': _key},
+      );
+      final results = res.data is Map ? res.data['results'] : null;
+      if (results is! List || results.isEmpty) return null;
+      final loc = (results.first['geometry'] as Map?)?['location'];
+      if (loc is! Map) return null;
+      final lat = (loc['lat'] as num?)?.toDouble();
+      final lng = (loc['lng'] as num?)?.toDouble();
+      if (lat == null || lng == null) return null;
+      return LatLng(lat, lng);
     } catch (_) {
       return null;
     }
