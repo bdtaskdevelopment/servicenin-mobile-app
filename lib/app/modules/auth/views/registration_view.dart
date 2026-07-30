@@ -6,8 +6,9 @@ import '../../../core/values/app_colors.dart';
 import '../../../global_widget/primary_button.dart';
 import '../controllers/auth_controller.dart';
 import '../controllers/registration_controller.dart';
+import '../widgets/terms_notice.dart';
 // ── Multi-step design (About · Location · PIN) — commented out for now,
-//    registration now collects only name · phone · email. ──────────────
+//    registration now collects only name · phone. ──────────────────────
 // import '../widgets/step_progress_bar.dart';
 // import 'steps/step_about.dart';
 // import 'steps/step_location.dart';
@@ -79,24 +80,22 @@ class RegistrationView extends GetView<RegistrationController> {
                       ),
                       const SizedBox(height: 8),
                       _RegPhoneInput(con: con),
-                      const SizedBox(height: 18),
-                      _Field(
-                        label: 'Email (optional)'.tr,
-                        hint: 'you@example.com',
-                        controller: con.emailController,
-                        onChanged: con.onInfoChanged,
-                        keyboard: TextInputType.emailAddress,
-                      ),
                     ],
                   ),
                 ),
                 // ── Bottom action ──────────────────────────────────
                 Padding(
                   padding: const EdgeInsets.fromLTRB(20, 8, 20, 16),
-                  child: PrimaryButton(
-                    label: 'Create your account'.tr,
-                    enabled: con.isInfoValid,
-                    onPressed: con.register,
+                  child: Column(
+                    children: [
+                      PrimaryButton(
+                        label: 'Create your account'.tr,
+                        enabled: con.isInfoValid,
+                        onPressed: con.register,
+                      ),
+                      const SizedBox(height: 14),
+                      const TermsNotice(),
+                    ],
                   ),
                 ),
               ],

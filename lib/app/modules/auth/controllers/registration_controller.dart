@@ -16,10 +16,9 @@ class RegistrationController extends GetxController {
 
   bool busy = false;
 
-  // ── Sign-up info (single step: name · phone · email) ──────────────
+  // ── Sign-up info (single step: name · phone) ───────────────────────
   final TextEditingController nameController = TextEditingController();
   final TextEditingController phoneController = TextEditingController();
-  final TextEditingController emailController = TextEditingController();
 
   @override
   void onInit() {
@@ -33,25 +32,18 @@ class RegistrationController extends GetxController {
 
   void onInfoChanged(String _) => update();
 
-  bool _emailOk(String e) {
-    final r = RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$');
-    return r.hasMatch(e);
-  }
-
   /// Same phone rules as the login screen: 10 local digits after +880.
   bool get isPhoneValid => phoneController.text.trim().length == 10;
   String get fullPhone =>
       '${AuthController.countryCode}${phoneController.text.trim()}';
 
   bool get isInfoValid =>
-      nameController.text.trim().isNotEmpty &&
-      isPhoneValid &&
-      // Email is optional — only validate the format when something is entered.
-      (emailController.text.trim().isEmpty ||
-          _emailOk(emailController.text.trim()));
+      nameController.text.trim().isNotEmpty && isPhoneValid;
 
-  /// Register the account (name · phone · email) then go to the login page,
-  /// where the user signs in with phone + OTP. No OTP step here.
+  /// Register the account (name · phone) then go straight to the OTP screen
+  /// — the register endpoint already sends the OTP for this phone, so no
+  /// separate request is needed. On successful verification the OTP screen
+  /// takes the user straight home, same as a normal login.
   Future<void> register() async {
     if (!isInfoValid || busy) return;
     busy = true;
@@ -64,17 +56,21 @@ class RegistrationController extends GetxController {
       final res = await Get.find<AuthRepository>().register(
         name: nameController.text.trim(),
         phone: fullPhone,
-        email: emailController.text.trim(),
+        email: '',
       );
       if (Get.isDialogOpen ?? false) Get.back();
       busy = false;
       update();
       if (res.success) {
-        // Remember the phone so the login screen can pre-fill it.
-        StorageService.save(
-            StorageConstants.phoneNumber, phoneController.text.trim());
-        Get.offAllNamed(Routes.AUTH);
-        SnackHelper.success(res.message.isEmpty ? 'এখন লগইন করুন' : res.message);
+        final phone = phoneController.text.trim();
+        StorageService.save(StorageConstants.phoneNumber, phone);
+        if (!Get.isRegistered<AuthController>()) {
+          Get.put(AuthController());
+        }
+        final authCon = Get.find<AuthController>();
+        authCon.phoneController.text = phone;
+        authCon.otpPhone = fullPhone;
+        authCon.proceedToOtp();
       } else {
         SnackHelper.error(res.message);
       }
