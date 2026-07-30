@@ -205,21 +205,6 @@ class ApiURL {
       'api/v1/services/bookings/$id/promo';
   static String serviceBookingReorderInterest(String id) =>
       'api/v1/services/bookings/$id/reorder-interest';
-  static String serviceBookingStatus(String id) =>
-      'api/v1/services/bookings/$id/status';
-  static String serviceBookingLocation(String id) =>
-      'api/v1/services/bookings/$id/location';
-
-  //===== Home-service provider (job management + GPS push).
-  static final String hsProviderDashboard =
-      'api/v1/services/provider/dashboard';
-  static String hsProviderJobs({String? status}) => status == null || status.isEmpty
-      ? 'api/v1/services/provider/jobs'
-      : 'api/v1/services/provider/jobs?status=$status';
-  static String hsProviderJobAccept(String id) =>
-      'api/v1/services/provider/jobs/$id/accept';
-  static String hsProviderJobDecline(String id) =>
-      'api/v1/services/provider/jobs/$id/decline';
 
   //===== Post-booking order editing.
   // Two kinds of line: "items" are service jobs (sub-services, labour) and
