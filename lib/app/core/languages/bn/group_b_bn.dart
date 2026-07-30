@@ -45,6 +45,7 @@ const Map<String, String> groupBBn = {
   'See all →': 'সব দেখুন →',
   'No bookings yet.': 'এখনও কোনো বুকিং নেই।',
   'My bookings': 'আমার বুকিং',
+  'History': 'আমার বুকিং',
   'Tap a trip to see its details': 'বিস্তারিত দেখতে একটি ট্রিপে ট্যাপ করুন',
   'Notifications': 'নোটিফিকেশন',
   'No notifications': 'কোনো নোটিফিকেশন নেই',

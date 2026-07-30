@@ -1,6 +1,7 @@
 import 'package:get/get.dart';
 
 import '../../../core/helpers/snack_helper.dart';
+import '../../../core/services/notification_router.dart';
 import '../../../data/models/response/notification_response.dart';
 import '../../../data/repositories/home.repo.dart';
 
@@ -46,6 +47,21 @@ class NotificationsController extends GetxController {
       unreadCount = await _repo.fetchUnreadCount();
       update();
     } catch (_) {}
+  }
+
+  /// Tapping a row marks it read AND deep-links to the entity it refers to.
+  void openNotification(AppNotification n) {
+    markRead(n); // fire-and-forget; navigation shouldn't wait on the PATCH
+    NotificationRouter.instance.handleNotification(n);
+  }
+
+  /// The ✕ on a card: mark it read and remove it from the visible list.
+  /// There is no delete endpoint, so this is a local, in-session dismiss —
+  /// a full refresh can bring already-read notifications back.
+  void dismiss(AppNotification n) {
+    markRead(n);
+    items.remove(n);
+    update();
   }
 
   Future<void> markRead(AppNotification n) async {

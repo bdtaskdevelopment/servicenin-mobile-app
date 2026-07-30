@@ -9,6 +9,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../../core/helpers/location_helper.dart';
 import '../../../core/helpers/snack_helper.dart';
 import '../../../core/helpers/sslcommerz_helper.dart';
+import '../../../core/mixins/live_refresh_mixin.dart';
 import '../../../core/services/home_service_socket_service.dart';
 import '../../../data/models/response/service_response.dart';
 import '../../../data/models/sn_place.dart';
@@ -112,8 +113,27 @@ class HsServiceItem {
 
 enum HsListMode { category, all, search }
 
-class HomeServiceController extends GetxController {
+class HomeServiceController extends GetxController with LiveRefreshMixin {
   ServiceRepository get _repo => Get.find<ServiceRepository>();
+
+  // ── Live refresh (LiveRefreshMixin) ─────────────────────────────────
+  // A booking status change (from the provider/admin) writes a notification
+  // on `user:<id>`; when it's for the booking currently open, re-pull it so
+  // the details/tracking page updates without a pull-to-refresh.
+  @override
+  Set<String> get liveRefreshTypes => {'service_booking', 'booking'};
+  @override
+  String get liveRefreshId => orderBooking?.id ?? '';
+  @override
+  Future<void> onLiveRefresh() => refreshOrder();
+
+  /// Deep-link entry: the notification router has already navigated to
+  /// HS_DETAILS; fetch the booking fresh (it isn't in memory) and populate
+  /// the fields the detail view reads.
+  Future<void> loadBookingById(String id) async {
+    if (id.isEmpty) return;
+    await _loadTrack(id);
+  }
 
   // ── Catalog ─────────────────────────────────────────────────────────
   List<HsCategory> categories = [];
@@ -140,6 +160,7 @@ class HomeServiceController extends GetxController {
     _initDefaultAddress();
     fetchCategories();
     fetchPopular();
+    startLiveRefresh();
   }
 
   Future<void> fetchCategories() async {

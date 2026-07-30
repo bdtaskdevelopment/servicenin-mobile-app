@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../../core/helpers/snack_helper.dart';
+import '../../../core/mixins/live_refresh_mixin.dart';
 import '../../../data/models/response/physio_response.dart';
 import '../../../data/repositories/physio.repo.dart';
 import '../../../routes/app_pages.dart';
@@ -119,7 +120,7 @@ class PhysioSession {
       );
 }
 
-class PhysioController extends GetxController {
+class PhysioController extends GetxController with LiveRefreshMixin {
   PhysioRepository get _repo => Get.find<PhysioRepository>();
 
   // ── Home: services + centers ─────────────────────────────────────────
@@ -129,10 +130,21 @@ class PhysioController extends GetxController {
   bool loadingCenters = false;
   PhysioServiceItem? selectedService;
 
+  // ── Live refresh (LiveRefreshMixin) ─────────────────────────────────
+  // No per-session detail page, so this is a LIST refresher (empty id):
+  // any physio status change re-pulls the "my sessions" list.
+  @override
+  Set<String> get liveRefreshTypes => {'physio_appointment'};
+  @override
+  String get liveRefreshId => '';
+  @override
+  Future<void> onLiveRefresh() => fetchMySessions();
+
   @override
   void onInit() {
     super.onInit();
     fetchServices();
+    startLiveRefresh();
   }
 
   Future<void> fetchServices() async {

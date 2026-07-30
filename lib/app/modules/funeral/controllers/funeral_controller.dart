@@ -2,12 +2,21 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../../core/helpers/snack_helper.dart';
+import '../../../core/mixins/live_refresh_mixin.dart';
 import '../../../data/models/response/funeral_response.dart';
 import '../../../data/repositories/funeral.repo.dart';
 import '../../../routes/app_pages.dart';
 
-class FuneralController extends GetxController {
+class FuneralController extends GetxController with LiveRefreshMixin {
   FuneralRepository get _repo => Get.find<FuneralRepository>();
+
+  // ── Live refresh (LiveRefreshMixin) — list refresher ────────────────
+  @override
+  Set<String> get liveRefreshTypes => {'funeral_request'};
+  @override
+  String get liveRefreshId => '';
+  @override
+  Future<void> onLiveRefresh() => fetchMyRequests();
 
   // ── Services (admin-managed) ──────────────────────────────────────
   List<FuneralService> services = [];
@@ -41,6 +50,7 @@ class FuneralController extends GetxController {
   void onInit() {
     super.onInit();
     fetchServices();
+    startLiveRefresh();
   }
 
   Future<void> fetchServices() async {

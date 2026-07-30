@@ -7,6 +7,7 @@ import 'package:permission_handler/permission_handler.dart';
 import '../../data/repositories/home.repo.dart';
 import '../../data/services/storage.service.dart';
 import '../values/storage.dart';
+import 'notification_router.dart';
 
 /// Handles a message that arrived while the app was backgrounded/terminated.
 /// Must be a top-level (or static) function — the plugin runs it in its own
@@ -34,15 +35,31 @@ class PushNotificationService {
     if (!_listenersReady) {
       _listenersReady = true;
       FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
-      // No foreground display here on purpose — NotificationSocketService's
-      // WebSocket connection already shows a snackbar for this same event
-      // while the app is open. FCM's job is the background/closed case,
-      // where the OS shows the system notification on its own since our
-      // messages carry a "notification" payload; showing it again here
-      // would duplicate the WebSocket's snackbar.
+
+      // No foreground *display* here on purpose — NotificationSocketService's
+      // WebSocket connection already shows a tappable banner for this same
+      // event while the app is open (and its payload carries the notification
+      // id we de-dup on). FCM's display job is the background/closed case,
+      // where the OS renders the system notification itself.
+
+      // A tapped push that reopened a backgrounded app → deep-link.
+      FirebaseMessaging.onMessageOpenedApp.listen(_handleTap);
+
       _messaging.onTokenRefresh.listen(_sendToken);
     }
+
+    // A tap that cold-started the app from terminated. The router queues it
+    // if nav/auth isn't ready yet and delivers it once the app lands home.
+    final initial = await _messaging.getInitialMessage();
+    if (initial != null) _handleTap(initial);
+
     await syncToken();
+  }
+
+  /// Route a tapped push to its detail page via the shared router.
+  void _handleTap(RemoteMessage message) {
+    if (message.data.isEmpty) return;
+    NotificationRouter.instance.handleFcmData(message.data);
   }
 
   /// Re-sends the current device token to the backend, if a user is

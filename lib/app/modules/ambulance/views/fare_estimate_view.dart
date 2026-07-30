@@ -95,40 +95,89 @@ class FareEstimateView extends GetView<FareController> {
                 ],
               ),
             ),
-            // Bottom confirm
+            // Bottom bar: a small "Booking History" button beside the larger
+            // "Booking" (confirm & dispatch) button.
             Container(
               color: AppColors.white,
               padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
-              child: SizedBox(
-                width: double.infinity,
-                height: 54,
-                child: GetBuilder<AmbulanceController>(
-                  builder: (amb) => GetBuilder<FareController>(
-                    builder: (c) => ElevatedButton(
-                      onPressed:
-                          (c.booking || amb.loadingPickup) ? null : c.confirm,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: _navy,
-                        foregroundColor: Colors.white,
-                        elevation: 0,
-                        disabledBackgroundColor: _navy.withValues(alpha: 0.5),
-                        shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(14)),
+              child: GetBuilder<AmbulanceController>(
+                builder: (amb) => GetBuilder<FareController>(
+                  builder: (c) => Row(
+                    children: [
+                      // Booking History — smaller, opens the past-bookings list.
+                      Expanded(
+                        flex: 2,
+                        child: SizedBox(
+                          height: 54,
+                          child: OutlinedButton(
+                            onPressed: amb.openBookings,
+                            style: OutlinedButton.styleFrom(
+                              foregroundColor: _navy,
+                              side: BorderSide(
+                                  color: _navy.withValues(alpha: 0.35),
+                                  width: 1.5),
+                              shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(14)),
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                const Icon(Icons.history_rounded, size: 20),
+                                const SizedBox(width: 6),
+                                Flexible(
+                                  child: Text(
+                                    'History'.tr,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: const TextStyle(
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w800),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
                       ),
-                      child: c.booking
-                          ? const SizedBox(
-                              width: 22,
-                              height: 22,
-                              child: CircularProgressIndicator(
-                                  strokeWidth: 2.4, color: Colors.white),
-                            )
-                          : Text(
-                              amb.loadingPickup
-                                  ? 'Finding your location…'.tr
-                                  : 'Confirm & dispatch'.tr,
-                              style: const TextStyle(
-                                  fontSize: 16, fontWeight: FontWeight.w800)),
-                    ),
+                      const SizedBox(width: 12),
+                      // Booking — larger primary action (what was here before).
+                      Expanded(
+                        flex: 3,
+                        child: SizedBox(
+                          height: 54,
+                          child: ElevatedButton(
+                            onPressed: (c.booking || amb.loadingPickup)
+                                ? null
+                                : c.confirm,
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: _navy,
+                              foregroundColor: Colors.white,
+                              elevation: 0,
+                              disabledBackgroundColor:
+                                  _navy.withValues(alpha: 0.5),
+                              shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(14)),
+                            ),
+                            child: c.booking
+                                ? const SizedBox(
+                                    width: 22,
+                                    height: 22,
+                                    child: CircularProgressIndicator(
+                                        strokeWidth: 2.4, color: Colors.white),
+                                  )
+                                : Text(
+                                    amb.loadingPickup
+                                        ? 'Finding your location…'.tr
+                                        : 'Confirm & dispatch'.tr,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: const TextStyle(
+                                        fontSize: 15,
+                                        fontWeight: FontWeight.w800)),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ),
@@ -403,8 +452,8 @@ class _TypeSelector extends StatelessWidget {
             scrollDirection: Axis.horizontal,
             physics: const NeverScrollableScrollPhysics(),
             itemCount: 4,
-            separatorBuilder: (_, _) => const SizedBox(width: 10),
-            itemBuilder: (_, _) =>
+            separatorBuilder: (_, __) => const SizedBox(width: 10),
+            itemBuilder: (_, __) =>
                 const SnBone(width: 132, height: 116, radius: 14),
           ),
         ),

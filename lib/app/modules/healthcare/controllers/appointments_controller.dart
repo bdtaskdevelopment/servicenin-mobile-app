@@ -1,15 +1,42 @@
 import 'package:get/get.dart';
 
 import '../../../core/helpers/snack_helper.dart';
+import '../../../core/mixins/live_refresh_mixin.dart';
 import '../../../data/models/response/healthcare_response.dart';
 import '../../../data/repositories/healthcare.repo.dart';
 import '../../../global_widget/pdf_preview_view.dart';
 import '../../../routes/app_pages.dart';
 import 'healthcare_controller.dart';
 
-class AppointmentsController extends GetxController {
+class AppointmentsController extends GetxController with LiveRefreshMixin {
   HealthcareRepository get _repo => Get.find<HealthcareRepository>();
   String? get _centerId => Get.find<HealthcareController>().selectedCenter?.id;
+
+  // ── Live refresh (LiveRefreshMixin) ─────────────────────────────────
+  @override
+  Set<String> get liveRefreshTypes => {'appointment'};
+  @override
+  String get liveRefreshId => selected?.id ?? '';
+  @override
+  Future<void> onLiveRefresh() async {
+    final id = selected?.id ?? '';
+    if (id.isEmpty) return;
+    await fetchDetail(id);
+    await fetchQueue(id);
+  }
+
+  /// Deep-link entry: open an appointment by id (router already navigated
+  /// to HC_QUEUE). Fetch it fresh since the object isn't in memory.
+  Future<void> loadAppointmentById(String id) async {
+    if (id.isEmpty) return;
+    queue = null;
+    doctorPrescriptions = [];
+    update();
+    await fetchDetail(id);
+    await fetchQueue(id);
+    final docId = selected?.doctorId ?? '';
+    if (docId.isNotEmpty) fetchDoctorPrescriptions(docId);
+  }
 
   List<HcAppointment> all = [];
   bool loading = false;
@@ -31,6 +58,7 @@ class AppointmentsController extends GetxController {
   void onInit() {
     super.onInit();
     fetchMine();
+    startLiveRefresh();
   }
 
   // The my-appointments list omits the doctor's name (it lives in the
