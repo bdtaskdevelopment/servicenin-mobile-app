@@ -188,6 +188,26 @@ class ApiURL {
       'api/v1/services/payment-methods';
   static final String servicesBook = 'api/v1/services/book';
   static final String servicesBookingsMy = 'api/v1/services/bookings/my';
+
+  //===== Provider job workbench + booking status/location.
+  // Verified against routes.go: GET /provider/dashboard, GET /provider/jobs
+  // (?status= filter), POST /provider/jobs/:id/accept, .../decline,
+  // POST /bookings/:id/status, POST /bookings/:id/location.
+  static final String hsProviderDashboard =
+      'api/v1/services/provider/dashboard';
+  static String hsProviderJobs({String? status}) =>
+      status == null || status.isEmpty
+          ? 'api/v1/services/provider/jobs'
+          : 'api/v1/services/provider/jobs?status=${Uri.encodeQueryComponent(status)}';
+  static String hsProviderJobAccept(String id) =>
+      'api/v1/services/provider/jobs/$id/accept';
+  static String hsProviderJobDecline(String id) =>
+      'api/v1/services/provider/jobs/$id/decline';
+  static String serviceBookingStatus(String id) =>
+      'api/v1/services/bookings/$id/status';
+  static String serviceBookingLocation(String id) =>
+      'api/v1/services/bookings/$id/location';
+
   static String serviceBooking(String id) => 'api/v1/services/bookings/$id';
   static String serviceBookingTimeline(String id) =>
       'api/v1/services/bookings/$id/timeline';
