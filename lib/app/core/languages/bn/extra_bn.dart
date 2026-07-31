@@ -40,7 +40,6 @@ const Map<String, String> extraBn = {
   'Change number': 'নাম্বার পরিবর্তন করুন',
   'Resend code': 'কোড আবার পাঠান',
   'Didn\'t get the code?': 'কোড পাননি?',
-  'Verify another way': 'অন্য পদ্ধতিতে যাচাই করুন',
   'Verify': 'যাচাই করুন',
 
   // ── Registration (registration_view) ────────────────────────
@@ -48,8 +47,10 @@ const Map<String, String> extraBn = {
   'Create an account with your details.':
       'আপনার তথ্য দিয়ে অ্যাকাউন্ট তৈরি করুন।',
   'Name': 'নাম',
+  'Your Name': 'আপনার নাম',
   'Your full name': 'আপনার পূর্ণ নাম',
   'Phone number': 'ফোন নম্বর',
+  'Your Phone Number': 'আপনার ফোন নাম্বার',
   'Email': 'ইমেইল',
   'Email (optional)': 'ইমেইল (ঐচ্ছিক)',
 

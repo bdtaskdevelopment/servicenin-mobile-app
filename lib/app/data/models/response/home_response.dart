@@ -72,12 +72,22 @@ class HomeService {
 
   factory HomeService.fromMap(Map<String, dynamic> j) => HomeService(
         key: _str(j['key']),
-        name: _str(j['name']),
+        name: _normalizeName(_str(j['name'])),
         icon: _str(j['icon']),
         colorHex: _str(j['color']),
         route: _str(j['route']),
         type: _str(j['type']),
       );
+
+  /// Display-name overrides for API service names. "Doctor / Healthcare"
+  /// is shown simply as "Healthcare" (both English and Bangla via `.tr`).
+  static String _normalizeName(String name) {
+    final n = name.trim();
+    if (n.toLowerCase().replaceAll(' ', '') == 'doctor/healthcare') {
+      return 'Healthcare';
+    }
+    return n;
+  }
 
   /// Parses `{ data: { services: [...] } }` (or a bare list).
   static List<HomeService> listFromResponse(dynamic src) {

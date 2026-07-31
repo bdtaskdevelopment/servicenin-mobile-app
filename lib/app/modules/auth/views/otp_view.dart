@@ -98,20 +98,6 @@ class OtpView extends GetView<AuthController> {
                             ),
                           ),
                   ),
-                  const SizedBox(height: 12),
-                  Center(
-                    child: GestureDetector(
-                      onTap: () {},
-                      child: Text(
-                        'Verify another way'.tr,
-                        style: const TextStyle(
-                          fontSize: 13.5,
-                          color: Color(0xFF64748B),
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ),
-                  ),
                   const Spacer(),
                   PrimaryButton(
                     label: 'Verify'.tr,

@@ -10,6 +10,9 @@ import '../../../global_widget/sn_shimmer.dart';
 import '../controllers/news_controller.dart';
 
 const _green = Color(0xFF16A34A);
+const _ink = Color(0xFF0F172A);
+const _muted = Color(0xFF94A3B8);
+const _line = Color(0xFFE9EDF2);
 
 String _mediaUrl(String path) {
   if (path.isEmpty) return '';
@@ -20,23 +23,24 @@ String _mediaUrl(String path) {
   return path.startsWith('/') ? '$base$path' : '$base/$path';
 }
 
-/// "Our News" — article list from GET /api/v1/news/posts.
+/// "Our News" — newspaper-style feed: top category nav, a featured latest
+/// post, then a list of title + thumbnail rows. Data: GET /api/v1/news/posts.
 class NewsView extends GetView<NewsController> {
   const NewsView({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF7F8FA),
+      backgroundColor: AppColors.white,
       body: SafeArea(
         child: Column(
           children: [
             _Header(),
-            const SizedBox(height: 12),
+            const Divider(height: 1, color: _line),
             GetBuilder<NewsController>(
-              builder: (con) => _CategoryChips(con: con),
+              builder: (con) => _CategoryNav(con: con),
             ),
-            const SizedBox(height: 10),
+            const Divider(height: 1, color: _line),
             Expanded(
               child: GetBuilder<NewsController>(
                 builder: (con) {
@@ -64,43 +68,13 @@ class NewsView extends GetView<NewsController> {
                                   child: Center(
                                     child: Text(
                                       'No news yet — check back soon.'.tr,
-                                      style: const TextStyle(
-                                          color: Color(0xFF94A3B8)),
+                                      style: const TextStyle(color: _muted),
                                     ),
                                   ),
                                 ),
                               ],
                             )
-                          : ListView(
-                              padding:
-                                  const EdgeInsets.fromLTRB(16, 12, 16, 24),
-                              children: [
-                                ...con.posts.asMap().entries.map((e) =>
-                                    FadeInUp(
-                                      from: 18,
-                                      duration:
-                                          const Duration(milliseconds: 350),
-                                      delay:
-                                          Duration(milliseconds: 60 * e.key),
-                                      child: Padding(
-                                        padding:
-                                            const EdgeInsets.only(bottom: 14),
-                                        child: GestureDetector(
-                                          onTap: () => con.openPost(e.value),
-                                          child: _NewsCard(post: e.value),
-                                        ),
-                                      ),
-                                    )),
-                                if (con.loadingMore)
-                                  const Padding(
-                                    padding:
-                                        EdgeInsets.symmetric(vertical: 12),
-                                    child: Center(
-                                        child: CircularProgressIndicator(
-                                            strokeWidth: 2.4, color: _green)),
-                                  ),
-                              ],
-                            ),
+                          : _NewsFeed(con: con),
                     ),
                   );
                 },
@@ -113,52 +87,307 @@ class NewsView extends GetView<NewsController> {
   }
 }
 
-// ── Category filter chips ────────────────────────────────────────────
-class _CategoryChips extends StatelessWidget {
-  const _CategoryChips({required this.con});
+// ── Feed: featured latest post + list rows ───────────────────────────
+class _NewsFeed extends StatelessWidget {
+  const _NewsFeed({required this.con});
+  final NewsController con;
+
+  @override
+  Widget build(BuildContext context) {
+    final posts = con.posts;
+    final featured = posts.first;
+    final rest = posts.length > 1 ? posts.sublist(1) : const <NewsPost>[];
+
+    return ListView(
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
+      children: [
+        // Featured / latest post
+        FadeInUp(
+          from: 18,
+          duration: const Duration(milliseconds: 350),
+          child: GestureDetector(
+            onTap: () => con.openPost(featured),
+            child: _FeaturedCard(post: featured),
+          ),
+        ),
+        const SizedBox(height: 8),
+        // Remaining posts as title + thumbnail rows
+        for (var i = 0; i < rest.length; i++) ...[
+          const Divider(height: 1, color: _line),
+          FadeInUp(
+            from: 14,
+            duration: const Duration(milliseconds: 320),
+            delay: Duration(milliseconds: 40 * i),
+            child: GestureDetector(
+              onTap: () => con.openPost(rest[i]),
+              child: _NewsRow(post: rest[i]),
+            ),
+          ),
+        ],
+        if (con.loadingMore)
+          const Padding(
+            padding: EdgeInsets.symmetric(vertical: 16),
+            child: Center(
+              child: CircularProgressIndicator(
+                  strokeWidth: 2.4, color: _green),
+            ),
+          ),
+      ],
+    );
+  }
+}
+
+// ── Top category navigation (underline tabs) ─────────────────────────
+class _CategoryNav extends StatelessWidget {
+  const _CategoryNav({required this.con});
   final NewsController con;
 
   @override
   Widget build(BuildContext context) {
     if (con.loadingCategories && con.categories.isEmpty) {
       return const Padding(
-        padding: EdgeInsets.symmetric(horizontal: 16),
+        padding: EdgeInsets.fromLTRB(16, 10, 16, 10),
         child: Align(
           alignment: Alignment.centerLeft,
           child: SnChipsSkeleton(count: 4),
         ),
       );
     }
-    if (con.categories.isEmpty) return const SizedBox.shrink();
+    if (con.categories.isEmpty) return const SizedBox(height: 4);
     final labels = ['All'.tr, ...con.categories.map((c) => c.name)];
     return SizedBox(
-      height: 36,
+      height: 46,
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.symmetric(horizontal: 16),
         itemCount: labels.length,
-        separatorBuilder: (_, __) => const SizedBox(width: 8),
+        separatorBuilder: (_, __) => const SizedBox(width: 20),
         itemBuilder: (_, i) {
           final sel = con.categoryIndex == i;
           return GestureDetector(
             onTap: () => con.setCategory(i),
             child: Container(
               alignment: Alignment.center,
-              padding: const EdgeInsets.symmetric(horizontal: 16),
               decoration: BoxDecoration(
-                color: sel ? _green : AppColors.white,
-                borderRadius: BorderRadius.circular(20),
-                border: Border.all(
-                    color: sel ? _green : const Color(0xFFE2E8F0)),
+                border: Border(
+                  bottom: BorderSide(
+                    color: sel ? _green : Colors.transparent,
+                    width: 2.6,
+                  ),
+                ),
               ),
-              child: Text(labels[i],
-                  style: TextStyle(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w700,
-                      color: sel ? Colors.white : const Color(0xFF334155))),
+              child: Text(
+                labels[i],
+                style: TextStyle(
+                  fontSize: 15,
+                  fontWeight: sel ? FontWeight.w800 : FontWeight.w600,
+                  color: sel ? _ink : _muted,
+                ),
+              ),
             ),
           );
         },
+      ),
+    );
+  }
+}
+
+// ── Featured card: big image with title & date overlaid ──────────────
+class _FeaturedCard extends StatelessWidget {
+  const _FeaturedCard({required this.post});
+  final NewsPost post;
+
+  @override
+  Widget build(BuildContext context) {
+    final img = _mediaUrl(post.heroImageUrl);
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(16),
+      child: AspectRatio(
+        aspectRatio: 16 / 10,
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            img.isEmpty
+                ? Container(
+                    color: const Color(0xFFDCFCE7),
+                    alignment: Alignment.center,
+                    child: const Icon(Icons.newspaper_rounded,
+                        color: _green, size: 48),
+                  )
+                : CachedNetworkImage(
+                    imageUrl: img,
+                    fit: BoxFit.cover,
+                    placeholder: (_, __) =>
+                        Container(color: const Color(0xFFF1F5F9)),
+                    errorWidget: (_, __, ___) => Container(
+                      color: const Color(0xFFDCFCE7),
+                      alignment: Alignment.center,
+                      child: const Icon(Icons.newspaper_rounded,
+                          color: _green, size: 48),
+                    ),
+                  ),
+            // Dark gradient for text legibility
+            const DecoratedBox(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    Colors.transparent,
+                    Colors.transparent,
+                    Color(0xCC000000),
+                    Color(0xF2000000),
+                  ],
+                  stops: [0.0, 0.42, 0.78, 1.0],
+                ),
+              ),
+            ),
+            Positioned(
+              left: 16,
+              right: 16,
+              bottom: 16,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (post.categoryName.isNotEmpty)
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 9, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: _green,
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      child: Text(
+                        post.categoryName,
+                        style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 10.5,
+                            fontWeight: FontWeight.w800),
+                      ),
+                    ),
+                  const SizedBox(height: 10),
+                  Text(
+                    post.title,
+                    maxLines: 3,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 22,
+                      height: 1.22,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                  if (post.dateLabel.isNotEmpty) ...[
+                    const SizedBox(height: 8),
+                    Row(
+                      children: [
+                        const Icon(Icons.calendar_today_outlined,
+                            size: 12.5, color: Colors.white70),
+                        const SizedBox(width: 5),
+                        Text(
+                          post.dateLabel,
+                          style: const TextStyle(
+                              fontSize: 12, color: Colors.white70),
+                        ),
+                      ],
+                    ),
+                  ],
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// ── List row: title + meta on the left, thumbnail on the right ───────
+class _NewsRow extends StatelessWidget {
+  const _NewsRow({required this.post});
+  final NewsPost post;
+
+  @override
+  Widget build(BuildContext context) {
+    final img = _mediaUrl(post.thumbnailUrl);
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 14),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                if (post.categoryName.isNotEmpty) ...[
+                  Text(
+                    post.categoryName.toUpperCase(),
+                    style: const TextStyle(
+                      fontSize: 10.5,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: 0.4,
+                      color: _green,
+                    ),
+                  ),
+                  const SizedBox(height: 5),
+                ],
+                Text(
+                  post.title,
+                  maxLines: 3,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    fontSize: 16.5,
+                    height: 1.28,
+                    fontWeight: FontWeight.w800,
+                    color: _ink,
+                  ),
+                ),
+                if (post.dateLabel.isNotEmpty) ...[
+                  const SizedBox(height: 8),
+                  Row(
+                    children: [
+                      const Icon(Icons.calendar_today_outlined,
+                          size: 12, color: _muted),
+                      const SizedBox(width: 5),
+                      Text(
+                        post.dateLabel,
+                        style: const TextStyle(fontSize: 11.5, color: _muted),
+                      ),
+                    ],
+                  ),
+                ],
+              ],
+            ),
+          ),
+          const SizedBox(width: 14),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(10),
+            child: SizedBox(
+              width: 118,
+              height: 88,
+              child: img.isEmpty
+                  ? Container(
+                      color: const Color(0xFFDCFCE7),
+                      alignment: Alignment.center,
+                      child: const Icon(Icons.newspaper_rounded,
+                          color: _green, size: 26),
+                    )
+                  : CachedNetworkImage(
+                      imageUrl: img,
+                      fit: BoxFit.cover,
+                      placeholder: (_, __) =>
+                          Container(color: const Color(0xFFF1F5F9)),
+                      errorWidget: (_, __, ___) => Container(
+                        color: const Color(0xFFDCFCE7),
+                        alignment: Alignment.center,
+                        child: const Icon(Icons.newspaper_rounded,
+                            color: _green, size: 26),
+                      ),
+                    ),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -180,152 +409,9 @@ class _Header extends StatelessWidget {
           ),
           Text('Our News'.tr,
               style: const TextStyle(
-                  fontSize: 19,
-                  fontWeight: FontWeight.w800,
-                  color: Color(0xFF0F172A))),
+                  fontSize: 19, fontWeight: FontWeight.w800, color: _ink)),
         ],
       ),
-    );
-  }
-}
-
-// ── News card: big cover image, then title · excerpt · meta ─────────
-class _NewsCard extends StatelessWidget {
-  const _NewsCard({required this.post});
-  final NewsPost post;
-
-  @override
-  Widget build(BuildContext context) {
-    final img = _mediaUrl(post.thumbnailUrl);
-    return Container(
-      decoration: BoxDecoration(
-        color: AppColors.white,
-        borderRadius: BorderRadius.circular(18),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.06),
-            blurRadius: 16,
-            offset: const Offset(0, 6),
-          ),
-        ],
-      ),
-      clipBehavior: Clip.antiAlias,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Big cover image
-          AspectRatio(
-            aspectRatio: 16 / 9,
-            child: Stack(
-              fit: StackFit.expand,
-              children: [
-                img.isEmpty
-                    ? Container(
-                        color: const Color(0xFFDCFCE7),
-                        alignment: Alignment.center,
-                        child: const Icon(Icons.newspaper_rounded,
-                            color: _green, size: 44),
-                      )
-                    : CachedNetworkImage(
-                        imageUrl: img,
-                        fit: BoxFit.cover,
-                        placeholder: (_, __) =>
-                            Container(color: const Color(0xFFF1F5F9)),
-                        errorWidget: (_, __, ___) => Container(
-                          color: const Color(0xFFDCFCE7),
-                          alignment: Alignment.center,
-                          child: const Icon(Icons.newspaper_rounded,
-                              color: _green, size: 44),
-                        ),
-                      ),
-                // Category badge overlaid on the image.
-                if (post.categoryName.isNotEmpty)
-                  Positioned(
-                    top: 10,
-                    left: 10,
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 9, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: _green,
-                        borderRadius: BorderRadius.circular(8),
-                        boxShadow: const [
-                          BoxShadow(color: Colors.black26, blurRadius: 6),
-                        ],
-                      ),
-                      child: Text(post.categoryName,
-                          style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 10.5,
-                              fontWeight: FontWeight.w800)),
-                    ),
-                  ),
-              ],
-            ),
-          ),
-          // Title + excerpt + date
-          Padding(
-            padding: const EdgeInsets.fromLTRB(14, 12, 14, 14),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(post.title,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                        fontSize: 16.5,
-                        height: 1.25,
-                        fontWeight: FontWeight.w800,
-                        color: Color(0xFF0F172A))),
-                if (post.excerpt.isNotEmpty) ...[
-                  const SizedBox(height: 6),
-                  Text(post.excerpt,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                          fontSize: 13,
-                          height: 1.35,
-                          color: Color(0xFF64748B))),
-                ],
-                if (post.dateLabel.isNotEmpty) ...[
-                  const SizedBox(height: 10),
-                  Row(
-                    children: [
-                      const Icon(Icons.calendar_today_outlined,
-                          size: 12, color: Color(0xFF94A3B8)),
-                      const SizedBox(width: 4),
-                      Text(post.dateLabel,
-                          style: const TextStyle(
-                              fontSize: 11.5, color: Color(0xFF94A3B8))),
-                    ],
-                  ),
-                ],
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-// ── Small pill/badge (category) ──────────────────────────────────────
-class _Pill extends StatelessWidget {
-  const _Pill(this.text, this.color);
-  final String text;
-  final Color color;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.12),
-        borderRadius: BorderRadius.circular(6),
-      ),
-      child: Text(text,
-          style: TextStyle(
-              fontSize: 10, fontWeight: FontWeight.w700, color: color)),
     );
   }
 }
