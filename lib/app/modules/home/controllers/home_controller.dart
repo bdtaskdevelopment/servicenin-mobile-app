@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../core/helpers/snack_helper.dart';
+import '../../../core/services/notification_router.dart';
 import '../../../core/utils/service_nav.dart';
 import '../../../data/models/response/home_response.dart';
 import '../../../data/repositories/home.repo.dart';
@@ -67,6 +68,14 @@ class HomeController extends GetxController {
     fetchBanners();
     fetchPopular();
     fetchRecent();
+  }
+
+  @override
+  void onReady() {
+    super.onReady();
+    // The authenticated landing is ready — deliver any deep-link that a
+    // tapped push queued while the app was cold-starting (or before login).
+    NotificationRouter.instance.flushPending();
   }
 
   Future<void> fetchBanners() async {

@@ -3,10 +3,12 @@ import 'dart:convert';
 
 import 'package:web_socket_channel/web_socket_channel.dart';
 
-import '../helpers/snack_helper.dart';
 import '../values/app_config.dart';
 import '../values/storage.dart';
+import '../../data/models/response/notification_response.dart';
 import '../../data/services/storage.service.dart';
+import '../../global_widget/notification_banner.dart';
+import 'notification_router.dart';
 
 /// Realtime companion to the REST notification feed (`HomeRepository`'s
 /// `fetchNotifications`/`fetchUnreadCount`). Connects to the backend's
@@ -28,6 +30,13 @@ class NotificationSocketService {
   StreamSubscription? _sub;
   Timer? _reconnectTimer;
   bool _closedByUs = false;
+
+  /// Every parsed `notification` event, re-broadcast so detail controllers
+  /// can live-refresh when their own entity changes (see LiveRefreshMixin).
+  /// Broadcast = multiple listeners, and late subscribers are fine since
+  /// notifications are transient.
+  final _notifications = StreamController<AppNotification>.broadcast();
+  Stream<AppNotification> get notifications => _notifications.stream;
 
   void connect() {
     final accessToken = StorageService.getString(StorageConstants.accessToken);
@@ -85,9 +94,19 @@ class NotificationSocketService {
       if (env is! Map || env['event'] != 'notification') return;
       final data = env['data'];
       if (data is! Map) return;
-      final title = (data['title'] ?? 'ServiceNin').toString();
-      final body = (data['body'] ?? '').toString();
-      if (body.isNotEmpty) SnackHelper.success(body, title: title);
+
+      final n = AppNotification(data.cast<String, dynamic>());
+
+      // 1) Feed detail pages so an open page updates itself in place.
+      _notifications.add(n);
+
+      // 2) Show a tappable banner that deep-links to the affected page.
+      if (n.body.isNotEmpty || n.title.isNotEmpty) {
+        showNotificationBanner(
+          n,
+          onTap: () => NotificationRouter.instance.handleNotification(n),
+        );
+      }
     } catch (_) {
       // Malformed/unexpected frame — ignore, next message may be fine.
     }

@@ -8,6 +8,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../core/helpers/snack_helper.dart';
+import '../../../core/mixins/live_refresh_mixin.dart';
 import '../../../core/values/storage.dart';
 import '../../../data/models/response/nagarik_response.dart';
 import '../../../data/repositories/nagarik.repo.dart';
@@ -46,8 +47,41 @@ IconData nagarikCategoryIcon(String icon) {
   }
 }
 
-class NagarikController extends GetxController {
+class NagarikController extends GetxController with LiveRefreshMixin {
   NagarikRepository get _repo => Get.find<NagarikRepository>();
+
+  // ── Live refresh (LiveRefreshMixin) ─────────────────────────────────
+  // A grievance status change writes a notification (type `ticket`,
+  // reference_type `grievance`) on `user:<id>`. When it's for the grievance
+  // currently open, silently re-pull it so the status page updates itself
+  // instead of the user having to pull-to-refresh.
+  @override
+  Set<String> get liveRefreshTypes => {'grievance'};
+  @override
+  String get liveRefreshId => selectedGrievance?.id ?? '';
+  @override
+  Future<void> onLiveRefresh() async {
+    final id = selectedGrievance?.id ?? '';
+    if (id.isEmpty) return;
+    try {
+      selectedGrievance = await _repo.fetchGrievance(id);
+      update();
+    } catch (_) {
+      // Keep the last good copy on a transient failure.
+    }
+  }
+
+  /// Deep-link entry: the notification router has already navigated to
+  /// NAGARIK_STATUS; fetch the grievance fresh (it isn't in memory).
+  Future<void> loadGrievanceById(String id) async {
+    if (id.isEmpty) return;
+    // Reset the verify form for the freshly-opened grievance, same as
+    // openGrievance does when coming from the list.
+    verifyStars = 5;
+    verifyComment.clear();
+    verifyPhoto = null;
+    await _loadGrievanceDetail(id);
+  }
 
   // ── Hotlines ────────────────────────────────────────────────────────
   NagarikHotlinesData? hotlines;
@@ -216,6 +250,7 @@ class NagarikController extends GetxController {
     fetchCategories();
     fetchGrievances();
     fetchTickets();
+    startLiveRefresh();
   }
 
   // ── Loaders ─────────────────────────────────────────────────────────

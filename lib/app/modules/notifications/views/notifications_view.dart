@@ -28,7 +28,7 @@ class _NotificationsViewState extends State<NotificationsView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.white,
+      backgroundColor: const Color(0xFFF1F3F6),
       appBar: CustomAppBar(
         title: 'Notifications'.tr,
         actions: [
@@ -61,16 +61,17 @@ class _NotificationsViewState extends State<NotificationsView> {
             color: AppColors.brandOrange,
             onRefresh: con.fetchNotifications,
             child: ListView.separated(
-              padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
+              padding: const EdgeInsets.fromLTRB(16, 12, 16, 20),
               itemCount: con.items.length,
-              separatorBuilder: (_, _) => const SizedBox(height: 12),
+              separatorBuilder: (_, __) => const SizedBox(height: 10),
               itemBuilder: (_, i) => FadeInUp(
                 from: 16,
                 duration: const Duration(milliseconds: 300),
                 delay: Duration(milliseconds: 40 * (i % 10)),
                 child: _NotificationCard(
                   item: con.items[i],
-                  onTap: () => con.markRead(con.items[i]),
+                  onTap: () => con.openNotification(con.items[i]),
+                  onDismiss: () => con.dismiss(con.items[i]),
                 ),
               ),
             ),
@@ -133,116 +134,154 @@ class _Empty extends StatelessWidget {
   }
 }
 
-IconData _typeIcon(String type) {
-  switch (type.toLowerCase()) {
-    case 'booking':
+/// The orange call-to-action label under each notification. Only the TEXT
+/// changes with the notification's kind — the colour is always brand orange,
+/// so every card reads as one consistent design.
+String _actionLabel(AppNotification n) {
+  final t = n.type.toLowerCase();
+  final r = n.referenceType.toLowerCase();
+  if (t == 'payment') return 'Receipt'.tr;
+  if (t == 'message') return 'Reply'.tr;
+  switch (r) {
     case 'service_booking':
-      return Icons.home_repair_service_rounded;
+    case 'booking':
+      return 'View booking'.tr;
+    case 'ambulance_booking':
+      return 'Track'.tr;
     case 'appointment':
-      return Icons.medical_services_rounded;
-    case 'blood':
-      return Icons.water_drop_rounded;
-    case 'ambulance':
-      return Icons.airport_shuttle_rounded;
+      return 'View appointment'.tr;
     case 'grievance':
-    case 'nagarik':
-      return Icons.account_balance_rounded;
-    case 'ticket':
-    case 'message':
-      return Icons.chat_bubble_outline_rounded;
-    case 'job':
-    case 'application':
-      return Icons.work_outline_rounded;
-    case 'match':
-    case 'matchmaking':
-      return Icons.favorite_rounded;
-    default:
-      return Icons.notifications_rounded;
+      return 'View status'.tr;
+    case 'blood_request':
+      return 'View request'.tr;
   }
+  return 'View'.tr;
 }
 
+/// One card design for every notification — differs only in its data
+/// (title, body, time, action label). White card with a soft shadow and a
+/// brand-orange accent bar along the bottom; a ✕ dismisses it.
 class _NotificationCard extends StatelessWidget {
-  const _NotificationCard({required this.item, required this.onTap});
+  const _NotificationCard({
+    required this.item,
+    required this.onTap,
+    required this.onDismiss,
+  });
   final AppNotification item;
   final VoidCallback onTap;
+  final VoidCallback onDismiss;
 
   @override
   Widget build(BuildContext context) {
     final unread = !item.isRead;
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.all(14),
-        decoration: BoxDecoration(
-          color: unread ? const Color(0xFFFFF4EE) : AppColors.white,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(
-            color: unread
-                ? const Color(0xFFFDE3D5)
-                : const Color(0xFFEDEFF2),
-          ),
-        ),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Container(
-              width: 44,
-              height: 44,
-              decoration: BoxDecoration(
-                color: AppColors.brandOrange.withValues(alpha: 0.12),
-                borderRadius: BorderRadius.circular(12),
+    return Material(
+      color: AppColors.white,
+      borderRadius: BorderRadius.circular(16),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(16),
+        child: Container(
+          decoration: BoxDecoration(
+            color: AppColors.white,
+            borderRadius: BorderRadius.circular(16),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.05),
+                blurRadius: 12,
+                offset: const Offset(0, 4),
               ),
-              child: Icon(_typeIcon(item.type),
-                  color: AppColors.brandOrange, size: 22),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    item.title,
-                    style: const TextStyle(
-                      fontSize: 14.5,
-                      fontWeight: FontWeight.w700,
-                      color: Color(0xFF0F172A),
+            ],
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Padding(
+                padding: const EdgeInsets.fromLTRB(12, 8, 6, 6),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(
+                          child: Padding(
+                            padding: const EdgeInsets.only(top: 5),
+                            child: Text(
+                              item.title,
+                              style: const TextStyle(
+                                fontSize: 13.5,
+                                fontWeight: FontWeight.w800,
+                                color: Color(0xFF0F172A),
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 6),
+                        Padding(
+                          padding: const EdgeInsets.only(top: 6, right: 4),
+                          child: Text(
+                            item.timeLabel,
+                            style: const TextStyle(
+                                fontSize: 11, color: Color(0xFF94A3B8)),
+                          ),
+                        ),
+                        // Bigger, higher-contrast, easy-to-hit dismiss button.
+                        GestureDetector(
+                          onTap: onDismiss,
+                          behavior: HitTestBehavior.opaque,
+                          child: Container(
+                            width: 28,
+                            height: 28,
+                            alignment: Alignment.center,
+                            decoration: const BoxDecoration(
+                              color: Color(0xFFEDF0F4),
+                              shape: BoxShape.circle,
+                            ),
+                            child: const Icon(Icons.close_rounded,
+                                size: 18, color: Color(0xFF334155)),
+                          ),
+                        ),
+                      ],
                     ),
-                  ),
-                  if (item.body.isNotEmpty) ...[
-                    const SizedBox(height: 3),
+                    if (item.body.isNotEmpty) ...[
+                      const SizedBox(height: 2),
+                      Padding(
+                        padding: const EdgeInsets.only(right: 12),
+                        child: Text(
+                          item.body,
+                          style: const TextStyle(
+                            fontSize: 12,
+                            color: Color(0xFF475569),
+                            height: 1.25,
+                          ),
+                        ),
+                      ),
+                    ],
+                    const SizedBox(height: 6),
                     Text(
-                      item.body,
+                      _actionLabel(item),
                       style: const TextStyle(
-                          fontSize: 12.5,
-                          color: Color(0xFF64748B),
-                          height: 1.3),
+                        fontSize: 12.5,
+                        fontWeight: FontWeight.w800,
+                        color: AppColors.brandOrange,
+                      ),
                     ),
                   ],
-                ],
-              ),
-            ),
-            const SizedBox(width: 8),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                Text(
-                  item.timeLabel,
-                  style: const TextStyle(
-                      fontSize: 11, color: Color(0xFF94A3B8)),
                 ),
-                const SizedBox(height: 8),
-                if (unread)
-                  Container(
-                    width: 8,
-                    height: 8,
-                    decoration: const BoxDecoration(
-                      color: AppColors.brandOrange,
-                      shape: BoxShape.circle,
-                    ),
-                  ),
-              ],
-            ),
-          ],
+              ),
+              // Brand-orange accent bar along the bottom — full colour when
+              // unread, faded once read.
+              Container(
+                margin: const EdgeInsets.fromLTRB(12, 1, 12, 10),
+                height: 3,
+                decoration: BoxDecoration(
+                  color: AppColors.brandOrange
+                      .withValues(alpha: unread ? 1 : 0.3),
+                  borderRadius: BorderRadius.circular(3),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

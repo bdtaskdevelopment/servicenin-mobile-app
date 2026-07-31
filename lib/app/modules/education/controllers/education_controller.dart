@@ -2,12 +2,21 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../../core/helpers/snack_helper.dart';
+import '../../../core/mixins/live_refresh_mixin.dart';
 import '../../../data/models/response/education_response.dart';
 import '../../../data/repositories/education.repo.dart';
 import '../../../routes/app_pages.dart';
 
-class EducationController extends GetxController {
+class EducationController extends GetxController with LiveRefreshMixin {
   EducationRepository get _repo => Get.find<EducationRepository>();
+
+  // ── Live refresh (LiveRefreshMixin) — list refresher ────────────────
+  @override
+  Set<String> get liveRefreshTypes => {'education_interest'};
+  @override
+  String get liveRefreshId => '';
+  @override
+  Future<void> onLiveRefresh() => fetchMyInterests();
 
   // ── Institute types (admin-managed) ──────────────────────────────────
   // Index 0 is a synthetic "All" entry; API institute types follow.
@@ -71,6 +80,7 @@ class EducationController extends GetxController {
     super.onInit();
     fetchInstituteTypes();
     fetchCentersNear();
+    startLiveRefresh();
   }
 
   Future<void> fetchInstituteTypes() async {

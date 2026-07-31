@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../core/helpers/snack_helper.dart';
+import '../../../core/mixins/live_refresh_mixin.dart';
 import '../../../core/values/storage.dart';
 import '../../../data/models/response/blood_request_response.dart';
 import '../../../data/models/response/blood_responder_response.dart';
@@ -65,7 +66,7 @@ class BloodRequest {
   final String note;
 }
 
-class BloodController extends GetxController {
+class BloodController extends GetxController with LiveRefreshMixin {
   BloodRepository get _repo => Get.find<BloodRepository>();
 
   // ── Donors near you (GET /api/v1/blood/donors[/nearest]) ────────────
@@ -73,6 +74,55 @@ class BloodController extends GetxController {
   List<DonorEntry> allDonors = [];
   bool loadingNearest = false;
   bool loadingAllDonors = false;
+
+  // ── Live refresh (LiveRefreshMixin) ─────────────────────────────────
+  // There's no single-request GET endpoint, so the open detail re-derives
+  // itself from the (re-fetched) my-requests / open-requests lists when a
+  // blood notification for it arrives.
+  @override
+  Set<String> get liveRefreshTypes => {'blood_request'};
+  @override
+  String get liveRefreshId => viewingRequest?.id ?? '';
+  @override
+  Future<void> onLiveRefresh() async {
+    final id = viewingRequest?.id ?? '';
+    if (id.isEmpty) return;
+    await Future.wait([fetchMyRequests(), fetchRequests()]);
+    final fresh = _findRequestById(id);
+    if (fresh != null) {
+      viewingRequest = fresh;
+      update();
+    }
+  }
+
+  BloodRequestEntry? _findRequestById(String id) {
+    for (final r in [...myRequests, ...requestList]) {
+      if (r.id == id) return r;
+    }
+    return null;
+  }
+
+  /// Deep-link entry: open a blood request's detail by id. No by-id endpoint
+  /// exists, so we (re)load the user's lists and find it there — a blood
+  /// notification always targets the requester or a responding donor, so the
+  /// request is in one of these. Falls back to the requests list if not found.
+  Future<void> loadRequestById(String id) async {
+    if (id.isEmpty) return;
+    var found = _findRequestById(id);
+    if (found == null) {
+      await Future.wait([fetchMyRequests(), fetchRequests()]);
+      found = _findRequestById(id);
+    }
+    if (found != null) {
+      viewingRequest = found;
+      update();
+    } else {
+      // Couldn't resolve it — send them to the requests list rather than a
+      // blank detail page.
+      Get.offNamed(Routes.BLOOD_REQUESTS);
+      fetchRequests();
+    }
+  }
 
   @override
   void onInit() {
@@ -83,6 +133,7 @@ class BloodController extends GetxController {
     fetchMyDonorStatus();
     fetchMyRequests();
     fetchRequests();
+    startLiveRefresh();
   }
 
   /// Pull-to-refresh for the Blood Bank home page — reloads the nearby donors,

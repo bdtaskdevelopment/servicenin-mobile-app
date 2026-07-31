@@ -7,6 +7,7 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../../../core/helpers/location_helper.dart';
 import '../../../core/helpers/snack_helper.dart';
+import '../../../core/mixins/live_refresh_mixin.dart';
 import '../../../core/values/bd_geo.dart';
 import '../../../data/models/response/ambulance_booking_response.dart';
 import '../../../data/models/response/ambulance_response.dart';
@@ -17,8 +18,46 @@ import '../../../data/services/route_planner.service.dart';
 import '../../../routes/app_pages.dart';
 import 'fare_controller.dart';
 
-class AmbulanceController extends GetxController {
+class AmbulanceController extends GetxController with LiveRefreshMixin {
   AmbulanceRepository get _repo => Get.find<AmbulanceRepository>();
+
+  // ── Live refresh (LiveRefreshMixin) ─────────────────────────────────
+  // Ambulance has no per-booking WS topic for the citizen — a status change
+  // (assigned/on_the_way/arrived/completed) arrives as a `user:<id>`
+  // notification. When it's for the booking open on the confirmed/detail
+  // page, silently re-pull it so the status updates without pull-to-refresh.
+  @override
+  Set<String> get liveRefreshTypes => {'ambulance_booking'};
+  @override
+  String get liveRefreshId => lastBooking?.id ?? '';
+  @override
+  Future<void> onLiveRefresh() async {
+    final current = lastBooking;
+    if (current == null || current.id.isEmpty) return;
+    try {
+      lastBooking = await _repo.fetchBookingById(current.id);
+      update();
+    } catch (_) {
+      // Keep the last good copy on a transient failure.
+    }
+  }
+
+  /// Deep-link entry: open a booking's detail (confirmed) page by id (router
+  /// already navigated to AMBULANCE_CONFIRMED). Fetch it fresh, then draw
+  /// its route.
+  Future<void> loadBookingById(String id) async {
+    if (id.isEmpty) return;
+    lastBookingRoutePoints = [];
+    _lastBookingRouteFor = null;
+    _livePos = null;
+    try {
+      lastBooking = await _repo.fetchBookingById(id);
+      update();
+      unawaited(loadLastBookingRoute());
+    } catch (e) {
+      SnackHelper.error(e.toString().replaceFirst('Exception: ', ''));
+    }
+  }
 
   // ── Available ambulances (GET /api/v1/ambulance/available) ──────────
   List<Ambulance> available = [];
@@ -66,6 +105,7 @@ class AmbulanceController extends GetxController {
     fetchBookings();
     fetchHotlines();
     _initDefaultPickup();
+    startLiveRefresh();
   }
 
   // ── Map points (fall back to the Bangladesh centroid until chosen) ───
