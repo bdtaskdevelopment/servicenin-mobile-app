@@ -63,7 +63,7 @@ class RegistrationView extends GetView<RegistrationController> {
                       ),
                       const SizedBox(height: 28),
                       _Field(
-                        label: 'Name'.tr,
+                        label: 'Your Name'.tr,
                         hint: 'Your full name'.tr,
                         controller: con.nameController,
                         onChanged: con.onInfoChanged,
@@ -71,7 +71,7 @@ class RegistrationView extends GetView<RegistrationController> {
                       ),
                       const SizedBox(height: 18),
                       Text(
-                        'Phone number'.tr,
+                        'Your Phone Number'.tr,
                         style: const TextStyle(
                           fontSize: 12,
                           fontWeight: FontWeight.w700,

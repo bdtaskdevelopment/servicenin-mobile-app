@@ -31,6 +31,11 @@ class WorksController extends GetxController {
 
   WorkPost? selected;
 
+  /// Only YouTube videos are shown — Facebook / other providers are dropped
+  /// (they can't play inside the app). Filtered client-side.
+  List<WorkPost> _onlyYoutube(List<WorkPost> list) =>
+      list.where((p) => p.provider == 'youtube').toList();
+
   @override
   void onInit() {
     super.onInit();
@@ -66,7 +71,7 @@ class WorksController extends GetxController {
     try {
       final list = await _repo.fetchWorks(
           page: _page, limit: _limit, categoryId: selectedCategoryId);
-      posts = list;
+      posts = _onlyYoutube(list);
       hasMore = list.length >= _limit;
     } catch (_) {
     } finally {
@@ -83,7 +88,7 @@ class WorksController extends GetxController {
       _page += 1;
       final list = await _repo.fetchWorks(
           page: _page, limit: _limit, categoryId: selectedCategoryId);
-      posts.addAll(list);
+      posts.addAll(_onlyYoutube(list));
       hasMore = list.length >= _limit;
     } catch (_) {
       _page -= 1;
