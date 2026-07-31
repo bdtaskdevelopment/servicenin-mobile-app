@@ -59,9 +59,9 @@ class FareController extends GetxController {
   // beyond that, `selectedType?.waitingFarePerMin` applies per extra minute.
   int waitingMinutes = 0;
 
-  // Booking inputs
-  final TextEditingController patientNameCtrl =
-      TextEditingController(text: 'Patient');
+  // Booking inputs — patient name starts blank and is required (the invoice
+  // is generated under this name).
+  final TextEditingController patientNameCtrl = TextEditingController();
   final TextEditingController phoneCtrl = TextEditingController();
 
   bool booking = false;
@@ -184,6 +184,11 @@ class FareController extends GetxController {
       SnackHelper.error('পিকআপ ও গন্তব্য নির্বাচন করুন');
       return;
     }
+    // Patient name is mandatory — the invoice is generated under this name.
+    if (patientNameCtrl.text.trim().isEmpty) {
+      SnackHelper.error('Please enter the patient name'.tr);
+      return;
+    }
     if (booking) return;
     booking = true;
     update();
@@ -191,9 +196,7 @@ class FareController extends GetxController {
       final payload = <String, dynamic>{
         'type_id': typeId,
         'customer_phone': phoneCtrl.text.trim(),
-        'patient_name': patientNameCtrl.text.trim().isEmpty
-            ? 'Patient'
-            : patientNameCtrl.text.trim(),
+        'patient_name': patientNameCtrl.text.trim(),
         'pickup_address': _amb.pickupPlace!.address,
         'pickup_lat': _amb.pickupPlace!.point.latitude,
         'pickup_lng': _amb.pickupPlace!.point.longitude,

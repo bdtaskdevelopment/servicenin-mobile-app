@@ -399,18 +399,27 @@ class _RegisterDonorCard extends StatelessWidget {
           ),
           const SizedBox(width: 12),
           Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text('Become a donor'.tr,
-                    style: const TextStyle(
-                        fontSize: 14.5,
-                        fontWeight: FontWeight.w800,
-                        color: Color(0xFF0F172A))),
-                const SizedBox(height: 2),
-                Text('Register & verify · get nearby requests'.tr,
-                    style: const TextStyle(fontSize: 12, color: Color(0xFF94A3B8))),
-              ],
+            child: GetBuilder<BloodController>(
+              builder: (con) => Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                      (con.isDonor ? 'Update donor profile' : 'Become a donor')
+                          .tr,
+                      style: const TextStyle(
+                          fontSize: 14.5,
+                          fontWeight: FontWeight.w800,
+                          color: Color(0xFF0F172A))),
+                  const SizedBox(height: 2),
+                  Text(
+                      (con.isDonor
+                              ? 'Update your details · availability'
+                              : 'Register & verify · get nearby requests')
+                          .tr,
+                      style: const TextStyle(
+                          fontSize: 12, color: Color(0xFF94A3B8))),
+                ],
+              ),
             ),
           ),
           const SizedBox(width: 8),

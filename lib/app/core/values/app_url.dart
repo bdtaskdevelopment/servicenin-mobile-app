@@ -19,6 +19,13 @@ class ApiURL {
   //===== Blood
   static final String bloodRequests = 'api/v1/blood/requests';
   static final String bloodRequestsMy = 'api/v1/blood/requests/my';
+
+  /// "Requests near you" — the backend keeps only requests whose alert radius
+  /// reaches the caller's location. Without coords it returns all open ones.
+  static String bloodRequestsNear({double? lat, double? lng}) {
+    if (lat == null || lng == null) return bloodRequests;
+    return '$bloodRequests?lat=$lat&lng=$lng';
+  }
   static String bloodRequestRespond(String id) =>
       'api/v1/blood/requests/$id/respond';
   static String bloodRequestResponders(String id) =>

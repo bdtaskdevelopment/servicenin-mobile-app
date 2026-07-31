@@ -1,13 +1,17 @@
 import 'dart:convert';
+import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:latlong2/latlong.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../../core/helpers/location_helper.dart';
 import '../../../core/helpers/snack_helper.dart';
 import '../../../core/mixins/live_refresh_mixin.dart';
 import '../../../core/values/storage.dart';
 import '../../../data/models/response/blood_request_response.dart';
+import '../../../data/services/geo_search.service.dart';
 import '../../../data/models/response/blood_responder_response.dart';
 import '../../../data/models/response/blood_response_response.dart';
 import '../../../data/models/response/donor_response.dart';
@@ -127,6 +131,7 @@ class BloodController extends GetxController with LiveRefreshMixin {
   @override
   void onInit() {
     super.onInit();
+    _initUserLocation();
     fetchNearestDonors();
     fetchMyResponses();
     fetchMyRank();
@@ -134,6 +139,74 @@ class BloodController extends GetxController with LiveRefreshMixin {
     fetchMyRequests();
     fetchRequests();
     startLiveRefresh();
+  }
+
+  // ── Viewer's current location (drives "requests near you" matching) ───
+  double? userLat;
+  double? userLng;
+
+  /// Reverse-geocoded short area name for the current GPS position — shown
+  /// in place of the old hardcoded "Gulshan area".
+  String areaLabel = '';
+
+  /// Reads the device GPS, resolves a readable area name, and re-computes
+  /// each request's distance from the user. Silent no-op if location is off.
+  Future<void> _initUserLocation() async {
+    try {
+      final pos = await LocationService.getCurrentPosition();
+      if (pos == null) return;
+      userLat = pos.latitude;
+      userLng = pos.longitude;
+      // Now that we know where the user is, re-pull the requests so the
+      // backend applies the "near you" radius filter (the first load in
+      // onInit ran before GPS resolved).
+      fetchRequests();
+      update();
+      final resolved =
+          await GeoSearchService.instance.reverse(LatLng(pos.latitude, pos.longitude));
+      if (resolved != null && resolved.isNotEmpty) {
+        areaLabel = _shortArea(resolved);
+        update();
+      }
+    } catch (_) {
+      // Location unavailable — the list falls back to showing everything.
+    }
+  }
+
+  /// Keep the first one or two address segments (e.g. "Baishakhi, Lake City
+  /// Rd") for a compact header label.
+  String _shortArea(String full) {
+    final parts = full
+        .split(',')
+        .map((s) => s.trim())
+        .where((s) => s.isNotEmpty)
+        .toList();
+    return parts.isEmpty ? full : parts.take(2).join(', ');
+  }
+
+  /// Stamps `distanceKm` onto every request from the viewer's position.
+  void _applyDistances() {
+    final la = userLat, lo = userLng;
+    if (la == null || lo == null) return;
+    for (final r in requestList) {
+      if (r.lat != null && r.lng != null) {
+        r.distanceKm = _haversineKm(la, lo, r.lat!, r.lng!);
+      }
+    }
+  }
+
+  /// Great-circle distance in km.
+  double _haversineKm(double lat1, double lng1, double lat2, double lng2) {
+    const earthKm = 6371.0;
+    double rad(double d) => d * math.pi / 180.0;
+    final dLat = rad(lat2 - lat1);
+    final dLng = rad(lng2 - lng1);
+    final a = math.sin(dLat / 2) * math.sin(dLat / 2) +
+        math.cos(rad(lat1)) *
+            math.cos(rad(lat2)) *
+            math.sin(dLng / 2) *
+            math.sin(dLng / 2);
+    return 2 * earthKm * math.asin(math.min(1.0, math.sqrt(a)));
   }
 
   /// Pull-to-refresh for the Blood Bank home page — reloads the nearby donors,
@@ -219,18 +292,43 @@ class BloodController extends GetxController with LiveRefreshMixin {
   int get openRequestsCount =>
       requestList.where((r) => !r.isFulfilled).length;
 
-  /// Requests filtered by the "compatible groups only" toggle.
-  List<BloodRequestEntry> get visibleRequestEntries => compatibleOnly
-      ? requestList
-          .where((r) => _compatibleGroups.contains(r.bloodGroup))
-          .toList()
-      : requestList;
+  /// The "requests near you" list — matched to the viewer:
+  ///  • blood group: only requests this user can donate to (only enforced
+  ///    once we know their donor group; non-donors see all groups),
+  ///  • distance: only requests whose alert radius (search_radius_km, chosen
+  ///    by the requester) covers the user's current location; radius 0 =
+  ///    "all over" (no limit). Requests we can't place (missing coords /
+  ///    location off) are kept rather than hidden.
+  /// Sorted nearest-first.
+  List<BloodRequestEntry> get visibleRequestEntries {
+    final groups = _compatibleGroups; // empty when not a registered donor
+    final list = requestList.where((r) {
+      if (groups.isNotEmpty && !groups.contains(r.bloodGroup)) return false;
+      if (userLat != null &&
+          userLng != null &&
+          r.lat != null &&
+          r.lng != null &&
+          r.searchRadiusKm > 0) {
+        final d = r.distanceKm ??
+            _haversineKm(userLat!, userLng!, r.lat!, r.lng!);
+        if (d > r.searchRadiusKm) return false;
+      }
+      return true;
+    }).toList();
+    list.sort((a, b) =>
+        (a.distanceKm ?? double.infinity).compareTo(b.distanceKm ?? double.infinity));
+    return list;
+  }
 
   Future<void> fetchRequests() async {
     loadingRequests = true;
     update();
     try {
-      requestList = await _repo.fetchRequests();
+      // Send the user's location so the backend returns only requests whose
+      // alert radius reaches them (correct even when paginated). The
+      // client-side distance/group logic then just labels + sorts them.
+      requestList = await _repo.fetchRequests(lat: userLat, lng: userLng);
+      _applyDistances();
     } catch (e) {
       SnackHelper.error(e.toString().replaceFirst('Exception: ', ''));
     } finally {
@@ -511,7 +609,10 @@ class BloodController extends GetxController with LiveRefreshMixin {
   String get donorGroup => myDonor?.bloodGroup ?? '';
   final int donations = 12;
   final int livesSaved = 36;
-  final String area = 'Gulshan area';
+
+  /// The user's real reverse-geocoded area (from GPS), replacing the old
+  /// hardcoded "Gulshan area". Falls back to a neutral label until located.
+  String get area => areaLabel.isNotEmpty ? areaLabel : 'your area'.tr;
 
   // ── My leaderboard rank (GET /api/v1/blood/donors/leaderboard) ──────
   /// My 1-based position on the leaderboard; 0 means unranked/not a donor yet.

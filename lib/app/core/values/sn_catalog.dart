@@ -29,6 +29,6 @@ class SnCatalog {
     QuickAction('Need\nBlood', Icons.water_drop_rounded, Color(0xFFE53935)),
     QuickAction('Ambulance', Icons.airport_shuttle_rounded, Color(0xFF3B82F6)),
     QuickAction('Find\nDoctor', Icons.medical_services_rounded, Color(0xFF10B981)),
-    QuickAction('Track\nOrder', Icons.location_on_rounded, Color(0xFF6366F1)),
+    QuickAction('Home\nService', Icons.home_repair_service_rounded, Color(0xFFF15A24)),
   ];
 }

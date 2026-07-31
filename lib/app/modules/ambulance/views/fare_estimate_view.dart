@@ -778,7 +778,8 @@ class _PatientCard extends StatelessWidget {
       ),
       child: Column(
         children: [
-          _field('Patient name'.tr, c.patientNameCtrl, TextInputType.text),
+          _field('${'Patient name'.tr} *', c.patientNameCtrl,
+              TextInputType.text),
           const SizedBox(height: 10),
           _field('Contact phone'.tr, c.phoneCtrl, TextInputType.phone),
         ],
@@ -855,13 +856,13 @@ class _PayList extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(m.label,
+                        Text(m.label.tr,
                             style: const TextStyle(
                                 fontSize: 14.5,
                                 fontWeight: FontWeight.w800,
                                 color: Color(0xFF0F172A))),
                         const SizedBox(height: 2),
-                        Text(m.description,
+                        Text(m.description.tr,
                             style: const TextStyle(
                                 fontSize: 12, color: Color(0xFF94A3B8))),
                       ],
