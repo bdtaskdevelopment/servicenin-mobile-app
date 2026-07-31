@@ -22,6 +22,8 @@ class DonorEntry {
     this.lastDonatedAt,
     this.lat,
     this.lng,
+    this.age,
+    this.profession = '',
   });
 
   final String id;
@@ -35,6 +37,8 @@ class DonorEntry {
   final DateTime? lastDonatedAt;
   final double? lat;
   final double? lng;
+  final int? age;
+  final String profession;
 
   // Flattened from `user` / `user.profile`.
   final String fullName;
@@ -81,6 +85,10 @@ class DonorEntry {
       lastDonatedAt: last.isEmpty ? null : DateTime.tryParse(last),
       lat: dbl(json['lat']),
       lng: dbl(json['lng']),
+      age: json['age'] is int
+          ? json['age'] as int
+          : int.tryParse(str(json['age'])),
+      profession: str(json['profession']),
       fullName: str(profile['full_name']),
       fullNameBn: str(profile['full_name_bn']),
       phone: str(user['phone']),

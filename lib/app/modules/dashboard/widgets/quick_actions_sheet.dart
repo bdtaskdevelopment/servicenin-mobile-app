@@ -5,7 +5,6 @@ import '../../../core/values/app_colors.dart';
 import '../../../core/values/sn_catalog.dart';
 import '../../../data/models/sn_service.dart';
 import '../../../routes/app_pages.dart';
-import '../controllers/dashboard_controller.dart';
 
 /// "Quick Actions" bottom sheet opened from the center nav button.
 class QuickActionsSheet extends StatelessWidget {
@@ -84,11 +83,8 @@ class _QuickItem extends StatelessWidget {
       case 'Find\nDoctor':
         Get.toNamed(Routes.HEALTHCARE_CENTERS);
         break;
-      case 'Track\nOrder':
-        // Not a page — jump the dashboard to the "Orders" tab.
-        if (Get.isRegistered<DashboardController>()) {
-          Get.find<DashboardController>().changeTab(2);
-        }
+      case 'Home\nService':
+        Get.toNamed(Routes.HOME_SERVICE);
         break;
     }
   }

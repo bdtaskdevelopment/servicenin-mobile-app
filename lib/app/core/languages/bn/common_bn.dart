@@ -127,6 +127,7 @@ const Map<String, String> commonBn = {
   'Need\nBlood': 'রক্ত\nপ্রয়োজন',
   'Find\nDoctor': 'ডাক্তার\nখুঁজুন',
   'Track\nOrder': 'অর্ডার\nট্র্যাক',
+  'Home\nService': 'হোম\nসার্ভিস',
 
   // ── Common empty / error ──
   'No results found': 'কোন ফলাফল পাওয়া যায়নি',

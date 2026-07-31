@@ -62,6 +62,15 @@ class HomeController extends GetxController {
   List<HomeService> recent = [];
   bool loadingRecent = false;
 
+  /// Services not surfaced in the app yet — kept out of the Popular / Recent
+  /// shortcuts (matched on HomeService.type / key).
+  static const _hiddenServices = {'jobs', 'matchmaking'};
+  List<HomeService> _visible(List<HomeService> list) => list
+      .where((s) =>
+          !_hiddenServices.contains(s.type.toLowerCase()) &&
+          !_hiddenServices.contains(s.key.toLowerCase()))
+      .toList();
+
   @override
   void onInit() {
     super.onInit();
@@ -95,7 +104,7 @@ class HomeController extends GetxController {
     loadingPopular = true;
     update();
     try {
-      popular = await _repo.fetchPopular(limit: 6);
+      popular = _visible(await _repo.fetchPopular(limit: 6));
     } catch (_) {
     } finally {
       loadingPopular = false;
@@ -107,7 +116,7 @@ class HomeController extends GetxController {
     loadingRecent = true;
     update();
     try {
-      recent = await _repo.fetchRecent(limit: 6);
+      recent = _visible(await _repo.fetchRecent(limit: 6));
     } catch (_) {
     } finally {
       loadingRecent = false;

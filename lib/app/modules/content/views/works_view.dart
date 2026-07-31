@@ -189,7 +189,7 @@ class _Header extends StatelessWidget {
   }
 }
 
-// ── Work row (list-style card: thumbnail · title · meta · menu) ─────
+// ── Work card: big 16:9 video thumbnail + play + provider, then title ──
 class _WorkCard extends StatelessWidget {
   const _WorkCard({required this.post});
   final WorkPost post;
@@ -198,92 +198,158 @@ class _WorkCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final img = _mediaUrl(post.thumbnailUrl);
     return Container(
-      padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
         color: AppColors.white,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: const Color(0xFFEDEFF2)),
+        borderRadius: BorderRadius.circular(18),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.06),
+            blurRadius: 16,
+            offset: const Offset(0, 6),
+          ),
+        ],
       ),
-      child: Row(
+      clipBehavior: Clip.antiAlias,
+      child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          ClipRRect(
-            borderRadius: BorderRadius.circular(10),
-            child: SizedBox(
-              width: 64,
-              height: 64,
-              child: Stack(
-                fit: StackFit.expand,
-                children: [
-                  img.isEmpty
-                      ? Container(color: const Color(0xFFE0F2FE))
-                      : CachedNetworkImage(
-                          imageUrl: img,
-                          fit: BoxFit.cover,
-                          placeholder: (_, __) =>
-                              Container(color: const Color(0xFFF1F5F9)),
-                          errorWidget: (_, __, ___) =>
-                              Container(color: const Color(0xFFE0F2FE)),
+          // Big video thumbnail
+          AspectRatio(
+            aspectRatio: 16 / 9,
+            child: Stack(
+              fit: StackFit.expand,
+              children: [
+                img.isEmpty
+                    ? Container(
+                        color: const Color(0xFFE0F2FE),
+                        alignment: Alignment.center,
+                        child: const Icon(Icons.videocam_rounded,
+                            color: _teal, size: 44),
+                      )
+                    : CachedNetworkImage(
+                        imageUrl: img,
+                        fit: BoxFit.cover,
+                        placeholder: (_, __) =>
+                            Container(color: const Color(0xFFF1F5F9)),
+                        errorWidget: (_, __, ___) => Container(
+                          color: const Color(0xFFE0F2FE),
+                          alignment: Alignment.center,
+                          child: const Icon(Icons.videocam_rounded,
+                              color: _teal, size: 44),
                         ),
-                  Container(
-                    alignment: Alignment.center,
-                    color: Colors.black.withValues(alpha: 0.15),
-                    child: const Icon(Icons.play_circle_fill_rounded,
-                        color: Colors.white, size: 26),
+                      ),
+                // Legibility gradient at the bottom.
+                const DecoratedBox(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [Colors.transparent, Colors.black26],
+                    ),
                   ),
-                ],
-              ),
+                ),
+                // Center play button.
+                Center(
+                  child: Container(
+                    width: 58,
+                    height: 58,
+                    decoration: BoxDecoration(
+                      color: Colors.black.withValues(alpha: 0.45),
+                      shape: BoxShape.circle,
+                      border: Border.all(
+                          color: Colors.white.withValues(alpha: 0.9),
+                          width: 2),
+                    ),
+                    child: const Icon(Icons.play_arrow_rounded,
+                        color: Colors.white, size: 36),
+                  ),
+                ),
+                // Provider badge (YouTube / Facebook).
+                if (post.provider.isNotEmpty)
+                  Positioned(
+                      top: 10, left: 10, child: _ProviderBadge(post.provider)),
+              ],
             ),
           ),
-          const SizedBox(width: 12),
-          Expanded(
+          // Title + meta
+          Padding(
+            padding: const EdgeInsets.fromLTRB(14, 12, 14, 14),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(post.title,
-                    maxLines: 1,
+                    maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                     style: const TextStyle(
-                        fontSize: 14.5,
+                        fontSize: 16.5,
+                        height: 1.25,
                         fontWeight: FontWeight.w800,
                         color: Color(0xFF0F172A))),
-                if (post.dateLabel.isNotEmpty) ...[
-                  const SizedBox(height: 5),
-                  Row(
-                    children: [
+                const SizedBox(height: 10),
+                Row(
+                  children: [
+                    if (post.categoryName.isNotEmpty)
+                      Flexible(child: _Pill(post.categoryName, _teal)),
+                    const Spacer(),
+                    if (post.dateLabel.isNotEmpty) ...[
                       const Icon(Icons.calendar_today_outlined,
-                          size: 11, color: Color(0xFF94A3B8)),
+                          size: 12, color: Color(0xFF94A3B8)),
                       const SizedBox(width: 4),
-                      Expanded(
-                        child: Text(
-                            '${'Modified date'.tr} : ${post.dateLabel}',
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(
-                                fontSize: 11.5, color: Color(0xFF94A3B8))),
-                      ),
+                      Text(post.dateLabel,
+                          style: const TextStyle(
+                              fontSize: 11.5, color: Color(0xFF94A3B8))),
                     ],
-                  ),
-                ],
-                if (post.categoryName.isNotEmpty ||
-                    post.provider.isNotEmpty) ...[
-                  const SizedBox(height: 6),
-                  Row(
-                    children: [
-                      if (post.categoryName.isNotEmpty)
-                        _Pill(post.categoryName, _teal),
-                      if (post.categoryName.isNotEmpty &&
-                          post.provider.isNotEmpty)
-                        const SizedBox(width: 6),
-                      if (post.provider.isNotEmpty)
-                        _Pill(post.provider.toUpperCase(),
-                            const Color(0xFF64748B)),
-                    ],
-                  ),
-                ],
+                  ],
+                ),
               ],
             ),
           ),
+        ],
+      ),
+    );
+  }
+}
+
+// ── Provider badge overlaid on the thumbnail ─────────────────────────
+class _ProviderBadge extends StatelessWidget {
+  const _ProviderBadge(this.provider);
+  final String provider;
+
+  @override
+  Widget build(BuildContext context) {
+    final p = provider.toLowerCase();
+    Color color;
+    String label;
+    if (p.contains('youtube')) {
+      color = const Color(0xFFFF0000);
+      label = 'YouTube';
+    } else if (p.contains('facebook')) {
+      color = const Color(0xFF1877F2);
+      label = 'Facebook';
+    } else {
+      color = const Color(0xFF334155);
+      label = provider;
+    }
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: color,
+        borderRadius: BorderRadius.circular(8),
+        boxShadow: const [
+          BoxShadow(color: Colors.black26, blurRadius: 6),
+        ],
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Icon(Icons.play_circle_fill_rounded,
+              color: Colors.white, size: 14),
+          const SizedBox(width: 4),
+          Text(label,
+              style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 10.5,
+                  fontWeight: FontWeight.w800)),
         ],
       ),
     );

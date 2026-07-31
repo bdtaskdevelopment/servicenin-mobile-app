@@ -130,6 +130,12 @@ const Map<String, String> groupBBn = {
   'Select pickup & destination to estimate the fare.':
       'ভাড়া হিসাব করতে পিকআপ ও গন্তব্য নির্বাচন করুন।',
   'Patient name': 'রোগীর নাম',
+  'Please enter the patient name': 'রোগীর নাম লিখুন',
+  'Cash Payment': 'নগদ পরিশোধ পদ্ধতি',
+  'Pay the driver in cash after the trip.':
+      'ট্রিপ শেষে চালককে নগদে অর্থ প্রদান করুন।',
+  'Expected waiting time': 'আনুমানিক অপেক্ষার সময়',
+  'Support': 'সাপোর্ট',
   'Contact phone': 'যোগাযোগের ফোন',
   'Schedule ambulance': 'অ্যাম্বুলেন্স শিডিউল করুন',
   'Step 2 of 3 · Patient & schedule': 'ধাপ ২/৩ · রোগী ও সময়সূচি',

@@ -25,6 +25,9 @@ class BloodRequestEntry {
     this.responseCount = 0,
     this.createdAt,
     this.expiresAt,
+    this.lat,
+    this.lng,
+    this.searchRadiusKm = 0,
   });
 
   final String id;
@@ -45,6 +48,25 @@ class BloodRequestEntry {
   final int responseCount;
   final DateTime? createdAt;
   final DateTime? expiresAt;
+
+  /// Hospital coordinates + the alert radius the requester chose (km;
+  /// 0 = "all over", no distance limit). Used to match requests against the
+  /// viewer's current location.
+  final double? lat;
+  final double? lng;
+  final int searchRadiusKm;
+
+  /// Distance (km) from the viewer's current location to this request,
+  /// computed client-side after the list loads. Null until set.
+  double? distanceKm;
+
+  /// A short "3.2 km" style label, or '' when distance isn't known.
+  String get distanceLabel {
+    final d = distanceKm;
+    if (d == null) return '';
+    if (d < 1) return '${(d * 1000).round()} m';
+    return '${d.toStringAsFixed(1)} km';
+  }
 
   /// Best display name for the contact person.
   String get contactDisplay =>
@@ -70,6 +92,8 @@ class BloodRequestEntry {
     String str(dynamic v) => v?.toString().trim() ?? '';
     int asInt(dynamic v) =>
         v is int ? v : int.tryParse(v?.toString() ?? '') ?? 0;
+    double? asDouble(dynamic v) =>
+        v == null ? null : (v is num ? v.toDouble() : double.tryParse('$v'));
     DateTime? date(dynamic v) {
       final s = str(v);
       return s.isEmpty ? null : DateTime.tryParse(s);
@@ -98,6 +122,9 @@ class BloodRequestEntry {
       requesterPhone: str(requester['phone']),
       requesterPhoto: str(profile['photo_url']),
       responseCount: asInt(json['response_count']),
+      lat: asDouble(json['lat']),
+      lng: asDouble(json['lng']),
+      searchRadiusKm: asInt(json['search_radius_km']),
     );
   }
 

@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 
+import '../../../core/helpers/app_helper.dart';
 import '../../../core/helpers/snack_helper.dart';
 import '../../../core/services/notification_socket_service.dart';
 import '../../../core/values/storage.dart';
@@ -257,8 +258,11 @@ class AccountController extends GetxController {
     Get.toNamed(Routes.ACCOUNT_ACTIVITY);
   }
   void openSettings() => Get.toNamed(Routes.ACCOUNT_SETTINGS);
-  void openPrivacy() => Get.toNamed(Routes.ACCOUNT_PRIVACY);
-  void openTerms() => Get.toNamed(Routes.ACCOUNT_TERMS);
+
+  // Terms & Privacy open the website — same targets as the login /
+  // registration Terms notice (see auth/widgets/terms_notice.dart).
+  void openPrivacy() => Helpers.launchWebsite('https://servicenin.net/privacy-policy');
+  void openTerms() => Helpers.launchWebsite('https://servicenin.net/terms');
   void openDeleteAccount() => Get.toNamed(Routes.ACCOUNT_DELETE);
 
   void deleteAccount() {

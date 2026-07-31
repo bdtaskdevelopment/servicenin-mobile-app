@@ -3,7 +3,8 @@ import 'package:get/get.dart';
 import 'package:latlong2/latlong.dart';
 
 import '../../../core/values/app_colors.dart';
-import '../../../global_widget/sn_map.dart';
+import '../../../global_widget/sn_google_map.dart';
+import '../../../global_widget/sn_map.dart' show SnMapMarker;
 import '../controllers/donor_register_controller.dart';
 
 const _red = Color(0xFFE11D48);
@@ -92,7 +93,9 @@ class DonorRegisterView extends GetView<DonorRegisterController> {
                       shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(14)),
                     ),
-                    child: Text('Register as donor →'.tr,
+                    child: Text(
+                        (con.isEditing ? 'Save changes' : 'Register as donor →')
+                            .tr,
                         style: const TextStyle(
                             fontSize: 16, fontWeight: FontWeight.w700)),
                   ),
@@ -121,18 +124,25 @@ class _Header extends StatelessWidget {
             icon: const Icon(Icons.arrow_back_ios_new_rounded,
                 size: 20, color: Color(0xFF1A1A1A)),
           ),
-          Column(
+          GetBuilder<DonorRegisterController>(
+            builder: (con) => Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('Become a donor'.tr,
+              Text((con.isEditing ? 'Update donor profile' : 'Become a donor')
+                  .tr,
                   style: const TextStyle(
                       fontSize: 19,
                       fontWeight: FontWeight.w800,
                       color: Color(0xFF0F172A))),
               const SizedBox(height: 1),
-              Text('Join the donor network'.tr,
+              Text(
+                  (con.isEditing
+                          ? 'Update your details & availability'
+                          : 'Join the donor network')
+                      .tr,
                   style: const TextStyle(fontSize: 12, color: Color(0xFF94A3B8))),
             ],
+          ),
           ),
         ],
       ),
@@ -249,63 +259,109 @@ class _GroupGrid extends StatelessWidget {
   }
 }
 
-// ── Location (map + GPS coordinates) ────────────────────────────────
+// ── Location (interactive Google map + GPS) ─────────────────────────
 class _LocationCard extends StatelessWidget {
   const _LocationCard({required this.con});
   final DonorRegisterController con;
 
   @override
   Widget build(BuildContext context) {
-    final point = LatLng(con.lat, con.lng);
-    return Container(
-      padding: const EdgeInsets.all(6),
-      decoration: BoxDecoration(
-        color: AppColors.white,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: const Color(0xFFEDEFF2)),
-      ),
-      child: Column(
-        children: [
-          ClipRRect(
-            borderRadius: BorderRadius.circular(10),
-            child: SizedBox(
-              height: 130,
-              child: SnMap(
-                center: point,
-                zoom: 14,
-                interactive: false,
-                markers: [
-                  SnMapMarker(point, _red, Icons.person_pin_circle_rounded),
-                ],
-              ),
-            ),
+    return GetBuilder<DonorRegisterController>(
+      builder: (con) {
+        final point = LatLng(con.lat, con.lng);
+        return Container(
+          padding: const EdgeInsets.all(6),
+          decoration: BoxDecoration(
+            color: AppColors.white,
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(color: const Color(0xFFEDEFF2)),
           ),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(8, 8, 8, 4),
-            child: Row(
-              children: [
-                const Icon(Icons.my_location_rounded,
-                    size: 16, color: Color(0xFF16A34A)),
-                const SizedBox(width: 6),
-                Expanded(
-                  child: Text(
-                    'GPS · ${con.lat.toStringAsFixed(4)}, ${con.lng.toStringAsFixed(4)}',
-                    style: const TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600,
-                        color: Color(0xFF64748B)),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              ClipRRect(
+                borderRadius: BorderRadius.circular(10),
+                child: SizedBox(
+                  height: 160,
+                  child: Stack(
+                    children: [
+                      SnGoogleMap(
+                        key: ValueKey('donor-map-${con.mapVersion}'),
+                        center: point,
+                        zoom: 15,
+                        showMyLocation: true,
+                        markers: [
+                          SnMapMarker(
+                              point, _red, Icons.person_pin_circle_rounded),
+                        ],
+                        onTap: con.setLocationFromMapTap,
+                      ),
+                      if (con.loadingLocation)
+                        const Positioned(
+                          top: 8,
+                          right: 8,
+                          child: SizedBox(
+                            width: 18,
+                            height: 18,
+                            child: CircularProgressIndicator(
+                                strokeWidth: 2.2, color: _red),
+                          ),
+                        ),
+                    ],
                   ),
                 ),
-                Text('Auto-detected'.tr,
-                    style: const TextStyle(
-                        fontSize: 11,
-                        fontWeight: FontWeight.w700,
-                        color: Color(0xFF16A34A))),
-              ],
-            ),
+              ),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(8, 8, 8, 2),
+                child: Row(
+                  children: [
+                    const Icon(Icons.place_rounded, size: 16, color: _red),
+                    const SizedBox(width: 6),
+                    Expanded(
+                      child: Text(
+                        con.locationLabel.isNotEmpty
+                            ? con.locationLabel
+                            : 'GPS · ${con.lat.toStringAsFixed(4)}, ${con.lng.toStringAsFixed(4)}',
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                            color: Color(0xFF64748B)),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Row(
+                children: [
+                  Expanded(
+                    child: TextButton.icon(
+                      onPressed: con.useCurrentLocation,
+                      icon: const Icon(Icons.my_location_rounded, size: 18),
+                      label: Text('Use current location'.tr,
+                          maxLines: 1, overflow: TextOverflow.ellipsis),
+                      style: TextButton.styleFrom(
+                          foregroundColor: const Color(0xFF16A34A)),
+                    ),
+                  ),
+                  Container(
+                      width: 1, height: 20, color: const Color(0xFFEDEFF2)),
+                  Expanded(
+                    child: TextButton.icon(
+                      onPressed: con.openLocationSearch,
+                      icon: const Icon(Icons.search_rounded, size: 18),
+                      label: Text('Search'.tr,
+                          maxLines: 1, overflow: TextOverflow.ellipsis),
+                      style: TextButton.styleFrom(foregroundColor: _red),
+                    ),
+                  ),
+                ],
+              ),
+            ],
           ),
-        ],
-      ),
+        );
+      },
     );
   }
 }

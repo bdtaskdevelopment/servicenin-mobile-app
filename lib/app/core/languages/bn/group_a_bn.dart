@@ -100,9 +100,18 @@ const Map<String, String> groupABn = {
   'Broadcast request →': 'অনুরোধ পাঠান →',
   'Bags of blood': 'রক্তের ব্যাগ',
   'Auto-detected': 'স্বয়ংক্রিয়ভাবে শনাক্ত',
+  'Use current location': 'বর্তমান অবস্থান ব্যবহার করুন',
+  'Search location': 'অবস্থান খুঁজুন',
+  'your area': 'আপনার এলাকা',
 
   // ── Blood: donor register ────────────────────────────────────────
   'Join the donor network': 'ডোনার নেটওয়ার্কে যোগ দিন',
+  'Update donor profile': 'ডোনার প্রোফাইল আপডেট করুন',
+  'Update your details & availability':
+      'আপনার তথ্য ও প্রাপ্যতা আপডেট করুন',
+  'Update your details · availability':
+      'আপনার তথ্য · প্রাপ্যতা আপডেট করুন',
+  'Save changes': 'আপডেট করুন',
   'Save lives near you': 'কাছাকাছি জীবন বাঁচান',
   'We\'ll send a one-time code to verify your account.':
       'আপনার অ্যাকাউন্ট যাচাই করতে আমরা একটি ওয়ান-টাইম কোড পাঠাব।',
@@ -182,7 +191,7 @@ const Map<String, String> groupABn = {
   'Message donor…': 'ডোনারকে মেসেজ করুন…',
 
   // ── Blood: confirmed ─────────────────────────────────────────────
-  'Donation confirmed': 'রক্তদান নিশ্চিত',
+  'Donation confirmed': 'রক্তদান নিশ্চিত করার জন্য আন্তরিক ধন্যবাদ',
   'You helped save a life 🩸': 'আপনি একটি জীবন বাঁচাতে সাহায্য করলেন 🩸',
   'View leaderboard': 'লিডারবোর্ড দেখুন',
   'Back to Blood home': 'রক্ত হোমে ফিরুন',

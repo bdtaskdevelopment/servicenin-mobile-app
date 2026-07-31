@@ -81,8 +81,12 @@ class BloodRepository {
   }
 
   /// GET /api/v1/blood/requests — open blood requests.
-  Future<List<BloodRequestEntry>> fetchRequests() async {
-    final res = await provider.getData(ApiURL.bloodRequests);
+  Future<List<BloodRequestEntry>> fetchRequests({
+    double? lat,
+    double? lng,
+  }) async {
+    final res =
+        await provider.getData(ApiURL.bloodRequestsNear(lat: lat, lng: lng));
     return BloodRequestEntry.listFromResponse(_payload(res));
   }
 

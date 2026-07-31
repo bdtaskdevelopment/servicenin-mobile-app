@@ -75,6 +75,22 @@ class BloodRequestApiCard extends StatelessWidget {
                       Text(hospital.isNotEmpty ? hospital : 'Hospital not set'.tr,
                           style: const TextStyle(
                               fontSize: 12.5, color: Color(0xFF94A3B8))),
+                      if (req.distanceLabel.isNotEmpty) ...[
+                        const SizedBox(height: 4),
+                        Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Icon(Icons.near_me_rounded,
+                                size: 13, color: Color(0xFFE11D48)),
+                            const SizedBox(width: 4),
+                            Text(req.distanceLabel,
+                                style: const TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w700,
+                                    color: Color(0xFFE11D48))),
+                          ],
+                        ),
+                      ],
                     ],
                   ),
                 ),
