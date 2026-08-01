@@ -632,6 +632,42 @@ class ServiceBooking {
   bool get fullyPaid => paymentStatus == 'paid';
   bool get partiallyPaid => paymentStatus == 'partial';
 
+  /// The assigned provider has ACCEPTED the job — i.e. the booking has moved
+  /// past `pending`/`assigned` (admin picked a provider but they haven't
+  /// accepted yet). Only from this point is the provider's profile shown to
+  /// the citizen. Mirrors the backend lifecycle in homeservice.go.
+  bool get providerAccepted {
+    switch (status.toLowerCase()) {
+      case 'accepted':
+      case 'on_the_way':
+      case 'arrived':
+      case 'in_progress':
+      case 'completed':
+      case 'closed':
+        return true;
+      default:
+        return false; // pending, assigned, cancelled, declined
+    }
+  }
+
+  /// Whether citizen ↔ provider chat should be open. It opens once the
+  /// provider accepts and closes again when the job is finished & paid
+  /// (or the booking is cancelled/declined/closed).
+  bool get chatOpen {
+    if (!providerAccepted) return false; // pending / assigned
+    switch (status.toLowerCase()) {
+      case 'cancelled':
+      case 'canceled':
+      case 'declined':
+      case 'closed':
+        return false;
+      case 'completed':
+        return !fullyPaid; // done — chat closes once fully paid
+      default:
+        return true; // accepted / on_the_way / arrived / in_progress
+    }
+  }
+
   factory ServiceBooking.fromMap(Map<String, dynamic> j) {
     final cat = j['category'] is Map ? j['category'] as Map : const {};
     final sub = j['sub_service'] is Map ? j['sub_service'] as Map : const {};

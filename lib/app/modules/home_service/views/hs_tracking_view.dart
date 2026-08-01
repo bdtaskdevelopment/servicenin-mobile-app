@@ -203,6 +203,7 @@ class HsTrackingView extends GetView<HomeServiceController> {
                                   child: _ActionBtn(
                                       icon: Icons.chat_bubble_outline_rounded,
                                       label: 'Chat'.tr,
+                                      enabled: con.chatAvailable,
                                       onTap: con.openChat)),
                               const SizedBox(width: 10),
                               Expanded(
@@ -377,29 +378,38 @@ class _StatusChip extends StatelessWidget {
 
 class _ActionBtn extends StatelessWidget {
   const _ActionBtn(
-      {required this.icon, required this.label, required this.onTap});
+      {required this.icon,
+      required this.label,
+      required this.onTap,
+      this.enabled = true});
   final IconData icon;
   final String label;
   final VoidCallback onTap;
+  final bool enabled;
   @override
   Widget build(BuildContext context) {
+    final iconColor = enabled ? _teal : const Color(0xFFB6BDC7);
+    final labelColor =
+        enabled ? const Color(0xFF334155) : const Color(0xFFB6BDC7);
     return GestureDetector(
+      // Keep it tappable even when disabled so the guard can explain why.
       onTap: onTap,
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 12),
         decoration: BoxDecoration(
-            color: AppColors.white,
+            color: enabled ? AppColors.white : const Color(0xFFF4F5F7),
             borderRadius: BorderRadius.circular(14),
             border: Border.all(color: const Color(0xFFEDEFF2))),
         child: Column(
           children: [
-            Icon(icon, color: _teal, size: 22),
+            Icon(enabled ? icon : Icons.lock_outline_rounded,
+                color: iconColor, size: 22),
             const SizedBox(height: 6),
             Text(label,
-                style: const TextStyle(
+                style: TextStyle(
                     fontSize: 11.5,
                     fontWeight: FontWeight.w600,
-                    color: Color(0xFF334155))),
+                    color: labelColor)),
           ],
         ),
       ),

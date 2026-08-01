@@ -168,9 +168,11 @@ class _BookingCard extends StatelessWidget {
               _StatusChip(status: b.status),
             ],
           ),
+          // Provider identity shows once assigned; the call button is
+          // withdrawn once the invoice is fully paid.
           if (b.provider != null) ...[
             const SizedBox(height: 12),
-            _ProviderRow(provider: b.provider!),
+            _ProviderRow(provider: b.provider!, canCall: !b.fullyPaid),
           ],
           const Padding(
             padding: EdgeInsets.symmetric(vertical: 12),
@@ -203,8 +205,9 @@ class _BookingCard extends StatelessWidget {
 
 /// Assigned provider strip: photo/initials, name, rating + a call button.
 class _ProviderRow extends StatelessWidget {
-  const _ProviderRow({required this.provider});
+  const _ProviderRow({required this.provider, this.canCall = true});
   final ServiceBookingProvider provider;
+  final bool canCall;
 
   @override
   Widget build(BuildContext context) {
@@ -226,7 +229,7 @@ class _ProviderRow extends StatelessWidget {
               child: photo.isNotEmpty
                   ? Image.network(photo,
                       fit: BoxFit.cover,
-                      errorBuilder: (_, _, _) => _initials())
+                      errorBuilder: (_, __, ___) => _initials())
                   : _initials(),
             ),
           ),
@@ -262,7 +265,7 @@ class _ProviderRow extends StatelessWidget {
               ],
             ),
           ),
-          if (provider.phone.isNotEmpty)
+          if (canCall && provider.phone.isNotEmpty)
             GestureDetector(
               onTap: () => _callProvider(provider.phone),
               child: Container(

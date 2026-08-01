@@ -244,7 +244,7 @@ const Map<String, String> groupBBn = {
   'Service charge': 'সেবা চার্জ',
   'VAT (5%)': 'ভ্যাট (৫%)',
   'Total paid': 'মোট পরিশোধিত',
-  'Rate service': 'সেবা রেট করুন',
+  'Rate service': 'সেবা সম্পর্কে মতামত দিন',
   'Report issue': 'সমস্যা জানান',
   'Report an issue': 'একটি সমস্যা জানান',
   'Describe what went wrong…': 'কী সমস্যা হয়েছে লিখুন…',
@@ -257,6 +257,12 @@ const Map<String, String> groupBBn = {
   'Technician': 'টেকনিসিয়ান',
   'Technician is': 'টেকনিসিয়ান আপনার থেকে',
   'away from you': 'দূরে আছেন',
+  'Chat opens once a provider is assigned and accepts.':
+      'একজন প্রোভাইডার নিয়োগ ও অনুরোধ গ্রহণ করলে চ্যাট চালু হবে।',
+  'Chat opens once the provider accepts your booking.':
+      'প্রোভাইডার আপনার বুকিং গ্রহণ করলে চ্যাট চালু হবে।',
+  'This booking is complete — chat is now closed.':
+      'এই বুকিংটি সম্পন্ন হয়েছে — চ্যাট এখন বন্ধ।',
   'Thanks for your review!': 'রিভিউর জন্য ধন্যবাদ!',
   'Would you book this service again?': 'আপনি কি আবার এই সার্ভিসটি বুক করতে চান?',
   'STATUS TIMELINE': 'অবস্থার টাইমলাইন',

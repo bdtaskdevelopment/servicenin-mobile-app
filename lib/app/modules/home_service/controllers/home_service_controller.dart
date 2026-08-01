@@ -432,10 +432,46 @@ class HomeServiceController extends GetxController with LiveRefreshMixin {
   ServiceBookingProvider? get _provider =>
       (trackedBooking ?? lastBooking)?.provider;
   bool get hasProvider => _provider != null;
+
+  /// The booking whose lifecycle drives contact affordances.
+  ServiceBooking? get _activeBooking => trackedBooking ?? lastBooking;
+
+  /// The provider's identity (name, rating, photo) is shown as soon as a
+  /// provider is assigned to the booking. Chat, however, stays gated on the
+  /// provider actually ACCEPTING (see [chatAvailable]).
+  bool get showProviderProfile => hasProvider;
+
+  /// Whether the in-app chat is currently open (provider accepted, job not yet
+  /// finished & paid).
+  bool get chatAvailable => _activeBooking?.chatOpen ?? false;
+
+  /// The provider's phone / call button is shown while a provider is assigned,
+  /// and is withdrawn once the invoice is fully paid (the provider's name &
+  /// rating stay visible — only the phone action goes away).
+  bool get providerCallAvailable =>
+      hasProvider &&
+      techPhone.isNotEmpty &&
+      !(_activeBooking?.fullyPaid ?? false);
+
+  /// Human-readable reason chat is unavailable — surfaced when the citizen
+  /// taps a disabled chat action.
+  String get chatUnavailableReason {
+    final b = _activeBooking;
+    if (b == null || !hasProvider) {
+      return 'Chat opens once a provider is assigned and accepts.'.tr;
+    }
+    if (!b.providerAccepted) {
+      return 'Chat opens once the provider accepts your booking.'.tr;
+    }
+    return 'This booking is complete — chat is now closed.'.tr;
+  }
   String get techName => _provider?.displayName ?? 'Service provider';
   String get techInitials => _provider?.initials ?? 'SP';
   String get techRating => _provider?.ratingLabel ?? '—';
-  String get techJobs => _provider != null ? '${_provider!.totalJobs} jobs' : '';
+  // Empty when the provider has no completed jobs yet, so the UI can hide the
+  // "0 jobs" label entirely.
+  String get techJobs =>
+      (_provider?.totalJobs ?? 0) > 0 ? '${_provider!.totalJobs} jobs' : '';
   String get techPhotoUrl =>
       (_provider?.photoUrl.isNotEmpty ?? false) ? _provider!.photoUrl : '';
   String get techPhone => _provider?.phone ?? '';
@@ -1196,7 +1232,11 @@ class HomeServiceController extends GetxController with LiveRefreshMixin {
   void openEditOrder() => Get.toNamed(Routes.HS_EDIT_ORDER);
   void rateService() => Get.toNamed(Routes.HS_RATE);
   void openChat() {
-    final id = trackedBooking?.id ?? lastBooking?.id;
+    if (!chatAvailable) {
+      SnackHelper.error(chatUnavailableReason, title: _moduleTitle);
+      return;
+    }
+    final id = _activeBooking?.id;
     if (id == null || id.isEmpty) return;
     Get.toNamed(Routes.HS_CHAT, arguments: id);
   }
