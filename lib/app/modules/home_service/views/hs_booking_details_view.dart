@@ -130,7 +130,10 @@ class HsBookingDetailsView extends GetView<HomeServiceController> {
                     ),
                   ),
                   // ── Assigned provider ─────────────────────────────────
-                  if (con.hasProvider) ...[
+                  // Only revealed once the provider has ACCEPTED the job —
+                  // an admin-assigned-but-not-yet-accepted booking keeps the
+                  // provider hidden.
+                  if (con.showProviderProfile) ...[
                     const SizedBox(height: 12),
                     _ProviderCard(con: con),
                   ],
@@ -630,7 +633,7 @@ class _ProviderCard extends StatelessWidget {
               child: photo.isNotEmpty
                   ? Image.network(photo,
                       fit: BoxFit.cover,
-                      errorBuilder: (_, _, _) => _initials())
+                      errorBuilder: (_, __, ___) => _initials())
                   : _initials(),
             ),
           ),
@@ -673,7 +676,8 @@ class _ProviderCard extends StatelessWidget {
               ],
             ),
           ),
-          if (con.techPhone.isNotEmpty) ...[
+          // Phone/call button hides once the invoice is fully paid.
+          if (con.providerCallAvailable) ...[
             const SizedBox(width: 8),
             InkWell(
               onTap: con.callProvider,

@@ -22,6 +22,15 @@ class SnSearchController extends GetxController {
   List<HomeService> searchResults = [];
   bool searching = false;
 
+  /// Services not surfaced in the app yet — kept out of the search catalog,
+  /// trending and results (matched on HomeService.type / key).
+  static const _hiddenServices = {'jobs', 'matchmaking'};
+  List<HomeService> _visible(List<HomeService> list) => list
+      .where((s) =>
+          !_hiddenServices.contains(s.type.toLowerCase()) &&
+          !_hiddenServices.contains(s.key.toLowerCase()))
+      .toList();
+
   /// What the list renders: full catalog when idle, search hits otherwise.
   List<HomeService> get results =>
       query.trim().isEmpty ? allServices : searchResults;
@@ -37,7 +46,7 @@ class SnSearchController extends GetxController {
     loadingServices = true;
     update();
     try {
-      allServices = await _repo.fetchServices();
+      allServices = _visible(await _repo.fetchServices());
     } catch (_) {
     } finally {
       loadingServices = false;
@@ -49,7 +58,7 @@ class SnSearchController extends GetxController {
     loadingTrending = true;
     update();
     try {
-      trending = await _repo.fetchTrending(limit: 6);
+      trending = _visible(await _repo.fetchTrending(limit: 6));
     } catch (_) {
     } finally {
       loadingTrending = false;
@@ -81,7 +90,7 @@ class SnSearchController extends GetxController {
     searching = true;
     update();
     try {
-      searchResults = await _repo.search(q.trim());
+      searchResults = _visible(await _repo.search(q.trim()));
     } catch (_) {
       searchResults = [];
     } finally {
