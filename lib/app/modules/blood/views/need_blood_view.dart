@@ -41,11 +41,30 @@ class NeedBloodView extends GetView<NeedBloodController> {
                       const SizedBox(height: 22),
                       _SectionLabel('WHEN NEEDED'.tr),
                       const SizedBox(height: 12),
-                      _TapCard(
-                        icon: Icons.calendar_today_outlined,
-                        label: 'DATE & TIME'.tr,
-                        value: con.neededDate,
-                        onTap: () => _pickDate(context, con),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: _TapCard(
+                              icon: Icons.calendar_today_outlined,
+                              label: 'DATE'.tr,
+                              value: con.neededAt == null
+                                  ? 'Today'.tr
+                                  : con.neededDate.split(' · ').first,
+                              onTap: () => _pickDate(context, con),
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: _TapCard(
+                              icon: Icons.access_time_rounded,
+                              label: 'TIME'.tr,
+                              value: con.neededTimeLabel.isEmpty
+                                  ? 'ASAP'.tr
+                                  : con.neededTimeLabel,
+                              onTap: () => _pickTime(context, con),
+                            ),
+                          ),
+                        ],
                       ),
                       const SizedBox(height: 22),
                       _SectionLabel('HOSPITAL'.tr),
@@ -241,11 +260,20 @@ class _UnitsCard extends StatelessWidget {
       child: Row(
         children: [
           Expanded(
-            child: Text('Bags of blood'.tr,
-                style: const TextStyle(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w600,
-                    color: Color(0xFF0F172A))),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('Bags of blood'.tr,
+                    style: const TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w600,
+                        color: Color(0xFF0F172A))),
+                const SizedBox(height: 2),
+                Text('Maximum 3 bags per request'.tr,
+                    style: const TextStyle(
+                        fontSize: 11.5, color: Color(0xFF94A3B8))),
+              ],
+            ),
           ),
           _stepBtn(Icons.remove_rounded, con.decUnits, filled: false),
           SizedBox(
@@ -392,6 +420,23 @@ Future<void> _pickDate(BuildContext context, NeedBloodController con) async {
   );
   if (picked != null) {
     con.setNeeded(picked);
+  }
+}
+
+// ── Time picker ─────────────────────────────────────────────────────
+Future<void> _pickTime(BuildContext context, NeedBloodController con) async {
+  final picked = await showTimePicker(
+    context: context,
+    initialTime: con.neededTime ?? TimeOfDay.now(),
+    builder: (ctx, child) => Theme(
+      data: Theme.of(ctx).copyWith(
+        colorScheme: const ColorScheme.light(primary: _red),
+      ),
+      child: child!,
+    ),
+  );
+  if (picked != null) {
+    con.setNeededTime(picked);
   }
 }
 

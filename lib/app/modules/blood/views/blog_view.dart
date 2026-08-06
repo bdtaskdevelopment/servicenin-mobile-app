@@ -1,3 +1,5 @@
+import 'dart:ui' show ImageFilter;
+
 import 'package:animate_do/animate_do.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
@@ -160,6 +162,10 @@ class _BlogCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // Fixed 16:9 thumbnail. Images of any shape are shown in FULL
+          // (BoxFit.contain — nothing is cropped) over a blurred fill of the
+          // same image, so the card size stays consistent and there are no
+          // harsh empty bars.
           AspectRatio(
             aspectRatio: 16 / 9,
             child: img.isEmpty
@@ -169,17 +175,39 @@ class _BlogCard extends StatelessWidget {
                     child: const Icon(Icons.menu_book_rounded,
                         color: _red, size: 32),
                   )
-                : CachedNetworkImage(
-                    imageUrl: img,
-                    fit: BoxFit.cover,
-                    placeholder: (_, __) =>
-                        Container(color: const Color(0xFFF1F5F9)),
-                    errorWidget: (_, __, ___) => Container(
-                      color: const Color(0xFFFDE4E4),
-                      alignment: Alignment.center,
-                      child: const Icon(Icons.menu_book_rounded,
-                          color: _red, size: 32),
-                    ),
+                : Stack(
+                    fit: StackFit.expand,
+                    children: [
+                      // Blurred backdrop (same image) fills the box.
+                      CachedNetworkImage(
+                        imageUrl: img,
+                        fit: BoxFit.cover,
+                        placeholder: (_, __) =>
+                            Container(color: const Color(0xFFF1F5F9)),
+                        errorWidget: (_, __, ___) =>
+                            Container(color: const Color(0xFFFDE4E4)),
+                      ),
+                      ClipRect(
+                        child: BackdropFilter(
+                          filter:
+                              ImageFilter.blur(sigmaX: 18, sigmaY: 18),
+                          child: Container(
+                              color: Colors.black.withValues(alpha: 0.10)),
+                        ),
+                      ),
+                      // The actual image, uncropped.
+                      CachedNetworkImage(
+                        imageUrl: img,
+                        fit: BoxFit.contain,
+                        placeholder: (_, __) => const SizedBox.shrink(),
+                        errorWidget: (_, __, ___) => Container(
+                          color: const Color(0xFFFDE4E4),
+                          alignment: Alignment.center,
+                          child: const Icon(Icons.menu_book_rounded,
+                              color: _red, size: 32),
+                        ),
+                      ),
+                    ],
                   ),
           ),
           Padding(

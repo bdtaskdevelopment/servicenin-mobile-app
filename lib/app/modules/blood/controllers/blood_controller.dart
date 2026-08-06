@@ -301,9 +301,12 @@ class BloodController extends GetxController with LiveRefreshMixin {
   ///    location off) are kept rather than hidden.
   /// Sorted nearest-first.
   List<BloodRequestEntry> get visibleRequestEntries {
-    final groups = _compatibleGroups; // empty when not a registered donor
+    // Exact blood-group match: a registered donor only sees requests for their
+    // OWN group (e.g. a B+ donor sees only B+ requests), per requirement — not
+    // the broader ABO/Rh compatible set. Non-donors (empty group) see all.
+    final myGroup = myDonor?.bloodGroup ?? '';
     final list = requestList.where((r) {
-      if (groups.isNotEmpty && !groups.contains(r.bloodGroup)) return false;
+      if (myGroup.isNotEmpty && r.bloodGroup != myGroup) return false;
       if (userLat != null &&
           userLng != null &&
           r.lat != null &&
@@ -457,9 +460,23 @@ class BloodController extends GetxController with LiveRefreshMixin {
   bool loadingResponders = false;
   bool completing = false;
 
-  /// True once blood has been confirmed received for the open request — used
-  /// to disable the call / chat / complete actions.
-  bool get requestCompleted => selectedMyRequest?.isFulfilled ?? false;
+  /// Confirmed donations so far — donors the requester has marked as having
+  /// donated. A multi-unit request needs one per bag.
+  int get confirmedCount =>
+      responders.where((r) => r.status == 'donated').length;
+
+  /// Bags needed for the selected request (at least 1).
+  int get unitsNeededForSelected {
+    final u = selectedMyRequest?.unitsNeeded ?? 1;
+    return u < 1 ? 1 : u;
+  }
+
+  /// The request is FILLED once it has as many confirmed donations as bags
+  /// needed (a 3-bag request needs 3 donors to confirm), or the server has
+  /// already flipped it to fulfilled. Used to close the actions.
+  bool get requestCompleted =>
+      (selectedMyRequest?.isFulfilled ?? false) ||
+      confirmedCount >= unitsNeededForSelected;
 
   void openResponders(BloodRequestEntry r) {
     selectedMyRequest = r;
@@ -507,7 +524,9 @@ class BloodController extends GetxController with LiveRefreshMixin {
   /// "Mark complete" → confirm, then POST /fulfillments/:id/received. On
   /// success the request is marked fulfilled so the actions are disabled.
   Future<void> confirmReceived(BloodResponder r) async {
-    if (completing || requestCompleted) return;
+    // Already-confirmed donors can't be re-confirmed; and once the request is
+    // fully filled no further confirmations are needed.
+    if (completing || requestCompleted || r.status == 'donated') return;
     final ok = await Get.dialog<bool>(
       AlertDialog(
         title: Text('Confirm blood received'.tr),
@@ -530,33 +549,18 @@ class BloodController extends GetxController with LiveRefreshMixin {
     try {
       final res = await _repo.confirmReceived(r.id);
       if (res.success) {
-        SnackHelper.success(res.message.isNotEmpty
-            ? res.message
-            : 'Blood received confirmed. Thank you!');
-        // Mark the open request fulfilled so call/chat/complete disable.
-        final cur = selectedMyRequest;
-        if (cur != null) {
-          selectedMyRequest = BloodRequestEntry(
-            id: cur.id,
-            requesterId: cur.requesterId,
-            bloodGroup: cur.bloodGroup,
-            unitsNeeded: cur.unitsNeeded,
-            hospitalName: cur.hospitalName,
-            hospitalAddress: cur.hospitalAddress,
-            contactName: cur.contactName,
-            contactPhone: cur.contactPhone,
-            contactEmail: cur.contactEmail,
-            urgency: cur.urgency,
-            status: 'fulfilled',
-            notes: cur.notes,
-            requesterName: cur.requesterName,
-            requesterPhone: cur.requesterPhone,
-            responseCount: cur.responseCount,
-            createdAt: cur.createdAt,
-            expiresAt: cur.expiresAt,
-          );
-        }
+        // Reflect THIS donor as confirmed (status → donated). The request only
+        // becomes filled once confirmedCount reaches unitsNeeded, so for a
+        // multi-bag request the other donors' actions stay open.
+        await fetchResponders();
         fetchMyRequests(); // refresh the my-requests list in the background
+        if (requestCompleted) {
+          SnackHelper.success('All bags confirmed — request filled.'.tr);
+        } else {
+          final left = unitsNeededForSelected - confirmedCount;
+          SnackHelper.success(
+              '${'Donor confirmed.'.tr} $left ${'more to go.'.tr}');
+        }
       } else {
         SnackHelper.error(res.message);
       }
