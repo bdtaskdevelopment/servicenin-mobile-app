@@ -25,6 +25,7 @@ class BloodRequestEntry {
     this.responseCount = 0,
     this.createdAt,
     this.expiresAt,
+    this.neededAt,
     this.lat,
     this.lng,
     this.searchRadiusKm = 0,
@@ -48,6 +49,21 @@ class BloodRequestEntry {
   final int responseCount;
   final DateTime? createdAt;
   final DateTime? expiresAt;
+
+  /// When the requester needs the blood (date + time), as chosen on the form.
+  final DateTime? neededAt;
+
+  /// "Needed 12 Aug, 3:30 PM" style label for the donor-facing list. Empty
+  /// when no date/time was set.
+  String get neededLabel {
+    final dt = neededAt?.toLocal();
+    if (dt == null) return '';
+    final now = DateTime.now();
+    final sameDay =
+        dt.year == now.year && dt.month == now.month && dt.day == now.day;
+    final datePart = sameDay ? 'Today' : DateFormat('d MMM').format(dt);
+    return '$datePart, ${DateFormat('h:mm a').format(dt)}';
+  }
 
   /// Hospital coordinates + the alert radius the requester chose (km;
   /// 0 = "all over", no distance limit). Used to match requests against the
@@ -118,6 +134,7 @@ class BloodRequestEntry {
       notes: str(json['notes']),
       createdAt: date(json['created_at']),
       expiresAt: date(json['expires_at']),
+      neededAt: date(json['needed_at']),
       requesterName: str(profile['full_name']),
       requesterPhone: str(requester['phone']),
       requesterPhoto: str(profile['photo_url']),

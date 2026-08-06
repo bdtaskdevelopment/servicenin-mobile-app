@@ -41,23 +41,53 @@ class NeedBloodController extends GetxController {
 
   bool busy = false;
 
-  // When the blood is needed.
+  // When the blood is needed — date + time.
   DateTime? neededAt;
+  TimeOfDay? neededTime;
   String neededDate = 'Today · ASAP';
 
-  /// API timestamp in RFC3339, e.g. "2026-06-10T00:00:00Z" (defaults to today
-  /// if not picked). The backend rejects a bare date, so the calendar day is
-  /// kept and pinned to midnight UTC.
-  String get neededAtIso {
+  /// The picked date + time combined as a local DateTime (falls back to now).
+  DateTime get _neededMoment {
     final d = neededAt ?? DateTime.now();
-    return '${d.year.toString().padLeft(4, '0')}-'
-        '${d.month.toString().padLeft(2, '0')}-'
-        '${d.day.toString().padLeft(2, '0')}T00:00:00Z';
+    final t = neededTime;
+    return DateTime(d.year, d.month, d.day, t?.hour ?? 0, t?.minute ?? 0);
+  }
+
+  /// API timestamp in RFC3339 (UTC). Carries the picked time so the donor
+  /// side can show exactly when the blood is needed.
+  String get neededAtIso => _neededMoment.toUtc().toIso8601String();
+
+  /// "3:30 PM" style label for the picked time (empty when not picked).
+  String get neededTimeLabel {
+    final t = neededTime;
+    if (t == null) return '';
+    final h = t.hourOfPeriod == 0 ? 12 : t.hourOfPeriod;
+    final m = t.minute.toString().padLeft(2, '0');
+    return '$h:$m ${t.period == DayPeriod.am ? 'AM' : 'PM'}';
+  }
+
+  void _refreshNeededLabel() {
+    final d = neededAt;
+    if (d == null) {
+      neededDate = 'Today · ASAP';
+      return;
+    }
+    final date = '${d.day} ${_months[d.month - 1]} ${d.year}';
+    neededDate =
+        neededTimeLabel.isEmpty ? date : '$date · $neededTimeLabel';
   }
 
   void setNeeded(DateTime d) {
     neededAt = d;
-    neededDate = '${d.day} ${_months[d.month - 1]} ${d.year}';
+    _refreshNeededLabel();
+    update();
+  }
+
+  void setNeededTime(TimeOfDay t) {
+    neededTime = t;
+    // Picking a time implies a date — default to today if none chosen yet.
+    neededAt ??= DateTime.now();
+    _refreshNeededLabel();
     update();
   }
 
@@ -182,8 +212,11 @@ class NeedBloodController extends GetxController {
     update();
   }
 
+  /// A request may ask for at most 3 bags at a time.
+  static const int maxUnits = 3;
+
   void incUnits() {
-    if (units < 10) {
+    if (units < maxUnits) {
       units++;
       update();
     }

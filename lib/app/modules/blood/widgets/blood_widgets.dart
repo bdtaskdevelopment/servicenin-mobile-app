@@ -91,6 +91,22 @@ class BloodRequestApiCard extends StatelessWidget {
                           ],
                         ),
                       ],
+                      if (req.neededLabel.isNotEmpty) ...[
+                        const SizedBox(height: 4),
+                        Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Icon(Icons.schedule_rounded,
+                                size: 13, color: Color(0xFF64748B)),
+                            const SizedBox(width: 4),
+                            Text('${'Needed'.tr}: ${req.neededLabel}',
+                                style: const TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w600,
+                                    color: Color(0xFF64748B))),
+                          ],
+                        ),
+                      ],
                     ],
                   ),
                 ),

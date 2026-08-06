@@ -153,6 +153,13 @@ class LeaderboardView extends GetView<DonationFlowController> {
   }
 }
 
+// Gold / silver / bronze accents for the top three.
+const Map<int, Color> _medal = {
+  1: Color(0xFFFBBF24),
+  2: Color(0xFFCBD5E1),
+  3: Color(0xFFE08A4B),
+};
+
 class _Podium extends StatelessWidget {
   const _Podium(
       {required this.donor,
@@ -166,53 +173,75 @@ class _Podium extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final medal = _medal[rank] ?? Colors.white;
     return Column(
       children: [
+        SizedBox(
+          height: 22,
+          child: crowned
+              ? const Icon(Icons.workspace_premium_rounded,
+                  color: Color(0xFFFBBF24), size: 22)
+              : null,
+        ),
         Container(
-          width: crowned ? 64 : 54,
-          height: crowned ? 64 : 54,
+          width: crowned ? 66 : 54,
+          height: crowned ? 66 : 54,
           decoration: BoxDecoration(
-            color: Colors.white.withValues(alpha: 0.15),
-            shape: BoxShape.circle,
-            border: Border.all(
-              color: crowned ? const Color(0xFFF59E0B) : Colors.white24,
-              width: crowned ? 3 : 2,
+            gradient: LinearGradient(
+              colors: [medal.withValues(alpha: 0.35), medal.withValues(alpha: 0.12)],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
             ),
+            shape: BoxShape.circle,
+            border: Border.all(color: medal, width: crowned ? 3 : 2),
+            boxShadow: [
+              BoxShadow(color: medal.withValues(alpha: 0.4), blurRadius: 12),
+            ],
           ),
           alignment: Alignment.center,
           child: Text(donor.initials,
               style: TextStyle(
                   color: Colors.white,
-                  fontSize: crowned ? 18 : 15,
+                  fontSize: crowned ? 19 : 15,
                   fontWeight: FontWeight.w800)),
         ),
         const SizedBox(height: 6),
         Text(_displayName(donor),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
+            textAlign: TextAlign.center,
             style: const TextStyle(
                 color: Colors.white,
                 fontSize: 13,
                 fontWeight: FontWeight.w700)),
-        Text('${donor.totalDonations}',
-            style: const TextStyle(
-                color: Color(0xFFF59E0B),
-                fontSize: 13,
-                fontWeight: FontWeight.w800)),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(Icons.water_drop_rounded,
+                size: 12, color: Color(0xFFFF6B81)),
+            const SizedBox(width: 3),
+            Text('${donor.totalDonations}',
+                style: TextStyle(
+                    color: medal, fontSize: 13, fontWeight: FontWeight.w800)),
+          ],
+        ),
         const SizedBox(height: 6),
         Container(
           height: height,
           decoration: BoxDecoration(
-            color: Colors.white.withValues(alpha: 0.10),
+            gradient: LinearGradient(
+              colors: [medal.withValues(alpha: 0.30), medal.withValues(alpha: 0.06)],
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+            ),
             borderRadius:
-                const BorderRadius.vertical(top: Radius.circular(8)),
+                const BorderRadius.vertical(top: Radius.circular(10)),
           ),
-          alignment: Alignment.center,
+          alignment: Alignment.topCenter,
+          padding: const EdgeInsets.only(top: 6),
           child: Text('$rank',
-              style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 18,
-                  fontWeight: FontWeight.w800)),
+              style: TextStyle(
+                  color: medal, fontSize: 20, fontWeight: FontWeight.w900)),
         ),
       ],
     );
@@ -279,9 +308,23 @@ class _RankRow extends StatelessWidget {
               ],
             ),
           ),
-          Text('${donor.totalDonations}',
-              style: const TextStyle(
-                  fontSize: 16, fontWeight: FontWeight.w800, color: _red)),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+            decoration: BoxDecoration(
+              color: _red.withValues(alpha: 0.08),
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(Icons.water_drop_rounded, size: 13, color: _red),
+                const SizedBox(width: 4),
+                Text('${donor.totalDonations}',
+                    style: const TextStyle(
+                        fontSize: 15, fontWeight: FontWeight.w800, color: _red)),
+              ],
+            ),
+          ),
         ],
       ),
     );

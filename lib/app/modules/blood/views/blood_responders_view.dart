@@ -55,27 +55,7 @@ class BloodRespondersView extends GetView<BloodController> {
                     ],
                   ),
                 ),
-                if (con.requestCompleted)
-                  Container(
-                    width: double.infinity,
-                    color: const Color(0xFFDCFCE7),
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                    child: Row(
-                      children: [
-                        const Icon(Icons.check_circle,
-                            size: 18, color: _green),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: Text('Blood received — request fulfilled'.tr,
-                              style: const TextStyle(
-                                  fontSize: 12.5,
-                                  fontWeight: FontWeight.w700,
-                                  color: _green)),
-                        ),
-                      ],
-                    ),
-                  ),
+                if (req != null) _FulfillProgress(con: con),
                 Expanded(
                   child: con.loadingResponders && con.responders.isEmpty
                       ? const SnListSkeleton(
@@ -130,6 +110,62 @@ class BloodRespondersView extends GetView<BloodController> {
   }
 }
 
+// ── Multi-unit fulfillment progress: "2 of 3 bags confirmed" ─────────
+class _FulfillProgress extends StatelessWidget {
+  const _FulfillProgress({required this.con});
+  final BloodController con;
+
+  @override
+  Widget build(BuildContext context) {
+    final need = con.unitsNeededForSelected;
+    final done = con.confirmedCount.clamp(0, need);
+    final filled = con.requestCompleted;
+    final pct = need == 0 ? 0.0 : done / need;
+    final bg = filled ? const Color(0xFFDCFCE7) : const Color(0xFFFFF7ED);
+    final fg = filled ? _green : const Color(0xFFB45309);
+    return Container(
+      width: double.infinity,
+      color: bg,
+      padding: const EdgeInsets.fromLTRB(16, 10, 16, 12),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(filled ? Icons.check_circle : Icons.water_drop_rounded,
+                  size: 18, color: fg),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                    filled
+                        ? 'Request filled — all bags confirmed'.tr
+                        : '$done ${'of'.tr} $need ${'bags confirmed'.tr}',
+                    style: TextStyle(
+                        fontSize: 12.5,
+                        fontWeight: FontWeight.w800,
+                        color: fg)),
+              ),
+              Text('$done/$need',
+                  style: TextStyle(
+                      fontSize: 12.5, fontWeight: FontWeight.w800, color: fg)),
+            ],
+          ),
+          const SizedBox(height: 8),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(8),
+            child: LinearProgressIndicator(
+              value: pct,
+              minHeight: 7,
+              backgroundColor: Colors.white,
+              valueColor: AlwaysStoppedAnimation(fg),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 class _ResponderCard extends StatelessWidget {
   const _ResponderCard({required this.r, required this.con});
   final BloodResponder r;
@@ -137,7 +173,11 @@ class _ResponderCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final disabled = con.requestCompleted;
+    final filled = con.requestCompleted;
+    final confirmed = r.status == 'donated';
+    // Call / chat stay open per-donor until the whole request is filled, so
+    // the requester can reach every donor separately.
+    final disabled = filled;
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
@@ -234,7 +274,9 @@ class _ResponderCard extends StatelessWidget {
           SizedBox(
             width: double.infinity,
             child: ElevatedButton.icon(
-              onPressed: (disabled || con.completing)
+              // Enabled only for a not-yet-confirmed donor while the request
+              // still needs bags. A confirmed donor shows a locked "Confirmed".
+              onPressed: (confirmed || filled || con.completing)
                   ? null
                   : () => con.confirmReceived(r),
               icon: con.completing
@@ -244,11 +286,16 @@ class _ResponderCard extends StatelessWidget {
                       child: CircularProgressIndicator(
                           strokeWidth: 2.2, color: Colors.white),
                     )
-                  : const Icon(Icons.check_circle_outline_rounded, size: 19),
+                  : Icon(
+                      confirmed
+                          ? Icons.check_circle_rounded
+                          : Icons.check_circle_outline_rounded,
+                      size: 19),
               style: ElevatedButton.styleFrom(
                 backgroundColor: _green,
                 foregroundColor: Colors.white,
-                disabledBackgroundColor: const Color(0xFFCBD5E1),
+                disabledBackgroundColor:
+                    confirmed ? _green : const Color(0xFFCBD5E1),
                 disabledForegroundColor: Colors.white,
                 elevation: 0,
                 padding: const EdgeInsets.symmetric(vertical: 13),
@@ -256,7 +303,9 @@ class _ResponderCard extends StatelessWidget {
                     borderRadius: BorderRadius.circular(12)),
               ),
               label: Text(
-                  disabled ? 'Completed'.tr : 'Mark blood received'.tr,
+                  confirmed
+                      ? 'Confirmed'.tr
+                      : (filled ? 'Filled'.tr : 'Mark blood received'.tr),
                   style: const TextStyle(
                       fontSize: 14.5, fontWeight: FontWeight.w800)),
             ),

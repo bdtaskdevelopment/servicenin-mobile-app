@@ -1,9 +1,7 @@
-import 'package:animate_do/animate_do.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../../core/values/app_colors.dart';
-import '../../../global_widget/sn_shimmer.dart';
 import '../../../routes/app_pages.dart';
 import '../controllers/blood_controller.dart';
 import '../widgets/blood_widgets.dart';
@@ -29,7 +27,7 @@ class BloodView extends GetView<BloodController> {
                 children: [
                   // Need blood / Donate — both tappable
                   SizedBox(
-                    height: 124,
+                    height: 130,
                     child: Row(
                       children: [
                         Expanded(
@@ -80,12 +78,9 @@ class BloodView extends GetView<BloodController> {
                     ),
                   ),
                   const SizedBox(height: 22),
-                  _RequestsHeader(onSeeAll: controller.openAllDonors),
-                  const SizedBox(height: 12),
-                  GetBuilder<BloodController>(
-                    builder: (con) => _NearestDonors(con: con),
-                  ),
-                  const SizedBox(height: 6),
+                  // "Requests near you" (nearest-donors) section hidden per
+                  // request — kept in code (_RequestsHeader / _NearestDonors)
+                  // in case it's brought back.
                   GetBuilder<BloodController>(
                     builder: (con) => GestureDetector(
                       onTap: () => Get.toNamed(Routes.BLOOD_LEADERBOARD),
@@ -104,13 +99,14 @@ class BloodView extends GetView<BloodController> {
                           letterSpacing: 0.8)),
                   const SizedBox(height: 12),
                   SizedBox(
-                    height: 124,
+                    height: 148,
                     child: Row(
                       children: [
                         Expanded(
                           child: _ActionCard(
                             onTap: () => Get.toNamed(Routes.BLOOD_BLOG),
                             isPrimary: false,
+                            accent: const Color(0xFF7C3AED),
                             icon: Icons.menu_book_rounded,
                             title: 'Blog'.tr,
                             subtitle: 'Tips & stories about donating'.tr,
@@ -121,6 +117,7 @@ class BloodView extends GetView<BloodController> {
                           child: _ActionCard(
                             onTap: () => Get.toNamed(Routes.BLOOD_FAQ),
                             isPrimary: false,
+                            accent: const Color(0xFF0EA5E9),
                             icon: Icons.quiz_rounded,
                             title: 'FAQ'.tr,
                             subtitle: 'Common questions answered'.tr,
@@ -215,6 +212,7 @@ class _ActionCard extends StatelessWidget {
     required this.title,
     required this.subtitle,
     this.badgeCount,
+    this.accent,
   });
 
   final VoidCallback onTap;
@@ -222,6 +220,10 @@ class _ActionCard extends StatelessWidget {
   final IconData icon;
   final String title;
   final String subtitle;
+
+  /// Optional colour theme for a non-primary card (e.g. Learn & FAQ). When
+  /// set, the card gets a soft tinted gradient + a filled colour icon chip.
+  final Color? accent;
 
   /// Small count badge in the top-right corner — e.g. how many open blood
   /// requests are waiting for a donor. Hidden when null or 0.
@@ -240,21 +242,44 @@ class _ActionCard extends StatelessWidget {
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                 )
-              : null,
-          color: isPrimary ? null : AppColors.white,
+              : (accent != null
+                  ? LinearGradient(
+                      colors: [
+                        accent!.withValues(alpha: 0.16),
+                        accent!.withValues(alpha: 0.04),
+                      ],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    )
+                  : null),
+          color: (isPrimary || accent != null) ? null : AppColors.white,
           borderRadius: BorderRadius.circular(18),
           border: isPrimary
               ? null
-              : Border.all(color: const Color(0xFFEDEFF2)),
+              : Border.all(
+                  color: accent != null
+                      ? accent!.withValues(alpha: 0.35)
+                      : const Color(0xFFEDEFF2)),
         ),
         child: Stack(
           children: [
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Icon(icon,
-                    color: isPrimary ? Colors.white : const Color(0xFF0F172A),
-                    size: isPrimary ? 26 : 24),
+                if (!isPrimary && accent != null)
+                  Container(
+                    width: 40,
+                    height: 40,
+                    decoration:
+                        BoxDecoration(color: accent, shape: BoxShape.circle),
+                    alignment: Alignment.center,
+                    child: Icon(icon, color: Colors.white, size: 22),
+                  )
+                else
+                  Icon(icon,
+                      color:
+                          isPrimary ? Colors.white : const Color(0xFF0F172A),
+                      size: isPrimary ? 26 : 24),
                 const Spacer(),
                 Text(title,
                     maxLines: 1,
@@ -262,7 +287,9 @@ class _ActionCard extends StatelessWidget {
                     style: TextStyle(
                         color: isPrimary
                             ? Colors.white
-                            : const Color(0xFF0F172A),
+                            : (accent != null
+                                ? accent!
+                                : const Color(0xFF0F172A)),
                         fontSize: 17,
                         fontWeight: FontWeight.w800)),
                 const SizedBox(height: 2),
@@ -624,7 +651,9 @@ class _MyRequestsCard extends StatelessWidget {
   }
 }
 
-// ── Requests header ─────────────────────────────────────────────────
+// ── Requests header + Nearest donors — hidden on the dashboard for now,
+//    kept here so the section can be restored quickly. ─────────────────
+/*
 class _RequestsHeader extends StatelessWidget {
   const _RequestsHeader({required this.onSeeAll});
   final VoidCallback onSeeAll;
@@ -709,6 +738,7 @@ class _NearestDonors extends StatelessWidget {
     );
   }
 }
+*/
 
 // ── Leaderboard ─────────────────────────────────────────────────────
 class _LeaderboardCard extends StatelessWidget {
