@@ -99,6 +99,9 @@ const Map<String, String> commonBn = {
   'Jobs': 'চাকরি',
   'Funeral': 'ফিউনারেল',
   'Education': 'শিক্ষা',
+  // Module renamed education → training. 'Training' is the module label;
+  // 'Education' above stays for the jobs/matchmaking qualification field.
+  'Training': 'প্রশিক্ষণ',
   'Nagarik Sheba': 'নাগরিক সেবা',
   'Our Work': 'আমাদের কাজ',
   'Our News': 'আমাদের খবর',

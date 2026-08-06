@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../../core/values/app_colors.dart';
+import '../../../core/values/app_url.dart';
 import '../../../global_widget/sn_shimmer.dart';
+import '../../support/views/support_view.dart';
 import '../controllers/information_controller.dart';
 
 const _purple = Color(0xFF6366F1);
@@ -55,6 +57,12 @@ class InformationView extends GetView<InformationController> {
                         ),
                       ),
                     ],
+                  ),
+                  const Spacer(),
+                  // Support center — admin-configured numbers for this module.
+                  SupportIconButton(
+                    title: 'Information Support'.tr,
+                    endpoint: ApiURL.infoHotlines,
                   ),
                 ],
               ),

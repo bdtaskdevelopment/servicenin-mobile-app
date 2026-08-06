@@ -18,7 +18,7 @@ class SnCatalog {
     SnService(name: 'Marriage', icon: Icons.favorite_rounded, color: Color(0xFFEC4899)),
     SnService(name: 'Jobs', icon: Icons.business_center_rounded, color: Color(0xFFF59E0B)),
     SnService(name: 'Funeral', icon: Icons.local_florist_rounded, color: Color(0xFF475569)),
-    SnService(name: 'Education', icon: Icons.menu_book_rounded, color: Color(0xFF7C3AED)),
+    SnService(name: 'Training', icon: Icons.menu_book_rounded, color: Color(0xFF7C3AED)),
     SnService(name: 'Nagarik Sheba', icon: Icons.account_balance_rounded, color: Color(0xFFF15A24)),
     SnService(name: 'Our Work', icon: Icons.video_camera_back_rounded, color: Color(0xFF0891B2)),
     SnService(name: 'Our News', icon: Icons.newspaper_rounded, color: Color(0xFF16A34A)),

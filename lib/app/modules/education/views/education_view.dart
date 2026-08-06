@@ -1,10 +1,13 @@
 import 'package:animate_do/animate_do.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../../core/values/app_colors.dart';
+import '../../../core/values/app_url.dart';
 import '../../../data/models/response/education_response.dart';
 import '../../../global_widget/sn_shimmer.dart';
+import '../../support/views/support_view.dart';
 import '../controllers/education_controller.dart';
 
 const _purple = Color(0xFF7C3AED);
@@ -39,7 +42,7 @@ class EducationView extends GetView<EducationController> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Education'.tr,
+                        'Training'.tr,
                         style: const TextStyle(
                           fontSize: 19,
                           fontWeight: FontWeight.w800,
@@ -65,6 +68,12 @@ class EducationView extends GetView<EducationController> {
                       size: 22,
                     ),
                   ),
+                  const SizedBox(width: 14),
+                  // Support center — admin-configured numbers for this module.
+                  SupportIconButton(
+                    title: 'Training Support'.tr,
+                    endpoint: ApiURL.trainingHotlines,
+                  ),
                 ],
               ),
             ),
@@ -87,7 +96,7 @@ class EducationView extends GetView<EducationController> {
                     scrollDirection: Axis.horizontal,
                     padding: const EdgeInsets.symmetric(horizontal: 16),
                     itemCount: count,
-                    separatorBuilder: (_, _) => const SizedBox(width: 8),
+                    separatorBuilder: (_, __) => const SizedBox(width: 8),
                     itemBuilder: (_, i) {
                       final sel = con.typeIndex == i;
                       return GestureDetector(
@@ -268,17 +277,19 @@ class _CenterCard extends StatelessWidget {
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Container(
-                width: 46,
-                height: 46,
-                decoration: BoxDecoration(
-                  color: _tile,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: const Icon(
-                  Icons.menu_book_rounded,
-                  color: _purple,
-                  size: 23,
+              ClipRRect(
+                borderRadius: BorderRadius.circular(12),
+                child: SizedBox(
+                  width: 46,
+                  height: 46,
+                  child: center.logoUrl.isNotEmpty
+                      ? CachedNetworkImage(
+                          imageUrl: center.logoUrl,
+                          fit: BoxFit.cover,
+                          placeholder: (_, __) => Container(color: _tile),
+                          errorWidget: (_, __, ___) => const _CenterLogoIcon(),
+                        )
+                      : const _CenterLogoIcon(),
                 ),
               ),
               const SizedBox(width: 12),
@@ -332,7 +343,7 @@ class _CenterCard extends StatelessWidget {
                           child: Text(
                             [
                               center.typeLabel,
-                              center.address,
+                              center.locationLabel,
                             ].where((s) => s.isNotEmpty).join(' · '),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
@@ -383,4 +394,14 @@ class _CenterCard extends StatelessWidget {
       ),
     );
   }
+}
+
+class _CenterLogoIcon extends StatelessWidget {
+  const _CenterLogoIcon();
+  @override
+  Widget build(BuildContext context) => Container(
+        color: _tile,
+        alignment: Alignment.center,
+        child: const Icon(Icons.menu_book_rounded, color: _purple, size: 23),
+      );
 }

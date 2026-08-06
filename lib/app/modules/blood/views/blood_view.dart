@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../../core/values/app_colors.dart';
+import '../../../core/values/app_url.dart';
 import '../../../routes/app_pages.dart';
+import '../../support/views/support_view.dart';
 import '../controllers/blood_controller.dart';
 import '../widgets/blood_widgets.dart';
 
@@ -171,6 +173,12 @@ class _Header extends StatelessWidget {
           const Spacer(),
           GetBuilder<BloodController>(
             builder: (c) => _AvailabilityToggleSwitch(con: c),
+          ),
+          const SizedBox(width: 12),
+          // Support center — admin-configured numbers for this module.
+          SupportIconButton(
+            title: 'Blood Support'.tr,
+            endpoint: ApiURL.bloodHotlines,
           ),
         ],
       ),

@@ -59,6 +59,33 @@ class EduCenter {
   String get targetGrades => _str(raw['target_grades']);
   bool get featured => raw['featured'] == true;
 
+  // ── Fields added when the module was renamed education → training ──
+  String get ownerName => _str(raw['owner_name']);
+  String get logoUrl => _str(raw['logo_url']);
+  String get coverUrl => _str(raw['cover_url']);
+  String get altPhone => _str(raw['alt_phone']);
+  String get website => _str(raw['website']);
+  String get facebookPage => _str(raw['facebook_page']);
+  String get whatsapp => _str(raw['whatsapp']);
+  String get district => _str(raw['district']);
+  String get upazila => _str(raw['upazila']);
+  String get mapUrl => _str(raw['map_url']);
+  int get establishedYear => _int(raw['established_year']);
+  String get officeTiming => _str(raw['office_timing']);
+  String get branchInfo => _str(raw['branch_info']);
+
+  /// "Uttara, Dhaka" from upazila + district, falling back to the address.
+  String get locationLabel {
+    final parts = [upazila, district].where((s) => s.isNotEmpty).toList();
+    return parts.isNotEmpty ? parts.join(', ') : address;
+  }
+
+  List<String> get targetGradeTags => targetGrades
+      .split(RegExp(r'[,/]'))
+      .map((s) => s.trim())
+      .where((s) => s.isNotEmpty)
+      .toList();
+
   String get typeLabel {
     final s = instituteType.replaceAll('_', ' ');
     return s.isEmpty ? '' : s[0].toUpperCase() + s.substring(1);

@@ -101,6 +101,7 @@ abstract class Routes {
   static const AMBULANCE_CONFIRMED = _Paths.AMBULANCE_CONFIRMED;
   static const AMBULANCE_RATE = _Paths.AMBULANCE_RATE;
   static const AMBULANCE_SUPPORT = _Paths.AMBULANCE_SUPPORT;
+  static const SUPPORT_CENTER = _Paths.SUPPORT_CENTER;
   static const EMERGENCY_CONTACTS = _Paths.EMERGENCY_CONTACTS;
   static const BLOOD_REQUESTS = _Paths.BLOOD_REQUESTS;
   static const BLOOD_REQUEST_DETAIL = _Paths.BLOOD_REQUEST_DETAIL;
@@ -256,6 +257,8 @@ abstract class _Paths {
   static const AMBULANCE_CONFIRMED = '/ambulance-confirmed';
   static const AMBULANCE_RATE = '/ambulance-rate';
   static const AMBULANCE_SUPPORT = '/ambulance-support';
+  // Shared support screen — the module is passed via Get.arguments.
+  static const SUPPORT_CENTER = '/support-center';
   static const EMERGENCY_CONTACTS = '/emergency-contacts';
   static const BLOOD_REQUESTS = '/blood-requests';
   static const BLOOD_REQUEST_DETAIL = '/blood-request-detail';

@@ -23,7 +23,7 @@ class SnackHelper {
     if (has('matchmaking')) return 'Marriage'.tr;
     if (has('jobs')) return 'Jobs'.tr;
     if (has('funeral')) return 'Funeral'.tr;
-    if (has('education')) return 'Education'.tr;
+    if (has('education')) return 'Training'.tr;
     if (has('nagarik')) return 'Nagarik Sheba'.tr;
     if (has('information')) return 'Information'.tr;
     if (has('registration')) return 'Login'.tr;

@@ -344,26 +344,34 @@ class ApiURL {
   static final String funeralServices = 'api/v1/funeral/services';
   static final String funeralRequests = 'api/v1/funeral/requests';
   static final String funeralRequestsMy = 'api/v1/funeral/requests/my';
+  static final String funeralHotlines = 'api/v1/funeral/hotlines';
+  // Support center numbers, one endpoint per module — all the same shape.
+  static final String homeServiceHotlines = 'api/v1/services/hotlines';
+  static final String bloodHotlines = 'api/v1/blood/hotlines';
+  static final String infoHotlines = 'api/v1/info/hotlines';
+  static final String trainingHotlines = 'api/v1/training/hotlines';
+  static final String physioHotlines = 'api/v1/physio/hotlines';
 
-  //===== Education
-  static final String educationCategories = 'api/v1/education/categories';
+  //===== Education / Training (backend module renamed education → training;
+  //      /training is canonical, /education is a deprecated alias).
+  static final String educationCategories = 'api/v1/training/categories';
   static final String educationInstituteTypes =
-      'api/v1/education/institute-types';
+      'api/v1/training/institute-types';
 
   /// "Centers near you", optionally filtered to one institute type (slug).
   static String educationCentersNear({String? instituteType}) {
-    const base = 'api/v1/education/centers/near';
+    const base = 'api/v1/training/centers/near';
     if (instituteType == null || instituteType.isEmpty) return base;
     return '$base?institute_type=${Uri.encodeQueryComponent(instituteType)}';
   }
 
-  static String educationCenter(String id) => 'api/v1/education/centers/$id';
+  static String educationCenter(String id) => 'api/v1/training/centers/$id';
   static String educationCenterCourses(String id) =>
-      'api/v1/education/centers/$id/courses';
-  static String educationCourse(String id) => 'api/v1/education/courses/$id';
-  static final String educationInterests = 'api/v1/education/interests';
+      'api/v1/training/centers/$id/courses';
+  static String educationCourse(String id) => 'api/v1/training/courses/$id';
+  static final String educationInterests = 'api/v1/training/interests';
   static final String educationInterestsMy =
-      'api/v1/education/interests/my';
+      'api/v1/training/interests/my';
 
   //===== Home dashboard
   static final String homeBanners = 'api/v1/home/banners';
