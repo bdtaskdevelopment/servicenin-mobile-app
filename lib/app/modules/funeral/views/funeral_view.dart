@@ -3,8 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../../core/values/app_colors.dart';
+import '../../../core/values/app_url.dart';
 import '../../../data/models/response/funeral_response.dart';
 import '../../../global_widget/sn_shimmer.dart';
+import '../../support/views/support_view.dart';
 import '../controllers/funeral_controller.dart';
 
 const _charcoal = Color(0xFF332F2C);
@@ -65,6 +67,14 @@ class FuneralView extends GetView<FuneralController> {
                       size: 22,
                     ),
                   ),
+                  const SizedBox(width: 14),
+                  // Support center — same icon and placement as every other
+                  // module. The strip below repeats the numbers inline, which
+                  // is what the ambulance module does too.
+                  SupportIconButton(
+                    title: 'Funeral Support'.tr,
+                    endpoint: ApiURL.funeralHotlines,
+                  ),
                 ],
               ),
             ),
@@ -107,6 +117,49 @@ class FuneralView extends GetView<FuneralController> {
                         ),
                       ),
                     ),
+                    // Support center — a family in this situation should be able
+                    // to reach a person before doing anything else, so the
+                    // numbers sit directly under the banner. Hidden entirely
+                    // when the admin has configured none.
+                    if (con.hotlines.isNotEmpty) ...[
+                      const SizedBox(height: 18),
+                      Row(
+                        children: [
+                          const Icon(Icons.support_agent_rounded,
+                              size: 18, color: Color(0xFF0F172A)),
+                          const SizedBox(width: 6),
+                          Text(
+                            'Support center'.tr,
+                            style: const TextStyle(
+                              fontSize: 15,
+                              fontWeight: FontWeight.w800,
+                              color: Color(0xFF0F172A),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 10),
+                      Row(
+                        children: con.hotlines
+                            .asMap()
+                            .entries
+                            .map(
+                              (e) => Expanded(
+                                child: Padding(
+                                  padding: EdgeInsets.only(
+                                      right: e.key == con.hotlines.length - 1
+                                          ? 0
+                                          : 10),
+                                  child: _SupportCard(
+                                    hotline: e.value,
+                                    onTap: () => con.call(e.value.number),
+                                  ),
+                                ),
+                              ),
+                            )
+                            .toList(),
+                      ),
+                    ],
                     const SizedBox(height: 22),
                     Text(
                       'Available services'.tr,
@@ -230,6 +283,63 @@ class _ServiceCard extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+/// One tappable support-center number. Deliberately calm — dark neutral, not
+/// the ambulance module's emergency red: this screen is for a grieving family.
+class _SupportCard extends StatelessWidget {
+  const _SupportCard({required this.hotline, required this.onTap});
+  final FuneralHotline hotline;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 10),
+        decoration: BoxDecoration(
+          color: _charcoal.withValues(alpha: 0.06),
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(color: _charcoal.withValues(alpha: 0.16)),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                const Icon(Icons.call_rounded, color: _charcoal, size: 15),
+                const SizedBox(width: 5),
+                Expanded(
+                  child: Text(
+                    hotline.label,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      fontSize: 11.5,
+                      fontWeight: FontWeight.w700,
+                      color: _charcoal,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 5),
+            Text(
+              hotline.number,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(
+                fontSize: 13.5,
+                fontWeight: FontWeight.w800,
+                color: Color(0xFF0F172A),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

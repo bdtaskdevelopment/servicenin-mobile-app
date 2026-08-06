@@ -83,7 +83,7 @@ class EnquiryDoneView extends GetView<EducationController> {
                     shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(14)),
                   ),
-                  child: Text('Back to Education'.tr,
+                  child: Text('Back to Training'.tr,
                       style: const TextStyle(
                           fontSize: 16, fontWeight: FontWeight.w800)),
                 ),

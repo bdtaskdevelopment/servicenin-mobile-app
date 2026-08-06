@@ -3,8 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../../core/values/app_colors.dart';
+import '../../../core/values/app_url.dart';
 import '../../../data/models/response/physio_response.dart';
 import '../../../global_widget/sn_shimmer.dart';
+import '../../support/views/support_view.dart';
 import '../controllers/physio_controller.dart';
 
 const _orange = Color(0xFFB45309);
@@ -52,6 +54,12 @@ class PhysioView extends GetView<PhysioController> {
                     onTap: con.openSessions,
                     child: const Icon(Icons.calendar_today_outlined,
                         color: Color(0xFF1A1A1A), size: 22),
+                  ),
+                  const SizedBox(width: 14),
+                  // Support center — admin-configured numbers for this module.
+                  SupportIconButton(
+                    title: 'Physiotherapy Support'.tr,
+                    endpoint: ApiURL.physioHotlines,
                   ),
                 ],
               ),

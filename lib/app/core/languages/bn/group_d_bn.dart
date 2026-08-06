@@ -10,6 +10,18 @@ const Map<String, String> groupDBn = {
   'We\'re here to help you through this time with care.':
       'এই কঠিন সময়ে আমরা যত্নসহকারে আপনার পাশে আছি।',
   'Speak to a coordinator now': 'এখনই একজন সমন্বয়কারীর সাথে কথা বলুন',
+  'Support center': 'সহায়তা কেন্দ্র',
+  'Support Center': 'সহায়তা কেন্দ্র',
+  'Funeral Support': 'ফিউনারেল সহায়তা',
+  'Home Service Support': 'হোম সার্ভিস সহায়তা',
+  'Blood Support': 'ব্লাড সহায়তা',
+  'Information Support': 'তথ্য সহায়তা',
+  'Training Support': 'ট্রেনিং সহায়তা',
+  'Physiotherapy Support': 'ফিজিওথেরাপি সহায়তা',
+  'Call us for immediate assistance.': 'তাৎক্ষণিক সহায়তার জন্য আমাদের কল করুন।',
+  'No support numbers available right now.':
+      'এই মুহূর্তে কোনো সহায়তা নম্বর নেই।',
+  'Assigned staff': 'নিযুক্ত কর্মী',
   'What we arrange': 'আমরা যা ব্যবস্থা করি',
   'Service units near you': 'আপনার কাছাকাছি সেবা ইউনিট',
   'No units available right now.': 'এই মুহূর্তে কোনো ইউনিট নেই।',
@@ -79,7 +91,7 @@ const Map<String, String> groupDBn = {
   'No courses listed yet.': 'এখনো কোনো কোর্স তালিকাভুক্ত নেই।',
   'Register interest — the center calls you back to confirm seat & schedule. No online payment yet.':
       'আগ্রহ নিবন্ধন করুন — সেন্টার আসন ও সময়সূচি নিশ্চিত করতে আপনাকে কল করবে। এখনো অনলাইন পেমেন্ট নেই।',
-  'Enroll': 'ভর্তি হোন',
+  'Register': 'রেজিস্ট্রেশন করুন',
   'My enrollments': 'আমার ভর্তি',
   'No enrollments yet': 'এখনো কোনো ভর্তি নেই',
   'Courses you register interest in appear here.':
@@ -103,7 +115,7 @@ const Map<String, String> groupDBn = {
   'Your selected course': 'আপনার নির্বাচিত কোর্স',
   'Your selected center': 'আপনার নির্বাচিত সেন্টার',
   'Center calls back within 24 hours': '২৪ ঘণ্টার মধ্যে সেন্টার ফিরতি কল করবে',
-  'Back to Education': 'শিক্ষায় ফিরে যান',
+  'Back to Training': 'প্রশিক্ষণে ফিরে যান',
 
   // ── Nagarik ───────────────────────────────────────────────────────
   'Nagarik Sheba': 'নাগরিক সেবা',

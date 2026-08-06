@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../../core/helpers/snack_helper.dart';
 import '../../../core/mixins/live_refresh_mixin.dart';
@@ -9,6 +10,30 @@ import '../../../routes/app_pages.dart';
 
 class EducationController extends GetxController with LiveRefreshMixin {
   EducationRepository get _repo => Get.find<EducationRepository>();
+
+  // ── Center contact actions (dial / WhatsApp / open link) ────────────
+  Future<void> _launch(String url) async {
+    final u = url.trim();
+    if (u.isEmpty) return;
+    try {
+      await launchUrl(Uri.parse(u), mode: LaunchMode.externalApplication);
+    } catch (_) {
+      SnackHelper.error('খুলতে সমস্যা হয়েছে');
+    }
+  }
+
+  void callCenter(String phone) {
+    if (phone.trim().isEmpty) return;
+    _launch('tel:${phone.trim()}');
+  }
+
+  void whatsappCenter(String number) {
+    final digits = number.replaceAll(RegExp(r'[^0-9]'), '');
+    if (digits.isEmpty) return;
+    _launch('https://wa.me/$digits');
+  }
+
+  void openLink(String url) => _launch(url);
 
   // ── Live refresh (LiveRefreshMixin) — list refresher ────────────────
   @override

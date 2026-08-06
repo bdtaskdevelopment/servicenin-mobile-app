@@ -82,7 +82,7 @@ class ServiceNav {
       case 'Funeral':
         Get.toNamed(Routes.FUNERAL);
         break;
-      case 'Education':
+      case 'Training':
         Get.toNamed(Routes.EDUCATION);
         break;
       case 'Nagarik Sheba':

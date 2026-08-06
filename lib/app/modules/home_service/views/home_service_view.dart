@@ -3,7 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../../core/values/app_colors.dart';
+import '../../../core/values/app_url.dart';
 import '../../../global_widget/sn_shimmer.dart';
+import '../../support/views/support_view.dart';
 import '../controllers/home_service_controller.dart';
 
 const _teal = Color(0xFF0E9F8E);
@@ -81,6 +83,12 @@ class HomeServiceView extends GetView<HomeServiceController> {
                         ),
                       ),
                     ),
+                  ),
+                  const SizedBox(width: 14),
+                  // Support center — admin-configured numbers for this module.
+                  SupportIconButton(
+                    title: 'Home Service Support'.tr,
+                    endpoint: ApiURL.homeServiceHotlines,
                   ),
                 ],
               ),

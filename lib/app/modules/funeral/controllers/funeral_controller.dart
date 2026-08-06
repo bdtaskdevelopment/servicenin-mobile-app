@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../../core/helpers/snack_helper.dart';
 import '../../../core/mixins/live_refresh_mixin.dart';
@@ -27,6 +28,10 @@ class FuneralController extends GetxController with LiveRefreshMixin {
   List<FuneralRequest> myRequests = [];
   bool loadingRequests = false;
 
+  // ── Support center (GET /api/v1/funeral/hotlines) ───────────────────
+  List<FuneralHotline> hotlines = [];
+  bool loadingHotlines = false;
+
   // ── Request form ────────────────────────────────────────────────────
   final TextEditingController name = TextEditingController();
   final TextEditingController address = TextEditingController();
@@ -50,6 +55,7 @@ class FuneralController extends GetxController with LiveRefreshMixin {
   void onInit() {
     super.onInit();
     fetchServices();
+    fetchHotlines();
     startLiveRefresh();
   }
 
@@ -66,6 +72,33 @@ class FuneralController extends GetxController with LiveRefreshMixin {
     } finally {
       loadingServices = false;
       update();
+    }
+  }
+
+  Future<void> fetchHotlines() async {
+    loadingHotlines = true;
+    update();
+    try {
+      hotlines = await _repo.fetchHotlines();
+    } catch (_) {
+      // Silent — the support strip simply doesn't render if this fails.
+      // Nothing about requesting a service depends on it.
+    } finally {
+      loadingHotlines = false;
+      update();
+    }
+  }
+
+  /// Open the dialer — used by both the support center numbers and the
+  /// assigned staff member's contact button.
+  Future<void> call(String number) async {
+    final digits = number.trim();
+    if (digits.isEmpty) return;
+    try {
+      await launchUrl(Uri.parse('tel:$digits'),
+          mode: LaunchMode.externalApplication);
+    } catch (_) {
+      SnackHelper.error('ডায়াল করা যায়নি');
     }
   }
 

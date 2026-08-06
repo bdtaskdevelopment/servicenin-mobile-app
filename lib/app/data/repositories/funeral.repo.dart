@@ -38,6 +38,13 @@ class FuneralRepository {
     return FuneralRequest.fromResponse(_payload(res));
   }
 
+  /// GET /api/v1/funeral/hotlines — the admin-configured support center
+  /// numbers. Public, so this works before the citizen has signed in.
+  Future<List<FuneralHotline>> fetchHotlines() async {
+    final res = await provider.getData(ApiURL.funeralHotlines);
+    return FuneralHotline.listFromResponse(_payload(res));
+  }
+
   Future<List<FuneralRequest>> fetchMyRequests() async {
     final res = await provider.getData(ApiURL.funeralRequestsMy);
     return FuneralRequest.listFromResponse(_payload(res));

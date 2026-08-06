@@ -35,7 +35,7 @@ class CourseEnquiryView extends GetView<EducationController> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text('Enroll'.tr,
+                            Text('Register'.tr,
                                 style: const TextStyle(
                                     fontSize: 19,
                                     fontWeight: FontWeight.w800,

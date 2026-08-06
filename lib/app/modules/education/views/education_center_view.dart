@@ -1,4 +1,5 @@
 import 'package:animate_do/animate_do.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -55,21 +56,43 @@ class EducationCenterView extends GetView<EducationController> {
                   child: ListView(
                     padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
                     children: [
+                      // Cover banner (new field)
+                      if (center.coverUrl.isNotEmpty) ...[
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(16),
+                          child: AspectRatio(
+                            aspectRatio: 16 / 8,
+                            child: CachedNetworkImage(
+                              imageUrl: center.coverUrl,
+                              fit: BoxFit.cover,
+                              placeholder: (_, __) =>
+                                  Container(color: const Color(0xFFF1F5F9)),
+                              errorWidget: (_, __, ___) =>
+                                  Container(color: _tile),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 14),
+                      ],
                       // Identity
                       Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Container(
-                            width: 64,
-                            height: 64,
-                            decoration: BoxDecoration(
-                              color: _tile,
-                              borderRadius: BorderRadius.circular(16),
-                            ),
-                            child: const Icon(
-                              Icons.menu_book_rounded,
-                              color: _purple,
-                              size: 32,
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(16),
+                            child: SizedBox(
+                              width: 64,
+                              height: 64,
+                              child: center.logoUrl.isNotEmpty
+                                  ? CachedNetworkImage(
+                                      imageUrl: center.logoUrl,
+                                      fit: BoxFit.cover,
+                                      placeholder: (_, __) =>
+                                          Container(color: _tile),
+                                      errorWidget: (_, __, ___) =>
+                                          const _LogoFallback(),
+                                    )
+                                  : const _LogoFallback(),
                             ),
                           ),
                           const SizedBox(width: 14),
@@ -89,7 +112,7 @@ class EducationCenterView extends GetView<EducationController> {
                                 Text(
                                   [
                                     center.typeLabel,
-                                    center.address,
+                                    center.locationLabel,
                                   ].where((s) => s.isNotEmpty).join(' · '),
                                   style: const TextStyle(
                                     fontSize: 12.5,
@@ -112,6 +135,16 @@ class EducationCenterView extends GetView<EducationController> {
                           ),
                         ],
                       ),
+                      // Meta rows (established / owner / timing) — new fields
+                      if (center.establishedYear > 0)
+                        _MetaRow(Icons.event_available_rounded,
+                            '${'Established'.tr} ${center.establishedYear}'),
+                      if (center.ownerName.isNotEmpty)
+                        _MetaRow(Icons.person_outline_rounded, center.ownerName),
+                      if (center.officeTiming.isNotEmpty)
+                        _MetaRow(Icons.schedule_rounded, center.officeTiming),
+                      if (center.address.isNotEmpty)
+                        _MetaRow(Icons.location_on_outlined, center.address),
                       if (center.description.isNotEmpty) ...[
                         const SizedBox(height: 14),
                         Text(
@@ -123,27 +156,38 @@ class EducationCenterView extends GetView<EducationController> {
                           ),
                         ),
                       ],
-                      if (center.contactPhone.isNotEmpty) ...[
-                        const SizedBox(height: 12),
-                        Row(
-                          children: [
-                            const Icon(
-                              Icons.call_outlined,
-                              size: 16,
-                              color: Color(0xFF64748B),
-                            ),
-                            const SizedBox(width: 8),
-                            Text(
-                              center.contactPhone,
-                              style: const TextStyle(
-                                fontSize: 13,
-                                fontWeight: FontWeight.w700,
-                                color: Color(0xFF0F172A),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
+                      // Contact channels (new: whatsapp / facebook / website)
+                      const SizedBox(height: 14),
+                      Wrap(
+                        spacing: 10,
+                        runSpacing: 10,
+                        children: [
+                          if (center.contactPhone.isNotEmpty)
+                            _ContactChip(
+                                icon: Icons.call_rounded,
+                                label: 'Call'.tr,
+                                color: const Color(0xFF16A34A),
+                                onTap: () => con.callCenter(center.contactPhone)),
+                          if (center.whatsapp.isNotEmpty)
+                            _ContactChip(
+                                icon: Icons.chat_rounded,
+                                label: 'WhatsApp'.tr,
+                                color: const Color(0xFF25D366),
+                                onTap: () => con.whatsappCenter(center.whatsapp)),
+                          if (center.facebookPage.isNotEmpty)
+                            _ContactChip(
+                                icon: Icons.facebook_rounded,
+                                label: 'Facebook'.tr,
+                                color: const Color(0xFF1877F2),
+                                onTap: () => con.openLink(center.facebookPage)),
+                          if (center.website.isNotEmpty)
+                            _ContactChip(
+                                icon: Icons.language_rounded,
+                                label: 'Website'.tr,
+                                color: _purple,
+                                onTap: () => con.openLink(center.website)),
+                        ],
+                      ),
                       const SizedBox(height: 22),
                       Text(
                         'Courses & batches'.tr,
@@ -220,6 +264,77 @@ class EducationCenterView extends GetView<EducationController> {
               ],
             );
           },
+        ),
+      ),
+    );
+  }
+}
+
+class _LogoFallback extends StatelessWidget {
+  const _LogoFallback();
+  @override
+  Widget build(BuildContext context) => Container(
+        color: _tile,
+        alignment: Alignment.center,
+        child: const Icon(Icons.menu_book_rounded, color: _purple, size: 30),
+      );
+}
+
+class _MetaRow extends StatelessWidget {
+  const _MetaRow(this.icon, this.text);
+  final IconData icon;
+  final String text;
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(top: 8),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(icon, size: 15, color: const Color(0xFF94A3B8)),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(text,
+                style: const TextStyle(
+                    fontSize: 12.5, color: Color(0xFF475569))),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ContactChip extends StatelessWidget {
+  const _ContactChip({
+    required this.icon,
+    required this.label,
+    required this.color,
+    required this.onTap,
+  });
+  final IconData icon;
+  final String label;
+  final Color color;
+  final VoidCallback onTap;
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 9),
+        decoration: BoxDecoration(
+          color: color.withValues(alpha: 0.10),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: color.withValues(alpha: 0.30)),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon, size: 17, color: color),
+            const SizedBox(width: 7),
+            Text(label,
+                style: TextStyle(
+                    fontSize: 13, fontWeight: FontWeight.w700, color: color)),
+          ],
         ),
       ),
     );
@@ -345,7 +460,7 @@ class _CourseCard extends StatelessWidget {
                     ),
                   ),
                   child: Text(
-                    'Enroll'.tr,
+                    'Register'.tr,
                     style: const TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.w800,

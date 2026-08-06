@@ -86,6 +86,8 @@ class HomeService {
     if (n.toLowerCase().replaceAll(' ', '') == 'doctor/healthcare') {
       return 'Healthcare';
     }
+    // Module renamed education → training.
+    if (n.toLowerCase() == 'education') return 'Training';
     return n;
   }
 

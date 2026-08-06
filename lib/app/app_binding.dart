@@ -29,7 +29,9 @@ import 'data/repositories/service.repo.dart';
 import 'data/repositories/physio.repo.dart';
 import 'data/repositories/matchmaking.repo.dart';
 import 'data/repositories/jobs.repo.dart';
+import 'data/providers/support.provider.dart';
 import 'data/repositories/funeral.repo.dart';
+import 'data/repositories/support.repo.dart';
 import 'data/repositories/education.repo.dart';
 import 'data/repositories/nagarik.repo.dart';
 import 'data/repositories/home.repo.dart';
@@ -113,6 +115,13 @@ class AppDependencyInjection {
     Get.lazyPut<JobsProvider>(() => JobsProvider(), fenix: true);
     Get.lazyPut<JobsRepository>(
       () => JobsRepository(provider: Get.find()),
+      fenix: true,
+    );
+
+    // Shared across every module's support screen.
+    Get.lazyPut<SupportProvider>(() => SupportProvider(), fenix: true);
+    Get.lazyPut<SupportRepository>(
+      () => SupportRepository(provider: Get.find()),
       fenix: true,
     );
 
