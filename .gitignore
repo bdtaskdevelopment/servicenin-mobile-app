@@ -48,3 +48,8 @@ app.*.map.json
 # Local Gradle/Java home redirected into the project root - never commit these
 .gradle-home/
 .javatmp/
+
+# Release signing — never commit the keystore or its passwords
+/android/key.properties
+*.jks
+*.keystore
