@@ -161,6 +161,16 @@ class HomeServiceController extends GetxController with LiveRefreshMixin {
     fetchCategories();
     fetchPopular();
     startLiveRefresh();
+    // Deep-link entry from the Home tab's category shortcut tiles: they
+    // navigate straight to HOME_SERVICE_LIST with the category pre-picked,
+    // so select it without the extra Get.toNamed openCategory() would
+    // otherwise fire (we're already on that route).
+    final args = Get.arguments;
+    if (args is Map && (args['categoryId'] as String?)?.isNotEmpty == true) {
+      final name = args['categoryName'] as String? ?? '';
+      _selectCategoryState(
+          HsCategory(name, name, hsCatIcon(name), id: args['categoryId'] as String));
+    }
   }
 
   Future<void> fetchCategories() async {
@@ -511,12 +521,16 @@ class HomeServiceController extends GetxController with LiveRefreshMixin {
   bool loadingMyBookings = false;
 
   // ── Navigation ──────────────────────────────────────────────────────
-  void openCategory(HsCategory c) {
+  void _selectCategoryState(HsCategory c) {
     mode = HsListMode.category;
     selectedCat = c;
     selectedCategory = c.en;
     update();
     _loadSubServices(c);
+  }
+
+  void openCategory(HsCategory c) {
+    _selectCategoryState(c);
     Get.toNamed(Routes.HOME_SERVICE_LIST);
   }
 

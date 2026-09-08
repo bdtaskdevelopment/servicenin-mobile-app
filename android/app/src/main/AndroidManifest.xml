@@ -1,4 +1,5 @@
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
     <!-- Required for loading map tiles (flutter_map / OpenStreetMap). -->
     <uses-permission android:name="android.permission.INTERNET"/>
     <!-- Required to read the device location (lat/long). -->
@@ -6,6 +7,13 @@
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
     <!-- Runtime permission on Android 13+ to show push notifications. -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
+    <!-- Play Store policy: photo/video uploads (profile, documents, bookings)
+         go through image_picker's system Photo Picker, which needs neither
+         permission — strip them out even though image_picker/file_picker
+         declare them unconditionally in their own manifests. Video picking
+         isn't a feature of this app at all. -->
+    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" tools:node="remove"/>
+    <uses-permission android:name="android.permission.READ_MEDIA_VIDEO" tools:node="remove"/>
     <application
         android:label="ServiceNin"
         android:name="${applicationName}"

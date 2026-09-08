@@ -7,17 +7,64 @@ import '../../../core/values/app_colors.dart';
 import '../../../core/values/app_config.dart';
 import '../../../core/values/sn_catalog.dart';
 import '../../../data/models/response/home_response.dart';
+import '../../../data/models/sn_service.dart';
 import '../../../global_widget/section_header.dart';
 import '../../../global_widget/service_app_bar.dart';
 import '../../../global_widget/sn_service_tile.dart';
 import '../../../global_widget/sn_shimmer.dart';
+import '../../../routes/app_pages.dart';
+import '../../home_service/controllers/home_service_controller.dart'
+    show hsCatIcon;
 import '../controllers/home_controller.dart';
 
 /// Home-page grid, minus services hidden for now (still fully wired up —
-/// routes/bindings untouched — just not shown here until re-enabled).
-final _homeServices =
-    SnCatalog.services.where((s) => !_hiddenOnHome.contains(s.name)).toList();
-const _hiddenOnHome = {'Marriage', 'Jobs'};
+/// routes/bindings untouched — just not shown here until re-enabled). "Home
+/// Service" itself is excluded too — its top categories (AC/Fridge/Plumbing)
+/// take the first row instead, with a "More Services" tile in its place
+/// (see [_topRowTiles]).
+final _homeServices = SnCatalog.services
+    .where((s) => !_hiddenOnHome.contains(s.name))
+    .toList();
+const _hiddenOnHome = {'Marriage', 'Jobs', 'Home Service'};
+
+const _homeServiceColor = Color(0xFFF15A24);
+
+/// First-row tiles: the top 3 home-service categories (whichever currently
+/// exist) + a "More Services" tile that opens the Home Service landing page
+/// — exactly what tapping the old "Home Service" card did.
+List<Widget> _topRowTiles(HomeController con) {
+  return [
+    for (final c in con.topServiceCategories)
+      SnServiceTile(
+        service: SnService(
+          name: c.displayName,
+          icon: hsCatIcon(c.name),
+          color: _homeServiceColor,
+        ),
+        onTap: () => Get.toNamed(Routes.HOME_SERVICE_LIST,
+            arguments: {'categoryId': c.id, 'categoryName': c.name}),
+      ),
+    SnServiceTile(
+      service: const SnService(
+        name: 'More Services',
+        icon: Icons.home_repair_service_rounded,
+        color: _homeServiceColor,
+      ),
+      onTap: () => Get.toNamed(Routes.HOME_SERVICE),
+    ),
+  ];
+}
+
+/// Same text/icon/route as the "Help & support" row on the Account tab
+/// (account_view.dart), so it picks up the identical Bangla translation.
+Widget _helpAndSupportTile() => SnServiceTile(
+      service: const SnService(
+        name: 'Help & support',
+        icon: Icons.chat_bubble_outline_rounded,
+        color: Color(0xFF0D9488),
+      ),
+      onTap: () => Get.toNamed(Routes.ACCOUNT_HELP_SUPPORT),
+    );
 
 class HomeView extends GetView<HomeController> {
   const HomeView({super.key});
@@ -48,23 +95,34 @@ class HomeView extends GetView<HomeController> {
                 const SizedBox(height: 14),
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: GridView.builder(
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    padding: EdgeInsets.zero,
-                    itemCount: _homeServices.length,
-                    gridDelegate:
-                        const SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 4,
-                      mainAxisSpacing: 12,
-                      crossAxisSpacing: 12,
-                      childAspectRatio: 0.86,
-                    ),
-                    itemBuilder: (_, i) => SnServiceTile(
-                      service: _homeServices[i],
-                      onTap: () => ServiceNav.open(_homeServices[i]),
-                    ),
-                  ),
+                  child: Builder(builder: (_) {
+                    final tiles = [
+                      ..._topRowTiles(con),
+                      for (final s in _homeServices) ...[
+                        // "Help & support" lands right before the catch-all
+                        // "More" tile, wherever that ends up in the list.
+                        if (s.name == 'More') _helpAndSupportTile(),
+                        SnServiceTile(
+                          service: s,
+                          onTap: () => ServiceNav.open(s),
+                        ),
+                      ],
+                    ];
+                    return GridView.builder(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      padding: EdgeInsets.zero,
+                      itemCount: tiles.length,
+                      gridDelegate:
+                          const SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 4,
+                        mainAxisSpacing: 12,
+                        crossAxisSpacing: 12,
+                        childAspectRatio: 0.86,
+                      ),
+                      itemBuilder: (_, i) => tiles[i],
+                    );
+                  }),
                 ),
                 // ── Popular services ──────────────────────────────
                 if (con.loadingPopular || con.popular.isNotEmpty) ...[

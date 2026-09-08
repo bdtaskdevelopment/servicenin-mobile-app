@@ -108,6 +108,7 @@ const Map<String, String> commonBn = {
   'All': 'সব',
   'Modified date': 'পরিবর্তনের তারিখ',
   'More': 'আরও',
+  'More Services': 'আরো সার্ভিস',
 
   // ── Our Work / Our News ──
   'See what we\'ve been up to': 'আমরা কী করছি দেখুন',

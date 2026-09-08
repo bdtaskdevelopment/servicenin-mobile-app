@@ -8,10 +8,13 @@ import '../../../core/helpers/snack_helper.dart';
 import '../../../core/services/notification_router.dart';
 import '../../../core/utils/service_nav.dart';
 import '../../../data/models/response/home_response.dart';
+import '../../../data/models/response/service_response.dart';
 import '../../../data/repositories/home.repo.dart';
+import '../../../data/repositories/service.repo.dart';
 
 class HomeController extends GetxController {
   HomeRepository get _repo => Get.find<HomeRepository>();
+  ServiceRepository get _serviceRepo => Get.find<ServiceRepository>();
 
   /// Banner tap: navigate to an in-app module (route), open an external URL,
   /// or launch the dialer — based on the banner's `action`.
@@ -71,12 +74,50 @@ class HomeController extends GetxController {
           !_hiddenServices.contains(s.key.toLowerCase()))
       .toList();
 
+  // ── Top home-service shortcuts (AC / Refrigerator / Plumbing) ────────
+  // Pulled from the same categories the Home Service module lists — these
+  // three get first-row visibility on the Home tab for more exposure. Shows
+  // whichever of the three currently exist; never blocks or crashes if the
+  // admin renames or removes one.
+  List<ServiceCategory> topServiceCategories = [];
+  bool loadingTopServiceCategories = false;
+
+  Future<void> fetchTopServiceCategories() async {
+    loadingTopServiceCategories = true;
+    update();
+    try {
+      final all = await _serviceRepo.fetchCategories();
+      topServiceCategories = _pickTopCategories(all);
+    } catch (_) {
+      topServiceCategories = [];
+    } finally {
+      loadingTopServiceCategories = false;
+      update();
+    }
+  }
+
+  static List<ServiceCategory> _pickTopCategories(List<ServiceCategory> all) {
+    ServiceCategory? find(bool Function(String nameLower) matches) {
+      for (final c in all) {
+        if (matches(c.name.toLowerCase())) return c;
+      }
+      return null;
+    }
+
+    final ac = find((n) => RegExp(r'\bac\b').hasMatch(n));
+    final fridge =
+        find((n) => n.contains('refrigerator') || n.contains('fridge'));
+    final plumbing = find((n) => n.contains('plumb'));
+    return [ac, fridge, plumbing].whereType<ServiceCategory>().toList();
+  }
+
   @override
   void onInit() {
     super.onInit();
     fetchBanners();
     fetchPopular();
     fetchRecent();
+    fetchTopServiceCategories();
   }
 
   @override
