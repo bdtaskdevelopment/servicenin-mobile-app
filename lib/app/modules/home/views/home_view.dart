@@ -312,24 +312,6 @@ class _BannerSlide extends StatelessWidget {
                             color: Colors.white.withValues(alpha: 0.9),
                             fontSize: 12)),
                   const Spacer(),
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 14, vertical: 8),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text('View →',
-                            style: TextStyle(
-                                color: colors.first,
-                                fontSize: 12,
-                                fontWeight: FontWeight.w800)),
-                      ],
-                    ),
-                  ),
                 ],
               ),
             ),

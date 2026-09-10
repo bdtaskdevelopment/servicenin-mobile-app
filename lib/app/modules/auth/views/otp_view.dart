@@ -64,6 +64,8 @@ class OtpView extends GetView<AuthController> {
                     length: AuthController.otpLength,
                     autoFocus: true,
                     clearToken: con.otpClearToken,
+                    prefillValue: con.otpPrefillValue,
+                    prefillToken: con.otpPrefillToken,
                     onChanged: con.onOtpChanged,
                     onCompleted: (_) => con.verifyOtp(),
                   ),

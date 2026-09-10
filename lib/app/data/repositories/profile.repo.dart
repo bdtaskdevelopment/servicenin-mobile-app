@@ -44,6 +44,8 @@ class ProfileRepository {
     required String gender,
     required String bloodGroup,
     required String address,
+    required String wardNumber,
+    required String holdingNumber,
   }) async {
     final payload = {
       'full_name': fullName,
@@ -51,6 +53,8 @@ class ProfileRepository {
       'gender': gender,
       'blood_group': bloodGroup,
       'address': address,
+      'ward': wardNumber,
+      'holding_number': holdingNumber,
     };
     final res = await provider.putData(ApiURL.usersMeProfile, payload);
     return AuthSimpleResponse.fromMap(_payload(res));

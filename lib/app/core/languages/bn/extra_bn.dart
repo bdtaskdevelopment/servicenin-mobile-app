@@ -53,6 +53,12 @@ const Map<String, String> extraBn = {
   'Your Phone Number': 'আপনার ফোন নাম্বার',
   'Email': 'ইমেইল',
   'Email (optional)': 'ইমেইল (ঐচ্ছিক)',
+  'Ward Number': 'ওয়ার্ড নাম্বার',
+  'Holding Number': 'হোল্ডিং নাম্বার',
+  'Your ward number': 'আপনার ওয়ার্ড নাম্বার',
+  'Your holding number': 'আপনার হোল্ডিং নাম্বার',
+  'WARD NUMBER': 'ওয়ার্ড নাম্বার',
+  'HOLDING NUMBER': 'হোল্ডিং নাম্বার',
 
   // ── Step: About ─────────────────────────────────────────────
   'Tell us about yourself': 'আপনার সম্পর্কে লিখুন',

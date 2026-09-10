@@ -5,8 +5,8 @@ import 'package:get/get.dart';
 import '../../../core/helpers/app_helper.dart';
 import '../../../core/values/app_colors.dart';
 
-const _termsUrl = 'https://servicenin.net/terms';
-const _privacyUrl = 'https://servicenin.net/privacy-policy';
+const _termsUrl = 'https://servicenin.com/terms';
+const _privacyUrl = 'https://servicenin.com/privacy-policy';
 
 /// "By continuing you agree to the Terms and Privacy Policy." with the two
 /// links tappable — shown under the primary action on both the login and

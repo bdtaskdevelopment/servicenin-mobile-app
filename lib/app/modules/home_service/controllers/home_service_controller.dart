@@ -25,7 +25,8 @@ IconData hsCatIcon(String name) {
   if (n.contains('clean')) return Icons.cleaning_services_rounded;
   if (n.contains('plumb')) return Icons.water_drop_rounded;
   if (n.contains('electric')) return Icons.lightbulb_outline_rounded;
-  if (n.contains('appliance') || n.contains('repair')) return Icons.bolt_rounded;
+  if (n.contains('appliance') || n.contains('repair'))
+    return Icons.bolt_rounded;
   if (n.contains('pest')) return Icons.shield_outlined;
   if (n.contains('paint')) return Icons.format_paint_rounded;
   if (n.contains('shift') || n.contains('move')) {
@@ -35,23 +36,28 @@ IconData hsCatIcon(String name) {
 }
 
 class HsCategory {
-  const HsCategory(this.name, this.en, this.icon, {this.id = ''});
+  const HsCategory(this.name, this.en, this.icon,
+      {this.id = '', this.imageUrl = ''});
   final String name; // display label (Bangla if available)
   final String en; // English name (list title)
   final IconData icon;
   final String id;
+
+  /// Admin-uploaded image (full URL or server-relative path) — shown in
+  /// place of [icon] when non-empty.
+  final String imageUrl;
 
   factory HsCategory.fromApi(ServiceCategory c) => HsCategory(
         c.displayName, // Bangla in bn, English in en
         c.name,
         hsCatIcon(c.name),
         id: c.id,
+        imageUrl: c.iconUrl,
       );
 }
 
 class HsService {
-  const HsService(this.name, this.desc, this.price, this.icon,
-      {this.id = ''});
+  const HsService(this.name, this.desc, this.price, this.icon, {this.id = ''});
   final String name;
   final String desc;
   final String price;
@@ -80,6 +86,9 @@ class HsServiceItem {
     required this.price,
     required this.category,
     this.icon = Icons.home_repair_service_outlined,
+    this.variants = const [],
+    this.variantId,
+    this.imageUrl = '',
   });
 
   final String id;
@@ -91,6 +100,23 @@ class HsServiceItem {
   final int price;
   final String category;
   final IconData icon;
+
+  /// Admin-uploaded image (full URL or server-relative path) — shown in
+  /// place of [icon] when non-empty.
+  final String imageUrl;
+
+  /// Further priced choices (e.g. AC capacity) — see [SubService.variants].
+  /// Empty means this item adds straight to the cart at [price].
+  final List<SubServiceVariant> variants;
+
+  /// Set on a CART-LINE copy (see [HomeServiceController.add]) once a
+  /// variant has been chosen for this sub-service — null for a catalog item
+  /// or a plain (no-variant) cart line. [id] always stays the real
+  /// sub-service id; this is what tells the cart/booking-submission code a
+  /// specific [SubServiceVariant] was picked.
+  final String? variantId;
+
+  bool get hasVariants => variants.isNotEmpty;
 
   /// Bangla name in bn, English name in en.
   String get displayName {
@@ -108,6 +134,8 @@ class HsServiceItem {
         desc: s.description,
         price: s.price,
         category: categoryName,
+        variants: s.variants,
+        imageUrl: s.iconUrl,
       );
 }
 
@@ -141,6 +169,23 @@ class HomeServiceController extends GetxController with LiveRefreshMixin {
   bool loadingCategories = false;
   bool loadingPopular = false;
 
+  /// Instant local filter over [categories] for the always-visible search
+  /// bar on the Home Service landing page.
+  String categoryFilterQuery = '';
+  void onCategoryFilterChanged(String v) {
+    categoryFilterQuery = v;
+    update();
+  }
+
+  List<HsCategory> get filteredCategories {
+    final q = categoryFilterQuery.trim().toLowerCase();
+    if (q.isEmpty) return categories;
+    return categories
+        .where((c) =>
+            c.en.toLowerCase().contains(q) || c.name.toLowerCase().contains(q))
+        .toList();
+  }
+
   @override
   void onInit() {
     super.onInit();
@@ -168,8 +213,8 @@ class HomeServiceController extends GetxController with LiveRefreshMixin {
     final args = Get.arguments;
     if (args is Map && (args['categoryId'] as String?)?.isNotEmpty == true) {
       final name = args['categoryName'] as String? ?? '';
-      _selectCategoryState(
-          HsCategory(name, name, hsCatIcon(name), id: args['categoryId'] as String));
+      _selectCategoryState(HsCategory(name, name, hsCatIcon(name),
+          id: args['categoryId'] as String));
     }
   }
 
@@ -212,16 +257,33 @@ class HomeServiceController extends GetxController with LiveRefreshMixin {
   List<HsServiceItem> searchItems = [];
   bool searching = false;
 
+  /// Instant, local (no network round-trip) filter over the CURRENTLY loaded
+  /// [subServices] by name — the always-visible search bar on the
+  /// category/sub-category list page. Separate from [query]/[_search], which
+  /// is the global cross-category search reached via [openSearch].
+  String subFilterQuery = '';
+  void onSubFilterChanged(String v) {
+    subFilterQuery = v;
+    update();
+  }
+
   String get listTitle => switch (mode) {
         HsListMode.search => 'Search services',
         HsListMode.all => 'All services',
-        HsListMode.category => selectedCategory.isEmpty
-            ? 'Services'
-            : selectedCategory,
+        HsListMode.category =>
+          selectedCategory.isEmpty ? 'Services' : selectedCategory,
       };
 
-  List<HsServiceItem> get visibleServices =>
-      mode == HsListMode.search ? searchItems : subServices;
+  List<HsServiceItem> get visibleServices {
+    if (mode == HsListMode.search) return searchItems;
+    final q = subFilterQuery.trim().toLowerCase();
+    if (q.isEmpty) return subServices;
+    return subServices
+        .where((s) =>
+            s.name.toLowerCase().contains(q) ||
+            s.bnName.toLowerCase().contains(q))
+        .toList();
+  }
 
   Future<void> _loadSubServices(HsCategory c) async {
     loadingSub = true;
@@ -229,8 +291,9 @@ class HomeServiceController extends GetxController with LiveRefreshMixin {
     update();
     try {
       final list = await _repo.fetchSubServices(c.id);
-      subServices =
-          list.map((s) => HsServiceItem.fromApi(s, categoryName: c.en)).toList();
+      subServices = list
+          .map((s) => HsServiceItem.fromApi(s, categoryName: c.en))
+          .toList();
     } catch (e) {
       SnackHelper.error(e.toString().replaceFirst('Exception: ', ''));
     } finally {
@@ -259,8 +322,8 @@ class HomeServiceController extends GetxController with LiveRefreshMixin {
       // Map category names so the sub-service rows show a category label.
       final catName = {for (final c in res.categories) c.id: c.name};
       searchItems = res.subServices
-          .map((s) =>
-              HsServiceItem.fromApi(s, categoryName: catName[s.categoryId] ?? ''))
+          .map((s) => HsServiceItem.fromApi(s,
+              categoryName: catName[s.categoryId] ?? ''))
           .toList();
     } catch (_) {
     } finally {
@@ -269,25 +332,59 @@ class HomeServiceController extends GetxController with LiveRefreshMixin {
     }
   }
 
-  // ── Cart (keyed by sub_service id) ──────────────────────────────────
+  // ── Cart (keyed by sub_service id, or "subServiceId::variantId" once a
+  // variant — e.g. AC capacity — has been picked, so the same sub-service can
+  // sit in the cart multiple times at different variant prices) ───────────
   final Map<String, int> _cart = {};
   final Map<String, HsServiceItem> _byId = {};
 
-  int qtyOf(HsServiceItem s) => _cart[s.id] ?? 0;
+  String _cartKey(HsServiceItem s) =>
+      s.variantId == null ? s.id : '${s.id}::${s.variantId}';
 
-  void add(HsServiceItem s) {
-    _byId[s.id] = s;
-    _cart[s.id] = (_cart[s.id] ?? 0) + 1;
+  int qtyOf(HsServiceItem s) => _cart[_cartKey(s)] ?? 0;
+
+  /// Adds [s] to the cart. Pass [variant] (one of `s.variants`) once the
+  /// customer has picked one — the cart line then shows "name (variant)" and
+  /// charges the variant's own price instead of `s.price`.
+  /// The cart-line item for [s] once [variant] is picked (or [s] itself when
+  /// there's no variant) — same composed "name (variant)" + variant price
+  /// used by [add], exposed so the list view can look up [qtyOf] for one
+  /// specific variant row (e.g. in an inline accordion) without duplicating
+  /// this composition.
+  HsServiceItem lineFor(HsServiceItem s, SubServiceVariant? variant) {
+    if (variant == null) return s;
+    return HsServiceItem(
+      id: s.id,
+      categoryId: s.categoryId,
+      name: '${s.name} (${variant.name})',
+      bnName:
+          '${s.bnName.isEmpty ? s.name : s.bnName} (${variant.nameBn.isEmpty ? variant.name : variant.nameBn})',
+      duration: s.duration,
+      desc: s.desc,
+      price: variant.price,
+      category: s.category,
+      icon: s.icon,
+      imageUrl: s.imageUrl,
+      variantId: variant.id,
+    );
+  }
+
+  void add(HsServiceItem s, {SubServiceVariant? variant}) {
+    final line = lineFor(s, variant);
+    final key = _cartKey(line);
+    _byId[key] = line;
+    _cart[key] = (_cart[key] ?? 0) + 1;
     _paidPayment = null; // cart (amount) changed → any prior payment is stale
     update();
   }
 
   void dec(HsServiceItem s) {
-    final q = (_cart[s.id] ?? 0) - 1;
+    final key = _cartKey(s);
+    final q = (_cart[key] ?? 0) - 1;
     if (q <= 0) {
-      _cart.remove(s.id);
+      _cart.remove(key);
     } else {
-      _cart[s.id] = q;
+      _cart[key] = q;
     }
     _paidPayment = null; // cart (amount) changed → any prior payment is stale
     update();
@@ -296,7 +393,7 @@ class HomeServiceController extends GetxController with LiveRefreshMixin {
   /// Remove a service from the cart entirely (the delete button on the confirm
   /// page). If nothing is left, returns to the previous screen.
   void removeItem(HsServiceItem s) {
-    _cart.remove(s.id);
+    _cart.remove(_cartKey(s));
     _paidPayment = null; // cart (amount) changed → any prior payment is stale
     update();
     if (_cart.isEmpty) {
@@ -320,6 +417,7 @@ class HomeServiceController extends GetxController with LiveRefreshMixin {
 
   // ── Address / schedule / slots / payment ────────────────────────────
   final TextEditingController addressCtrl = TextEditingController();
+  final TextEditingController notesCtrl = TextEditingController();
   String address = '';
   double? addressLat;
   double? addressLng;
@@ -399,12 +497,13 @@ class HomeServiceController extends GetxController with LiveRefreshMixin {
 
   String get bookingSummary {
     final b = lastBooking;
-    if (b != null && b.items.isNotEmpty) {
-      return '${b.title} ×${b.items.fold(0, (a, i) => a + i.quantity)}';
-    }
+    // servicesLabel lists every distinct line (e.g. "AC Jet Wash (1 Ton),
+    // AC Jet Wash (1.5 Ton)") — collapsing to "${b.title} ×N" here used to
+    // mislabel a mixed cart as N units of just the first/primary item.
+    if (b != null && b.items.isNotEmpty) return b.servicesLabel;
     if (lastCartSummary.isNotEmpty) return lastCartSummary;
     if (cartItems.isEmpty) return 'Service';
-    return '${cartItems.first.displayName} ×$totalItems';
+    return cartItems.map((s) => '${s.displayName} ×${qtyOf(s)}').join(', ');
   }
 
   String get whenSummary {
@@ -475,6 +574,7 @@ class HomeServiceController extends GetxController with LiveRefreshMixin {
     }
     return 'This booking is complete — chat is now closed.'.tr;
   }
+
   String get techName => _provider?.displayName ?? 'Service provider';
   String get techInitials => _provider?.initials ?? 'SP';
   String get techRating => _provider?.ratingLabel ?? '—';
@@ -525,6 +625,7 @@ class HomeServiceController extends GetxController with LiveRefreshMixin {
     mode = HsListMode.category;
     selectedCat = c;
     selectedCategory = c.en;
+    subFilterQuery = '';
     update();
     _loadSubServices(c);
   }
@@ -660,10 +761,15 @@ class HomeServiceController extends GetxController with LiveRefreshMixin {
         if (addressLng != null) 'lng': addressLng,
         'scheduled_at': '${d.date}T00:00:00+06:00',
         'time_slot': selectedSlotKey,
+        'notes': notesCtrl.text.trim(),
         'payment_method':
             selectedMethodKey.isNotEmpty ? selectedMethodKey : 'cash',
         'items': cartItems
-            .map((s) => {'sub_service_id': s.id, 'quantity': qtyOf(s)})
+            .map((s) => {
+                  'sub_service_id': s.id,
+                  if (s.variantId != null) 'variant_id': s.variantId,
+                  'quantity': qtyOf(s),
+                })
             .toList(),
       };
       // Online payment (SSLCommerz sandbox): initiate → checkout → attach the
@@ -692,10 +798,10 @@ class HomeServiceController extends GetxController with LiveRefreshMixin {
         payload['tran_id'] = pay.tranId;
       }
       // Capture the cart summary before clearing (the booking response may
-      // not echo the items back).
+      // not echo the items back) — every distinct line, not just the first.
       lastCartSummary = cartItems.isEmpty
           ? ''
-          : '${cartItems.first.displayName} ×$totalItems';
+          : cartItems.map((s) => '${s.displayName} ×${qtyOf(s)}').join(', ');
       lastBooking = await _repo.book(payload);
       _cart.clear();
       _paidPayment = null; // booking succeeded — payment consumed
@@ -847,9 +953,8 @@ class HomeServiceController extends GetxController with LiveRefreshMixin {
     try {
       final pay = await SslcommerzPay.checkout(
         amount: summary.outstanding,
-        productName: bookingSummary.isNotEmpty
-            ? bookingSummary
-            : 'Home service balance',
+        productName:
+            bookingSummary.isNotEmpty ? bookingSummary : 'Home service balance',
         category: 'homeservice',
       );
       if (!pay.success) {
@@ -1036,7 +1141,8 @@ class HomeServiceController extends GetxController with LiveRefreshMixin {
     try {
       final res = await _repo.dispute(id, reason, description);
       if (res.success) {
-        SnackHelper.success(res.message.isNotEmpty ? res.message : 'Dispute opened');
+        SnackHelper.success(
+            res.message.isNotEmpty ? res.message : 'Dispute opened');
         return true;
       }
       SnackHelper.error(res.message);
@@ -1290,13 +1396,25 @@ class HomeServiceController extends GetxController with LiveRefreshMixin {
     }
   }
 
-  void backToHomeService() =>
-      Get.until((route) => route.settings.name == Routes.HOME_SERVICE);
+  /// Returns to the Home Service landing page. Category tiles on the app's
+  /// main home screen push straight to HOME_SERVICE_LIST without ever
+  /// putting HOME_SERVICE on the stack, so searching only for HOME_SERVICE
+  /// would never match and Get.until would spin forever trying to pop past
+  /// the root Dashboard route (blank/frozen screen). Stopping at isFirst
+  /// guarantees termination; push HOME_SERVICE on top if we landed short of it.
+  void backToHomeService() {
+    Get.until(
+        (route) => route.settings.name == Routes.HOME_SERVICE || route.isFirst);
+    if (Get.currentRoute != Routes.HOME_SERVICE) {
+      Get.toNamed(Routes.HOME_SERVICE);
+    }
+  }
 
   @override
   void onClose() {
     _stopLiveTracking();
     addressCtrl.dispose();
+    notesCtrl.dispose();
     super.onClose();
   }
 }

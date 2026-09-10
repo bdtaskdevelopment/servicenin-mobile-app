@@ -152,8 +152,8 @@ abstract class Routes {
   static const ALL_TASKS = _Paths.ALL_TASKS;
   static const SPRINTS = _Paths.SPRINTS;
   static const USE_CASES = _Paths.USE_CASES;
-  static const DAILY_TASKS     = _Paths.DAILY_TASKS;
-  static const ADD_DAILY_TASK  = _Paths.ADD_DAILY_TASK;
+  static const DAILY_TASKS = _Paths.DAILY_TASKS;
+  static const ADD_DAILY_TASK = _Paths.ADD_DAILY_TASK;
 }
 
 abstract class _Paths {
@@ -309,6 +309,6 @@ abstract class _Paths {
   static const ALL_TASKS = '/all-tasks';
   static const SPRINTS = '/sprints';
   static const USE_CASES = '/use-cases';
-  static const DAILY_TASKS    = '/daily-tasks';
+  static const DAILY_TASKS = '/daily-tasks';
   static const ADD_DAILY_TASK = '/add-daily-task';
 }

@@ -94,7 +94,7 @@ const Map<String, String> commonBn = {
   'Healthcare': 'স্বাস্থ্যসেবা',
   'Information': 'তথ্য',
   'Home Service': 'হোম সার্ভিস',
-  'Physio': 'ফিজিও',
+  'Physio': 'ফিজিওথেরাপি',
   'Marriage': 'বিবাহ',
   'Jobs': 'চাকরি',
   'Funeral': 'ফিউনারেল',

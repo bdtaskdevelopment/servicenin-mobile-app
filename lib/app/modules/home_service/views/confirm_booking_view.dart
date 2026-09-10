@@ -406,6 +406,36 @@ class ConfirmBookingView extends GetView<HomeServiceController> {
                         }).toList(),
                       ),
                       ),
+                      const SizedBox(height: 18),
+                      _Label('SERVICE DETAILS'.tr),
+                      const SizedBox(height: 8),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 14, vertical: 4),
+                        decoration: BoxDecoration(
+                            color: AppColors.white,
+                            borderRadius: BorderRadius.circular(14)),
+                        child: TextField(
+                          controller: con.notesCtrl,
+                          minLines: 2,
+                          maxLines: 4,
+                          decoration: InputDecoration(
+                            hintText:
+                                'e.g. AC is on the 3rd floor, no lift — anything the technician should know'
+                                    .tr,
+                            hintStyle: const TextStyle(
+                                fontSize: 13, color: Color(0xFF94A3B8)),
+                            border: InputBorder.none,
+                            isCollapsed: true,
+                            contentPadding:
+                                const EdgeInsets.symmetric(vertical: 12),
+                          ),
+                          style: const TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                              color: Color(0xFF0F172A)),
+                        ),
+                      ),
                     ],
                   ),
                 ),

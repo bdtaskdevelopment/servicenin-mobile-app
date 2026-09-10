@@ -1,8 +1,10 @@
 import 'package:animate_do/animate_do.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../../core/values/app_colors.dart';
+import '../../../core/values/app_config.dart';
 import '../../../core/values/app_url.dart';
 import '../../../global_widget/sn_shimmer.dart';
 import '../../support/views/support_view.dart';
@@ -11,6 +13,18 @@ import '../controllers/home_service_controller.dart';
 const _teal = Color(0xFF0E9F8E);
 const _darkTeal = Color(0xFF0E7C6B);
 const _tile = Color(0xFFE0F2EF);
+
+/// Resolves an admin-uploaded icon URL, which may already be absolute (S3)
+/// or a server-relative path (`/static/...`, local dev storage) — same
+/// convention as `_providerPhotoUrl` in hs_my_bookings_view.dart.
+String _iconUrl(String path) {
+  if (path.isEmpty) return '';
+  if (path.startsWith('http')) return path;
+  final base = AppConfig.baseUrl.endsWith('/')
+      ? AppConfig.baseUrl.substring(0, AppConfig.baseUrl.length - 1)
+      : AppConfig.baseUrl;
+  return path.startsWith('/') ? '$base$path' : '$base/$path';
+}
 
 class HomeServiceView extends GetView<HomeServiceController> {
   const HomeServiceView({super.key});
@@ -104,6 +118,38 @@ class HomeServiceView extends GetView<HomeServiceController> {
                         child: _Hero(),
                       ),
                       const SizedBox(height: 14),
+                      // Always-visible filter: narrows the category grid
+                      // below by name as you type — instant, no network call.
+                      Container(
+                        height: 46,
+                        padding: const EdgeInsets.symmetric(horizontal: 14),
+                        decoration: BoxDecoration(
+                            color: AppColors.white,
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(color: const Color(0xFFEDEFF2))),
+                        child: Row(
+                          children: [
+                            const Icon(Icons.filter_list_rounded,
+                                color: Color(0xFF94A3B8)),
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: TextField(
+                                onChanged: con.onCategoryFilterChanged,
+                                decoration: InputDecoration(
+                                  hintText: 'Filter by category…'.tr,
+                                  hintStyle:
+                                      const TextStyle(color: Color(0xFF94A3B8)),
+                                  border: InputBorder.none,
+                                  isCollapsed: true,
+                                ),
+                                style: const TextStyle(
+                                    fontSize: 14.5, color: Color(0xFF0F172A)),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 14),
                       GestureDetector(
                         onTap: con.openMyBookings,
                         child: const _ActiveCard(),
@@ -122,6 +168,15 @@ class HomeServiceView extends GetView<HomeServiceController> {
                           padding: EdgeInsets.zero,
                           childAspectRatio: 0.92,
                         )
+                      else if (con.filteredCategories.isEmpty)
+                        Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 24),
+                          child: Center(
+                            child: Text('No matching category'.tr,
+                                style:
+                                    const TextStyle(color: Color(0xFF94A3B8))),
+                          ),
+                        )
                       else
                         FadeInUp(
                           from: 18,
@@ -133,7 +188,7 @@ class HomeServiceView extends GetView<HomeServiceController> {
                             mainAxisSpacing: 14,
                             crossAxisSpacing: 12,
                             childAspectRatio: 0.92,
-                            children: con.categories
+                            children: con.filteredCategories
                                 .map((c) => GestureDetector(
                                       onTap: () => con.openCategory(c),
                                       child: _CatTile(cat: c),
@@ -160,20 +215,23 @@ class HomeServiceView extends GetView<HomeServiceController> {
                           padding: EdgeInsets.zero,
                         )
                       else
-                        ...con.popular.toList().asMap().entries.map((e) =>
-                            FadeInUp(
-                              from: 18,
-                              duration: const Duration(milliseconds: 350),
-                              delay: Duration(milliseconds: 70 * e.key),
-                              child: Padding(
-                                padding: const EdgeInsets.only(bottom: 12),
-                                child: GestureDetector(
-                                  onTap: () => con.openCategoryById(
-                                      e.value.id, e.value.name),
-                                  child: _ServiceCard(service: e.value),
-                                ),
-                              ),
-                            )),
+                        ...con.popular
+                            .toList()
+                            .asMap()
+                            .entries
+                            .map((e) => FadeInUp(
+                                  from: 18,
+                                  duration: const Duration(milliseconds: 350),
+                                  delay: Duration(milliseconds: 70 * e.key),
+                                  child: Padding(
+                                    padding: const EdgeInsets.only(bottom: 12),
+                                    child: GestureDetector(
+                                      onTap: () => con.openCategoryById(
+                                          e.value.id, e.value.name),
+                                      child: _ServiceCard(service: e.value),
+                                    ),
+                                  ),
+                                )),
                     ],
                   );
                 },
@@ -230,7 +288,8 @@ class _Hero extends StatelessWidget {
                       borderRadius: BorderRadius.circular(12)),
                   child: Row(
                     children: [
-                      const Icon(Icons.search_rounded, color: Color(0xFF94A3B8)),
+                      const Icon(Icons.search_rounded,
+                          color: Color(0xFF94A3B8)),
                       const SizedBox(width: 10),
                       Text('Search AC service, cleaning, plumber…'.tr,
                           style: const TextStyle(
@@ -264,8 +323,8 @@ class _ActiveCard extends StatelessWidget {
             height: 44,
             decoration: BoxDecoration(
                 color: _tile, borderRadius: BorderRadius.circular(12)),
-            child: const Icon(Icons.receipt_long_rounded,
-                color: _teal, size: 22),
+            child:
+                const Icon(Icons.receipt_long_rounded, color: _teal, size: 22),
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -279,7 +338,8 @@ class _ActiveCard extends StatelessWidget {
                         color: Color(0xFF0F172A))),
                 const SizedBox(height: 2),
                 Text('Track your service bookings'.tr,
-                    style: const TextStyle(fontSize: 12, color: Color(0xFF94A3B8))),
+                    style: const TextStyle(
+                        fontSize: 12, color: Color(0xFF94A3B8))),
               ],
             ),
           ),
@@ -329,7 +389,23 @@ class _CatTile extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(cat.icon, color: _teal, size: 26),
+          cat.imageUrl.isEmpty
+              ? Icon(cat.icon, color: _teal, size: 26)
+              : ClipRRect(
+                  borderRadius: BorderRadius.circular(8),
+                  child: SizedBox(
+                    width: 28,
+                    height: 28,
+                    child: CachedNetworkImage(
+                      imageUrl: _iconUrl(cat.imageUrl),
+                      fit: BoxFit.cover,
+                      placeholder: (_, __) =>
+                          Icon(cat.icon, color: _teal, size: 26),
+                      errorWidget: (_, __, ___) =>
+                          Icon(cat.icon, color: _teal, size: 26),
+                    ),
+                  ),
+                ),
           const SizedBox(height: 6),
           Flexible(
             child: Builder(

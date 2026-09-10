@@ -40,9 +40,16 @@ class AuthRepository {
     required String name,
     required String phone,
     required String email,
+    required String wardNumber,
+    required String holdingNumber,
   }) async {
-    final res = await authProvider.postData(
-        ApiURL.authRegister, {'name': name, 'phone': phone, 'email': email});
+    final res = await authProvider.postData(ApiURL.authRegister, {
+      'name': name,
+      'phone': phone,
+      'email': email,
+      'ward_number': wardNumber,
+      'holding_number': holdingNumber,
+    });
     return AuthSimpleResponse.fromMap(_payload(res));
   }
 
