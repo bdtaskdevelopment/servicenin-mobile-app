@@ -138,6 +138,14 @@ class EditProfileView extends GetView<AccountController> {
                       ),
                     ),
                     const SizedBox(height: 14),
+                    _InputCard(
+                        label: 'WARD NUMBER'.tr,
+                        controller: con.wardCtrl,
+                        keyboardType: TextInputType.number),
+                    const SizedBox(height: 14),
+                    _InputCard(
+                        label: 'HOLDING NUMBER'.tr, controller: con.holdingCtrl),
+                    const SizedBox(height: 14),
                     _InputCard(label: 'FULL NAME'.tr, controller: con.nameCtrl),
                     const SizedBox(height: 14),
                     _InputCard(

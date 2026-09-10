@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:servicenin/app/core/helpers/app_helper.dart';
+import 'package:smart_auth/smart_auth.dart';
 
 import '../../../core/helpers/snack_helper.dart';
 import '../../../core/services/notification_socket_service.dart';
@@ -55,6 +56,32 @@ class AuthController extends GetxController {
   void onOtpChanged(String value) {
     _otp = value;
     update();
+  }
+
+  // ── OTP SMS autofill ────────────────────────────────────────────
+  // Uses Android's SMS User Consent API: no RECEIVE_SMS/READ_SMS permission
+  // needed (Play Store restricts those to default SMS/dialer apps), and the
+  // system shows a one-tap consent dialog with the incoming message before
+  // handing the text to the app. No-op on iOS/other platforms.
+  final SmartAuth _smartAuth = SmartAuth.instance;
+  String? otpPrefillValue;
+  int otpPrefillToken = 0;
+
+  Future<void> _listenForOtpSms() async {
+    try {
+      final res = await _smartAuth.getSmsWithUserConsentApi();
+      if (!res.hasData) return;
+      final code = res.requireData.code;
+      if (code == null || code.length != otpLength) return;
+      otpPrefillValue = code;
+      otpPrefillToken++;
+      _otp = code;
+      update();
+      await verifyOtp();
+    } catch (_) {
+      // No Play Services, user dismissed the consent dialog, listener timed
+      // out, etc. — the user can always still type/paste the code manually.
+    }
   }
 
   // Resend countdown
@@ -113,6 +140,12 @@ class AuthController extends GetxController {
   Future<void> login() async {
     if (!isPhoneValid) return;
     otpPhone = fullPhone; // capture the exact phone used for this OTP request
+    // Arm the SMS listener BEFORE the request goes out, not after it
+    // succeeds: some gateways deliver the OTP within ~1s, which can beat
+    // Play Services to registering the listener if we wait for the HTTP
+    // round-trip first — that race makes the consent broadcast arrive with
+    // a TIMEOUT status instead of the actual message.
+    unawaited(_listenForOtpSms());
     final res = await _run(() => _repo.requestOtp(otpPhone));
     if (res == null) return;
     if (res.success) {
@@ -124,7 +157,8 @@ class AuthController extends GetxController {
     }
   }
 
-  /// Open the OTP screen (OTP already requested).
+  /// Open the OTP screen (OTP already requested; the SMS listener is already
+  /// armed from [login]/[resendOtp]).
   void proceedToOtp() {
     _otp = '';
     _startTimer();
@@ -137,11 +171,14 @@ class AuthController extends GetxController {
   Future<void> resendOtp() async {
     if (!canResend) return;
     final phone = otpPhone.isNotEmpty ? otpPhone : fullPhone;
+    // See the comment in login() — arm the listener before the request.
+    unawaited(_listenForOtpSms());
     final res = await _run(() => _repo.resendOtp(phone));
     if (res == null) return;
     _otp = '';
     _startTimer();
-    SnackHelper.success(res.message.isEmpty ? 'নতুন কোড পাঠানো হয়েছে' : res.message);
+    SnackHelper.success(
+        res.message.isEmpty ? 'নতুন কোড পাঠানো হয়েছে' : res.message);
   }
 
   /// "যাচাই করুন" — verify the OTP. On success save token + user and go home;
@@ -153,10 +190,12 @@ class AuthController extends GetxController {
     if (res == null) return;
 
     if (res.success && res.userExist && (res.token ?? '').isNotEmpty) {
-      printWrapped('OTP verification successful. Saving token and user info. ${res.token}');
+      printWrapped(
+          'OTP verification successful. Saving token and user info. ${res.token}');
       await StorageService.save(StorageConstants.accessToken, res.token);
       if ((res.refreshToken ?? '').isNotEmpty) {
-        await StorageService.save(StorageConstants.refreshToken, res.refreshToken);
+        await StorageService.save(
+            StorageConstants.refreshToken, res.refreshToken);
       }
       if (res.user != null) {
         await StorageService.save(
@@ -173,8 +212,9 @@ class AuthController extends GetxController {
       NotificationSocketService.instance.connect();
       // No success message on login — go straight home (or the provider
       // dashboard, for a home-service provider account).
-      Get.offAllNamed(
-          AuthUser.fromStorage()?.isProvider == true ? Routes.HS_PROVIDER : Routes.HOME);
+      Get.offAllNamed(AuthUser.fromStorage()?.isProvider == true
+          ? Routes.HS_PROVIDER
+          : Routes.HOME);
     } else {
       // user_exist == false or verification failed: clear the OTP boxes so the
       // user can re-enter, then surface the error.
@@ -188,6 +228,7 @@ class AuthController extends GetxController {
   @override
   void onClose() {
     _timer?.cancel();
+    unawaited(_smartAuth.removeUserConsentApiListener());
     // NOTE: phoneController is intentionally NOT disposed here. This controller
     // is a fenix singleton; disposing the TextEditingController can leave a
     // disposed controller bound to the rebuilt login field after

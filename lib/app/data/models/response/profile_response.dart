@@ -19,6 +19,8 @@ class UserProfile {
     this.address,
     this.photoUrl,
     this.maskedPhone,
+    this.wardNumber,
+    this.holdingNumber,
   });
 
   final String id;
@@ -37,6 +39,8 @@ class UserProfile {
   final String? bloodGroup;
   final String? address;
   final String? photoUrl;
+  final String? wardNumber;
+  final String? holdingNumber;
 
   /// Builds from the full `{ success, message, data: { ..., profile } }`
   /// envelope or from a bare user `data` map.
@@ -65,6 +69,8 @@ class UserProfile {
       address: str(profile['address']),
       photoUrl: str(profile['photo_url'] ?? user['photo_url']),
       maskedPhone: str(user['masked_phone']),
+      wardNumber: str(profile['ward']),
+      holdingNumber: str(profile['holding_number']),
     );
   }
 
@@ -75,6 +81,8 @@ class UserProfile {
     String? bloodGroup,
     String? address,
     String? photoUrl,
+    String? wardNumber,
+    String? holdingNumber,
   }) =>
       UserProfile(
         id: id,
@@ -89,6 +97,8 @@ class UserProfile {
         address: address ?? this.address,
         photoUrl: photoUrl ?? this.photoUrl,
         maskedPhone: maskedPhone,
+        wardNumber: wardNumber ?? this.wardNumber,
+        holdingNumber: holdingNumber ?? this.holdingNumber,
       );
 }
 

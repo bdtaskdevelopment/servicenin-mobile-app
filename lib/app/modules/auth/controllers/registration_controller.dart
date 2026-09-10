@@ -19,6 +19,8 @@ class RegistrationController extends GetxController {
   // ── Sign-up info (single step: name · phone) ───────────────────────
   final TextEditingController nameController = TextEditingController();
   final TextEditingController phoneController = TextEditingController();
+  final TextEditingController wardController = TextEditingController();
+  final TextEditingController holdingController = TextEditingController();
 
   @override
   void onInit() {
@@ -38,7 +40,10 @@ class RegistrationController extends GetxController {
       '${AuthController.countryCode}${phoneController.text.trim()}';
 
   bool get isInfoValid =>
-      nameController.text.trim().isNotEmpty && isPhoneValid;
+      nameController.text.trim().isNotEmpty &&
+      isPhoneValid &&
+      wardController.text.trim().isNotEmpty &&
+      holdingController.text.trim().isNotEmpty;
 
   /// Register the account (name · phone) then go straight to the OTP screen
   /// — the register endpoint already sends the OTP for this phone, so no
@@ -57,6 +62,8 @@ class RegistrationController extends GetxController {
         name: nameController.text.trim(),
         phone: fullPhone,
         email: '',
+        wardNumber: wardController.text.trim(),
+        holdingNumber: holdingController.text.trim(),
       );
       if (Get.isDialogOpen ?? false) Get.back();
       busy = false;

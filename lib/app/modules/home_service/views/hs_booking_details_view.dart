@@ -137,6 +137,23 @@ class HsBookingDetailsView extends GetView<HomeServiceController> {
                     const SizedBox(height: 12),
                     _ProviderCard(con: con),
                   ],
+                  if (booking != null && booking.notes.isNotEmpty) ...[
+                    const SizedBox(height: 18),
+                    _Label('SPECIAL INSTRUCTIONS'.tr),
+                    const SizedBox(height: 10),
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(14),
+                      decoration: BoxDecoration(
+                          color: AppColors.white,
+                          borderRadius: BorderRadius.circular(16)),
+                      child: Text(booking.notes,
+                          style: const TextStyle(
+                              fontSize: 13.5,
+                              height: 1.4,
+                              color: Color(0xFF334155))),
+                    ),
+                  ],
                   // Status timeline & work proof hidden for now.
                   /*
                   const SizedBox(height: 18),

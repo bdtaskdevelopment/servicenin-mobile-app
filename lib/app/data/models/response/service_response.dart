@@ -13,10 +13,12 @@ String _localized(String en, String bn) {
   if (isBn && bn.isNotEmpty) return bn;
   return en.isNotEmpty ? en : bn;
 }
+
 int _int(dynamic v) =>
     v is int ? v : int.tryParse(_str(v)) ?? (v is num ? v.toInt() : 0);
-double? _dbl(dynamic v) =>
-    v == null ? null : (v is num ? v.toDouble() : double.tryParse(v.toString()));
+double? _dbl(dynamic v) => v == null
+    ? null
+    : (v is num ? v.toDouble() : double.tryParse(v.toString()));
 
 dynamic _data(dynamic src) {
   final d = _dec(src);
@@ -88,6 +90,8 @@ class SubService {
     required this.description,
     required this.price,
     required this.durationMin,
+    this.variants = const [],
+    this.iconUrl = '',
   });
 
   final String id;
@@ -97,6 +101,18 @@ class SubService {
   final String description;
   final int price;
   final int durationMin;
+
+  /// Admin-uploaded image — may be a full URL (S3) or a server-relative path
+  /// (`/static/...`, local dev storage). Empty when no image is set, in
+  /// which case the app falls back to a generic icon.
+  final String iconUrl;
+
+  /// Further priced choices under this sub-service — e.g. AC capacity
+  /// (1/1.5/2/3/4 Ton). Empty for a plain sub-service, which the citizen app
+  /// adds straight to the cart at [price]; when non-empty the app lets the
+  /// customer pick one inline (see the accordion row in HsServiceListView)
+  /// and uses that variant's own price instead.
+  final List<SubServiceVariant> variants;
 
   String get displayName => _localized(name, nameBn);
   String get durationLabel => durationMin > 0 ? '$durationMin min' : '';
@@ -109,6 +125,8 @@ class SubService {
         description: _str(j['description']),
         price: _int(j['price']),
         durationMin: _int(j['duration_min']),
+        variants: SubServiceVariant.listFromJson(j['variants']),
+        iconUrl: _str(j['icon_url']),
       );
 
   static List<SubService> listFromResponse(dynamic src) {
@@ -117,6 +135,42 @@ class SubService {
     return list
         .whereType<Map>()
         .map((e) => SubService.fromMap(e.cast<String, dynamic>()))
+        .toList();
+  }
+}
+
+/// A priced option under a [SubService] — e.g. "1.5 Ton" for "AC Jet Wash".
+class SubServiceVariant {
+  SubServiceVariant({
+    required this.id,
+    required this.subServiceId,
+    required this.name,
+    required this.nameBn,
+    required this.price,
+  });
+
+  final String id;
+  final String subServiceId;
+  final String name;
+  final String nameBn;
+  final int price;
+
+  String get displayName => _localized(name, nameBn);
+
+  factory SubServiceVariant.fromMap(Map<String, dynamic> j) =>
+      SubServiceVariant(
+        id: _str(j['id']),
+        subServiceId: _str(j['sub_service_id']),
+        name: _str(j['name']),
+        nameBn: _str(j['name_bn']),
+        price: _int(j['price']),
+      );
+
+  static List<SubServiceVariant> listFromJson(dynamic src) {
+    final list = src is List ? src : const [];
+    return list
+        .whereType<Map>()
+        .map((e) => SubServiceVariant.fromMap(e.cast<String, dynamic>()))
         .toList();
   }
 }
@@ -130,7 +184,8 @@ class ServiceSearchResult {
   factory ServiceSearchResult.fromResponse(dynamic src) {
     final d = _data(src);
     final map = d is Map ? d : const {};
-    final cats = map['categories'] is List ? map['categories'] as List : const [];
+    final cats =
+        map['categories'] is List ? map['categories'] as List : const [];
     final subs =
         map['sub_services'] is List ? map['sub_services'] as List : const [];
     return ServiceSearchResult(
@@ -291,13 +346,16 @@ class ServiceBookingItem {
 
   factory ServiceBookingItem.fromMap(Map<String, dynamic> j) {
     final sub = j['sub_service'] is Map ? j['sub_service'] as Map : const {};
+    final variant = j['variant'] is Map ? j['variant'] as Map : const {};
+    final subName = _str(sub['name']);
+    final variantName = _str(variant['name']);
     return ServiceBookingItem(
       id: _str(j['id']),
       subServiceId: _str(j['sub_service_id']),
       quantity: _int(j['quantity']),
       unitPrice: _int(j['unit_price']),
       lineTotal: _int(j['line_total']),
-      name: _str(sub['name']),
+      name: variantName.isEmpty ? subName : '$subName ($variantName)',
       status: _str(j['status']),
       notes: _str(j['notes']),
       addedByRole: _str(j['added_by_role']),
@@ -336,8 +394,9 @@ class ServiceBookingExtraItem {
 
   /// Drops the trailing `.0` on whole quantities so "2 litre" doesn't
   /// render as "2.0 litre".
-  String get quantityLabel =>
-      quantity == quantity.roundToDouble() ? '${quantity.round()}' : '$quantity';
+  String get quantityLabel => quantity == quantity.roundToDouble()
+      ? '${quantity.round()}'
+      : '$quantity';
 
   String get quantityWithUnit =>
       unit.isEmpty ? quantityLabel : '$quantityLabel $unit';
@@ -498,6 +557,7 @@ class ServiceBooking {
     required this.servicesSummary,
     required this.categoryNames,
     required this.isMultiCategory,
+    this.notes = '',
     this.provider,
     this.providerLat,
     this.providerLng,
@@ -533,6 +593,7 @@ class ServiceBooking {
   final String servicesSummary;
   final List<String> categoryNames;
   final bool isMultiCategory;
+  final String notes;
   final ServiceBookingProvider? provider;
   // Mutable — patched in place from live WebSocket location pushes
   // (HomeServiceSocketService) without re-fetching the whole booking.
@@ -572,10 +633,14 @@ class ServiceBooking {
     switch (key) {
       case 'morning':
         return 'Morning';
+      case 'midday':
+        return 'Mid-day';
       case 'afternoon':
         return 'Afternoon';
       case 'evening':
         return 'Evening';
+      case 'night':
+        return 'Night';
       default:
         return key;
     }
@@ -611,7 +676,8 @@ class ServiceBooking {
   /// button. Empty when it is editable.
   String get lockReason {
     if (!locked) return '';
-    if (settled) return 'This order has been settled and can no longer be changed.';
+    if (settled)
+      return 'This order has been settled and can no longer be changed.';
     switch (status.toLowerCase()) {
       case 'completed':
       case 'closed':
@@ -721,8 +787,10 @@ class ServiceBooking {
       categoryNames:
           catNamesRaw.map((e) => _str(e)).where((s) => s.isNotEmpty).toList(),
       isMultiCategory: j['is_multi_category'] == true,
-      provider:
-          prov == null ? null : ServiceBookingProvider.fromMap(prov.cast<String, dynamic>()),
+      notes: _str(j['notes']),
+      provider: prov == null
+          ? null
+          : ServiceBookingProvider.fromMap(prov.cast<String, dynamic>()),
       providerLat: _dbl(j['provider_lat']),
       providerLng: _dbl(j['provider_lng']),
       locationUpdatedAt:
@@ -868,7 +936,8 @@ class ServiceChatMessage {
 
   factory ServiceChatMessage.fromMap(Map<String, dynamic> j) {
     final sender = j['sender'] is Map ? j['sender'] as Map : const {};
-    final profile = sender['profile'] is Map ? sender['profile'] as Map : const {};
+    final profile =
+        sender['profile'] is Map ? sender['profile'] as Map : const {};
     final created = _str(j['created_at']);
     return ServiceChatMessage(
       id: _str(j['id']),
@@ -952,7 +1021,8 @@ class ProviderDashboardSummary {
   }
 
   static ProviderDashboardSummary fromResponse(dynamic src) =>
-      ProviderDashboardSummary.fromMap((_data(src) as Map).cast<String, dynamic>());
+      ProviderDashboardSummary.fromMap(
+          (_data(src) as Map).cast<String, dynamic>());
 }
 
 // ── Provider's own job list row (GET /services/provider/jobs[/today]) ──
@@ -974,7 +1044,8 @@ class ProviderJob {
   final String id;
   final String title;
   final String address;
-  final String status; // my_status: assigned|accepted|on_the_way|arrived|in_progress|completed
+  final String
+      status; // my_status: assigned|accepted|on_the_way|arrived|in_progress|completed
   final double amount; // my_amount
   // my_task_ids — empty means the whole booking is theirs (not a split order).
   final List<String> taskIds;
@@ -1020,11 +1091,14 @@ class ProviderJob {
       id: _str(j['id']),
       title: summary.isNotEmpty
           ? summary
-          : (subName.isNotEmpty ? subName : (catName.isNotEmpty ? catName : 'Service')),
+          : (subName.isNotEmpty
+              ? subName
+              : (catName.isNotEmpty ? catName : 'Service')),
       address: _str(j['address']),
       status: _str(j['my_status']),
       amount: _dbl(j['my_amount']) ?? 0,
-      taskIds: taskIdsRaw.map((e) => _str(e)).where((s) => s.isNotEmpty).toList(),
+      taskIds:
+          taskIdsRaw.map((e) => _str(e)).where((s) => s.isNotEmpty).toList(),
       scheduledAt: sched.isEmpty ? null : DateTime.tryParse(sched),
     );
   }

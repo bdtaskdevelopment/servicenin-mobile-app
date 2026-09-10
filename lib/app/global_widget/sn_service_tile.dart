@@ -44,7 +44,11 @@ class SnServiceTile extends StatelessWidget {
                         builder: (_) {
                           final label = service.name.tr;
                           final multiWord = label.trim().contains(' ');
-                          return Text(
+                          // Single-word labels get one line — never a
+                          // mid-word break — but shrink to fit instead of
+                          // ellipsizing, since a long single word (e.g.
+                          // "ফিজিওথেরাপি") would otherwise get cut off.
+                          final text = Text(
                             label,
                             textAlign: TextAlign.center,
                             maxLines: multiWord ? 2 : 1,
@@ -56,6 +60,9 @@ class SnServiceTile extends StatelessWidget {
                               height: 1.1,
                             ),
                           );
+                          return multiWord
+                              ? text
+                              : FittedBox(fit: BoxFit.scaleDown, child: text);
                         },
                       ),
                     ),

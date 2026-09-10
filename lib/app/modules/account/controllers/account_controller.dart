@@ -28,6 +28,8 @@ class AccountController extends GetxController {
   final TextEditingController nameCtrl = TextEditingController();
   final TextEditingController emailCtrl = TextEditingController();
   final TextEditingController addressCtrl = TextEditingController();
+  final TextEditingController wardCtrl = TextEditingController();
+  final TextEditingController holdingCtrl = TextEditingController();
 
   @override
   void onInit() {
@@ -157,6 +159,8 @@ class AccountController extends GetxController {
     nameCtrl.text = p.fullName;
     emailCtrl.text = p.email;
     addressCtrl.text = p.address ?? '';
+    wardCtrl.text = p.wardNumber ?? '';
+    holdingCtrl.text = p.holdingNumber ?? '';
     gender = _normalizeGender(p.gender);
     if (p.bloodGroup != null && bloodGroups.contains(p.bloodGroup)) {
       bloodGroup = p.bloodGroup!;
@@ -181,8 +185,18 @@ class AccountController extends GetxController {
     if (saving) return;
     final fullName = nameCtrl.text.trim();
     final emailValue = emailCtrl.text.trim();
+    final wardValue = wardCtrl.text.trim();
+    final holdingValue = holdingCtrl.text.trim();
     if (fullName.isEmpty) {
       SnackHelper.error('নাম দিন');
+      return;
+    }
+    if (wardValue.isEmpty) {
+      SnackHelper.error('ওয়ার্ড নাম্বার দিন');
+      return;
+    }
+    if (holdingValue.isEmpty) {
+      SnackHelper.error('হোল্ডিং নাম্বার দিন');
       return;
     }
     saving = true;
@@ -194,6 +208,8 @@ class AccountController extends GetxController {
         gender: gender.toLowerCase(),
         bloodGroup: bloodGroup,
         address: addressCtrl.text.trim(),
+        wardNumber: wardValue,
+        holdingNumber: holdingValue,
       );
       // Reflect the change locally so the profile screen is up to date.
       profile = profile?.copyWith(
@@ -202,6 +218,8 @@ class AccountController extends GetxController {
         gender: gender.toLowerCase(),
         bloodGroup: bloodGroup,
         address: addressCtrl.text.trim(),
+        wardNumber: wardValue,
+        holdingNumber: holdingValue,
       );
       saving = false;
       update();
