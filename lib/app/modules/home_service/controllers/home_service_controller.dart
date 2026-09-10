@@ -23,7 +23,7 @@ IconData hsCatIcon(String name) {
   final n = name.toLowerCase();
   if (n.contains('ac')) return Icons.ac_unit_rounded;
   if (n.contains('clean')) return Icons.cleaning_services_rounded;
-  if (n.contains('plumb')) return Icons.water_drop_rounded;
+  if (n.contains('plumb')) return Icons.plumbing_rounded;
   if (n.contains('electric')) return Icons.lightbulb_outline_rounded;
   if (n.contains('appliance') || n.contains('repair'))
     return Icons.bolt_rounded;
