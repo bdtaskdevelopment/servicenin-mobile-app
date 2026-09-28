@@ -103,6 +103,20 @@ class NotificationRouter {
       return const _Target(Routes.NOTIFICATIONS);
     }
     switch (referenceType) {
+      // Payment prompt (job completed with a balance owed). Opens the booking
+      // details page and auto-launches the online-payment flow so the customer
+      // lands straight on payment — see openBookingForPayment.
+      case 'booking_payment':
+        return _Target(
+          Routes.HS_DETAILS,
+          referenceId: referenceId,
+          load: (id) {
+            if (!Get.isRegistered<HomeServiceController>()) {
+              HomeServiceBinding().dependencies();
+            }
+            Get.find<HomeServiceController>().openBookingForPayment(id);
+          },
+        );
       // Home-service booking: transitions/ratings use `service_booking`,
       // admin reschedule / provider decline / finance use `booking`. Both
       // point at a ServiceBooking id — same detail page.
