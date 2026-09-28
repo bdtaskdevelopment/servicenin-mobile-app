@@ -163,6 +163,19 @@ class HomeServiceController extends GetxController with LiveRefreshMixin {
     await _loadTrack(id);
   }
 
+  /// Deep-link entry for a "Payment due" notification (job completed with a
+  /// balance owed): load the booking, then — if there's still an outstanding
+  /// amount — take the customer straight into the online-payment flow. Falls
+  /// back to just the details page (with its "Pay online" button) when nothing
+  /// is owed or the summary hasn't loaded.
+  Future<void> openBookingForPayment(String id) async {
+    if (id.isEmpty) return;
+    await _loadTrack(id);
+    if (paymentSummary?.hasOutstanding == true && !isPayingOnline) {
+      await payOutstandingOnline();
+    }
+  }
+
   // ── Catalog ─────────────────────────────────────────────────────────
   List<HsCategory> categories = [];
   List<HsService> popular = [];
