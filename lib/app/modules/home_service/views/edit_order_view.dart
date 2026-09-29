@@ -296,46 +296,48 @@ class EditOrderView extends GetView<HomeServiceController> {
                   child: Center(child: CircularProgressIndicator()))
               : c.categoryItems.isEmpty
                   ? _empty('No parts available for this service'.tr)
-                  : Flexible(
-                      child: ListView.separated(
-                        shrinkWrap: true,
-                        itemCount: c.categoryItems.length,
-                        separatorBuilder: (_, __) => const Divider(
-                            height: 1, color: Color(0xFFF1F5F9)),
-                        itemBuilder: (_, i) {
-                          final it = c.categoryItems[i];
-                          return ListTile(
-                            contentPadding: EdgeInsets.zero,
-                            enabled: it.inStock,
-                            title: Text(it.name,
-                                style: TextStyle(
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w700,
-                                    color: it.inStock
-                                        ? const Color(0xFF0F172A)
-                                        : const Color(0xFFCBD5E1))),
-                            subtitle: Text(
-                                it.inStock
-                                    ? '৳${it.unitPrice} / ${it.unit}'
-                                    : 'Out of stock'.tr,
-                                style: TextStyle(
-                                    fontSize: 12.5,
-                                    color: it.inStock
-                                        ? const Color(0xFF94A3B8)
-                                        : const Color(0xFFEF4444))),
-                            trailing: it.inStock
-                                ? const Icon(Icons.add_circle_outline_rounded,
-                                    color: _teal)
-                                : null,
-                            onTap: it.inStock
-                                ? () async {
-                                    Navigator.of(context).pop();
-                                    await con.addPart(it, 1);
-                                  }
-                                : null,
-                          );
-                        },
-                      ),
+                  // The outer _Sheet already wraps this in a Flexible, so the
+                  // list is bounded — a shrink-wrapped ListView here scrolls
+                  // within that height. (No inner Flexible: nesting two would
+                  // assert.)
+                  : ListView.separated(
+                      shrinkWrap: true,
+                      itemCount: c.categoryItems.length,
+                      separatorBuilder: (_, __) => const Divider(
+                          height: 1, color: Color(0xFFF1F5F9)),
+                      itemBuilder: (_, i) {
+                        final it = c.categoryItems[i];
+                        return ListTile(
+                          contentPadding: EdgeInsets.zero,
+                          enabled: it.inStock,
+                          title: Text(it.name,
+                              style: TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w700,
+                                  color: it.inStock
+                                      ? const Color(0xFF0F172A)
+                                      : const Color(0xFFCBD5E1))),
+                          subtitle: Text(
+                              it.inStock
+                                  ? '৳${it.unitPrice} / ${it.unit}'
+                                  : 'Out of stock'.tr,
+                              style: TextStyle(
+                                  fontSize: 12.5,
+                                  color: it.inStock
+                                      ? const Color(0xFF94A3B8)
+                                      : const Color(0xFFEF4444))),
+                          trailing: it.inStock
+                              ? const Icon(Icons.add_circle_outline_rounded,
+                                  color: _teal)
+                              : null,
+                          onTap: it.inStock
+                              ? () async {
+                                  Navigator.of(context).pop();
+                                  await con.addPart(it, 1);
+                                }
+                              : null,
+                        );
+                      },
                     ),
         ),
       ),
@@ -387,7 +389,10 @@ class _Sheet extends StatelessWidget {
                     fontWeight: FontWeight.w800,
                     color: Color(0xFF0F172A))),
             const SizedBox(height: 6),
-            child,
+            // Give the child a bounded height. Without this, a Flexible/
+            // shrink-wrapped ListView inside `child` collapses to zero height
+            // in this mainAxisSize.min column and the sheet renders blank.
+            Flexible(child: child),
           ],
         ),
       );
