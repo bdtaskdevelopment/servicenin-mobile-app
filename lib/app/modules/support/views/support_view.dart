@@ -65,6 +65,11 @@ class SupportView extends GetView<SupportController> {
                           child: _SupportRow(
                             hotline: e.value,
                             onTap: () => con.call(e.value.number),
+                            onWhatsApp: con.showWhatsApp &&
+                                    SupportController.canWhatsApp(
+                                        e.value.number)
+                                ? () => con.whatsapp(e.value.number)
+                                : null,
                           ),
                         ),
                       ),
@@ -79,9 +84,13 @@ class SupportView extends GetView<SupportController> {
 }
 
 class _SupportRow extends StatelessWidget {
-  const _SupportRow({required this.hotline, required this.onTap});
+  const _SupportRow(
+      {required this.hotline, required this.onTap, this.onWhatsApp});
   final SupportHotline hotline;
   final VoidCallback onTap;
+
+  /// When set, a WhatsApp button is shown beside the call button.
+  final VoidCallback? onWhatsApp;
 
   @override
   Widget build(BuildContext context) {
@@ -127,6 +136,23 @@ class _SupportRow extends StatelessWidget {
                 ],
               ),
             ),
+            if (onWhatsApp != null) ...[
+              // Own tap target so pressing it doesn't also dial via the row.
+              Semantics(
+                button: true,
+                label: 'WhatsApp'.tr,
+                child: GestureDetector(
+                  onTap: onWhatsApp,
+                  child: Image.asset(
+                    'assets/image/whatsapp.png',
+                    width: 40,
+                    height: 40,
+                    fit: BoxFit.contain,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 10),
+            ],
             Container(
               width: 40,
               height: 40,
@@ -153,6 +179,7 @@ class SupportIconButton extends StatelessWidget {
     super.key,
     required this.title,
     required this.endpoint,
+    this.whatsapp = false,
     this.color = const Color(0xFF1A1A1A),
     this.size = 22,
   });
@@ -162,6 +189,9 @@ class SupportIconButton extends StatelessWidget {
 
   /// Module endpoint, e.g. 'api/v1/blood/hotlines'.
   final String endpoint;
+
+  /// Show a WhatsApp button beside each number on the support screen.
+  final bool whatsapp;
   final Color color;
   final double size;
 
@@ -175,7 +205,7 @@ class SupportIconButton extends StatelessWidget {
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       onSelected: (_) => Get.toNamed(
         '/support-center',
-        arguments: {'title': title, 'endpoint': endpoint},
+        arguments: {'title': title, 'endpoint': endpoint, 'whatsapp': whatsapp},
       ),
       itemBuilder: (context) => [
         PopupMenuItem(

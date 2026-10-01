@@ -19,6 +19,10 @@ class SupportController extends GetxController {
   List<SupportHotline> hotlines = [];
   bool loading = false;
 
+  /// Opt-in per module (Get.arguments 'whatsapp': true) — adds a WhatsApp
+  /// button beside the call button on each row.
+  bool showWhatsApp = false;
+
   @override
   void onInit() {
     super.onInit();
@@ -26,6 +30,7 @@ class SupportController extends GetxController {
     if (args is Map) {
       title = (args['title'] ?? title).toString();
       endpoint = (args['endpoint'] ?? '').toString();
+      showWhatsApp = args['whatsapp'] == true;
     }
     fetch();
   }
@@ -53,6 +58,34 @@ class SupportController extends GetxController {
           mode: LaunchMode.externalApplication);
     } catch (_) {
       SnackHelper.error('ডায়াল করা যায়নি');
+    }
+  }
+
+  /// wa.me needs the international form with no '+' or leading zero, but the
+  /// admin enters local Bangladeshi numbers ("01878889930") — 01… → 8801….
+  static String whatsappDigits(String number) {
+    final d = number.replaceAll(RegExp(r'[^0-9]'), '');
+    if (d.startsWith('880')) return d;
+    if (d.startsWith('0')) return '880${d.substring(1)}';
+    if (d.length == 10 && d.startsWith('1')) return '880$d';
+    return d;
+  }
+
+  /// Short codes / partial numbers can't be on WhatsApp, so the button is
+  /// hidden for them rather than opening a chat that goes nowhere.
+  static bool canWhatsApp(String number) => whatsappDigits(number).length >= 10;
+
+  /// Opens the WhatsApp chat with [number] (falls back to the browser's
+  /// wa.me page when the app isn't installed).
+  Future<void> whatsapp(String number) async {
+    final digits = whatsappDigits(number);
+    if (digits.length < 10) return;
+    try {
+      final ok = await launchUrl(Uri.parse('https://wa.me/$digits'),
+          mode: LaunchMode.externalApplication);
+      if (!ok) SnackHelper.error('WhatsApp খোলা যায়নি');
+    } catch (_) {
+      SnackHelper.error('WhatsApp খোলা যায়নি');
     }
   }
 }

@@ -60,6 +60,7 @@ class PhysioView extends GetView<PhysioController> {
                   SupportIconButton(
                     title: 'Physiotherapy Support'.tr,
                     endpoint: ApiURL.physioHotlines,
+                    whatsapp: true,
                   ),
                 ],
               ),
