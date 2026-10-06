@@ -71,43 +71,47 @@ class OrdersView extends GetView<OrdersController> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.white,
-      appBar: ServiceAppBar(
-        title: 'My Orders'.tr,
-        subtitle: '${controller.total}টি অর্ডার · সব সেবা',
-      ),
-      body: GetBuilder<OrdersController>(
-        builder: (con) {
-          if (con.loading && con.orders.isEmpty) {
-            return const SnListSkeleton(
-                padding: EdgeInsets.fromLTRB(16, 12, 16, 16));
-          }
-          if (con.orders.isEmpty) {
-            return const _Empty();
-          }
-          return RefreshIndicator(
-            color: AppColors.brandOrange,
-            onRefresh: con.fetchOrders,
-            child: ListView(
-              padding: const EdgeInsets.fromLTRB(16, 12, 16, 100),
-              children: con.orders
-                  .toList()
-                  .asMap()
-                  .entries
-                  .map((e) => FadeInUp(
-                        from: 18,
-                        duration: const Duration(milliseconds: 350),
-                        delay: Duration(milliseconds: 50 * (e.key % 8)),
-                        child: Padding(
-                          padding: const EdgeInsets.only(bottom: 12),
-                          child: _OrderCard(order: e.value),
-                        ),
-                      ))
-                  .toList(),
-            ),
-          );
-        },
+    // Whole Scaffold sits under the builder so the app-bar count (total)
+    // refreshes together with the list after each fetch.
+    return GetBuilder<OrdersController>(
+      builder: (con) => Scaffold(
+        backgroundColor: AppColors.white,
+        appBar: ServiceAppBar(
+          title: 'My Orders'.tr,
+          subtitle: '${con.total}টি অর্ডার · সব সেবা',
+        ),
+        body: GetBuilder<OrdersController>(
+          builder: (con) {
+            if (con.loading && con.orders.isEmpty) {
+              return const SnListSkeleton(
+                  padding: EdgeInsets.fromLTRB(16, 12, 16, 16));
+            }
+            if (con.orders.isEmpty) {
+              return const _Empty();
+            }
+            return RefreshIndicator(
+              color: AppColors.brandOrange,
+              onRefresh: con.fetchOrders,
+              child: ListView(
+                padding: const EdgeInsets.fromLTRB(16, 12, 16, 100),
+                children: con.orders
+                    .toList()
+                    .asMap()
+                    .entries
+                    .map((e) => FadeInUp(
+                          from: 18,
+                          duration: const Duration(milliseconds: 350),
+                          delay: Duration(milliseconds: 50 * (e.key % 8)),
+                          child: Padding(
+                            padding: const EdgeInsets.only(bottom: 12),
+                            child: _OrderCard(order: e.value),
+                          ),
+                        ))
+                    .toList(),
+              ),
+            );
+          },
+        ),
       ),
     );
   }
@@ -228,8 +232,7 @@ class _StatusPill extends StatelessWidget {
           BoxDecoration(color: bg, borderRadius: BorderRadius.circular(20)),
       child: Text(
         order.statusLabel,
-        style: TextStyle(
-            fontSize: 11, fontWeight: FontWeight.w700, color: fg),
+        style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: fg),
       ),
     );
   }
