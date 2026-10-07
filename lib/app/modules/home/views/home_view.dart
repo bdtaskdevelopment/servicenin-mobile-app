@@ -273,7 +273,7 @@ class _BannerSlide extends StatelessWidget {
               Image.network(
                 img,
                 fit: BoxFit.cover,
-                errorBuilder: (_, _, _) => _gradientBox(colors),
+                errorBuilder: (_, __, ___) => _gradientBox(colors),
                 loadingBuilder: (_, child, progress) =>
                     progress == null ? child : _gradientBox(colors),
               )
@@ -345,7 +345,7 @@ class _ServiceStrip extends StatelessWidget {
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.symmetric(horizontal: 16),
         itemCount: services.length,
-        separatorBuilder: (_, _) => const SizedBox(width: 12),
+        separatorBuilder: (_, __) => const SizedBox(width: 12),
         itemBuilder: (_, i) => _ServiceCard(service: services[i]),
       ),
     );

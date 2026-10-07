@@ -458,43 +458,72 @@ class HsBookingDetailsView extends GetView<HomeServiceController> {
                       ),
                     const SizedBox(height: 12),
                   ],
-                  // Review is the only action here now — the "Report
-                  // issue" button was removed from this screen, so the
-                  // review button takes the full width.
-                  SizedBox(
-                    width: double.infinity,
-                    height: 52,
-                    // Once reviewed the button still opens the page (so the
-                    // customer can read back what they wrote) but reads
-                    // "View your review" and drops the primary styling.
-                    child: con.hasReviewed
-                        ? OutlinedButton(
-                            onPressed: con.rateService,
-                            style: OutlinedButton.styleFrom(
-                              side: const BorderSide(color: Color(0xFFCDEBE4)),
-                              shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(14)),
-                            ),
-                            child: Text('View your review'.tr,
+                  // Review is only available once the job is completed AND
+                  // fully paid. Already-reviewed bookings keep a "View your
+                  // review" button; a completed-but-unpaid booking shows a
+                  // "pay first" hint instead of an actionable Rate button.
+                  if (con.hasReviewed)
+                    SizedBox(
+                      width: double.infinity,
+                      height: 52,
+                      child: OutlinedButton(
+                        onPressed: con.rateService,
+                        style: OutlinedButton.styleFrom(
+                          side: const BorderSide(color: Color(0xFFCDEBE4)),
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(14)),
+                        ),
+                        child: Text('View your review'.tr,
+                            style: const TextStyle(
+                                fontSize: 15,
+                                fontWeight: FontWeight.w700,
+                                color: _darkTeal)),
+                      ),
+                    )
+                  else if (con.canReview)
+                    SizedBox(
+                      width: double.infinity,
+                      height: 52,
+                      child: ElevatedButton(
+                        onPressed: con.rateService,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: _darkTeal,
+                          foregroundColor: Colors.white,
+                          elevation: 0,
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(14)),
+                        ),
+                        child: Text('Rate service'.tr,
+                            style: const TextStyle(
+                                fontSize: 15, fontWeight: FontWeight.w800)),
+                      ),
+                    )
+                  else if (con.completedButUnpaid)
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 14, vertical: 14),
+                      decoration: BoxDecoration(
+                          color: const Color(0xFFFFF7ED),
+                          borderRadius: BorderRadius.circular(12),
+                          border:
+                              Border.all(color: const Color(0xFFFED7AA))),
+                      child: Row(
+                        children: [
+                          const Icon(Icons.lock_clock_outlined,
+                              size: 18, color: Color(0xFFC2410C)),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: Text(
+                                'Complete your payment to leave a review'.tr,
                                 style: const TextStyle(
-                                    fontSize: 15,
-                                    fontWeight: FontWeight.w700,
-                                    color: _darkTeal)),
-                          )
-                        : ElevatedButton(
-                            onPressed: con.rateService,
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: _darkTeal,
-                              foregroundColor: Colors.white,
-                              elevation: 0,
-                              shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(14)),
-                            ),
-                            child: Text('Rate service'.tr,
-                                style: const TextStyle(
-                                    fontSize: 15, fontWeight: FontWeight.w800)),
+                                    fontSize: 12.5,
+                                    fontWeight: FontWeight.w600,
+                                    color: Color(0xFF9A3412))),
                           ),
-                  ),
+                        ],
+                      ),
+                    ),
                   // Duplicate dispute link hidden — dispute now in the row above.
                   // const SizedBox(height: 8),
                   // TextButton(

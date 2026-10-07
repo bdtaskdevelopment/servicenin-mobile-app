@@ -187,7 +187,7 @@ class _PhotoGallery extends StatelessWidget {
           height: 180,
           width: double.infinity,
           fit: BoxFit.cover,
-          errorBuilder: (_, _, _) => const _PhotoPlaceholder(),
+          errorBuilder: (_, __, ___) => const _PhotoPlaceholder(),
         ),
       );
     }
@@ -196,7 +196,7 @@ class _PhotoGallery extends StatelessWidget {
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
         itemCount: urls.length,
-        separatorBuilder: (_, _) => const SizedBox(width: 10),
+        separatorBuilder: (_, __) => const SizedBox(width: 10),
         itemBuilder: (_, i) => ClipRRect(
           borderRadius: BorderRadius.circular(14),
           child: Image.network(
@@ -204,7 +204,7 @@ class _PhotoGallery extends StatelessWidget {
             height: 130,
             width: 150,
             fit: BoxFit.cover,
-            errorBuilder: (_, _, _) => const SizedBox(
+            errorBuilder: (_, __, ___) => const SizedBox(
               width: 150,
               child: _PhotoPlaceholder(),
             ),
@@ -422,7 +422,7 @@ class _VerificationSection extends StatelessWidget {
                   height: 160,
                   width: double.infinity,
                   fit: BoxFit.cover,
-                  errorBuilder: (_, _, _) => const _PhotoPlaceholder(),
+                  errorBuilder: (_, __, ___) => const _PhotoPlaceholder(),
                 ),
               ),
             ],

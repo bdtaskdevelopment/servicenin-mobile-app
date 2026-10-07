@@ -7,14 +7,20 @@ import '../../../core/values/app_colors.dart';
 import '../../../core/values/app_config.dart';
 import '../../../data/models/response/service_response.dart';
 import '../../../global_widget/sn_shimmer.dart';
+import '../../../routes/app_pages.dart';
 import '../controllers/home_service_controller.dart';
 
-const _teal = Color(0xFF0E9F8E);
-const _darkTeal = Color(0xFF0E7C6B);
+const hsTeal = Color(0xFF0E9F8E);
+const hsDarkTeal = Color(0xFF0E7C6B);
+// Kept as aliases so the rest of this file doesn't need touching.
+const _teal = hsTeal;
+const _darkTeal = hsDarkTeal;
 
 /// Resolves an admin-uploaded icon URL, which may already be absolute (S3)
 /// or a server-relative path (`/static/...`, local dev storage) — same
 /// convention as `_providerPhotoUrl` in hs_my_bookings_view.dart.
+String hsIconUrl(String path) => _iconUrl(path);
+
 String _iconUrl(String path) {
   if (path.isEmpty) return '';
   if (path.startsWith('http')) return path;
@@ -26,6 +32,9 @@ String _iconUrl(String path) {
 
 /// Small rounded thumbnail used as the leading icon for a sub-service row —
 /// the uploaded image when present, else the generic fallback icon.
+Widget hsServiceThumb(HsServiceItem service, {double size = 36}) =>
+    _serviceThumb(service, size: size);
+
 Widget _serviceThumb(HsServiceItem service, {double size = 36}) {
   return Container(
     width: size,
@@ -204,7 +213,7 @@ class HsServiceListView extends GetView<HomeServiceController> {
                             ),
                 ),
                 // Review booking bar
-                if (con.totalItems > 0) _ReviewBar(con: con),
+                if (con.totalItems > 0) HsReviewBar(con: con),
               ],
             );
           },
@@ -221,16 +230,15 @@ class _ServiceRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // A sub-service with variants (e.g. AC capacity) expands in place to
-    // show each option with its own price + Add/stepper, instead of a plain
-    // single Add button — the customer books everything from this one page.
+    // A sub-service with variants (e.g. AC capacity) opens its own page to
+    // pick one — cleaner than expanding every option inline on this list.
     if (service.hasVariants) {
-      return _VariantAccordionRow(service: service, con: con);
+      return _VariantServiceRow(service: service, con: con);
     }
     final qty = con.qtyOf(service);
     final selected = qty > 0;
     return Container(
-      padding: const EdgeInsets.all(14),
+      padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: AppColors.white,
         borderRadius: BorderRadius.circular(16),
@@ -239,142 +247,205 @@ class _ServiceRow extends StatelessWidget {
             width: selected ? 1.5 : 1.2),
       ),
       child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          _serviceThumb(service),
+          _serviceThumb(service, size: 52),
           const SizedBox(width: 12),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
               children: [
-                Row(
-                  children: [
-                    Flexible(
-                      child: Text(service.displayName,
-                          style: const TextStyle(
-                              fontSize: 15.5,
-                              fontWeight: FontWeight.w800,
-                              color: Color(0xFF0F172A))),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 2),
-                Text('${service.bnName} · ${service.duration}',
+                Text(service.displayName,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                     style: const TextStyle(
-                        fontSize: 12, color: Color(0xFF94A3B8))),
-                const SizedBox(height: 8),
-                Text(service.desc,
-                    style: const TextStyle(
-                        fontSize: 13, color: Color(0xFF64748B))),
-                const SizedBox(height: 8),
-                Text('৳${service.price}',
-                    style: const TextStyle(
-                        fontSize: 16,
+                        fontSize: 15.5,
                         fontWeight: FontWeight.w800,
                         color: Color(0xFF0F172A))),
+                const SizedBox(height: 4),
+                _DurationPriceRow(
+                    duration: service.duration,
+                    price: service.price,
+                    originalPrice: service.originalPrice),
               ],
             ),
           ),
-          const SizedBox(width: 12),
-          Align(
-            alignment: Alignment.center,
-            child: selected
-                ? _Stepper(
-                    qty: qty,
-                    onMinus: () => con.dec(service),
-                    onPlus: () => con.add(service))
-                : _AddButton(onTap: () => con.add(service)),
-          ),
+          const SizedBox(width: 10),
+          selected
+              ? HsQtyStepper(
+                  qty: qty,
+                  onMinus: () => con.dec(service),
+                  onPlus: () => con.add(service))
+              : HsAddButton(onTap: () => con.add(service)),
         ],
       ),
     );
   }
 }
 
-/// A sub-service that has variants (e.g. AC capacity) — expands in place to
-/// list every variant with its own price + Add/stepper, so the customer books
-/// straight from this page instead of a separate picker screen.
-class _VariantAccordionRow extends StatefulWidget {
-  const _VariantAccordionRow({required this.service, required this.con});
+/// "⏱ 60 min · ৳800" row shared by the plain and variant-summary cards —
+/// keeps duration + price on one line instead of two, so the card doesn't
+/// grow taller than its thumbnail and leave blank space beside it.
+class _DurationPriceRow extends StatelessWidget {
+  const _DurationPriceRow({
+    required this.duration,
+    required this.price,
+    this.originalPrice,
+    this.prefix,
+  });
+  final String duration;
+
+  /// What the customer pays.
+  final int price;
+
+  /// The list price, shown struck through beside [price] when discounted.
+  final int? originalPrice;
+
+  /// Optional lead-in word, e.g. "From" on a variant summary.
+  final String? prefix;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        if (duration.isNotEmpty) ...[
+          const Icon(Icons.access_time_rounded,
+              size: 13, color: Color(0xFF94A3B8)),
+          const SizedBox(width: 3),
+          Text(duration,
+              style: const TextStyle(fontSize: 12, color: Color(0xFF94A3B8))),
+          const SizedBox(width: 8),
+          const Text('·', style: TextStyle(color: Color(0xFFCBD5E1))),
+          const SizedBox(width: 8),
+        ],
+        Flexible(child: PriceText(price: price, originalPrice: originalPrice, prefix: prefix)),
+      ],
+    );
+  }
+}
+
+/// Price in the admin panel's style: the payable price in emerald, with the
+/// list price struck through in red beside it when a discount applies.
+class PriceText extends StatelessWidget {
+  const PriceText({super.key, required this.price, this.originalPrice, this.prefix});
+  final int price;
+  final int? originalPrice;
+  final String? prefix;
+
+  @override
+  Widget build(BuildContext context) {
+    final hasDiscount = originalPrice != null;
+    return Text.rich(
+      TextSpan(children: [
+        if (prefix != null)
+          TextSpan(
+              text: '$prefix ',
+              style: const TextStyle(
+                  fontSize: 12, fontWeight: FontWeight.w600, color: Color(0xFF64748B))),
+        TextSpan(
+            text: '৳$price',
+            style: TextStyle(
+                fontSize: 15,
+                fontWeight: FontWeight.w800,
+                color: hasDiscount ? const Color(0xFF047857) : _darkTeal)),
+        if (hasDiscount) ...[
+          const TextSpan(text: '  '),
+          TextSpan(
+              text: '৳$originalPrice',
+              style: const TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                  color: Color(0xFFEF4444),
+                  decoration: TextDecoration.lineThrough,
+                  decorationColor: Color(0xFFEF4444))),
+        ],
+      ]),
+      maxLines: 1,
+      overflow: TextOverflow.ellipsis,
+    );
+  }
+}
+
+/// A sub-service that has variants (e.g. AC capacity) — summarised here with
+/// its cheapest price ("From ৳X") and an in-cart count; tapping opens
+/// [HsVariantPickerView] to actually choose one and add it.
+class _VariantServiceRow extends StatelessWidget {
+  const _VariantServiceRow({required this.service, required this.con});
   final HsServiceItem service;
   final HomeServiceController con;
 
   @override
-  State<_VariantAccordionRow> createState() => _VariantAccordionRowState();
-}
-
-class _VariantAccordionRowState extends State<_VariantAccordionRow> {
-  bool _expanded = false;
-
-  @override
   Widget build(BuildContext context) {
-    final service = widget.service;
-    final con = widget.con;
-    // Any variant already in the cart? Keep the card highlighted like a
-    // normal selected row, and auto-open so the customer sees what's in it.
-    final anyInCart =
-        service.variants.any((v) => con.qtyOf(con.lineFor(service, v)) > 0);
-    return Container(
-      decoration: BoxDecoration(
-        color: AppColors.white,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: anyInCart ? _teal : const Color(0xFFEDEFF2),
-          width: anyInCart ? 1.5 : 1.2,
+    final totalQty = service.variants
+        .map((v) => con.qtyOf(con.lineFor(service, v)))
+        .fold<int>(0, (a, b) => a + b);
+    final selected = totalQty > 0;
+    return GestureDetector(
+      onTap: () => Get.toNamed(Routes.HS_VARIANTS, arguments: service),
+      child: Container(
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: AppColors.white,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+              color: selected ? _teal : const Color(0xFFEDEFF2),
+              width: selected ? 1.5 : 1.2),
         ),
-      ),
-      clipBehavior: Clip.antiAlias,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          InkWell(
-            onTap: () => setState(() => _expanded = !_expanded),
-            child: Padding(
-              padding: const EdgeInsets.all(14),
-              child: Row(
-                children: [
-                  _serviceThumb(service),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Text(service.displayName,
-                        style: const TextStyle(
-                            fontSize: 15.5,
-                            fontWeight: FontWeight.w800,
-                            color: Color(0xFF0F172A))),
-                  ),
-                  AnimatedRotation(
-                    turns: _expanded ? 0.5 : 0,
-                    duration: const Duration(milliseconds: 180),
-                    child: const Icon(Icons.keyboard_arrow_down_rounded,
-                        color: Color(0xFF94A3B8)),
-                  ),
-                ],
-              ),
-            ),
-          ),
-          if (_expanded)
-            Container(
-              decoration: const BoxDecoration(
-                color: Color(0xFFF7F8FA),
-                border:
-                    Border(top: BorderSide(color: Color(0xFFEDEFF2), width: 1)),
-              ),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            _serviceThumb(service, size: 52),
+            const SizedBox(width: 12),
+            Expanded(
               child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
                 children: [
-                  for (final v in service.variants)
-                    _VariantRow(service: service, variant: v, con: con),
+                  Text(service.displayName,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                          fontSize: 15.5,
+                          fontWeight: FontWeight.w800,
+                          color: Color(0xFF0F172A))),
+                  const SizedBox(height: 4),
+                  _DurationPriceRow(
+                      duration: service.duration,
+                      price: service.fromPrice,
+                      originalPrice: service.fromOriginalPrice,
+                      prefix: 'From'.tr),
                 ],
               ),
             ),
-        ],
+            const SizedBox(width: 10),
+            if (selected) ...[
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+                decoration: BoxDecoration(
+                    color: _darkTeal, borderRadius: BorderRadius.circular(8)),
+                child: Text('$totalQty',
+                    style: const TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w700,
+                        color: Colors.white)),
+              ),
+              const SizedBox(width: 4),
+            ],
+            const Icon(Icons.chevron_right_rounded,
+                color: Color(0xFF94A3B8)),
+          ],
+        ),
       ),
     );
   }
 }
 
-class _VariantRow extends StatelessWidget {
-  const _VariantRow(
-      {required this.service, required this.variant, required this.con});
+/// One variant's price row with its own Add/stepper — shared by
+/// [HsVariantPickerView].
+class HsVariantRow extends StatelessWidget {
+  const HsVariantRow(
+      {super.key, required this.service, required this.variant, required this.con});
   final HsServiceItem service;
   final SubServiceVariant variant;
   final HomeServiceController con;
@@ -402,29 +473,28 @@ class _VariantRow extends StatelessWidget {
                         fontWeight: FontWeight.w700,
                         color: Color(0xFF0F172A))),
                 const SizedBox(height: 2),
-                Text('৳${variant.price}',
-                    style: const TextStyle(
-                        fontSize: 13.5,
-                        fontWeight: FontWeight.w700,
-                        color: _darkTeal)),
+                PriceText(
+                    price: variant.effective,
+                    originalPrice:
+                        variant.discountPrice != null ? variant.price : null),
               ],
             ),
           ),
           const SizedBox(width: 8),
           qty > 0
-              ? _Stepper(
+              ? HsQtyStepper(
                   qty: qty,
                   onMinus: () => con.dec(line),
                   onPlus: () => con.add(service, variant: variant))
-              : _AddButton(onTap: () => con.add(service, variant: variant)),
+              : HsAddButton(onTap: () => con.add(service, variant: variant)),
         ],
       ),
     );
   }
 }
 
-class _AddButton extends StatelessWidget {
-  const _AddButton({required this.onTap});
+class HsAddButton extends StatelessWidget {
+  const HsAddButton({super.key, required this.onTap});
   final VoidCallback onTap;
   @override
   Widget build(BuildContext context) {
@@ -444,9 +514,9 @@ class _AddButton extends StatelessWidget {
   }
 }
 
-class _Stepper extends StatelessWidget {
-  const _Stepper(
-      {required this.qty, required this.onMinus, required this.onPlus});
+class HsQtyStepper extends StatelessWidget {
+  const HsQtyStepper(
+      {super.key, required this.qty, required this.onMinus, required this.onPlus});
   final int qty;
   final VoidCallback onMinus;
   final VoidCallback onPlus;
@@ -483,8 +553,8 @@ class _Stepper extends StatelessWidget {
       );
 }
 
-class _ReviewBar extends StatelessWidget {
-  const _ReviewBar({required this.con});
+class HsReviewBar extends StatelessWidget {
+  const HsReviewBar({super.key, required this.con});
   final HomeServiceController con;
   @override
   Widget build(BuildContext context) {

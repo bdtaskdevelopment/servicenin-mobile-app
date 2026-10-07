@@ -2,6 +2,36 @@
 // widget subfolders, and any leftover static strings.
 // Keys are the English source text; English mode falls back to the key.
 const Map<String, String> extraBn = {
+  // ── Review gating (must pay before rating) ──────────────────
+  'Please complete the payment before rating your provider':
+      'সেবাদাতাকে রেটিং দেওয়ার আগে অনুগ্রহ করে পেমেন্ট সম্পন্ন করুন',
+  'Complete your payment to leave a review':
+      'রিভিউ দিতে আপনার পেমেন্ট সম্পন্ন করুন',
+
+  // ── Payment chooser (job complete → pay) ────────────────────
+  'Service complete!': 'সেবা সম্পন্ন হয়েছে!',
+  'Choose how you’d like to pay': 'আপনি কীভাবে পরিশোধ করতে চান তা বেছে নিন',
+  'Amount due': 'বকেয়া পরিমাণ',
+  'Pay Online': 'অনলাইনে পরিশোধ',
+  'Card, bKash, Nagad & more — pay now securely':
+      'কার্ড, বিকাশ, নগদ ও আরও — এখনই নিরাপদে পরিশোধ করুন',
+  'Pay Cash': 'নগদে পরিশোধ',
+  'Hand cash to your provider — he’ll confirm it':
+      'সেবাদাতাকে নগদ দিন — তিনি নিশ্চিত করবেন',
+  'Maybe later': 'পরে করব',
+  'Pay': 'পরিশোধ করুন',
+  'in cash': 'নগদে',
+  'Please hand': 'অনুগ্রহ করে দিন',
+  'to your service provider. He’ll confirm it in his app, and you’ll get a receipt notification.':
+      'আপনার সেবাদাতাকে। তিনি তার অ্যাপে নিশ্চিত করবেন, এবং আপনি একটি রসিদের নোটিফিকেশন পাবেন।',
+  'Got it': 'বুঝেছি',
+  'Done': 'সম্পন্ন',
+  'Payment confirmed': 'পেমেন্ট নিশ্চিত হয়েছে',
+  'Your provider confirmed your cash payment. Your booking is fully paid — thank you!':
+      'আপনার সেবাদাতা আপনার নগদ পেমেন্ট নিশ্চিত করেছেন। আপনার বুকিং সম্পূর্ণ পরিশোধিত — ধন্যবাদ!',
+  'Your provider confirmed your cash payment. Thank you!':
+      'আপনার সেবাদাতা আপনার নগদ পেমেন্ট নিশ্চিত করেছেন। ধন্যবাদ!',
+
   // ── Phone / login (phone_view) ──────────────────────────────
   'Enter your phone number': 'আপনার ফোন নাম্বার দিন',
   'We\'ll send you an OTP to verify.': 'আমরা যাচাইয়ের জন্য একটি OTP পাঠাব।',
@@ -20,6 +50,10 @@ const Map<String, String> extraBn = {
   'No services selected': 'কোনো সার্ভিস নির্বাচন করা হয়নি',
   'Select a date & time slot': 'তারিখ ও সময় নির্বাচন করুন',
   'Enter a service address': 'সার্ভিস ঠিকানা দিন',
+
+  // ── Home service: variant picker page ───────────────────────
+  'From': 'শুরু',
+  'Choose an option': 'একটি অপশন বাছাই করুন',
 
   // ── Exit-app confirmation ───────────────────────────────────
   'Are you sure?': 'আপনি কি নিশ্চিত?',

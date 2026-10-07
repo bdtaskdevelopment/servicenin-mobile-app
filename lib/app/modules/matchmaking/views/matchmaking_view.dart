@@ -216,7 +216,7 @@ class MatchmakingView extends GetView<MatchmakingController> {
                             scrollDirection: Axis.horizontal,
                             padding: EdgeInsets.zero,
                             itemCount: con.categoryChips.length,
-                            separatorBuilder: (_, _) =>
+                            separatorBuilder: (_, __) =>
                                 const SizedBox(width: 8),
                             itemBuilder: (_, i) {
                               final label = con.categoryChips[i];
