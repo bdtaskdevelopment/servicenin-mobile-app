@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:get/get.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 
 import '../values/app_config.dart';
@@ -8,6 +9,8 @@ import '../values/storage.dart';
 import '../../data/models/response/notification_response.dart';
 import '../../data/services/storage.service.dart';
 import '../../global_widget/notification_banner.dart';
+import '../../modules/home_service/bindings/home_service_binding.dart';
+import '../../modules/home_service/controllers/home_service_controller.dart';
 import 'notification_router.dart';
 
 /// Realtime companion to the REST notification feed (`HomeRepository`'s
@@ -91,8 +94,25 @@ class NotificationSocketService {
   void _onMessage(dynamic raw) {
     try {
       final env = jsonDecode(raw as String);
-      if (env is! Map || env['event'] != 'notification') return;
+      if (env is! Map) return;
+      final event = env['event'];
       final data = env['data'];
+
+      // Live PAYMENT POPUP: the provider just completed the job with a balance
+      // owed → show the Cash/Online chooser straight away.
+      if (event == 'payment_prompt') {
+        if (data is Map) _handlePaymentPrompt(data.cast<String, dynamic>());
+        return;
+      }
+      // Provider confirmed a cash payment → refresh the open booking and
+      // celebrate. (The customer's own online payment also broadcasts this,
+      // but that path already shows its own success, so we skip it below.)
+      if (event == 'payment_recorded') {
+        if (data is Map) _handlePaymentRecorded(data.cast<String, dynamic>());
+        return;
+      }
+
+      if (event != 'notification') return;
       if (data is! Map) return;
 
       final n = AppNotification(data.cast<String, dynamic>());
@@ -100,8 +120,13 @@ class NotificationSocketService {
       // 1) Feed detail pages so an open page updates itself in place.
       _notifications.add(n);
 
-      // 2) Show a tappable banner that deep-links to the affected page.
-      if (n.body.isNotEmpty || n.title.isNotEmpty) {
+      // 2) Show a tappable banner that deep-links to the affected page —
+      // EXCEPT for payment prompts/receipts, whose dedicated live events
+      // (handled above) already drive a richer popup, so a banner on top would
+      // be redundant.
+      final rt = n.referenceType.trim().toLowerCase();
+      final handledByPopup = rt == 'booking_payment' || rt == 'payment_received';
+      if (!handledByPopup && (n.body.isNotEmpty || n.title.isNotEmpty)) {
         showNotificationBanner(
           n,
           onTap: () => NotificationRouter.instance.handleNotification(n),
@@ -110,5 +135,32 @@ class NotificationSocketService {
     } catch (_) {
       // Malformed/unexpected frame — ignore, next message may be fine.
     }
+  }
+
+  void _handlePaymentPrompt(Map<String, dynamic> data) {
+    final booking = data['booking'];
+    final id = booking is Map ? (booking['id']?.toString() ?? '') : '';
+    final outstanding = (data['outstanding'] as num?)?.toDouble();
+    if (id.isEmpty) return;
+    if (!Get.isRegistered<HomeServiceController>()) {
+      HomeServiceBinding().dependencies();
+    }
+    Get.find<HomeServiceController>()
+        .promptPaymentChoice(id, outstanding: outstanding);
+  }
+
+  void _handlePaymentRecorded(Map<String, dynamic> data) {
+    final actor = (data['actor_role'] ?? '').toString();
+    // Only the collector's action (provider/admin recorded cash) needs a
+    // customer-facing acknowledgement here; a customer's own online payment is
+    // already acknowledged in the pay flow.
+    if (actor != 'provider' && actor != 'admin') return;
+    final booking = data['booking'];
+    final id = booking is Map ? (booking['id']?.toString() ?? '') : '';
+    final fullyPaid = data['fully_paid'] == true;
+    if (!Get.isRegistered<HomeServiceController>()) {
+      HomeServiceBinding().dependencies();
+    }
+    Get.find<HomeServiceController>().onPaymentRecorded(id, fullyPaid: fullyPaid);
   }
 }

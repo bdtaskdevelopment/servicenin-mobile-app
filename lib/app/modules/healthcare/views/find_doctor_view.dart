@@ -101,7 +101,7 @@ class FindDoctorView extends GetView<DoctorsController> {
                     scrollDirection: Axis.horizontal,
                     padding: const EdgeInsets.symmetric(horizontal: 16),
                     itemCount: con.filters.length,
-                    separatorBuilder: (_, _) => const SizedBox(width: 10),
+                    separatorBuilder: (_, __) => const SizedBox(width: 10),
                     itemBuilder: (_, i) {
                       final sel = con.selectedFilter == i;
                       return GestureDetector(
@@ -247,7 +247,7 @@ class _DoctorCard extends StatelessWidget {
                         ? Image.network(
                             doctor.photo,
                             fit: BoxFit.cover,
-                            errorBuilder: (_, _, _) => _initialsBox(),
+                            errorBuilder: (_, __, ___) => _initialsBox(),
                             loadingBuilder: (_, child, progress) =>
                                 progress == null ? child : _initialsBox(),
                           )

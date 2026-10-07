@@ -123,6 +123,18 @@ class ServiceRepository {
     return ServicePaymentSummary.fromResponse(_payload(res));
   }
 
+  /// Records the customer's chosen settlement method at completion — "cash"
+  /// (they'll pay the provider on-site, who records it) or "online" (they'll
+  /// pay now via the gateway). The backend saves it on the booking so the
+  /// provider app shows the right action, and pings the provider to collect on
+  /// a cash choice. Moves no money; best-effort — a failure here never blocks
+  /// the actual payment that follows.
+  Future<void> setPaymentIntent(String id, String method) async {
+    final res = await provider
+        .postData(ApiURL.serviceBookingPaymentIntent(id), {'method': method});
+    _payload(res); // throws on a backend error, otherwise we don't need the body
+  }
+
   /// Redeems a promo code against an EXISTING booking's outstanding balance
   /// — for a citizen who didn't have (or didn't use) a code at checkout.
   /// Owner (or admin) only; the server rejects everyone else, a code already

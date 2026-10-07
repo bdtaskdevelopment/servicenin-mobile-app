@@ -172,7 +172,7 @@ class _PlaceSearchViewState extends State<PlaceSearchView> {
     return ListView.separated(
       padding: const EdgeInsets.symmetric(vertical: 4),
       itemCount: _results.length,
-      separatorBuilder: (_, _) =>
+      separatorBuilder: (_, __) =>
           const Divider(height: 1, color: Color(0xFFEDEFF2), indent: 56),
       itemBuilder: (_, i) {
         final p = _results[i];

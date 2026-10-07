@@ -138,7 +138,7 @@ class ChooseSlotView extends GetView<BookingController> {
                         child: ListView.separated(
                           scrollDirection: Axis.horizontal,
                           itemCount: con.dates.length,
-                          separatorBuilder: (_, _) => const SizedBox(width: 10),
+                          separatorBuilder: (_, __) => const SizedBox(width: 10),
                           itemBuilder: (_, i) {
                             final sel = con.selectedDate == i;
                             final d = con.dates[i];

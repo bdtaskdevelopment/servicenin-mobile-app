@@ -228,6 +228,10 @@ class ApiURL {
       'api/v1/services/bookings/$id/chat';
   static String serviceBookingPayments(String id) =>
       'api/v1/services/bookings/$id/payments';
+  // Customer declares cash vs online at completion (drives the provider's
+  // action + a heads-up); never moves money itself.
+  static String serviceBookingPaymentIntent(String id) =>
+      'api/v1/services/bookings/$id/payment-intent';
   static String serviceBookingPromo(String id) =>
       'api/v1/services/bookings/$id/promo';
   static String serviceBookingReorderInterest(String id) =>

@@ -20,6 +20,17 @@ double? _dbl(dynamic v) => v == null
     ? null
     : (v is num ? v.toDouble() : double.tryParse(v.toString()));
 
+/// Admin-set discount, or null when none. Mirrors models.HasDiscount on the
+/// backend: only a positive value strictly below the price is a markdown.
+int? _discountOrNull(dynamic v, int price) {
+  if (v == null) return null;
+  final d = _int(v);
+  return d > 0 && d < price ? d : null;
+}
+
+/// Price the customer actually pays: the discount when one applies, else price.
+int effectivePrice(int price, int? discount) => discount ?? price;
+
 dynamic _data(dynamic src) {
   final d = _dec(src);
   return d is Map && d.containsKey('data') ? d['data'] : d;
@@ -35,6 +46,7 @@ class ServiceCategory {
     required this.description,
     required this.basePrice,
     required this.bookingCount,
+    this.discountPrice,
   });
 
   final String id;
@@ -45,18 +57,28 @@ class ServiceCategory {
   final int basePrice;
   final int bookingCount;
 
-  String get displayName => _localized(name, nameBn);
-  String get priceLabel => '৳$basePrice';
+  /// Admin markdown, null when none applies. See [effectivePrice].
+  final int? discountPrice;
 
-  factory ServiceCategory.fromMap(Map<String, dynamic> j) => ServiceCategory(
-        id: _str(j['id']),
-        name: _str(j['name']),
-        nameBn: _str(j['name_bn']),
-        iconUrl: _str(j['icon_url']),
-        description: _str(j['description']),
-        basePrice: _int(j['base_price']),
-        bookingCount: _int(j['booking_count']),
-      );
+  String get displayName => _localized(name, nameBn);
+  bool get hasDiscount => discountPrice != null;
+  int get effective => effectivePrice(basePrice, discountPrice);
+  String get priceLabel => '৳$effective';
+  String? get originalPriceLabel => hasDiscount ? '৳$basePrice' : null;
+
+  factory ServiceCategory.fromMap(Map<String, dynamic> j) {
+    final base = _int(j['base_price']);
+    return ServiceCategory(
+      id: _str(j['id']),
+      name: _str(j['name']),
+      nameBn: _str(j['name_bn']),
+      iconUrl: _str(j['icon_url']),
+      description: _str(j['description']),
+      basePrice: base,
+      discountPrice: _discountOrNull(j['discount_price'], base),
+      bookingCount: _int(j['booking_count']),
+    );
+  }
 
   static List<ServiceCategory> listFromResponse(dynamic src) {
     final d = _data(src);
@@ -90,6 +112,7 @@ class SubService {
     required this.description,
     required this.price,
     required this.durationMin,
+    this.discountPrice,
     this.variants = const [],
     this.iconUrl = '',
   });
@@ -100,7 +123,12 @@ class SubService {
   final String nameBn;
   final String description;
   final int price;
+
+  /// Admin markdown on [price], null when none applies.
+  final int? discountPrice;
   final int durationMin;
+
+  int get effective => effectivePrice(price, discountPrice);
 
   /// Admin-uploaded image — may be a full URL (S3) or a server-relative path
   /// (`/static/...`, local dev storage). Empty when no image is set, in
@@ -117,17 +145,21 @@ class SubService {
   String get displayName => _localized(name, nameBn);
   String get durationLabel => durationMin > 0 ? '$durationMin min' : '';
 
-  factory SubService.fromMap(Map<String, dynamic> j) => SubService(
+  factory SubService.fromMap(Map<String, dynamic> j) {
+    final price = _int(j['price']);
+    return SubService(
         id: _str(j['id']),
         categoryId: _str(j['category_id']),
         name: _str(j['name']),
         nameBn: _str(j['name_bn']),
         description: _str(j['description']),
-        price: _int(j['price']),
+        price: price,
+        discountPrice: _discountOrNull(j['discount_price'], price),
         durationMin: _int(j['duration_min']),
         variants: SubServiceVariant.listFromJson(j['variants']),
         iconUrl: _str(j['icon_url']),
       );
+  }
 
   static List<SubService> listFromResponse(dynamic src) {
     final d = _data(src);
@@ -147,6 +179,7 @@ class SubServiceVariant {
     required this.name,
     required this.nameBn,
     required this.price,
+    this.discountPrice,
   });
 
   final String id;
@@ -155,16 +188,23 @@ class SubServiceVariant {
   final String nameBn;
   final int price;
 
-  String get displayName => _localized(name, nameBn);
+  /// Admin markdown on [price], null when none applies.
+  final int? discountPrice;
 
-  factory SubServiceVariant.fromMap(Map<String, dynamic> j) =>
-      SubServiceVariant(
+  String get displayName => _localized(name, nameBn);
+  int get effective => effectivePrice(price, discountPrice);
+
+  factory SubServiceVariant.fromMap(Map<String, dynamic> j) {
+    final price = _int(j['price']);
+    return SubServiceVariant(
         id: _str(j['id']),
         subServiceId: _str(j['sub_service_id']),
         name: _str(j['name']),
         nameBn: _str(j['name_bn']),
-        price: _int(j['price']),
+        price: price,
+        discountPrice: _discountOrNull(j['discount_price'], price),
       );
+  }
 
   static List<SubServiceVariant> listFromJson(dynamic src) {
     final list = src is List ? src : const [];

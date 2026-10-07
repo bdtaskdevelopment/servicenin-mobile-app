@@ -196,9 +196,9 @@ class ConfirmBookingView extends GetView<HomeServiceController> {
                               scrollDirection: Axis.horizontal,
                               physics: const NeverScrollableScrollPhysics(),
                               itemCount: 5,
-                              separatorBuilder: (_, _) =>
+                              separatorBuilder: (_, __) =>
                                   const SizedBox(width: 10),
-                              itemBuilder: (_, _) => const SnBone(
+                              itemBuilder: (_, __) => const SnBone(
                                   width: 78, height: 74, radius: 12),
                             ),
                           ),

@@ -44,7 +44,7 @@ class HcDoctorCard extends StatelessWidget {
                       ? Image.network(
                           doctor.photo,
                           fit: BoxFit.cover,
-                          errorBuilder: (_, _, _) => _initialsBox(),
+                          errorBuilder: (_, __, ___) => _initialsBox(),
                           loadingBuilder: (_, child, progress) =>
                               progress == null ? child : _initialsBox(),
                         )
