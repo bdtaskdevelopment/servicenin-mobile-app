@@ -121,8 +121,8 @@ class SnListSkeleton extends StatelessWidget {
         shrinkWrap: true,
         physics: const NeverScrollableScrollPhysics(),
         itemCount: count,
-        separatorBuilder: (_, _) => const SizedBox(height: 12),
-        itemBuilder: (_, _) => SnCardRowSkeleton(showTrailing: showTrailing),
+        separatorBuilder: (_, __) => const SizedBox(height: 12),
+        itemBuilder: (_, __) => SnCardRowSkeleton(showTrailing: showTrailing),
       ),
     );
   }
@@ -154,8 +154,8 @@ class SnStripSkeleton extends StatelessWidget {
           padding: padding,
           physics: const NeverScrollableScrollPhysics(),
           itemCount: count,
-          separatorBuilder: (_, _) => const SizedBox(width: 12),
-          itemBuilder: (_, _) => SnBone(
+          separatorBuilder: (_, __) => const SizedBox(width: 12),
+          itemBuilder: (_, __) => SnBone(
             width: itemWidth,
             height: height,
             radius: 16,
@@ -215,7 +215,7 @@ class SnGridSkeleton extends StatelessWidget {
           crossAxisSpacing: 12,
           childAspectRatio: childAspectRatio,
         ),
-        itemBuilder: (_, _) => Container(
+        itemBuilder: (_, __) => Container(
           decoration: BoxDecoration(
             color: Colors.transparent,
             borderRadius: BorderRadius.circular(16),

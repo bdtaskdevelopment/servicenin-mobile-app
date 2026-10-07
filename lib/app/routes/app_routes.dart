@@ -15,6 +15,7 @@ abstract class Routes {
   static const INFORMATION = _Paths.INFORMATION;
   static const HOME_SERVICE = _Paths.HOME_SERVICE;
   static const HOME_SERVICE_LIST = _Paths.HOME_SERVICE_LIST;
+  static const HS_VARIANTS = _Paths.HS_VARIANTS;
   static const HS_CONFIRM = _Paths.HS_CONFIRM;
   static const HS_PLACED = _Paths.HS_PLACED;
   static const HS_TRACKING = _Paths.HS_TRACKING;
@@ -171,6 +172,7 @@ abstract class _Paths {
   static const INFORMATION = '/information';
   static const HOME_SERVICE = '/home-service';
   static const HOME_SERVICE_LIST = '/home-service-list';
+  static const HS_VARIANTS = '/hs-variants';
   static const HS_CONFIRM = '/hs-confirm';
   static const HS_PLACED = '/hs-placed';
   static const HS_TRACKING = '/hs-tracking';

@@ -11,7 +11,6 @@ import '../../support/views/support_view.dart';
 import '../controllers/home_service_controller.dart';
 
 const _teal = Color(0xFF0E9F8E);
-const _darkTeal = Color(0xFF0E7C6B);
 const _tile = Color(0xFFE0F2EF);
 
 /// Resolves an admin-uploaded icon URL, which may already be absolute (S3)
@@ -111,50 +110,16 @@ class HomeServiceView extends GetView<HomeServiceController> {
               child: GetBuilder<HomeServiceController>(
                 builder: (con) {
                   return ListView(
-                    padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+                    padding: const EdgeInsets.fromLTRB(16, 10, 16, 24),
                     children: [
                       FadeInDown(
                         duration: const Duration(milliseconds: 300),
-                        child: _Hero(),
-                      ),
-                      const SizedBox(height: 14),
-                      // Always-visible filter: narrows the category grid
-                      // below by name as you type — instant, no network call.
-                      Container(
-                        height: 46,
-                        padding: const EdgeInsets.symmetric(horizontal: 14),
-                        decoration: BoxDecoration(
-                            color: AppColors.white,
-                            borderRadius: BorderRadius.circular(12),
-                            border: Border.all(color: const Color(0xFFEDEFF2))),
-                        child: Row(
-                          children: [
-                            const Icon(Icons.filter_list_rounded,
-                                color: Color(0xFF94A3B8)),
-                            const SizedBox(width: 10),
-                            Expanded(
-                              child: TextField(
-                                onChanged: con.onCategoryFilterChanged,
-                                decoration: InputDecoration(
-                                  hintText: 'Filter by category…'.tr,
-                                  hintStyle:
-                                      const TextStyle(color: Color(0xFF94A3B8)),
-                                  border: InputBorder.none,
-                                  isCollapsed: true,
-                                ),
-                                style: const TextStyle(
-                                    fontSize: 14.5, color: Color(0xFF0F172A)),
-                              ),
-                            ),
-                          ],
+                        child: GestureDetector(
+                          onTap: con.openMyBookings,
+                          child: const _ActiveCard(),
                         ),
                       ),
-                      const SizedBox(height: 14),
-                      GestureDetector(
-                        onTap: con.openMyBookings,
-                        child: const _ActiveCard(),
-                      ),
-                      const SizedBox(height: 22),
+                      const SizedBox(height: 24),
                       GestureDetector(
                         onTap: con.openAll,
                         child: _SectionHeader(
@@ -239,68 +204,6 @@ class HomeServiceView extends GetView<HomeServiceController> {
             ),
           ],
         ),
-      ),
-    );
-  }
-}
-
-class _Hero extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(18),
-      decoration: BoxDecoration(
-        gradient: const LinearGradient(
-            colors: [_darkTeal, Color(0xFF0B5E52)],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight),
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: Stack(
-        children: [
-          Positioned(
-            right: -6,
-            top: -6,
-            child: Icon(Icons.home_repair_service_outlined,
-                size: 80, color: Colors.white.withValues(alpha: 0.10)),
-          ),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text('All home services, in one place'.tr,
-                  style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 20,
-                      fontWeight: FontWeight.w800)),
-              const SizedBox(height: 6),
-              Text('Verified technicians · 7-day warranty · cash or online'.tr,
-                  style: TextStyle(
-                      color: Colors.white.withValues(alpha: 0.9),
-                      fontSize: 12.5)),
-              const SizedBox(height: 16),
-              GestureDetector(
-                onTap: Get.find<HomeServiceController>().openSearch,
-                child: Container(
-                  height: 50,
-                  padding: const EdgeInsets.symmetric(horizontal: 14),
-                  decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(12)),
-                  child: Row(
-                    children: [
-                      const Icon(Icons.search_rounded,
-                          color: Color(0xFF94A3B8)),
-                      const SizedBox(width: 10),
-                      Text('Search AC service, cleaning, plumber…'.tr,
-                          style: const TextStyle(
-                              color: Color(0xFF94A3B8), fontSize: 13)),
-                    ],
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ],
       ),
     );
   }
@@ -541,9 +444,22 @@ class _ServiceCard extends StatelessWidget {
           Container(
             width: 44,
             height: 44,
+            alignment: Alignment.center,
             decoration: BoxDecoration(
                 color: _tile, borderRadius: BorderRadius.circular(12)),
-            child: Icon(service.icon, color: _teal, size: 22),
+            clipBehavior: Clip.antiAlias,
+            child: service.imageUrl.isEmpty
+                ? Icon(service.icon, color: _teal, size: 22)
+                : CachedNetworkImage(
+                    imageUrl: _iconUrl(service.imageUrl),
+                    fit: BoxFit.cover,
+                    width: 44,
+                    height: 44,
+                    placeholder: (_, __) =>
+                        Icon(service.icon, color: _teal, size: 22),
+                    errorWidget: (_, __, ___) =>
+                        Icon(service.icon, color: _teal, size: 22),
+                  ),
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -565,11 +481,25 @@ class _ServiceCard extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 8),
-          Text(service.price,
-              style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w800,
-                  color: Color(0xFF0E7C6B))),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(service.price,
+                  style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w800,
+                      color: Color(0xFF047857))),
+              if (service.originalPrice != null)
+                Text(service.originalPrice!,
+                    style: const TextStyle(
+                        fontSize: 11.5,
+                        fontWeight: FontWeight.w600,
+                        color: Color(0xFFEF4444),
+                        decoration: TextDecoration.lineThrough,
+                        decorationColor: Color(0xFFEF4444))),
+            ],
+          ),
         ],
       ),
     );

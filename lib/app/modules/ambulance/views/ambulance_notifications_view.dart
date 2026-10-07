@@ -87,7 +87,7 @@ class AmbulanceNotificationsView
                     scrollDirection: Axis.horizontal,
                     padding: const EdgeInsets.fromLTRB(16, 10, 16, 10),
                     itemCount: con.tabs.length,
-                    separatorBuilder: (_, _) => const SizedBox(width: 10),
+                    separatorBuilder: (_, __) => const SizedBox(width: 10),
                     itemBuilder: (_, i) {
                       final sel = con.selectedTab == i;
                       return GestureDetector(

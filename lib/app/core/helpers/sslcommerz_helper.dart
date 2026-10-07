@@ -99,11 +99,19 @@ class SslcommerzPay {
     );
     final SSLCTransactionInfoModel res = await sslcommerz.payNow();
     final status = (res.status ?? '').toUpperCase();
-    final ok =
-        status == 'VALID' || status == 'VALIDATED' || status == 'SUCCESS';
+    final valId = (res.valId ?? '').trim();
+    // Success requires BOTH a success status AND a usable val_id. A cancelled
+    // or closed session (status "closed"/"FAILED") carries no val_id, so even
+    // if the SDK ever misreports the status, the absence of a val_id keeps us
+    // from recording a payment the gateway never actually completed. The
+    // backend re-verifies this val_id against SSLCommerz before settling.
+    final ok = (status == 'VALID' ||
+            status == 'VALIDATED' ||
+            status == 'SUCCESS') &&
+        valId.isNotEmpty;
     return SslcResult(
       success: ok,
-      valId: res.valId ?? '',
+      valId: valId,
       tranId: (res.tranId?.isNotEmpty ?? false) ? res.tranId! : tranId,
     );
   }

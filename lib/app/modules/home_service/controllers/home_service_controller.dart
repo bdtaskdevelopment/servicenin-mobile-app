@@ -17,6 +17,7 @@ import '../../../data/repositories/service.repo.dart';
 import '../../../data/services/geo_search.service.dart';
 import '../../../data/services/settings.service.dart';
 import '../../../routes/app_pages.dart';
+import '../views/widgets/payment_choice_sheet.dart';
 
 /// Icon for a service category, chosen from its (English) name.
 IconData hsCatIcon(String name) {
@@ -57,12 +58,19 @@ class HsCategory {
 }
 
 class HsService {
-  const HsService(this.name, this.desc, this.price, this.icon, {this.id = ''});
+  const HsService(this.name, this.desc, this.price, this.icon,
+      {this.id = '', this.imageUrl = '', this.originalPrice});
   final String name;
   final String desc;
-  final String price;
+  final String price; // what the customer pays
+  final String? originalPrice; // list price, shown struck through when discounted
   final IconData icon;
   final String id; // category id (popular items are categories)
+
+  /// Admin-uploaded category image — shown in place of [icon] when
+  /// non-empty. Was dropped by fromApi before, so "Popular this week" cards
+  /// always fell back to the generic icon even when the category had one.
+  final String imageUrl;
 
   factory HsService.fromApi(ServiceCategory c) => HsService(
         c.displayName, // Bangla in bn, English in en
@@ -72,6 +80,8 @@ class HsService {
         c.priceLabel,
         hsCatIcon(c.name),
         id: c.id,
+        imageUrl: c.iconUrl,
+        originalPrice: c.originalPriceLabel,
       );
 }
 
@@ -85,6 +95,7 @@ class HsServiceItem {
     required this.desc,
     required this.price,
     required this.category,
+    this.originalPrice,
     this.icon = Icons.home_repair_service_outlined,
     this.variants = const [],
     this.variantId,
@@ -97,7 +108,11 @@ class HsServiceItem {
   final String bnName;
   final String duration;
   final String desc;
+  /// What the customer pays for this line (the discount when one applies).
   final int price;
+
+  /// The list price, only set when [price] is a discount off it.
+  final int? originalPrice;
   final String category;
   final IconData icon;
 
@@ -118,6 +133,20 @@ class HsServiceItem {
 
   bool get hasVariants => variants.isNotEmpty;
 
+  /// The cheapest payable price across variants, else the plain [price] —
+  /// what a summary row advertises as "From".
+  int get fromPrice => hasVariants
+      ? variants.map((v) => v.effective).reduce((a, b) => a < b ? a : b)
+      : price;
+
+  /// The list price of whichever option [fromPrice] comes from, only when
+  /// that option is discounted — so the summary row can strike it through.
+  int? get fromOriginalPrice {
+    if (!hasVariants) return originalPrice;
+    final cheapest = variants.reduce((a, b) => a.effective <= b.effective ? a : b);
+    return cheapest.discountPrice != null ? cheapest.price : null;
+  }
+
   /// Bangla name in bn, English name in en.
   String get displayName {
     final isBn = Get.locale?.languageCode == 'bn';
@@ -132,7 +161,8 @@ class HsServiceItem {
         bnName: s.nameBn,
         duration: s.durationLabel,
         desc: s.description,
-        price: s.price,
+        price: s.effective,
+        originalPrice: s.discountPrice != null ? s.price : null,
         category: categoryName,
         variants: s.variants,
         imageUrl: s.iconUrl,
@@ -164,16 +194,85 @@ class HomeServiceController extends GetxController with LiveRefreshMixin {
   }
 
   /// Deep-link entry for a "Payment due" notification (job completed with a
-  /// balance owed): load the booking, then — if there's still an outstanding
-  /// amount — take the customer straight into the online-payment flow. Falls
-  /// back to just the details page (with its "Pay online" button) when nothing
-  /// is owed or the summary hasn't loaded.
+  /// balance owed): load the booking, then show the Cash/Online chooser so the
+  /// customer picks how to settle. Falls back to just the details page when
+  /// nothing is owed.
   Future<void> openBookingForPayment(String id) async {
     if (id.isEmpty) return;
     await _loadTrack(id);
-    if (paymentSummary?.hasOutstanding == true && !isPayingOnline) {
-      await payOutstandingOnline();
+    await promptPaymentChoice(id, outstanding: paymentSummary?.outstanding);
+  }
+
+  /// Shows the attractive Cash/Online payment popup. Driven by:
+  ///  * the live `payment_prompt` WS event (provider just completed the job), and
+  ///  * a tapped "Payment due" notification (via openBookingForPayment).
+  ///
+  /// [outstanding] lets the live event render instantly from its payload; the
+  /// authoritative figure is still re-checked from the ledger before paying.
+  Future<void> promptPaymentChoice(String id, {double? outstanding}) async {
+    if (id.isEmpty || PaymentChoiceSheet.isOpen || isPayingOnline) return;
+    // Use the payload figure for an instant popup; fall back to a fetch.
+    double amount = outstanding ?? 0;
+    if (amount <= 0) {
+      try {
+        paymentSummary = await _repo.fetchPaymentSummary(id);
+      } catch (_) {}
+      amount = paymentSummary?.outstanding ?? 0;
     }
+    if (amount <= 0.005) return; // nothing owed — no popup
+    await PaymentChoiceSheet.show(
+      amount: amount,
+      onOnline: () => choosePayOnline(id),
+      onCash: () => choosePayCash(id),
+    );
+  }
+
+  /// Customer picked "Pay Online": record the choice (best-effort), make sure
+  /// the booking + ledger are loaded, then launch the gateway.
+  Future<void> choosePayOnline(String id) async {
+    try {
+      await _repo.setPaymentIntent(id, 'online');
+    } catch (_) {}
+    if (trackedBooking?.id != id || paymentSummary == null) {
+      await _loadTrack(id);
+    }
+    await payOutstandingOnline();
+  }
+
+  /// Customer picked "Pay Cash": record the choice so the provider is told to
+  /// collect, then reassure the customer. The actual payment is recorded by
+  /// the provider; the customer is notified when that happens.
+  Future<void> choosePayCash(String id) async {
+    double amount = paymentSummary?.outstanding ?? 0;
+    try {
+      await _repo.setPaymentIntent(id, 'cash');
+    } catch (e) {
+      SnackHelper.error(e.toString().replaceFirst('Exception: ', ''));
+      return;
+    }
+    if (amount <= 0) {
+      try {
+        paymentSummary = await _repo.fetchPaymentSummary(id);
+        amount = paymentSummary?.outstanding ?? 0;
+      } catch (_) {}
+    }
+    await showCashPendingDialog(amount);
+  }
+
+  /// Called when a `payment_recorded` WS event (or a "payment received"
+  /// notification) tells us the provider confirmed a cash payment — refresh
+  /// the open booking and celebrate.
+  Future<void> onPaymentRecorded(String id, {bool fullyPaid = false}) async {
+    if (id.isNotEmpty && (trackedBooking?.id == id || lastBooking?.id == id)) {
+      await refreshOrder();
+    }
+    await showPaymentSuccessDialog(
+      title: 'Payment confirmed'.tr,
+      message: fullyPaid
+          ? 'Your provider confirmed your cash payment. Your booking is fully paid — thank you!'
+              .tr
+          : 'Your provider confirmed your cash payment. Thank you!'.tr,
+    );
   }
 
   // ── Catalog ─────────────────────────────────────────────────────────
@@ -374,7 +473,8 @@ class HomeServiceController extends GetxController with LiveRefreshMixin {
           '${s.bnName.isEmpty ? s.name : s.bnName} (${variant.nameBn.isEmpty ? variant.name : variant.nameBn})',
       duration: s.duration,
       desc: s.desc,
-      price: variant.price,
+      price: variant.effective,
+      originalPrice: variant.discountPrice != null ? variant.price : null,
       category: s.category,
       icon: s.icon,
       imageUrl: s.imageUrl,
@@ -566,6 +666,24 @@ class HomeServiceController extends GetxController with LiveRefreshMixin {
   /// Whether the in-app chat is currently open (provider accepted, job not yet
   /// finished & paid).
   bool get chatAvailable => _activeBooking?.chatOpen ?? false;
+
+  /// A customer may review their provider only once the job is completed AND
+  /// fully paid — selecting a gateway and cancelling must not unlock the
+  /// review (the backend enforces the same rule). [completedButUnpaid] drives
+  /// a "pay first" hint in place of the Rate button.
+  bool get canReview {
+    final b = _activeBooking;
+    return b != null &&
+        b.status.toLowerCase() == 'completed' &&
+        b.fullyPaid;
+  }
+
+  bool get completedButUnpaid {
+    final b = _activeBooking;
+    return b != null &&
+        b.status.toLowerCase() == 'completed' &&
+        !b.fullyPaid;
+  }
 
   /// The provider's phone / call button is shown while a provider is assigned,
   /// and is withdrawn once the invoice is fully paid (the provider's name &
@@ -1115,6 +1233,13 @@ class HomeServiceController extends GetxController with LiveRefreshMixin {
   Future<bool> submitRating(int stars, String comment) async {
     final id = trackedBooking?.id ?? lastBooking?.id;
     if (id == null) return false;
+    // Defence in depth — the Rate screen shouldn't be reachable unpaid, but
+    // never let an unpaid review through (the server rejects it too).
+    if (!canReview && !hasReviewed) {
+      SnackHelper.error(
+          'Please complete the payment before rating your provider'.tr);
+      return false;
+    }
     try {
       final res = await _repo.rate(id, stars, comment);
       if (res.success) {
@@ -1363,7 +1488,16 @@ class HomeServiceController extends GetxController with LiveRefreshMixin {
   // ── Navigation (misc) ───────────────────────────────────────────────
   void viewBookingDetails() => Get.toNamed(Routes.HS_DETAILS);
   void openEditOrder() => Get.toNamed(Routes.HS_EDIT_ORDER);
-  void rateService() => Get.toNamed(Routes.HS_RATE);
+  void rateService() {
+    // Reviewing is only for a completed + fully-paid booking. Already-reviewed
+    // bookings still open the screen so the customer can read theirs back.
+    if (!canReview && !hasReviewed) {
+      SnackHelper.error(
+          'Please complete the payment before rating your provider'.tr);
+      return;
+    }
+    Get.toNamed(Routes.HS_RATE);
+  }
   void openChat() {
     if (!chatAvailable) {
       SnackHelper.error(chatUnavailableReason, title: _moduleTitle);

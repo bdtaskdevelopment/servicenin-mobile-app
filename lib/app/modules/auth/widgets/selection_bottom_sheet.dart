@@ -108,7 +108,7 @@ class _SelectionBottomSheetState extends State<SelectionBottomSheet> {
               padding: const EdgeInsets.fromLTRB(8, 8, 8, 16),
               shrinkWrap: true,
               itemCount: _filtered.length,
-              separatorBuilder: (_, _) =>
+              separatorBuilder: (_, __) =>
                   const Divider(height: 1, color: Color(0xFFF1F5F9)),
               itemBuilder: (_, i) {
                 final option = _filtered[i];

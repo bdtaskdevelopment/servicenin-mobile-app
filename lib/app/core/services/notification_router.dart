@@ -104,8 +104,8 @@ class NotificationRouter {
     }
     switch (referenceType) {
       // Payment prompt (job completed with a balance owed). Opens the booking
-      // details page and auto-launches the online-payment flow so the customer
-      // lands straight on payment — see openBookingForPayment.
+      // details page and shows the Cash/Online chooser — see
+      // openBookingForPayment → promptPaymentChoice.
       case 'booking_payment':
         return _Target(
           Routes.HS_DETAILS,
@@ -115,6 +115,19 @@ class NotificationRouter {
               HomeServiceBinding().dependencies();
             }
             Get.find<HomeServiceController>().openBookingForPayment(id);
+          },
+        );
+      // The provider confirmed a cash payment (or it otherwise landed). Open
+      // the booking so the refreshed, now-paid invoice is visible.
+      case 'payment_received':
+        return _Target(
+          Routes.HS_DETAILS,
+          referenceId: referenceId,
+          load: (id) {
+            if (!Get.isRegistered<HomeServiceController>()) {
+              HomeServiceBinding().dependencies();
+            }
+            Get.find<HomeServiceController>().loadBookingById(id);
           },
         );
       // Home-service booking: transitions/ratings use `service_booking`,

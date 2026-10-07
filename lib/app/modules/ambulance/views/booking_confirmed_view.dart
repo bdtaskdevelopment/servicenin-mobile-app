@@ -413,7 +413,7 @@ class _DriverCard extends StatelessWidget {
                   ? Image.network(
                       photo,
                       fit: BoxFit.cover,
-                      errorBuilder: (_, _, _) => _DriverInitials(_initials()),
+                      errorBuilder: (_, __, ___) => _DriverInitials(_initials()),
                       loadingBuilder: (_, child, progress) =>
                           progress == null ? child : _DriverInitials(_initials()),
                     )

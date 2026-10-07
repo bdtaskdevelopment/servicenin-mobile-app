@@ -75,7 +75,7 @@ class DoctorProfileView extends GetView<BookingController> {
                                   ? Image.network(
                                       con.doctorPhoto,
                                       fit: BoxFit.cover,
-                                      errorBuilder: (_, _, _) =>
+                                      errorBuilder: (_, __, ___) =>
                                           _profileInitials(con.doctorInitials),
                                       loadingBuilder: (_, child, progress) =>
                                           progress == null

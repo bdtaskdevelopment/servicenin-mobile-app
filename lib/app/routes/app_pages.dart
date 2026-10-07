@@ -12,6 +12,7 @@ import '../modules/healthcare/views/telemedicine_view.dart';
 import '../modules/home_service/bindings/home_service_binding.dart';
 import '../modules/home_service/views/home_service_view.dart';
 import '../modules/home_service/views/hs_service_list_view.dart';
+import '../modules/home_service/views/hs_variant_picker_view.dart';
 import '../modules/home_service/views/confirm_booking_view.dart';
 import '../modules/home_service/views/booking_placed_view.dart';
 import '../modules/home_service/views/hs_tracking_view.dart';
@@ -224,6 +225,11 @@ class AppPages {
     GetPage(
       name: _Paths.HOME_SERVICE_LIST,
       page: () => const HsServiceListView(),
+      binding: HomeServiceBinding(),
+    ),
+    GetPage(
+      name: _Paths.HS_VARIANTS,
+      page: () => const HsVariantPickerView(),
       binding: HomeServiceBinding(),
     ),
     GetPage(
