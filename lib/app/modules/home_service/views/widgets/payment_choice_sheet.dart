@@ -20,17 +20,24 @@ class PaymentChoiceSheet {
 
   static bool isOpen = false;
 
-  /// Shows the method chooser. [onOnline]/[onCash] run after the sheet closes.
+  /// Shows the method chooser. [onOnline]/[onCash] run after the sheet
+  /// closes. [showCash] hides the Pay Cash option entirely — e.g. for a
+  /// third-party provider, who doesn't collect cash on the company's behalf.
   static Future<void> show({
     required double amount,
     required Future<void> Function() onOnline,
     required Future<void> Function() onCash,
+    bool showCash = true,
   }) async {
     if (isOpen) return;
     isOpen = true;
     try {
       await Get.bottomSheet(
-        _ChoiceSheet(amount: amount, onOnline: onOnline, onCash: onCash),
+        _ChoiceSheet(
+            amount: amount,
+            onOnline: onOnline,
+            onCash: onCash,
+            showCash: showCash),
         isScrollControlled: true,
         backgroundColor: Colors.transparent,
         isDismissible: true,
@@ -47,11 +54,13 @@ class _ChoiceSheet extends StatelessWidget {
     required this.amount,
     required this.onOnline,
     required this.onCash,
+    required this.showCash,
   });
 
   final double amount;
   final Future<void> Function() onOnline;
   final Future<void> Function() onCash;
+  final bool showCash;
 
   String get _amt => '৳${amount.toStringAsFixed(amount % 1 == 0 ? 0 : 2)}';
 
@@ -104,8 +113,8 @@ class _ChoiceSheet extends StatelessWidget {
               Text(
                 'Choose how you’d like to pay'.tr,
                 textAlign: TextAlign.center,
-                style: const TextStyle(
-                    fontSize: 13.5, color: Color(0xFF64748B)),
+                style:
+                    const TextStyle(fontSize: 13.5, color: Color(0xFF64748B)),
               ),
               const SizedBox(height: 16),
               // Amount due card
@@ -147,18 +156,20 @@ class _ChoiceSheet extends StatelessWidget {
                   await onOnline();
                 },
               ),
-              const SizedBox(height: 12),
-              _OptionCard(
-                filled: false,
-                accent: teal,
-                icon: Icons.payments_rounded,
-                title: 'Pay Cash'.tr,
-                subtitle: 'Hand cash to your provider — he’ll confirm it'.tr,
-                onTap: () async {
-                  Get.back();
-                  await onCash();
-                },
-              ),
+              if (showCash) ...[
+                const SizedBox(height: 12),
+                _OptionCard(
+                  filled: false,
+                  accent: teal,
+                  icon: Icons.payments_rounded,
+                  title: 'Pay Cash'.tr,
+                  subtitle: 'Hand cash to your provider — he’ll confirm it'.tr,
+                  onTap: () async {
+                    Get.back();
+                    await onCash();
+                  },
+                ),
+              ],
               const SizedBox(height: 6),
               TextButton(
                 onPressed: () => Get.back(),
@@ -196,7 +207,8 @@ class _OptionCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final fg = filled ? Colors.white : const Color(0xFF0F172A);
-    final sub = filled ? Colors.white.withOpacity(.85) : const Color(0xFF64748B);
+    final sub =
+        filled ? Colors.white.withOpacity(.85) : const Color(0xFF64748B);
     return Material(
       color: filled ? accent : Colors.white,
       borderRadius: BorderRadius.circular(16),
@@ -222,7 +234,8 @@ class _OptionCard extends StatelessWidget {
                       : accent.withOpacity(.10),
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: Icon(icon, color: filled ? Colors.white : accent, size: 24),
+                child:
+                    Icon(icon, color: filled ? Colors.white : accent, size: 24),
               ),
               const SizedBox(width: 14),
               Expanded(
@@ -267,14 +280,14 @@ Future<void> showCashPendingDialog(double amount) async {
             Container(
               width: 60,
               height: 60,
-              decoration:
-                  BoxDecoration(color: teal.withOpacity(.10), shape: BoxShape.circle),
+              decoration: BoxDecoration(
+                  color: teal.withOpacity(.10), shape: BoxShape.circle),
               child: Icon(Icons.payments_rounded, color: teal, size: 34),
             ),
             const SizedBox(height: 14),
             Text('${'Pay'.tr} $amt ${'in cash'.tr}',
-                style: const TextStyle(
-                    fontSize: 17, fontWeight: FontWeight.w800)),
+                style:
+                    const TextStyle(fontSize: 17, fontWeight: FontWeight.w800)),
             const SizedBox(height: 8),
             Text(
               '${'Please hand'.tr} $amt ${'to your service provider. He’ll confirm it in his app, and you’ll get a receipt notification.'.tr}',
@@ -335,8 +348,8 @@ Future<void> showPaymentSuccessDialog({
             const SizedBox(height: 14),
             Text(title,
                 textAlign: TextAlign.center,
-                style: const TextStyle(
-                    fontSize: 17, fontWeight: FontWeight.w800)),
+                style:
+                    const TextStyle(fontSize: 17, fontWeight: FontWeight.w800)),
             const SizedBox(height: 8),
             Text(message,
                 textAlign: TextAlign.center,

@@ -1,9 +1,20 @@
 import 'dart:convert';
 
+import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 
 dynamic _dec(dynamic src) => src is String ? jsonDecode(src) : src;
 String _str(dynamic v) => v?.toString().trim() ?? '';
+
+/// Picks the Bangla text when the app language is Bangla (falling back to
+/// the English value), otherwise the English text. Mirrors the same helper
+/// in service_response.dart.
+String _localized(String en, String bn) {
+  final isBn = Get.locale?.languageCode == 'bn';
+  if (isBn && bn.isNotEmpty) return bn;
+  return en.isNotEmpty ? en : bn;
+}
+
 int _int(dynamic v) =>
     v is int ? v : int.tryParse(_str(v)) ?? (v is num ? v.toInt() : 0);
 double _dbl(dynamic v) =>
@@ -27,7 +38,8 @@ String _fullName(dynamic sender) {
 
 // ── Hotlines ────────────────────────────────────────────────────────
 class NagarikHotline {
-  NagarikHotline({required this.key, required this.label, required this.number});
+  NagarikHotline(
+      {required this.key, required this.label, required this.number});
   final String key;
   final String label;
   final String number;
@@ -87,19 +99,34 @@ class NagarikReportCategory {
     required this.key,
     required this.label,
     required this.description,
-    required this.icon,
   });
   final String key;
+
+  /// Raw server label — admin enters it as a single "English / বাংলা"
+  /// string (e.g. "Street lights / সড়কবাতি"), so both languages are always
+  /// in here together. Use [displayLabel] to show only the half matching
+  /// the app's current language; this raw form is kept only for cases
+  /// that need the whole string (e.g. admin editing).
   final String label;
   final String description;
-  final String icon;
+
+  /// The half of [label] matching the app's current language — English
+  /// only in English mode, Bangla only in Bangla mode. Falls back to the
+  /// full raw label on anything that isn't the expected "en / bn" shape.
+  String get displayLabel {
+    final parts = label.split(' / ');
+    if (parts.length != 2) return label;
+    final en = parts[0].trim();
+    final bn = parts[1].trim();
+    if (en.isEmpty || bn.isEmpty) return label;
+    return _localized(en, bn);
+  }
 
   factory NagarikReportCategory.fromMap(Map<String, dynamic> j) =>
       NagarikReportCategory(
         key: _str(j['key']),
         label: _str(j['label']),
         description: _str(j['description']),
-        icon: _str(j['icon']),
       );
 
   /// Parses `{ data: { categories: [...] } }`.
@@ -147,6 +174,7 @@ class NagarikGrievance {
     if (out.isEmpty && photoUrl.isNotEmpty) out.add(photoUrl);
     return out;
   }
+
   String get status => _str(raw['status']);
   int get upvoteCount => _int(raw['upvote_count']);
   double get ratingAverage => _dbl(raw['rating_average']);

@@ -26,6 +26,7 @@ class ApiURL {
     if (lat == null || lng == null) return bloodRequests;
     return '$bloodRequests?lat=$lat&lng=$lng';
   }
+
   static String bloodRequestRespond(String id) =>
       'api/v1/blood/requests/$id/respond';
   static String bloodRequestResponders(String id) =>
@@ -37,7 +38,8 @@ class ApiURL {
       'api/v1/blood/fulfillments/$id/received';
   static final String bloodDonors = 'api/v1/blood/donors';
   static final String bloodDonorsNearest = 'api/v1/blood/donors/nearest';
-  static final String bloodDonorsLeaderboard = 'api/v1/blood/donors/leaderboard';
+  static final String bloodDonorsLeaderboard =
+      'api/v1/blood/donors/leaderboard';
   static final String bloodDonorMe = 'api/v1/blood/donors/me';
   static final String bloodDonorAvailability =
       'api/v1/blood/donors/me/availability';
@@ -130,13 +132,13 @@ class ApiURL {
   /// center.
   static String hcDoctorsAvailableTodayPaged(
       {int page = 1, int limit = 10, String? centerId}) {
-    final q =
-        StringBuffer('$hcDoctorsAvailableToday?page=$page&limit=$limit');
+    final q = StringBuffer('$hcDoctorsAvailableToday?page=$page&limit=$limit');
     if (centerId != null && centerId.isNotEmpty) {
       q.write('&center_id=${Uri.encodeQueryComponent(centerId)}');
     }
     return q.toString();
   }
+
   static String hcDoctorProfile(String id) =>
       'api/v1/healthcare/doctors/$id/profile';
   static String hcDoctorReviews(String id) =>
@@ -147,12 +149,10 @@ class ApiURL {
       'api/v1/healthcare/doctors/$id/schedule-dates?venue_id=$venueId';
   static String hcTimeSlots(String id, String venueId, String date) =>
       'api/v1/healthcare/doctors/$id/time-slots?venue_id=$venueId&date=$date';
-  static final String hcPaymentMethods =
-      'api/v1/healthcare/payment-methods';
+  static final String hcPaymentMethods = 'api/v1/healthcare/payment-methods';
   static final String hcFamily = 'api/v1/healthcare/family';
   static String hcFamilyById(String id) => 'api/v1/healthcare/family/$id';
-  static final String hcDocumentsUpload =
-      'api/v1/healthcare/documents/upload';
+  static final String hcDocumentsUpload = 'api/v1/healthcare/documents/upload';
   static final String hcAppointments = 'api/v1/healthcare/appointments';
   static final String hcAppointmentsMy = 'api/v1/healthcare/appointments/my';
 
@@ -187,8 +187,11 @@ class ApiURL {
   static String servicesSearch(String q) => 'api/v1/services/search?q=$q';
   static String servicesSubServices(String categoryId) =>
       'api/v1/services/categories/$categoryId/sub-services';
-  static final String servicesScheduleDates =
-      'api/v1/services/schedule-dates';
+  // Category's Description/Terms & Conditions/FAQs, shown below the
+  // sub-service list on the category's list page.
+  static String servicesCategoryDetail(String categoryId) =>
+      'api/v1/services/categories/$categoryId';
+  static final String servicesScheduleDates = 'api/v1/services/schedule-dates';
   static String servicesTimeSlots(String date) =>
       'api/v1/services/time-slots?date=$date';
   static final String servicesPaymentMethods =
@@ -202,10 +205,10 @@ class ApiURL {
   // POST /bookings/:id/status, POST /bookings/:id/location.
   static final String hsProviderDashboard =
       'api/v1/services/provider/dashboard';
-  static String hsProviderJobs({String? status}) =>
-      status == null || status.isEmpty
-          ? 'api/v1/services/provider/jobs'
-          : 'api/v1/services/provider/jobs?status=${Uri.encodeQueryComponent(status)}';
+  static String hsProviderJobs({String? status}) => status == null ||
+          status.isEmpty
+      ? 'api/v1/services/provider/jobs'
+      : 'api/v1/services/provider/jobs?status=${Uri.encodeQueryComponent(status)}';
   static String hsProviderJobAccept(String id) =>
       'api/v1/services/provider/jobs/$id/accept';
   static String hsProviderJobDecline(String id) =>
@@ -286,8 +289,7 @@ class ApiURL {
   static final String physioScheduleDates = 'api/v1/physio/schedule-dates';
   static String physioTimeSlots(String staffId, String date) =>
       'api/v1/physio/time-slots?staff_id=$staffId&date=$date';
-  static final String physioPaymentMethods =
-      'api/v1/physio/payment-methods';
+  static final String physioPaymentMethods = 'api/v1/physio/payment-methods';
   static final String physioAppointments = 'api/v1/physio/appointments';
   static String physioAppointmentsMy({int page = 1, int limit = 20}) =>
       'api/v1/physio/appointments/my?page=$page&limit=$limit';
@@ -341,8 +343,7 @@ class ApiURL {
   static final String jobsResumeUpload = 'api/v1/jobs/resume/upload';
   static String jobApply(String id) => 'api/v1/jobs/$id/apply';
   static final String jobsApplicationsMy = 'api/v1/jobs/applications/my';
-  static final String jobsEmployerRegister =
-      'api/v1/jobs/employers/register';
+  static final String jobsEmployerRegister = 'api/v1/jobs/employers/register';
 
   //===== Funeral
   static final String funeralServices = 'api/v1/funeral/services';
@@ -374,8 +375,7 @@ class ApiURL {
       'api/v1/training/centers/$id/courses';
   static String educationCourse(String id) => 'api/v1/training/courses/$id';
   static final String educationInterests = 'api/v1/training/interests';
-  static final String educationInterestsMy =
-      'api/v1/training/interests/my';
+  static final String educationInterestsMy = 'api/v1/training/interests/my';
 
   //===== Home dashboard
   static final String homeBanners = 'api/v1/home/banners';
@@ -397,8 +397,7 @@ class ApiURL {
       'api/v1/notifications/unread-count';
   static String snNotificationRead(String id) =>
       'api/v1/notifications/$id/read';
-  static final String snNotificationsReadAll =
-      'api/v1/notifications/read-all';
+  static final String snNotificationsReadAll = 'api/v1/notifications/read-all';
   static final String snDeviceToken = 'api/v1/notifications/device-token';
 
   //===== Nagarik Seba (civic grievances + support)
@@ -410,8 +409,7 @@ class ApiURL {
   static String nagarikGrievanceVerify(String id) =>
       'api/v1/nagarik/grievances/$id/verify';
   static final String nagarikTickets = 'api/v1/nagarik/tickets';
-  static String nagarikTicketById(String id) =>
-      'api/v1/nagarik/tickets/$id';
+  static String nagarikTicketById(String id) => 'api/v1/nagarik/tickets/$id';
   static String nagarikTicketMessages(String id) =>
       'api/v1/nagarik/tickets/$id/messages';
 
@@ -445,36 +443,37 @@ class ApiURL {
   static final String profileAvatar = '/profile/avatar';
   static final String dashboard = '/dashboard';
   static final String attendanceLocations = '/attendance/locations';
-  static final String attendanceCheckIn   = '/attendance/check-in';
-  static final String attendanceStatus     = '/attendance/status';
+  static final String attendanceCheckIn = '/attendance/check-in';
+  static final String attendanceStatus = '/attendance/status';
   static final String attendanceBreakStart = '/attendance/break-start';
-  static final String attendanceHistory    = '/attendance/history';
-  static final String notices              = '/notices';
-  static final String leave                = '/leave';
-  static String leaveById(int id)          => '/leave/$id';
-  static final String shortLeave           = '/leave/short-leave';
-  static String shortLeaveById(int id)     => '/leave/short-leave/$id';
-  static final String leaveTypes           = '/leave/types';
-  static final String leaveEmployees       = '/leave/employees';
-  static final String notifications        = '/notifications';
+  static final String attendanceHistory = '/attendance/history';
+  static final String notices = '/notices';
+  static final String leave = '/leave';
+  static String leaveById(int id) => '/leave/$id';
+  static final String shortLeave = '/leave/short-leave';
+  static String shortLeaveById(int id) => '/leave/short-leave/$id';
+  static final String leaveTypes = '/leave/types';
+  static final String leaveEmployees = '/leave/employees';
+  static final String notifications = '/notifications';
   static final String notificationsReadAll = '/notifications/read-all';
   static String notificationRead(String id) => '/notifications/$id/read';
-  static final String projects              = '/projects';
-  static String projectById(int id)         => '/projects/$id';
-  static String projectSprints(int id)      => '/projects/$id/sprints';
-  static String projectUseCases(int id)     => '/projects/$id/use-cases';
-  static final String tasks                 = '/tasks';
+  static final String projects = '/projects';
+  static String projectById(int id) => '/projects/$id';
+  static String projectSprints(int id) => '/projects/$id/sprints';
+  static String projectUseCases(int id) => '/projects/$id/use-cases';
+  static final String tasks = '/tasks';
   static String ownTasks({int? projectId}) =>
       projectId != null ? '/tasks/own?project_id=$projectId' : '/tasks/own';
-  static String taskById(int id)            => '/tasks/$id';
-  static final String policies              = '/policies';
-  static final String documents             = '/documents';
-  static final String loans                 = '/loans';
-  static final String clients               = '/clients';
-  static final String team                  = '/team';
-  static final String kanbanDashboard      = '/kanban/dashboard';
-  static final String kanban               = '/kanban';
-  static String kanbanMove(int id, int status) => '/kanban/$id/move?status=$status';
+  static String taskById(int id) => '/tasks/$id';
+  static final String policies = '/policies';
+  static final String documents = '/documents';
+  static final String loans = '/loans';
+  static final String clients = '/clients';
+  static final String team = '/team';
+  static final String kanbanDashboard = '/kanban/dashboard';
+  static final String kanban = '/kanban';
+  static String kanbanMove(int id, int status) =>
+      '/kanban/$id/move?status=$status';
   static final String dailyTasksBase = '/daily-tasks';
   static String dailyTaskById(int id) => '/daily-tasks/$id';
   static String dailyTasks({
@@ -487,12 +486,12 @@ class ApiURL {
     int perPage = 15,
   }) {
     final params = <String, String>{};
-    if (title.isNotEmpty)      params['title']       = title;
-    if (dateFrom.isNotEmpty)   params['date_from']   = dateFrom;
-    if (dateTo.isNotEmpty)     params['date_to']     = dateTo;
+    if (title.isNotEmpty) params['title'] = title;
+    if (dateFrom.isNotEmpty) params['date_from'] = dateFrom;
+    if (dateTo.isNotEmpty) params['date_to'] = dateTo;
     if (isApproved.isNotEmpty) params['is_approved'] = isApproved;
     if (employeeId.isNotEmpty) params['employee_id'] = employeeId;
-    params['page']     = page.toString();
+    params['page'] = page.toString();
     params['per_page'] = perPage.toString();
     final query = params.entries.map((e) => '${e.key}=${e.value}').join('&');
     return '/daily-tasks?$query';

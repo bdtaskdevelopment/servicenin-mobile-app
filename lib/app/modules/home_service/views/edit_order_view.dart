@@ -170,8 +170,7 @@ class EditOrderView extends GetView<HomeServiceController> {
                     fontWeight: FontWeight.w800,
                     color: Color(0xFF0F172A))),
             Text(b.invoiceNo,
-                style: const TextStyle(
-                    fontSize: 12, color: Color(0xFF94A3B8))),
+                style: const TextStyle(fontSize: 12, color: Color(0xFF94A3B8))),
           ],
         ),
       );
@@ -260,8 +259,7 @@ class EditOrderView extends GetView<HomeServiceController> {
                                   foregroundColor: Colors.white,
                                   elevation: 0,
                                   shape: RoundedRectangleBorder(
-                                      borderRadius:
-                                          BorderRadius.circular(14)),
+                                      borderRadius: BorderRadius.circular(14)),
                                 ),
                                 child: Text('Add to order'.tr,
                                     style: const TextStyle(
@@ -303,8 +301,8 @@ class EditOrderView extends GetView<HomeServiceController> {
                   : ListView.separated(
                       shrinkWrap: true,
                       itemCount: c.categoryItems.length,
-                      separatorBuilder: (_, __) => const Divider(
-                          height: 1, color: Color(0xFFF1F5F9)),
+                      separatorBuilder: (_, __) =>
+                          const Divider(height: 1, color: Color(0xFFF1F5F9)),
                       itemBuilder: (_, i) {
                         final it = c.categoryItems[i];
                         return ListTile(
@@ -319,7 +317,9 @@ class EditOrderView extends GetView<HomeServiceController> {
                                       : const Color(0xFFCBD5E1))),
                           subtitle: Text(
                               it.inStock
-                                  ? '৳${it.unitPrice} / ${it.unit}'
+                                  ? (it.vatRate > 0
+                                      ? '৳${it.unitPrice} / ${it.unit} · +${it.vatRate}% VAT'
+                                      : '৳${it.unitPrice} / ${it.unit}')
                                   : 'Out of stock'.tr,
                               style: TextStyle(
                                   fontSize: 12.5,
@@ -349,8 +349,7 @@ class EditOrderView extends GetView<HomeServiceController> {
         child: Center(
           child: Text(msg,
               textAlign: TextAlign.center,
-              style: const TextStyle(
-                  fontSize: 13.5, color: Color(0xFF94A3B8))),
+              style: const TextStyle(fontSize: 13.5, color: Color(0xFF94A3B8))),
         ),
       );
 }
@@ -362,8 +361,8 @@ class _Sheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Container(
-        constraints: BoxConstraints(
-            maxHeight: MediaQuery.of(context).size.height * .75),
+        constraints:
+            BoxConstraints(maxHeight: MediaQuery.of(context).size.height * .75),
         padding: const EdgeInsets.fromLTRB(20, 14, 20, 20),
         decoration: const BoxDecoration(
           color: Colors.white,
@@ -458,9 +457,8 @@ class _EditableJobRow extends GetView<HomeServiceController> {
               onMinus: (item.quantity == 1 && !canRemove) || con.orderBusy
                   ? null
                   : () => con.changeTaskQuantity(item, -1),
-              onPlus: con.orderBusy
-                  ? null
-                  : () => con.changeTaskQuantity(item, 1),
+              onPlus:
+                  con.orderBusy ? null : () => con.changeTaskQuantity(item, 1),
               minusIcon: item.quantity == 1
                   ? Icons.delete_outline_rounded
                   : Icons.remove_rounded,
@@ -507,8 +505,7 @@ class _EditablePartRow extends GetView<HomeServiceController> {
           else
             IconButton(
               splashRadius: 20,
-              onPressed:
-                  con.orderBusy ? null : () => con.removePart(part),
+              onPressed: con.orderBusy ? null : () => con.removePart(part),
               icon: const Icon(Icons.delete_outline_rounded,
                   size: 20, color: Color(0xFFDC2626)),
             ),
@@ -554,7 +551,9 @@ class _Stepper extends StatelessWidget {
           width: 30,
           height: 30,
           decoration: BoxDecoration(
-            color: onTap == null ? const Color(0xFFF1F5F9) : const Color(0xFFE0F2EF),
+            color: onTap == null
+                ? const Color(0xFFF1F5F9)
+                : const Color(0xFFE0F2EF),
             borderRadius: BorderRadius.circular(8),
           ),
           child: Icon(icon,
@@ -581,14 +580,12 @@ class _AddButton extends StatelessWidget {
           style: OutlinedButton.styleFrom(
             side: const BorderSide(color: Color(0xFFB6E0D7)),
             backgroundColor: Colors.white,
-            shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(14)),
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
           ),
           label: Text(label,
               style: const TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w700,
-                  color: _darkTeal)),
+                  fontSize: 14, fontWeight: FontWeight.w700, color: _darkTeal)),
         ),
       );
 }
@@ -603,16 +600,13 @@ class _TotalCard extends StatelessWidget {
   Widget build(BuildContext context) => Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
         decoration: BoxDecoration(
-            color: AppColors.white,
-            borderRadius: BorderRadius.circular(16)),
+            color: AppColors.white, borderRadius: BorderRadius.circular(16)),
         child: Column(
           children: [
             _row('Subtotal'.tr, '৳${booking.subtotal}'),
             const SizedBox(height: 8),
             _row(
-                booking.vatRate > 0
-                    ? 'VAT (${booking.vatRate}%)'.tr
-                    : 'VAT'.tr,
+                booking.vatRate > 0 ? '${'VAT'.tr} (${booking.vatRate}%)' : 'VAT'.tr,
                 '৳${booking.vatAmount}'),
             const Padding(
               padding: EdgeInsets.symmetric(vertical: 10),

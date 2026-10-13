@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
@@ -16,6 +17,7 @@ import '../../../data/models/sn_place.dart';
 import '../../../data/repositories/service.repo.dart';
 import '../../../data/services/geo_search.service.dart';
 import '../../../data/services/settings.service.dart';
+import '../../../data/services/storage.service.dart';
 import '../../../routes/app_pages.dart';
 import '../views/widgets/payment_choice_sheet.dart';
 
@@ -63,7 +65,8 @@ class HsService {
   final String name;
   final String desc;
   final String price; // what the customer pays
-  final String? originalPrice; // list price, shown struck through when discounted
+  final String?
+      originalPrice; // list price, shown struck through when discounted
   final IconData icon;
   final String id; // category id (popular items are categories)
 
@@ -108,6 +111,7 @@ class HsServiceItem {
   final String bnName;
   final String duration;
   final String desc;
+
   /// What the customer pays for this line (the discount when one applies).
   final int price;
 
@@ -143,7 +147,8 @@ class HsServiceItem {
   /// that option is discounted — so the summary row can strike it through.
   int? get fromOriginalPrice {
     if (!hasVariants) return originalPrice;
-    final cheapest = variants.reduce((a, b) => a.effective <= b.effective ? a : b);
+    final cheapest =
+        variants.reduce((a, b) => a.effective <= b.effective ? a : b);
     return cheapest.discountPrice != null ? cheapest.price : null;
   }
 
@@ -220,8 +225,21 @@ class HomeServiceController extends GetxController with LiveRefreshMixin {
       amount = paymentSummary?.outstanding ?? 0;
     }
     if (amount <= 0.005) return; // nothing owed — no popup
+    // Need the assigned provider's employment type to decide whether Cash
+    // is even offered (see showCash below) — openBookingForPayment already
+    // loads the booking first, but the live WS event calls straight in, so
+    // make sure trackedBooking actually matches this id before reading it.
+    if (trackedBooking?.id != id) {
+      await _loadTrack(id);
+    }
+    // A third-party provider isn't the company's own staff, so they don't
+    // collect cash on its behalf — hide Cash for exactly that assignment.
+    // Defaults to shown when the provider/employment type isn't known yet,
+    // so a load hiccup never silently blocks a legitimate cash payment.
+    final showCash = trackedBooking?.provider?.isThirdParty != true;
     await PaymentChoiceSheet.show(
       amount: amount,
+      showCash: showCash,
       onOnline: () => choosePayOnline(id),
       onCash: () => choosePayCash(id),
     );
@@ -273,6 +291,82 @@ class HomeServiceController extends GetxController with LiveRefreshMixin {
               .tr
           : 'Your provider confirmed your cash payment. Thank you!'.tr,
     );
+    // Payment just completed → surface the review prompt on the dashboard.
+    await _queueReviewPromptFor(id);
+  }
+
+  // ── Dashboard "please review" prompts ────────────────────────────────
+  //
+  // When a booking is completed AND fully paid (the provider recorded the
+  // cash, or the customer paid online), a review prompt is queued and shown
+  // on the home-service dashboard. It persists across app launches until the
+  // customer reviews or dismisses (crosses) it. Each entry carries just enough
+  // to render the card: {id, provider, service, invoice}.
+  static const _pendingReviewKey = 'hs_pending_reviews';
+  List<Map<String, dynamic>> pendingReviews = [];
+
+  void _loadPendingReviews() {
+    try {
+      final raw = StorageService.read(_pendingReviewKey);
+      if (raw is String && raw.isNotEmpty) {
+        pendingReviews = (json.decode(raw) as List)
+            .map((e) => (e as Map).cast<String, dynamic>())
+            .toList();
+      }
+    } catch (_) {
+      pendingReviews = [];
+    }
+    update();
+  }
+
+  Future<void> _savePendingReviews() async =>
+      StorageService.save(_pendingReviewKey, json.encode(pendingReviews));
+
+  /// Fetch the just-paid booking and, if it's completed + fully paid and not
+  /// already reviewed, queue a dashboard review prompt for it.
+  Future<void> _queueReviewPromptFor(String id) async {
+    if (id.isEmpty) return;
+    if (pendingReviews.any((e) => e['id'] == id)) return;
+    try {
+      final b = await _repo.fetchBooking(id);
+      if (b.status.toLowerCase() != 'completed' || !b.fullyPaid) return;
+      // Don't prompt for a booking the customer already reviewed.
+      final existing = await _repo.fetchMyReview(id);
+      if (existing != null) return;
+      pendingReviews.insert(0, {
+        'id': b.id,
+        'provider': b.provider?.displayName ?? '',
+        'service': b.servicesSummary,
+        'invoice': b.invoiceNo,
+      });
+      await _savePendingReviews();
+      update();
+    } catch (_) {
+      // Best-effort — never let a prompt failure disrupt the payment flow.
+    }
+  }
+
+  /// Customer tapped the prompt's "Rate now" → load the booking and open the
+  /// rating screen. The prompt is cleared once the review is submitted.
+  Future<void> reviewFromPrompt(String id) async {
+    if (id.isEmpty) return;
+    await _loadTrack(id); // sets trackedBooking + paymentSummary → canReview
+    rateService();
+  }
+
+  /// Customer crossed (X) the prompt — stop showing it for this booking.
+  Future<void> dismissReviewPrompt(String id) async {
+    pendingReviews.removeWhere((e) => e['id'] == id);
+    await _savePendingReviews();
+    update();
+  }
+
+  Future<void> _clearReviewPrompt(String id) async {
+    if (pendingReviews.any((e) => e['id'] == id)) {
+      pendingReviews.removeWhere((e) => e['id'] == id);
+      await _savePendingReviews();
+      update();
+    }
   }
 
   // ── Catalog ─────────────────────────────────────────────────────────
@@ -317,6 +411,7 @@ class HomeServiceController extends GetxController with LiveRefreshMixin {
     _initDefaultAddress();
     fetchCategories();
     fetchPopular();
+    _loadPendingReviews();
     startLiveRefresh();
     // Deep-link entry from the Home tab's category shortcut tiles: they
     // navigate straight to HOME_SERVICE_LIST with the category pre-picked,
@@ -410,6 +505,41 @@ class HomeServiceController extends GetxController with LiveRefreshMixin {
       SnackHelper.error(e.toString().replaceFirst('Exception: ', ''));
     } finally {
       loadingSub = false;
+      update();
+    }
+  }
+
+  // ── Category Description / Terms & Conditions / FAQs ─────────────────
+  //
+  // Shown below the sub-service list, in that exact order, on the
+  // category's list page (HsServiceListView). Fetched separately from the
+  // sub-service list itself since FAQs is a has-many relation only the
+  // single-category detail endpoint preloads.
+  String categoryDescription = '';
+  String categoryTerms = '';
+  List<ServiceCategoryFaq> categoryFaqs = [];
+  bool loadingCategoryDetail = false;
+
+  Future<void> _loadCategoryDetail(String categoryId) async {
+    categoryDescription = '';
+    categoryTerms = '';
+    categoryFaqs = [];
+    if (categoryId.isEmpty) {
+      update();
+      return;
+    }
+    loadingCategoryDetail = true;
+    update();
+    try {
+      final d = await _repo.fetchCategoryDetail(categoryId);
+      categoryDescription = d.description;
+      categoryTerms = d.termsConditions;
+      categoryFaqs = d.faqs;
+    } catch (_) {
+      // Best-effort — the sub-service list above already loaded on its own;
+      // a failure here just means this category has no extra info to show.
+    } finally {
+      loadingCategoryDetail = false;
       update();
     }
   }
@@ -673,16 +803,12 @@ class HomeServiceController extends GetxController with LiveRefreshMixin {
   /// a "pay first" hint in place of the Rate button.
   bool get canReview {
     final b = _activeBooking;
-    return b != null &&
-        b.status.toLowerCase() == 'completed' &&
-        b.fullyPaid;
+    return b != null && b.status.toLowerCase() == 'completed' && b.fullyPaid;
   }
 
   bool get completedButUnpaid {
     final b = _activeBooking;
-    return b != null &&
-        b.status.toLowerCase() == 'completed' &&
-        !b.fullyPaid;
+    return b != null && b.status.toLowerCase() == 'completed' && !b.fullyPaid;
   }
 
   /// The provider's phone / call button is shown while a provider is assigned,
@@ -759,6 +885,7 @@ class HomeServiceController extends GetxController with LiveRefreshMixin {
     subFilterQuery = '';
     update();
     _loadSubServices(c);
+    _loadCategoryDetail(c.id);
   }
 
   void openCategory(HsCategory c) {
@@ -1105,6 +1232,8 @@ class HomeServiceController extends GetxController with LiveRefreshMixin {
       trackedBooking = await _repo.fetchBooking(booking.id);
       lastBooking = trackedBooking;
       SnackHelper.success('পেমেন্ট সম্পন্ন হয়েছে', title: _moduleTitle);
+      // Paid online + completed → queue the dashboard review prompt.
+      await _queueReviewPromptFor(booking.id);
     } catch (e) {
       SnackHelper.error(e.toString().replaceFirst('Exception: ', ''));
     } finally {
@@ -1230,7 +1359,8 @@ class HomeServiceController extends GetxController with LiveRefreshMixin {
     }
   }
 
-  Future<bool> submitRating(int stars, String comment) async {
+  Future<bool> submitRating(int stars, String comment,
+      {List<String> tags = const []}) async {
     final id = trackedBooking?.id ?? lastBooking?.id;
     if (id == null) return false;
     // Defence in depth — the Rate screen shouldn't be reachable unpaid, but
@@ -1241,7 +1371,7 @@ class HomeServiceController extends GetxController with LiveRefreshMixin {
       return false;
     }
     try {
-      final res = await _repo.rate(id, stars, comment);
+      final res = await _repo.rate(id, stars, comment, tags: tags);
       if (res.success) {
         SnackHelper.success(res.message.isNotEmpty ? res.message : 'Thank you');
         hasReviewed = true;
@@ -1250,6 +1380,8 @@ class HomeServiceController extends GetxController with LiveRefreshMixin {
         // A fresh review always lands in the moderation queue — contact
         // options stay open until an admin approves it.
         myReviewStatus = 'pending';
+        // Reviewed → clear any dashboard prompt for this booking.
+        await _clearReviewPrompt(id);
         update();
         return true;
       }
@@ -1498,6 +1630,7 @@ class HomeServiceController extends GetxController with LiveRefreshMixin {
     }
     Get.toNamed(Routes.HS_RATE);
   }
+
   void openChat() {
     if (!chatAvailable) {
       SnackHelper.error(chatUnavailableReason, title: _moduleTitle);

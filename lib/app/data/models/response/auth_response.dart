@@ -3,8 +3,9 @@ import 'dart:convert';
 import '../../../core/values/storage.dart';
 import '../../services/storage.service.dart';
 
-Map<String, dynamic> _asMap(dynamic src) =>
-    src is String ? jsonDecode(src) as Map<String, dynamic> : src as Map<String, dynamic>;
+Map<String, dynamic> _asMap(dynamic src) => src is String
+    ? jsonDecode(src) as Map<String, dynamic>
+    : src as Map<String, dynamic>;
 
 /// Common envelope for login / register / resend-otp:
 /// `{ "success": true, "message": "..." }` (plus optional data fields).
@@ -15,6 +16,7 @@ class AuthSimpleResponse {
     this.phone,
     this.userId,
     this.otpSent,
+    this.registered,
   });
 
   final bool success;
@@ -23,15 +25,29 @@ class AuthSimpleResponse {
   final String? userId;
   final bool? otpSent;
 
+  /// Set to `false` by `/auth/login` when the phone has no account yet —
+  /// the backend refuses to send an OTP for a number nobody can verify
+  /// into, and tells the client explicitly so it can route to
+  /// registration instead of just showing a dead-end error. Null for
+  /// every other response (resend/register), where it doesn't apply.
+  final bool? registered;
+
   factory AuthSimpleResponse.fromMap(dynamic src) {
     final json = _asMap(src);
-    final data = json['data'] is Map ? json['data'] as Map<String, dynamic> : null;
+    final data =
+        json['data'] is Map ? json['data'] as Map<String, dynamic> : null;
+    // response.BadRequest puts its third argument under "error", not
+    // "data" — confirmed against the live /auth/login response, which
+    // disagreed with that handler's own doc comment.
+    final error =
+        json['error'] is Map ? json['error'] as Map<String, dynamic> : null;
     return AuthSimpleResponse(
       success: json['success'] == true,
       message: json['message']?.toString() ?? '',
       phone: (data?['phone'] ?? json['phone'])?.toString(),
       userId: (data?['user_id'] ?? json['user_id'])?.toString(),
       otpSent: data?['otp_sent'] as bool?,
+      registered: error?['registered'] as bool?,
     );
   }
 }

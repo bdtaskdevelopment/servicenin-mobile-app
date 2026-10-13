@@ -102,6 +102,49 @@ class ServiceCategory {
   }
 }
 
+/// One admin-authored Q&A pair shown in a category's FAQ section (e.g.
+/// "Do you bring your own tools?" under "AC Repair & Service").
+class ServiceCategoryFaq {
+  ServiceCategoryFaq({required this.question, required this.answer});
+  final String question;
+  final String answer;
+
+  factory ServiceCategoryFaq.fromMap(Map<String, dynamic> j) =>
+      ServiceCategoryFaq(
+        question: _str(j['question']),
+        answer: _str(j['answer']),
+      );
+}
+
+/// GET /services/categories/:id — a category's Description, Terms &
+/// Conditions and FAQs, on-screen in that exact order on the category's
+/// sub-service list page. The category's own name/icon/price and its
+/// sub-service list are already held separately (HsCategory / subServices),
+/// so this only carries the three extra sections.
+class ServiceCategoryDetail {
+  ServiceCategoryDetail({
+    required this.description,
+    required this.termsConditions,
+    required this.faqs,
+  });
+  final String description;
+  final String termsConditions;
+  final List<ServiceCategoryFaq> faqs;
+
+  static ServiceCategoryDetail fromResponse(dynamic src) {
+    final d = (_data(src) as Map).cast<String, dynamic>();
+    final faqsRaw = d['faqs'] is List ? d['faqs'] as List : const [];
+    return ServiceCategoryDetail(
+      description: _str(d['description']),
+      termsConditions: _str(d['terms_conditions']),
+      faqs: faqsRaw
+          .whereType<Map>()
+          .map((e) => ServiceCategoryFaq.fromMap(e.cast<String, dynamic>()))
+          .toList(),
+    );
+  }
+}
+
 // ── Sub-service ─────────────────────────────────────────────────────
 class SubService {
   SubService({
@@ -148,17 +191,17 @@ class SubService {
   factory SubService.fromMap(Map<String, dynamic> j) {
     final price = _int(j['price']);
     return SubService(
-        id: _str(j['id']),
-        categoryId: _str(j['category_id']),
-        name: _str(j['name']),
-        nameBn: _str(j['name_bn']),
-        description: _str(j['description']),
-        price: price,
-        discountPrice: _discountOrNull(j['discount_price'], price),
-        durationMin: _int(j['duration_min']),
-        variants: SubServiceVariant.listFromJson(j['variants']),
-        iconUrl: _str(j['icon_url']),
-      );
+      id: _str(j['id']),
+      categoryId: _str(j['category_id']),
+      name: _str(j['name']),
+      nameBn: _str(j['name_bn']),
+      description: _str(j['description']),
+      price: price,
+      discountPrice: _discountOrNull(j['discount_price'], price),
+      durationMin: _int(j['duration_min']),
+      variants: SubServiceVariant.listFromJson(j['variants']),
+      iconUrl: _str(j['icon_url']),
+    );
   }
 
   static List<SubService> listFromResponse(dynamic src) {
@@ -197,13 +240,13 @@ class SubServiceVariant {
   factory SubServiceVariant.fromMap(Map<String, dynamic> j) {
     final price = _int(j['price']);
     return SubServiceVariant(
-        id: _str(j['id']),
-        subServiceId: _str(j['sub_service_id']),
-        name: _str(j['name']),
-        nameBn: _str(j['name_bn']),
-        price: price,
-        discountPrice: _discountOrNull(j['discount_price'], price),
-      );
+      id: _str(j['id']),
+      subServiceId: _str(j['sub_service_id']),
+      name: _str(j['name']),
+      nameBn: _str(j['name_bn']),
+      price: price,
+      discountPrice: _discountOrNull(j['discount_price'], price),
+    );
   }
 
   static List<SubServiceVariant> listFromJson(dynamic src) {
@@ -421,6 +464,8 @@ class ServiceBookingExtraItem {
     required this.unit,
     required this.addedByRole,
     required this.createdAt,
+    this.vatRate = 0,
+    this.vatAmount = 0,
   });
   final String id;
   final String itemId;
@@ -431,6 +476,12 @@ class ServiceBookingExtraItem {
   final String unit;
   final String addedByRole;
   final DateTime? createdAt;
+
+  /// % snapshotted when the part was added, and this line's own VAT amount
+  /// (lineTotal * vatRate / 100) — separate from the booking-wide Service
+  /// VAT. Zero when this item carries no VAT.
+  final int vatRate;
+  final int vatAmount;
 
   /// Drops the trailing `.0` on whole quantities so "2 litre" doesn't
   /// render as "2.0 litre".
@@ -453,6 +504,8 @@ class ServiceBookingExtraItem {
       unit: _str(it['unit']),
       addedByRole: _str(j['added_by_role']),
       createdAt: DateTime.tryParse(_str(j['created_at'])),
+      vatRate: _int(j['vat_rate']),
+      vatAmount: _int(j['vat_amount']),
     );
   }
 }
@@ -501,12 +554,17 @@ class ServiceItem {
     required this.unit,
     required this.unitPrice,
     required this.stockQty,
+    this.vatRate = 0,
   });
   final String id;
   final String name;
   final String unit;
   final int unitPrice;
   final double stockQty;
+
+  /// Optional VAT % on this part, 0 = none. Not folded into [unitPrice] —
+  /// the server adds it as its own line when the part is added to a booking.
+  final int vatRate;
 
   bool get inStock => stockQty > 0;
 
@@ -516,6 +574,7 @@ class ServiceItem {
         unit: _str(j['unit']),
         unitPrice: _int(j['unit_price']),
         stockQty: _dbl(j['stock_qty']) ?? 0,
+        vatRate: _int(j['vat_rate']),
       );
 
   static List<ServiceItem> listFromResponse(dynamic src) {
@@ -538,6 +597,7 @@ class ServiceBookingProvider {
     required this.rating,
     required this.totalJobs,
     required this.skills,
+    this.employmentType = '',
   });
 
   final String id;
@@ -547,6 +607,14 @@ class ServiceBookingProvider {
   final double rating;
   final int totalJobs;
   final String skills;
+
+  /// Mirrors models.HomeServiceProvider.EmploymentType on the backend —
+  /// "third_party" or "in_house". A third-party provider isn't the
+  /// company's own staff, so they don't collect cash on its behalf — see
+  /// [isThirdParty], used to hide the Cash option on the payment-choice
+  /// sheet for exactly these bookings.
+  final String employmentType;
+  bool get isThirdParty => employmentType == 'third_party';
 
   String get displayName => fullName.isNotEmpty ? fullName : 'Service provider';
   String get ratingLabel => rating > 0 ? rating.toStringAsFixed(1) : '—';
@@ -568,6 +636,7 @@ class ServiceBookingProvider {
         rating: _dbl(j['rating']) ?? 0,
         totalJobs: _int(j['total_jobs']),
         skills: _str(j['skills']),
+        employmentType: _str(j['employment_type']),
       );
 }
 
@@ -593,6 +662,11 @@ class ServiceBooking {
     required this.extraItems,
     required this.baseAmount,
     required this.promoDiscount,
+    this.promoCode = '',
+    this.adminDiscountAmount = 0,
+    this.adminDiscountByName = '',
+    this.itemVatAmount = 0,
+    this.roundOffAmount = 0,
     required this.settled,
     required this.servicesSummary,
     required this.categoryNames,
@@ -626,9 +700,31 @@ class ServiceBooking {
   final List<ServiceBookingExtraItem> extraItems;
 
   /// Flat call-out fee charged before any line items, frozen at booking
-  /// time. Part of the subtotal but not attributable to a job or part.
+  /// time. Already included IN [subtotal] — never add this on top of it
+  /// (see the invoice's own "Subtotal" line, which is the single source of
+  /// truth). Kept only for recompute bookkeeping, not its own invoice row.
   final int baseAmount;
   final int promoDiscount;
+
+  /// The redeemed coupon code, shown next to [promoDiscount] on the
+  /// invoice ("Promo discount (CODE)") when non-empty.
+  final String promoCode;
+
+  /// A discount an admin applied directly to the invoice — distinct from
+  /// [promoDiscount] (a customer-facing coupon). Shown as its own "Discount
+  /// (by X)" line, separate from the promo discount line.
+  final int adminDiscountAmount;
+  final String adminDiscountByName;
+
+  /// Sum of every extra item's own VAT — distinct from [vatAmount] (the
+  /// booking-wide "Service VAT"). Both are folded into [amount] already;
+  /// this is only for the invoice's own "Item VAT" line.
+  final int itemVatAmount;
+
+  /// Admin-only manual adjustment on the final total, already folded into
+  /// [amount]. The app never sets this — shown only when non-zero, and can
+  /// be negative.
+  final int roundOffAmount;
   final bool settled;
   final String servicesSummary;
   final List<String> categoryNames;
@@ -649,6 +745,8 @@ class ServiceBooking {
   String get amountLabel => '৳$amount';
   String get subtotalLabel => '৳$subtotal';
   String get vatLabel => '৳$vatAmount';
+  bool get hasItemVat => itemVatAmount != 0;
+  bool get hasRoundOff => roundOffAmount != 0;
 
   String get title => subServiceName.isNotEmpty
       ? subServiceName
@@ -822,6 +920,11 @@ class ServiceBooking {
       ),
       baseAmount: _int(j['base_amount']),
       promoDiscount: _int(j['promo_discount']),
+      promoCode: _str(j['promo_code']),
+      adminDiscountAmount: _int(j['admin_discount_amount']),
+      adminDiscountByName: _str(j['admin_discount_by_name']),
+      itemVatAmount: _int(j['item_vat_amount']),
+      roundOffAmount: _int(j['round_off_amount']),
       settled: _str(j['settled_at']).isNotEmpty,
       servicesSummary: _str(j['services_summary']),
       categoryNames:

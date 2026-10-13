@@ -35,7 +35,8 @@ class PhoneView extends GetView<AuthController> {
                   const SizedBox(height: 8),
                   Text(
                     'We\'ll send you an OTP to verify.'.tr,
-                    style: const TextStyle(fontSize: 14, color: Color(0xFF64748B)),
+                    style:
+                        const TextStyle(fontSize: 14, color: Color(0xFF64748B)),
                   ),
                   const SizedBox(height: 28),
                   Text(
@@ -51,7 +52,8 @@ class PhoneView extends GetView<AuthController> {
                   const SizedBox(height: 8),
                   Text(
                     'Only Bangladeshi numbers are supported.'.tr,
-                    style: const TextStyle(fontSize: 12, color: Color(0xFF94A3B8)),
+                    style:
+                        const TextStyle(fontSize: 12, color: Color(0xFF94A3B8)),
                   ),
                   const Spacer(),
                   PrimaryButton(
@@ -146,7 +148,7 @@ class _PhoneInput extends StatelessWidget {
               controller: con.phoneController,
               keyboardType: TextInputType.phone,
               onChanged: con.onPhoneChanged,
-              maxLength: 10,
+              maxLength: 11,
               inputFormatters: [FilteringTextInputFormatter.digitsOnly],
               style: const TextStyle(
                 fontSize: 16,
@@ -156,14 +158,15 @@ class _PhoneInput extends StatelessWidget {
               ),
               decoration: const InputDecoration(
                 counterText: '',
-                hintText: '1XXXXXXXXX',
+                hintText: '01XXXXXXXXX',
                 hintStyle: TextStyle(
                   color: Color(0xFFB6C0CC),
                   fontWeight: FontWeight.w500,
                   letterSpacing: 1,
                 ),
                 border: InputBorder.none,
-                contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 16),
+                contentPadding:
+                    EdgeInsets.symmetric(horizontal: 12, vertical: 16),
               ),
             ),
           ),

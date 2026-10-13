@@ -74,115 +74,21 @@ class HsServiceListView extends GetView<HomeServiceController> {
             final isSearch = con.mode == HsListMode.search;
             return Column(
               children: [
-                // Header
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(8, 6, 16, 8),
-                  child: Row(
-                    children: [
-                      IconButton(
-                        splashRadius: 22,
-                        onPressed: () => Get.back(),
-                        icon: const Icon(Icons.arrow_back_ios_new_rounded,
-                            size: 20, color: Color(0xFF1A1A1A)),
-                      ),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(con.listTitle,
-                              style: const TextStyle(
-                                  fontSize: 19,
-                                  fontWeight: FontWeight.w800,
-                                  color: Color(0xFF0F172A))),
-                          Text('${services.length} ${'services available'.tr}',
-                              style: const TextStyle(
-                                  fontSize: 12, color: Color(0xFF94A3B8))),
-                        ],
-                      ),
-                      const Spacer(),
-                      if (!isSearch) ...[
-                        GestureDetector(
-                          onTap: con.openSearch,
-                          child: const Icon(Icons.search_rounded,
-                              color: Color(0xFF1A1A1A), size: 22),
-                        ),
-                        const SizedBox(width: 16),
-                      ],
-                      // Cart with live item-count badge → opens the cart page.
-                      GestureDetector(
-                        onTap: con.openCart,
-                        behavior: HitTestBehavior.opaque,
-                        child: Stack(
-                          clipBehavior: Clip.none,
-                          children: [
-                            const Icon(Icons.shopping_cart_outlined,
-                                color: Color(0xFF1A1A1A), size: 24),
-                            if (con.totalItems > 0)
-                              Positioned(
-                                right: -7,
-                                top: -7,
-                                child: Container(
-                                  padding: const EdgeInsets.all(3),
-                                  constraints: const BoxConstraints(
-                                      minWidth: 18, minHeight: 18),
-                                  decoration: const BoxDecoration(
-                                      color: AppColors.brandOrange,
-                                      shape: BoxShape.circle),
-                                  alignment: Alignment.center,
-                                  child: Text('${con.totalItems}',
-                                      style: const TextStyle(
-                                          color: Colors.white,
-                                          fontSize: 10,
-                                          fontWeight: FontWeight.w800)),
-                                ),
-                              ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                // Always-visible filter/search bar: in category mode it
-                // instantly filters the currently loaded sub-services by
-                // name (no network call); in search mode (reached via the
-                // search icon, or Home's "Search…"/"All →") it runs the
-                // cross-category search as before.
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
-                  child: Container(
-                    height: 46,
-                    padding: const EdgeInsets.symmetric(horizontal: 14),
-                    decoration: BoxDecoration(
-                        color: const Color(0xFFEFF1F4),
-                        borderRadius: BorderRadius.circular(12)),
-                    child: Row(
-                      children: [
-                        const Icon(Icons.search_rounded,
-                            color: Color(0xFF94A3B8)),
-                        const SizedBox(width: 10),
-                        Expanded(
-                          child: TextField(
-                            autofocus: isSearch,
-                            onChanged: isSearch
-                                ? con.onQueryChanged
-                                : con.onSubFilterChanged,
-                            decoration: InputDecoration(
-                              hintText: (isSearch
-                                      ? 'Search services…'
-                                      : 'Filter services in this category…')
-                                  .tr,
-                              hintStyle:
-                                  const TextStyle(color: Color(0xFF94A3B8)),
-                              border: InputBorder.none,
-                              isCollapsed: true,
-                            ),
-                            style: const TextStyle(
-                                fontSize: 14.5, color: Color(0xFF0F172A)),
-                          ),
-                        ),
-                      ],
+                // Hero header (gradient, rounded bottom) with a floating
+                // search/filter card peeking out of its lower edge.
+                Stack(
+                  clipBehavior: Clip.none,
+                  children: [
+                    _CategoryHeader(con: con, isSearch: isSearch),
+                    Positioned(
+                      left: 16,
+                      right: 16,
+                      bottom: -24,
+                      child: _FloatingSearchField(con: con, isSearch: isSearch),
                     ),
-                  ),
+                  ],
                 ),
+                const SizedBox(height: 36),
                 Expanded(
                   child: (con.loadingSub || con.searching) && services.isEmpty
                       ? const SnListSkeleton(
@@ -201,14 +107,21 @@ class HsServiceListView extends GetView<HomeServiceController> {
                               child: ListView(
                                 padding:
                                     const EdgeInsets.fromLTRB(16, 8, 16, 16),
-                                children: services
-                                    .map((s) => Padding(
-                                          padding:
-                                              const EdgeInsets.only(bottom: 12),
-                                          child:
-                                              _ServiceRow(service: s, con: con),
-                                        ))
-                                    .toList(),
+                                children: [
+                                  ...services.map((s) => Padding(
+                                        padding:
+                                            const EdgeInsets.only(bottom: 12),
+                                        child:
+                                            _ServiceRow(service: s, con: con),
+                                      )),
+                                  // Category's own Description → Terms &
+                                  // Conditions → FAQs, in that order, below
+                                  // the sub-service list. Only meaningful in
+                                  // category mode (search/all list results
+                                  // from many categories at once).
+                                  if (con.mode == HsListMode.category)
+                                    ..._categoryInfoSections(con),
+                                ],
                               ),
                             ),
                 ),
@@ -221,6 +134,250 @@ class HsServiceListView extends GetView<HomeServiceController> {
       ),
     );
   }
+}
+
+/// Gradient hero header: back/search/cart row, then the category's own
+/// avatar (uploaded image, else a generic icon) beside its title — replaces
+/// the old plain white app-bar row with something that actually reads as
+/// "this category's own page" rather than a generic list screen. Extra
+/// bottom padding leaves room for [_FloatingSearchField] to overlap its
+/// rounded lower edge.
+class _CategoryHeader extends StatelessWidget {
+  const _CategoryHeader({required this.con, required this.isSearch});
+  final HomeServiceController con;
+  final bool isSearch;
+
+  @override
+  Widget build(BuildContext context) {
+    final services = con.visibleServices;
+    final cat = con.selectedCat;
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.fromLTRB(10, 6, 16, 44),
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          colors: [hsTeal, hsDarkTeal],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.only(
+          bottomLeft: Radius.circular(28),
+          bottomRight: Radius.circular(28),
+        ),
+        boxShadow: [
+          BoxShadow(
+              color: Color(0x330E7C6B), blurRadius: 18, offset: Offset(0, 8)),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              _HeaderIconButton(
+                  icon: Icons.arrow_back_ios_new_rounded,
+                  onTap: () => Get.back()),
+              const Spacer(),
+              if (!isSearch) ...[
+                _HeaderIconButton(
+                    icon: Icons.search_rounded, onTap: con.openSearch),
+                const SizedBox(width: 10),
+              ],
+              _HeaderCartButton(con: con),
+            ],
+          ),
+          const SizedBox(height: 16),
+          Padding(
+            padding: const EdgeInsets.only(left: 6),
+            child: Row(
+              children: [
+                _CategoryAvatar(cat: cat, isSearch: isSearch),
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(con.listTitle,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                              fontSize: 21,
+                              fontWeight: FontWeight.w800,
+                              color: Colors.white,
+                              letterSpacing: 0.1)),
+                      const SizedBox(height: 3),
+                      Text('${services.length} ${'services available'.tr}',
+                          style: const TextStyle(
+                              fontSize: 12.5,
+                              fontWeight: FontWeight.w500,
+                              color: Color(0xCCFFFFFF))),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// The category's own uploaded image on a soft white disc, falling back to
+/// its generic icon — or a plain search glyph while in search mode, where
+/// there's no single category to represent.
+class _CategoryAvatar extends StatelessWidget {
+  const _CategoryAvatar({required this.cat, required this.isSearch});
+  final HsCategory? cat;
+  final bool isSearch;
+
+  @override
+  Widget build(BuildContext context) {
+    const size = 50.0;
+    return Container(
+      width: size,
+      height: size,
+      alignment: Alignment.center,
+      decoration:
+          const BoxDecoration(color: Color(0x33FFFFFF), shape: BoxShape.circle),
+      clipBehavior: Clip.antiAlias,
+      child: isSearch
+          ? const Icon(Icons.search_rounded, color: Colors.white, size: 24)
+          : (cat?.imageUrl.isEmpty ?? true)
+              ? Icon(cat?.icon ?? Icons.home_repair_service_outlined,
+                  color: Colors.white, size: 24)
+              : CachedNetworkImage(
+                  imageUrl: _iconUrl(cat!.imageUrl),
+                  fit: BoxFit.cover,
+                  width: size,
+                  height: size,
+                  placeholder: (_, __) =>
+                      Icon(cat!.icon, color: Colors.white, size: 24),
+                  errorWidget: (_, __, ___) =>
+                      Icon(cat!.icon, color: Colors.white, size: 24),
+                ),
+    );
+  }
+}
+
+/// Small translucent circular button used for back/search in the header —
+/// a consistent "glass" look instead of bare icons on the gradient.
+class _HeaderIconButton extends StatelessWidget {
+  const _HeaderIconButton({required this.icon, required this.onTap});
+  final IconData icon;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) => Material(
+        color: const Color(0x26FFFFFF),
+        shape: const CircleBorder(),
+        child: InkWell(
+          onTap: onTap,
+          customBorder: const CircleBorder(),
+          child: SizedBox(
+            width: 38,
+            height: 38,
+            child: Icon(icon, color: Colors.white, size: 19),
+          ),
+        ),
+      );
+}
+
+/// Cart button, same "glass" circle as the other header icons, with the
+/// live item-count badge kept from the old header.
+class _HeaderCartButton extends StatelessWidget {
+  const _HeaderCartButton({required this.con});
+  final HomeServiceController con;
+
+  @override
+  Widget build(BuildContext context) => GestureDetector(
+        onTap: con.openCart,
+        behavior: HitTestBehavior.opaque,
+        child: Stack(
+          clipBehavior: Clip.none,
+          children: [
+            Material(
+              color: const Color(0x26FFFFFF),
+              shape: const CircleBorder(),
+              child: const SizedBox(
+                width: 38,
+                height: 38,
+                child: Icon(Icons.shopping_cart_outlined,
+                    color: Colors.white, size: 19),
+              ),
+            ),
+            if (con.totalItems > 0)
+              Positioned(
+                right: -4,
+                top: -4,
+                child: Container(
+                  padding: const EdgeInsets.all(3),
+                  constraints:
+                      const BoxConstraints(minWidth: 18, minHeight: 18),
+                  decoration: const BoxDecoration(
+                      color: AppColors.brandOrange, shape: BoxShape.circle),
+                  alignment: Alignment.center,
+                  child: Text('${con.totalItems}',
+                      style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 10,
+                          fontWeight: FontWeight.w800)),
+                ),
+              ),
+          ],
+        ),
+      );
+}
+
+/// The always-visible filter/search field, now a floating white card that
+/// overlaps the header's rounded lower edge instead of sitting flush below
+/// it. In category mode it instantly filters the currently loaded
+/// sub-services by name (no network call); in search mode (reached via the
+/// header's search icon, or Home's "Search…"/"All →") it runs the
+/// cross-category search as before.
+class _FloatingSearchField extends StatelessWidget {
+  const _FloatingSearchField({required this.con, required this.isSearch});
+  final HomeServiceController con;
+  final bool isSearch;
+
+  @override
+  Widget build(BuildContext context) => Container(
+        height: 50,
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        decoration: BoxDecoration(
+          color: AppColors.white,
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: const [
+            BoxShadow(
+                color: Color(0x1A0F172A), blurRadius: 16, offset: Offset(0, 6)),
+          ],
+        ),
+        child: Row(
+          children: [
+            const Icon(Icons.search_rounded, color: _teal),
+            const SizedBox(width: 10),
+            Expanded(
+              child: TextField(
+                autofocus: isSearch,
+                onChanged:
+                    isSearch ? con.onQueryChanged : con.onSubFilterChanged,
+                decoration: InputDecoration(
+                  hintText: (isSearch
+                          ? 'Search services…'
+                          : 'Filter services in this category…')
+                      .tr,
+                  hintStyle: const TextStyle(color: Color(0xFF94A3B8)),
+                  border: InputBorder.none,
+                  isCollapsed: true,
+                ),
+                style:
+                    const TextStyle(fontSize: 14.5, color: Color(0xFF0F172A)),
+              ),
+            ),
+          ],
+        ),
+      );
 }
 
 class _ServiceRow extends StatelessWidget {
@@ -241,10 +398,18 @@ class _ServiceRow extends StatelessWidget {
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: AppColors.white,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(18),
         border: Border.all(
-            color: selected ? _teal : const Color(0xFFEDEFF2),
-            width: selected ? 1.5 : 1.2),
+            color: selected ? _teal : const Color(0xFFEEF1F4),
+            width: selected ? 1.5 : 1),
+        boxShadow: [
+          BoxShadow(
+              color: selected
+                  ? _teal.withValues(alpha: 0.14)
+                  : const Color(0x0A0F172A),
+              blurRadius: selected ? 14 : 10,
+              offset: const Offset(0, 4)),
+        ],
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
@@ -319,7 +484,9 @@ class _DurationPriceRow extends StatelessWidget {
           const Text('·', style: TextStyle(color: Color(0xFFCBD5E1))),
           const SizedBox(width: 8),
         ],
-        Flexible(child: PriceText(price: price, originalPrice: originalPrice, prefix: prefix)),
+        Flexible(
+            child: PriceText(
+                price: price, originalPrice: originalPrice, prefix: prefix)),
       ],
     );
   }
@@ -328,7 +495,8 @@ class _DurationPriceRow extends StatelessWidget {
 /// Price in the admin panel's style: the payable price in emerald, with the
 /// list price struck through in red beside it when a discount applies.
 class PriceText extends StatelessWidget {
-  const PriceText({super.key, required this.price, this.originalPrice, this.prefix});
+  const PriceText(
+      {super.key, required this.price, this.originalPrice, this.prefix});
   final int price;
   final int? originalPrice;
   final String? prefix;
@@ -342,7 +510,9 @@ class PriceText extends StatelessWidget {
           TextSpan(
               text: '$prefix ',
               style: const TextStyle(
-                  fontSize: 12, fontWeight: FontWeight.w600, color: Color(0xFF64748B))),
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                  color: Color(0xFF64748B))),
         TextSpan(
             text: '৳$price',
             style: TextStyle(
@@ -387,10 +557,18 @@ class _VariantServiceRow extends StatelessWidget {
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
           color: AppColors.white,
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(18),
           border: Border.all(
-              color: selected ? _teal : const Color(0xFFEDEFF2),
-              width: selected ? 1.5 : 1.2),
+              color: selected ? _teal : const Color(0xFFEEF1F4),
+              width: selected ? 1.5 : 1),
+          boxShadow: [
+            BoxShadow(
+                color: selected
+                    ? _teal.withValues(alpha: 0.14)
+                    : const Color(0x0A0F172A),
+                blurRadius: selected ? 14 : 10,
+                offset: const Offset(0, 4)),
+          ],
         ),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.center,
@@ -432,8 +610,7 @@ class _VariantServiceRow extends StatelessWidget {
               ),
               const SizedBox(width: 4),
             ],
-            const Icon(Icons.chevron_right_rounded,
-                color: Color(0xFF94A3B8)),
+            const Icon(Icons.chevron_right_rounded, color: Color(0xFF94A3B8)),
           ],
         ),
       ),
@@ -445,7 +622,10 @@ class _VariantServiceRow extends StatelessWidget {
 /// [HsVariantPickerView].
 class HsVariantRow extends StatelessWidget {
   const HsVariantRow(
-      {super.key, required this.service, required this.variant, required this.con});
+      {super.key,
+      required this.service,
+      required this.variant,
+      required this.con});
   final HsServiceItem service;
   final SubServiceVariant variant;
   final HomeServiceController con;
@@ -516,7 +696,10 @@ class HsAddButton extends StatelessWidget {
 
 class HsQtyStepper extends StatelessWidget {
   const HsQtyStepper(
-      {super.key, required this.qty, required this.onMinus, required this.onPlus});
+      {super.key,
+      required this.qty,
+      required this.onMinus,
+      required this.onPlus});
   final int qty;
   final VoidCallback onMinus;
   final VoidCallback onPlus;
@@ -600,4 +783,139 @@ class HsReviewBar extends StatelessWidget {
       ),
     );
   }
+}
+
+/// Category's own Description → Terms & Conditions → FAQs, in that exact
+/// order, each only shown when the category actually has content for it
+/// (an admin may set none, some, or all three).
+List<Widget> _categoryInfoSections(HomeServiceController con) {
+  final sections = <Widget>[];
+  if (con.categoryDescription.isNotEmpty) {
+    sections.addAll([
+      const SizedBox(height: 8),
+      _InfoSectionLabel(Icons.info_outline_rounded, 'Description'.tr),
+      const SizedBox(height: 10),
+      _InfoTextCard(con.categoryDescription),
+    ]);
+  }
+  if (con.categoryTerms.isNotEmpty) {
+    sections.addAll([
+      const SizedBox(height: 20),
+      _InfoSectionLabel(Icons.description_outlined, 'Terms & Conditions'.tr),
+      const SizedBox(height: 10),
+      _InfoTextCard(con.categoryTerms),
+    ]);
+  }
+  if (con.categoryFaqs.isNotEmpty) {
+    sections.addAll([
+      const SizedBox(height: 20),
+      _InfoSectionLabel(Icons.help_outline_rounded, 'FAQ'.tr),
+      const SizedBox(height: 10),
+      _FaqCard(faqs: con.categoryFaqs),
+    ]);
+  }
+  return sections;
+}
+
+/// A small teal icon chip beside an uppercase label — gives the
+/// Description/Terms/FAQ sections a bit more presence than a bare grey
+/// caption, while staying quiet next to the service cards above them.
+class _InfoSectionLabel extends StatelessWidget {
+  const _InfoSectionLabel(this.icon, this.text);
+  final IconData icon;
+  final String text;
+  @override
+  Widget build(BuildContext context) => Row(
+        children: [
+          Container(
+            width: 24,
+            height: 24,
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+                color: _teal.withValues(alpha: 0.12),
+                borderRadius: BorderRadius.circular(8)),
+            child: Icon(icon, size: 14, color: _darkTeal),
+          ),
+          const SizedBox(width: 8),
+          Text(text,
+              style: const TextStyle(
+                  fontSize: 12.5,
+                  fontWeight: FontWeight.w800,
+                  color: Color(0xFF475569),
+                  letterSpacing: 0.5)),
+        ],
+      );
+}
+
+class _InfoTextCard extends StatelessWidget {
+  const _InfoTextCard(this.text);
+  final String text;
+  @override
+  Widget build(BuildContext context) => Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(14),
+        decoration: BoxDecoration(
+          color: AppColors.white,
+          borderRadius: BorderRadius.circular(18),
+          boxShadow: const [
+            BoxShadow(
+                color: Color(0x0A0F172A), blurRadius: 10, offset: Offset(0, 4)),
+          ],
+        ),
+        child: Text(text,
+            style: const TextStyle(
+                fontSize: 13.5, height: 1.5, color: Color(0xFF334155))),
+      );
+}
+
+/// Expandable Q&A list — collapsed by default so a category with many FAQs
+/// doesn't push the page into a wall of text.
+class _FaqCard extends StatelessWidget {
+  const _FaqCard({required this.faqs});
+  final List<ServiceCategoryFaq> faqs;
+
+  @override
+  Widget build(BuildContext context) => Container(
+        decoration: BoxDecoration(
+          color: AppColors.white,
+          borderRadius: BorderRadius.circular(18),
+          boxShadow: const [
+            BoxShadow(
+                color: Color(0x0A0F172A), blurRadius: 10, offset: Offset(0, 4)),
+          ],
+        ),
+        child: Theme(
+          data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
+          child: Column(
+            children: [
+              for (int i = 0; i < faqs.length; i++) ...[
+                if (i > 0) const Divider(height: 1, color: Color(0xFFF1F5F9)),
+                ExpansionTile(
+                  tilePadding:
+                      const EdgeInsets.symmetric(horizontal: 14, vertical: 2),
+                  childrenPadding: const EdgeInsets.fromLTRB(14, 0, 14, 14),
+                  expandedCrossAxisAlignment: CrossAxisAlignment.start,
+                  iconColor: _teal,
+                  collapsedIconColor: const Color(0xFF94A3B8),
+                  title: Text(faqs[i].question,
+                      style: const TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w700,
+                          color: Color(0xFF0F172A))),
+                  children: [
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: Text(faqs[i].answer,
+                          style: const TextStyle(
+                              fontSize: 13.5,
+                              height: 1.5,
+                              color: Color(0xFF334155))),
+                    ),
+                  ],
+                ),
+              ],
+            ],
+          ),
+        ),
+      );
 }

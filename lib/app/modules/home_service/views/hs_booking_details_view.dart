@@ -33,129 +33,128 @@ class HsBookingDetailsView extends GetView<HomeServiceController> {
     return GetBuilder<HomeServiceController>(builder: (con) {
       final booking = con.orderBooking;
       return Scaffold(
-      backgroundColor: const Color(0xFFF7F8FA),
-      body: SafeArea(
-        child: Column(
-          children: [
-            Padding(
-              padding: const EdgeInsets.fromLTRB(8, 6, 16, 8),
-              child: Row(
-                children: [
-                  IconButton(
-                    splashRadius: 22,
-                    onPressed: () => Get.back(),
-                    icon: const Icon(Icons.arrow_back_ios_new_rounded,
-                        size: 20, color: Color(0xFF1A1A1A)),
-                  ),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text('Booking details'.tr,
-                          style: const TextStyle(
-                              fontSize: 19,
-                              fontWeight: FontWeight.w800,
-                              color: Color(0xFF0F172A))),
-                      Text(con.bookingId,
-                          style: const TextStyle(
-                              fontSize: 12, color: Color(0xFF94A3B8))),
-                    ],
-                  ),
-                  const Spacer(),
-                  // Manual refresh — the provider can add parts, move the
-                  // status on, or collect cash while this screen is open,
-                  // none of which push to the app.
-                  con.refreshingOrder
-                      ? const Padding(
-                          padding: EdgeInsets.all(12),
-                          child: SizedBox(
-                            width: 20,
-                            height: 20,
-                            child: CircularProgressIndicator(
-                                strokeWidth: 2.2, color: _darkTeal),
-                          ),
-                        )
-                      : IconButton(
-                          splashRadius: 22,
-                          tooltip: 'Refresh'.tr,
-                          onPressed: () =>
-                              con.refreshOrder(showSpinner: true),
-                          icon: const Icon(Icons.refresh_rounded,
-                              size: 22, color: Color(0xFF1A1A1A)),
-                        ),
-                ],
-              ),
-            ),
-            Expanded(
-              child: ListView(
-                padding: const EdgeInsets.fromLTRB(16, 6, 16, 16),
-                children: [
-                  // Service card
-                  Container(
-                    padding: const EdgeInsets.all(14),
-                    decoration: BoxDecoration(
-                        color: AppColors.white,
-                        borderRadius: BorderRadius.circular(16)),
-                    child: Row(
+        backgroundColor: const Color(0xFFF7F8FA),
+        body: SafeArea(
+          child: Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.fromLTRB(8, 6, 16, 8),
+                child: Row(
+                  children: [
+                    IconButton(
+                      splashRadius: 22,
+                      onPressed: () => Get.back(),
+                      icon: const Icon(Icons.arrow_back_ios_new_rounded,
+                          size: 20, color: Color(0xFF1A1A1A)),
+                    ),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Container(
-                          width: 44,
-                          height: 44,
-                          decoration: BoxDecoration(
-                              color: _tile,
-                              borderRadius: BorderRadius.circular(12)),
-                          child: const Icon(Icons.ac_unit_rounded,
-                              color: _teal, size: 22),
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(con.bookingSummary,
-                                  style: const TextStyle(
-                                      fontSize: 14.5,
-                                      fontWeight: FontWeight.w800,
-                                      color: Color(0xFF0F172A))),
-                              const SizedBox(height: 2),
-                              Text(
-                                  '${con.techName} · ${con.whenSummary}',
-                                  style: const TextStyle(
-                                      fontSize: 12,
-                                      color: Color(0xFF94A3B8))),
-                            ],
-                          ),
-                        ),
-                        _StatusChip(status: con.trackedBooking?.status ?? ''),
+                        Text('Booking details'.tr,
+                            style: const TextStyle(
+                                fontSize: 19,
+                                fontWeight: FontWeight.w800,
+                                color: Color(0xFF0F172A))),
+                        Text(con.bookingId,
+                            style: const TextStyle(
+                                fontSize: 12, color: Color(0xFF94A3B8))),
                       ],
                     ),
-                  ),
-                  // ── Assigned provider ─────────────────────────────────
-                  // Only revealed once the provider has ACCEPTED the job —
-                  // an admin-assigned-but-not-yet-accepted booking keeps the
-                  // provider hidden.
-                  if (con.showProviderProfile) ...[
-                    const SizedBox(height: 12),
-                    _ProviderCard(con: con),
+                    const Spacer(),
+                    // Manual refresh — the provider can add parts, move the
+                    // status on, or collect cash while this screen is open,
+                    // none of which push to the app.
+                    con.refreshingOrder
+                        ? const Padding(
+                            padding: EdgeInsets.all(12),
+                            child: SizedBox(
+                              width: 20,
+                              height: 20,
+                              child: CircularProgressIndicator(
+                                  strokeWidth: 2.2, color: _darkTeal),
+                            ),
+                          )
+                        : IconButton(
+                            splashRadius: 22,
+                            tooltip: 'Refresh'.tr,
+                            onPressed: () =>
+                                con.refreshOrder(showSpinner: true),
+                            icon: const Icon(Icons.refresh_rounded,
+                                size: 22, color: Color(0xFF1A1A1A)),
+                          ),
                   ],
-                  if (booking != null && booking.notes.isNotEmpty) ...[
-                    const SizedBox(height: 18),
-                    _Label('SPECIAL INSTRUCTIONS'.tr),
-                    const SizedBox(height: 10),
+                ),
+              ),
+              Expanded(
+                child: ListView(
+                  padding: const EdgeInsets.fromLTRB(16, 6, 16, 16),
+                  children: [
+                    // Service card
                     Container(
-                      width: double.infinity,
                       padding: const EdgeInsets.all(14),
                       decoration: BoxDecoration(
                           color: AppColors.white,
                           borderRadius: BorderRadius.circular(16)),
-                      child: Text(booking.notes,
-                          style: const TextStyle(
-                              fontSize: 13.5,
-                              height: 1.4,
-                              color: Color(0xFF334155))),
+                      child: Row(
+                        children: [
+                          Container(
+                            width: 44,
+                            height: 44,
+                            decoration: BoxDecoration(
+                                color: _tile,
+                                borderRadius: BorderRadius.circular(12)),
+                            child: const Icon(Icons.ac_unit_rounded,
+                                color: _teal, size: 22),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(con.bookingSummary,
+                                    style: const TextStyle(
+                                        fontSize: 14.5,
+                                        fontWeight: FontWeight.w800,
+                                        color: Color(0xFF0F172A))),
+                                const SizedBox(height: 2),
+                                Text('${con.techName} · ${con.whenSummary}',
+                                    style: const TextStyle(
+                                        fontSize: 12,
+                                        color: Color(0xFF94A3B8))),
+                              ],
+                            ),
+                          ),
+                          _StatusChip(status: con.trackedBooking?.status ?? ''),
+                        ],
+                      ),
                     ),
-                  ],
-                  // Status timeline & work proof hidden for now.
-                  /*
+                    // ── Assigned provider ─────────────────────────────────
+                    // Only revealed once the provider has ACCEPTED the job —
+                    // an admin-assigned-but-not-yet-accepted booking keeps the
+                    // provider hidden.
+                    if (con.showProviderProfile) ...[
+                      const SizedBox(height: 12),
+                      _ProviderCard(con: con),
+                    ],
+                    if (booking != null && booking.notes.isNotEmpty) ...[
+                      const SizedBox(height: 18),
+                      _Label('SPECIAL INSTRUCTIONS'.tr),
+                      const SizedBox(height: 10),
+                      Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.all(14),
+                        decoration: BoxDecoration(
+                            color: AppColors.white,
+                            borderRadius: BorderRadius.circular(16)),
+                        child: Text(booking.notes,
+                            style: const TextStyle(
+                                fontSize: 13.5,
+                                height: 1.4,
+                                color: Color(0xFF334155))),
+                      ),
+                    ],
+                    // Status timeline & work proof hidden for now.
+                    /*
                   const SizedBox(height: 18),
                   const _Label('STATUS TIMELINE'),
                   const SizedBox(height: 10),
@@ -237,309 +236,345 @@ class HsBookingDetailsView extends GetView<HomeServiceController> {
                     ],
                   ),
                   */
-                  // ── Every job on this order ──────────────────────────
-                  if (booking != null && booking.items.isNotEmpty) ...[
-                    const SizedBox(height: 18),
-                    _Label('SERVICES'.tr),
-                    const SizedBox(height: 10),
-                    Container(
-                      decoration: BoxDecoration(
-                          color: AppColors.white,
-                          borderRadius: BorderRadius.circular(16)),
-                      child: Column(
-                        children: [
-                          for (int i = 0; i < booking.items.length; i++) ...[
-                            if (i > 0)
-                              const Divider(
-                                  height: 1, color: Color(0xFFF1F5F9)),
-                            _JobRow(item: booking.items[i]),
+                    // ── Every job on this order ──────────────────────────
+                    if (booking != null && booking.items.isNotEmpty) ...[
+                      const SizedBox(height: 18),
+                      _Label('SERVICES'.tr),
+                      const SizedBox(height: 10),
+                      Container(
+                        decoration: BoxDecoration(
+                            color: AppColors.white,
+                            borderRadius: BorderRadius.circular(16)),
+                        child: Column(
+                          children: [
+                            for (int i = 0; i < booking.items.length; i++) ...[
+                              if (i > 0)
+                                const Divider(
+                                    height: 1, color: Color(0xFFF1F5F9)),
+                              _JobRow(item: booking.items[i]),
+                            ],
                           ],
-                        ],
-                      ),
-                    ),
-                  ],
-                  // ── Parts and materials ──────────────────────────────
-                  if (booking != null && booking.extraItems.isNotEmpty) ...[
-                    const SizedBox(height: 18),
-                    _Label('PARTS & MATERIALS'.tr),
-                    const SizedBox(height: 10),
-                    Container(
-                      decoration: BoxDecoration(
-                          color: AppColors.white,
-                          borderRadius: BorderRadius.circular(16)),
-                      child: Column(
-                        children: [
-                          for (int i = 0;
-                              i < booking.extraItems.length;
-                              i++) ...[
-                            if (i > 0)
-                              const Divider(
-                                  height: 1, color: Color(0xFFF1F5F9)),
-                            _PartRow(part: booking.extraItems[i]),
-                          ],
-                        ],
-                      ),
-                    ),
-                  ],
-                  const SizedBox(height: 18),
-                  _Label('INVOICE'.tr),
-                  const SizedBox(height: 10),
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    decoration: BoxDecoration(
-                        color: AppColors.white,
-                        borderRadius: BorderRadius.circular(16)),
-                    child: Column(
-                      children: [
-                        if (booking != null && booking.baseAmount > 0) ...[
-                          _fee('Call-out charge'.tr, '৳${booking.baseAmount}'),
-                          const Divider(height: 1, color: Color(0xFFF1F5F9)),
-                        ],
-                        _fee('Service charge'.tr,
-                            '৳${booking?.subtotal ?? con.subtotalAmount}'),
-                        if (booking != null && booking.promoDiscount > 0) ...[
-                          const Divider(height: 1, color: Color(0xFFF1F5F9)),
-                          _fee('Discount'.tr, '−৳${booking.promoDiscount}'),
-                        ],
-                        const Divider(height: 1, color: Color(0xFFF1F5F9)),
-                        // Rate comes from the booking — it is frozen at
-                        // booking time, so a later settings change must not
-                        // relabel an old invoice.
-                        _fee(
-                            booking != null && booking.vatRate > 0
-                                ? 'VAT (${booking.vatRate}%)'.tr
-                                : 'VAT'.tr,
-                            '৳${booking?.vatAmount ?? con.vat}'),
-                        const Divider(height: 1, color: Color(0xFFF1F5F9)),
-                        _fee('Total'.tr, '৳${booking?.amount ?? con.totalPaid}',
-                            bold: true),
-                        // Discount the provider (or an admin) granted when
-                        // collecting payment. It doesn't change the Total —
-                        // it reduces what the customer hands over — so it
-                        // sits below Total next to what was actually paid.
-                        if (con.paymentSummary?.hasDiscount == true) ...[
-                          const Divider(height: 1, color: Color(0xFFF1F5F9)),
-                          _fee(
-                              'Discount given'.tr,
-                              '−৳${con.paymentSummary!.discountTotal.toStringAsFixed(0)}',
-                              valueColor: const Color(0xFFB45309)),
-                          const Divider(height: 1, color: Color(0xFFF1F5F9)),
-                          _fee(
-                              'Amount paid'.tr,
-                              '৳${con.paymentSummary!.cashReceived.toStringAsFixed(0)}'),
-                        ],
-                        // Promo code — offered only while there's still a
-                        // balance owed and none has been redeemed on this
-                        // booking yet. Placed BEFORE the outstanding-balance
-                        // row so the balance the customer is about to pay
-                        // already reflects the discount, not after.
-                        if (booking != null &&
-                            !booking.locked &&
-                            booking.promoDiscount == 0 &&
-                            con.paymentSummary?.hasOutstanding == true) ...[
-                          const Divider(height: 1, color: Color(0xFFF1F5F9)),
-                          const _PromoCodeRow(),
-                        ],
-                        if (con.paymentSummary?.hasOutstanding == true) ...[
-                          const Divider(height: 1, color: Color(0xFFF1F5F9)),
-                          _fee(
-                              'Outstanding balance'.tr,
-                              '৳${con.paymentSummary!.outstanding.toStringAsFixed(0)}',
-                              bold: true,
-                              valueColor: const Color(0xFFDC2626)),
-                        ],
-                      ],
-                    ),
-                  ),
-                  // Available whenever a balance is owed, regardless of how
-                  // the booking was originally paid — the customer can
-                  // always choose to settle it online instead of waiting
-                  // for cash collection on-site.
-                  if (con.paymentSummary?.hasOutstanding == true) ...[
-                    const SizedBox(height: 12),
-                    SizedBox(
-                      width: double.infinity,
-                      height: 52,
-                      child: ElevatedButton.icon(
-                        onPressed:
-                            con.isPayingOnline ? null : con.payOutstandingOnline,
-                        icon: con.isPayingOnline
-                            ? const SizedBox(
-                                width: 18,
-                                height: 18,
-                                child: CircularProgressIndicator(
-                                    strokeWidth: 2, color: Colors.white))
-                            : const Icon(Icons.credit_card_rounded, size: 20),
-                        label: Text(
-                            con.isPayingOnline
-                                ? 'প্রসেসিং...'
-                                : 'Pay ৳${con.paymentSummary!.outstanding.toStringAsFixed(0)} online'
-                                    .tr,
-                            style: const TextStyle(
-                                fontSize: 15, fontWeight: FontWeight.w800)),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: _darkTeal,
-                          foregroundColor: Colors.white,
-                          elevation: 0,
-                          shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(14)),
                         ),
                       ),
+                    ],
+                    // ── Parts and materials ──────────────────────────────
+                    if (booking != null && booking.extraItems.isNotEmpty) ...[
+                      const SizedBox(height: 18),
+                      _Label('PARTS & MATERIALS'.tr),
+                      const SizedBox(height: 10),
+                      Container(
+                        decoration: BoxDecoration(
+                            color: AppColors.white,
+                            borderRadius: BorderRadius.circular(16)),
+                        child: Column(
+                          children: [
+                            for (int i = 0;
+                                i < booking.extraItems.length;
+                                i++) ...[
+                              if (i > 0)
+                                const Divider(
+                                    height: 1, color: Color(0xFFF1F5F9)),
+                              _PartRow(part: booking.extraItems[i]),
+                            ],
+                          ],
+                        ),
+                      ),
+                    ],
+                    const SizedBox(height: 18),
+                    _Label('INVOICE'.tr),
+                    const SizedBox(height: 10),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      decoration: BoxDecoration(
+                          color: AppColors.white,
+                          borderRadius: BorderRadius.circular(16)),
+                      child: Column(
+                        children: [
+                          // [booking.baseAmount] is already included IN
+                          // subtotal (see its doc comment) — it's never a
+                          // separate charge on top, so it gets no invoice
+                          // row of its own. Matches the web admin invoice,
+                          // which only ever shows one "Subtotal" line.
+                          _fee('Subtotal'.tr,
+                              '৳${booking?.subtotal ?? con.subtotalAmount}'),
+                          if (booking != null && booking.promoDiscount > 0) ...[
+                            const Divider(height: 1, color: Color(0xFFF1F5F9)),
+                            _fee(
+                                booking.promoCode.isNotEmpty
+                                    ? 'Promo discount (${booking.promoCode})'.tr
+                                    : 'Promo discount'.tr,
+                                '−৳${booking.promoDiscount}',
+                                valueColor: const Color(0xFF047857)),
+                          ],
+                          // An admin-granted discount — a separate concept
+                          // from the promo code above, so both can show at
+                          // once (mirrors the web invoice's two distinct
+                          // rows).
+                          if (booking != null &&
+                              booking.adminDiscountAmount > 0) ...[
+                            const Divider(height: 1, color: Color(0xFFF1F5F9)),
+                            _fee(
+                                booking.adminDiscountByName.isNotEmpty
+                                    ? 'Discount (by ${booking.adminDiscountByName})'
+                                        .tr
+                                    : 'Discount'.tr,
+                                '−৳${booking.adminDiscountAmount}',
+                                valueColor: const Color(0xFFB45309)),
+                          ],
+                          const Divider(height: 1, color: Color(0xFFF1F5F9)),
+                          // Rate comes from the booking — it is frozen at
+                          // booking time, so a later settings change must not
+                          // relabel an old invoice. Labelled "Service VAT" to
+                          // stay distinct from the per-part "Item VAT" below.
+                          _fee(
+                              booking != null && booking.vatRate > 0
+                                  ? '${'Service VAT'.tr} (${booking.vatRate}%)'
+                                  : 'Service VAT'.tr,
+                              '৳${booking?.vatAmount ?? con.vat}'),
+                          // Sum of every part's own VAT (set per-item by admin),
+                          // separate from the booking-wide Service VAT above.
+                          if (booking != null && booking.hasItemVat) ...[
+                            const Divider(height: 1, color: Color(0xFFF1F5F9)),
+                            _fee('Item VAT'.tr, '৳${booking.itemVatAmount}'),
+                          ],
+                          // Admin-only manual adjustment on the total — shown
+                          // only when one was actually applied.
+                          if (booking != null && booking.hasRoundOff) ...[
+                            const Divider(height: 1, color: Color(0xFFF1F5F9)),
+                            _fee(
+                                'Round off'.tr,
+                                booking.roundOffAmount > 0
+                                    ? '+৳${booking.roundOffAmount}'
+                                    : '−৳${-booking.roundOffAmount}'),
+                          ],
+                          const Divider(height: 1, color: Color(0xFFF1F5F9)),
+                          _fee('Total'.tr,
+                              '৳${booking?.amount ?? con.totalPaid}',
+                              bold: true),
+                          // Discount the provider (or an admin) granted when
+                          // collecting payment. It doesn't change the Total —
+                          // it reduces what the customer hands over — so it
+                          // sits below Total next to what was actually paid.
+                          if (con.paymentSummary?.hasDiscount == true) ...[
+                            const Divider(height: 1, color: Color(0xFFF1F5F9)),
+                            _fee('Discount given'.tr,
+                                '−৳${con.paymentSummary!.discountTotal.toStringAsFixed(0)}',
+                                valueColor: const Color(0xFFB45309)),
+                            const Divider(height: 1, color: Color(0xFFF1F5F9)),
+                            _fee('Amount paid'.tr,
+                                '৳${con.paymentSummary!.cashReceived.toStringAsFixed(0)}'),
+                          ],
+                          // Promo code — offered only while there's still a
+                          // balance owed and none has been redeemed on this
+                          // booking yet. Placed BEFORE the outstanding-balance
+                          // row so the balance the customer is about to pay
+                          // already reflects the discount, not after.
+                          if (booking != null &&
+                              !booking.locked &&
+                              booking.promoDiscount == 0 &&
+                              con.paymentSummary?.hasOutstanding == true) ...[
+                            const Divider(height: 1, color: Color(0xFFF1F5F9)),
+                            const _PromoCodeRow(),
+                          ],
+                          if (con.paymentSummary?.hasOutstanding == true) ...[
+                            const Divider(height: 1, color: Color(0xFFF1F5F9)),
+                            _fee('Outstanding balance'.tr,
+                                '৳${con.paymentSummary!.outstanding.toStringAsFixed(0)}',
+                                bold: true,
+                                valueColor: const Color(0xFFDC2626)),
+                          ],
+                        ],
+                      ),
                     ),
-                  ],
-                  if (booking != null) ...[
-                    const SizedBox(height: 8),
-                    _PaymentNote(booking: booking),
-                  ],
-                  if ((con.trackedBooking?.id ?? '').isNotEmpty) ...[
-                    const SizedBox(height: 14),
-                    InvoiceActions(
-                      viewPath: ApiURL.hsInvoicePdf(con.trackedBooking!.id),
-                      downloadPath:
-                          ApiURL.hsInvoicePdfDownload(con.trackedBooking!.id),
-                      fileName: 'invoice-${con.trackedBooking!.id}',
-                      accent: _darkTeal,
-                    ),
-                  ],
-                ],
-              ),
-            ),
-            // Bottom actions
-            Container(
-              color: AppColors.white,
-              padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
-              child: Column(
-                children: [
-                  // Editing is offered only while the server would accept
-                  // it; once locked we say why rather than showing a
-                  // button that is guaranteed to fail.
-                  if (booking != null) ...[
-                    if (con.canEditOrder)
+                    // Available whenever a balance is owed, regardless of how
+                    // the booking was originally paid — the customer can
+                    // always choose to settle it online instead of waiting
+                    // for cash collection on-site.
+                    if (con.paymentSummary?.hasOutstanding == true) ...[
+                      const SizedBox(height: 12),
                       SizedBox(
                         width: double.infinity,
                         height: 52,
-                        child: OutlinedButton.icon(
-                          onPressed: con.openEditOrder,
-                          icon: const Icon(Icons.edit_note_rounded,
-                              size: 20, color: _darkTeal),
-                          style: OutlinedButton.styleFrom(
-                            side: const BorderSide(color: _teal),
+                        child: ElevatedButton.icon(
+                          onPressed: con.isPayingOnline
+                              ? null
+                              : con.payOutstandingOnline,
+                          icon: con.isPayingOnline
+                              ? const SizedBox(
+                                  width: 18,
+                                  height: 18,
+                                  child: CircularProgressIndicator(
+                                      strokeWidth: 2, color: Colors.white))
+                              : const Icon(Icons.credit_card_rounded, size: 20),
+                          label: Text(
+                              con.isPayingOnline
+                                  ? 'প্রসেসিং...'
+                                  : 'Pay ৳${con.paymentSummary!.outstanding.toStringAsFixed(0)} online'
+                                      .tr,
+                              style: const TextStyle(
+                                  fontSize: 15, fontWeight: FontWeight.w800)),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: _darkTeal,
+                            foregroundColor: Colors.white,
+                            elevation: 0,
                             shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(14)),
                           ),
-                          label: Text('Edit order'.tr,
+                        ),
+                      ),
+                    ],
+                    if (booking != null) ...[
+                      const SizedBox(height: 8),
+                      _PaymentNote(booking: booking),
+                    ],
+                    if ((con.trackedBooking?.id ?? '').isNotEmpty) ...[
+                      const SizedBox(height: 14),
+                      InvoiceActions(
+                        viewPath: ApiURL.hsInvoicePdf(con.trackedBooking!.id),
+                        downloadPath:
+                            ApiURL.hsInvoicePdfDownload(con.trackedBooking!.id),
+                        fileName: 'invoice-${con.trackedBooking!.id}',
+                        accent: _darkTeal,
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+              // Bottom actions
+              Container(
+                color: AppColors.white,
+                padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
+                child: Column(
+                  children: [
+                    // Editing is offered only while the server would accept
+                    // it; once locked we say why rather than showing a
+                    // button that is guaranteed to fail.
+                    if (booking != null) ...[
+                      if (con.canEditOrder)
+                        SizedBox(
+                          width: double.infinity,
+                          height: 52,
+                          child: OutlinedButton.icon(
+                            onPressed: con.openEditOrder,
+                            icon: const Icon(Icons.edit_note_rounded,
+                                size: 20, color: _darkTeal),
+                            style: OutlinedButton.styleFrom(
+                              side: const BorderSide(color: _teal),
+                              shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(14)),
+                            ),
+                            label: Text('Edit order'.tr,
+                                style: const TextStyle(
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.w800,
+                                    color: _darkTeal)),
+                          ),
+                        )
+                      else
+                        Container(
+                          width: double.infinity,
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 14, vertical: 12),
+                          decoration: BoxDecoration(
+                              color: const Color(0xFFF1F5F9),
+                              borderRadius: BorderRadius.circular(12)),
+                          child: Row(
+                            children: [
+                              const Icon(Icons.lock_outline_rounded,
+                                  size: 16, color: Color(0xFF94A3B8)),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: Text(booking.lockReason.tr,
+                                    style: const TextStyle(
+                                        fontSize: 12.5,
+                                        color: Color(0xFF64748B))),
+                              ),
+                            ],
+                          ),
+                        ),
+                      const SizedBox(height: 12),
+                    ],
+                    // Review is only available once the job is completed AND
+                    // fully paid. Already-reviewed bookings keep a "View your
+                    // review" button; a completed-but-unpaid booking shows a
+                    // "pay first" hint instead of an actionable Rate button.
+                    if (con.hasReviewed)
+                      SizedBox(
+                        width: double.infinity,
+                        height: 52,
+                        child: OutlinedButton(
+                          onPressed: con.rateService,
+                          style: OutlinedButton.styleFrom(
+                            side: const BorderSide(color: Color(0xFFCDEBE4)),
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(14)),
+                          ),
+                          child: Text('View your review'.tr,
                               style: const TextStyle(
                                   fontSize: 15,
-                                  fontWeight: FontWeight.w800,
+                                  fontWeight: FontWeight.w700,
                                   color: _darkTeal)),
                         ),
                       )
-                    else
+                    else if (con.canReview)
+                      SizedBox(
+                        width: double.infinity,
+                        height: 52,
+                        child: ElevatedButton(
+                          onPressed: con.rateService,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: _darkTeal,
+                            foregroundColor: Colors.white,
+                            elevation: 0,
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(14)),
+                          ),
+                          child: Text('Rate service'.tr,
+                              style: const TextStyle(
+                                  fontSize: 15, fontWeight: FontWeight.w800)),
+                        ),
+                      )
+                    else if (con.completedButUnpaid)
                       Container(
                         width: double.infinity,
                         padding: const EdgeInsets.symmetric(
-                            horizontal: 14, vertical: 12),
+                            horizontal: 14, vertical: 14),
                         decoration: BoxDecoration(
-                            color: const Color(0xFFF1F5F9),
-                            borderRadius: BorderRadius.circular(12)),
+                            color: const Color(0xFFFFF7ED),
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(color: const Color(0xFFFED7AA))),
                         child: Row(
                           children: [
-                            const Icon(Icons.lock_outline_rounded,
-                                size: 16, color: Color(0xFF94A3B8)),
-                            const SizedBox(width: 8),
+                            const Icon(Icons.lock_clock_outlined,
+                                size: 18, color: Color(0xFFC2410C)),
+                            const SizedBox(width: 10),
                             Expanded(
-                              child: Text(booking.lockReason.tr,
+                              child: Text(
+                                  'Complete your payment to leave a review'.tr,
                                   style: const TextStyle(
                                       fontSize: 12.5,
-                                      color: Color(0xFF64748B))),
+                                      fontWeight: FontWeight.w600,
+                                      color: Color(0xFF9A3412))),
                             ),
                           ],
                         ),
                       ),
-                    const SizedBox(height: 12),
+                    // Duplicate dispute link hidden — dispute now in the row above.
+                    // const SizedBox(height: 8),
+                    // TextButton(
+                    //   onPressed: () => _showDisputeDialog(context, con),
+                    //   child: const Text('Report an issue (dispute)',
+                    //       style: TextStyle(
+                    //           fontSize: 13.5,
+                    //           fontWeight: FontWeight.w700,
+                    //           color: Color(0xFFDC2626))),
+                    // ),
                   ],
-                  // Review is only available once the job is completed AND
-                  // fully paid. Already-reviewed bookings keep a "View your
-                  // review" button; a completed-but-unpaid booking shows a
-                  // "pay first" hint instead of an actionable Rate button.
-                  if (con.hasReviewed)
-                    SizedBox(
-                      width: double.infinity,
-                      height: 52,
-                      child: OutlinedButton(
-                        onPressed: con.rateService,
-                        style: OutlinedButton.styleFrom(
-                          side: const BorderSide(color: Color(0xFFCDEBE4)),
-                          shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(14)),
-                        ),
-                        child: Text('View your review'.tr,
-                            style: const TextStyle(
-                                fontSize: 15,
-                                fontWeight: FontWeight.w700,
-                                color: _darkTeal)),
-                      ),
-                    )
-                  else if (con.canReview)
-                    SizedBox(
-                      width: double.infinity,
-                      height: 52,
-                      child: ElevatedButton(
-                        onPressed: con.rateService,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: _darkTeal,
-                          foregroundColor: Colors.white,
-                          elevation: 0,
-                          shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(14)),
-                        ),
-                        child: Text('Rate service'.tr,
-                            style: const TextStyle(
-                                fontSize: 15, fontWeight: FontWeight.w800)),
-                      ),
-                    )
-                  else if (con.completedButUnpaid)
-                    Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 14, vertical: 14),
-                      decoration: BoxDecoration(
-                          color: const Color(0xFFFFF7ED),
-                          borderRadius: BorderRadius.circular(12),
-                          border:
-                              Border.all(color: const Color(0xFFFED7AA))),
-                      child: Row(
-                        children: [
-                          const Icon(Icons.lock_clock_outlined,
-                              size: 18, color: Color(0xFFC2410C)),
-                          const SizedBox(width: 10),
-                          Expanded(
-                            child: Text(
-                                'Complete your payment to leave a review'.tr,
-                                style: const TextStyle(
-                                    fontSize: 12.5,
-                                    fontWeight: FontWeight.w600,
-                                    color: Color(0xFF9A3412))),
-                          ),
-                        ],
-                      ),
-                    ),
-                  // Duplicate dispute link hidden — dispute now in the row above.
-                  // const SizedBox(height: 8),
-                  // TextButton(
-                  //   onPressed: () => _showDisputeDialog(context, con),
-                  //   child: const Text('Report an issue (dispute)',
-                  //       style: TextStyle(
-                  //           fontSize: 13.5,
-                  //           fontWeight: FontWeight.w700,
-                  //           color: Color(0xFFDC2626))),
-                  // ),
-                ],
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
-      ),
       );
     });
   }
@@ -606,8 +641,8 @@ class _PromoCodeRowState extends State<_PromoCodeRow> {
               decoration: InputDecoration(
                 hintText: 'Promo code'.tr,
                 isDense: true,
-                contentPadding: const EdgeInsets.symmetric(
-                    horizontal: 12, vertical: 10),
+                contentPadding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(10),
                   borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
@@ -635,8 +670,8 @@ class _PromoCodeRowState extends State<_PromoCodeRow> {
                 foregroundColor: Colors.white,
                 elevation: 0,
                 padding: const EdgeInsets.symmetric(horizontal: 16),
-                shape:
-                    RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10)),
               ),
               child: con.isApplyingPromo
                   ? const SizedBox(
@@ -780,8 +815,8 @@ class _StatusChip extends StatelessWidget {
       decoration:
           BoxDecoration(color: bg, borderRadius: BorderRadius.circular(20)),
       child: Text(label,
-          style: TextStyle(
-              fontSize: 11, fontWeight: FontWeight.w800, color: fg)),
+          style:
+              TextStyle(fontSize: 11, fontWeight: FontWeight.w800, color: fg)),
     );
   }
 }
@@ -908,7 +943,10 @@ class _PartRow extends StatelessWidget {
                         fontWeight: FontWeight.w700,
                         color: Color(0xFF0F172A))),
                 const SizedBox(height: 3),
-                Text('${part.quantityWithUnit} × ৳${part.unitPrice}',
+                Text(
+                    part.vatAmount > 0
+                        ? '${part.quantityWithUnit} × ৳${part.unitPrice} · +৳${part.vatAmount} VAT (${part.vatRate}%)'
+                        : '${part.quantityWithUnit} × ৳${part.unitPrice}',
                     style: const TextStyle(
                         fontSize: 12.5, color: Color(0xFF94A3B8))),
                 if (part.addedByRole.isNotEmpty &&

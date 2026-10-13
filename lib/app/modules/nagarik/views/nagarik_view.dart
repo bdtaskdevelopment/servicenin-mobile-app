@@ -7,7 +7,6 @@ import '../../../data/models/response/nagarik_response.dart';
 import '../../../global_widget/sn_shimmer.dart';
 import '../controllers/nagarik_controller.dart';
 
-const _navy = Color(0xFF1E2A4A);
 const _orange = Color(0xFFF15A24);
 const _tile = Color(0xFFFCE6CB);
 
@@ -68,8 +67,6 @@ class NagarikView extends GetView<NagarikController> {
                   child: ListView(
                     padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
                     children: [
-                      _Banner(con: con),
-                      const SizedBox(height: 16),
                       _ActionCards(con: con),
                       const SizedBox(height: 22),
                       Text(
@@ -113,98 +110,6 @@ class NagarikView extends GetView<NagarikController> {
                   ),
                 ),
               ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-}
-
-class _Banner extends StatelessWidget {
-  const _Banner({required this.con});
-  final NagarikController con;
-  @override
-  Widget build(BuildContext context) {
-    final hotline = con.hotlineNumber;
-    return FadeInDown(
-      duration: const Duration(milliseconds: 300),
-      child: Container(
-        padding: const EdgeInsets.all(18),
-        decoration: BoxDecoration(
-          gradient: const LinearGradient(
-            colors: [_navy, Color(0xFF2D3E63)],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
-          borderRadius: BorderRadius.circular(18),
-        ),
-        child: Stack(
-          children: [
-            Positioned(
-              right: -6,
-              top: -8,
-              child: Icon(
-                Icons.account_balance_rounded,
-                size: 80,
-                color: Colors.white.withValues(alpha: 0.10),
-              ),
-            ),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  con.bannerTitle,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 18,
-                    fontWeight: FontWeight.w800,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  con.bannerSubtitle,
-                  style: TextStyle(
-                    color: Colors.white.withValues(alpha: 0.9),
-                    fontSize: 12.5,
-                    height: 1.4,
-                  ),
-                ),
-                const SizedBox(height: 14),
-                GestureDetector(
-                  onTap: () => con.callNumber(hotline),
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 7,
-                    ),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withValues(alpha: 0.14),
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        const Icon(
-                          Icons.call_rounded,
-                          size: 14,
-                          color: Colors.white,
-                        ),
-                        const SizedBox(width: 6),
-                        Text(
-                          hotline,
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 13,
-                            fontWeight: FontWeight.w800,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
             ),
           ],
         ),
@@ -365,14 +270,14 @@ class _CatTile extends StatelessWidget {
               borderRadius: BorderRadius.circular(14),
             ),
             child: Icon(
-              nagarikCategoryIcon(cat.icon),
+              nagarikCategoryIcon(cat.key),
               color: _orange,
               size: 24,
             ),
           ),
           const SizedBox(height: 10),
           Text(
-            cat.label,
+            cat.displayLabel,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             textAlign: TextAlign.center,
@@ -574,9 +479,8 @@ class StatusPill extends StatelessWidget {
             style: TextStyle(
               fontSize: 11,
               fontWeight: FontWeight.w700,
-              color: resolved
-                  ? const Color(0xFF15803D)
-                  : const Color(0xFFB45309),
+              color:
+                  resolved ? const Color(0xFF15803D) : const Color(0xFFB45309),
             ),
           ),
         ],
