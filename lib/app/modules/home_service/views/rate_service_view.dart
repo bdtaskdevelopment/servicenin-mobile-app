@@ -17,7 +17,9 @@ class RateServiceView extends StatefulWidget {
 
 class _RateServiceViewState extends State<RateServiceView> {
   int rating = 5;
-  final Set<String> selectedTags = {'On time', 'Professional'};
+  // Stores the English label of each ticked aspect — that canonical value is
+  // what's sent to the server and shown in the admin panel.
+  final Set<String> selectedTags = {};
   final TextEditingController _comment = TextEditingController();
 
   @override
@@ -33,8 +35,17 @@ class _RateServiceViewState extends State<RateServiceView> {
     4: 'Very good',
     5: 'Excellent',
   };
-  static const _tags = [
-    'On time', 'Professional', 'Tidy work', 'Fair price', 'Polite', 'Skilled',
+  // The "what went well" checklist. ($1) is the English label — the canonical
+  // value stored/sent and shown in the admin panel; ($2) is the one-line
+  // description. Both are translated via .tr so they follow the app language.
+  static const List<(String, String)> _aspects = [
+    ('Service Quality', 'Problem solved correctly, with good finishing'),
+    ('Professionalism', 'Behaviour, politeness and cooperation with the customer'),
+    ('Punctuality', 'Arriving at the scheduled time'),
+    ('Technical Skill', 'Job knowledge, skill and problem-solving ability'),
+    ('Cleanliness', 'Keeping the area clean after the work'),
+    ('Reliability', 'Working as promised and keeping commitments'),
+    ('Pricing Transparency', 'A clear idea of the service charge and any extra costs'),
   ];
 
   @override
@@ -165,35 +176,77 @@ class _RateServiceViewState extends State<RateServiceView> {
                           color: Color(0xFF94A3B8),
                           letterSpacing: 0.6)),
                   const SizedBox(height: 12),
-                  Wrap(
-                    spacing: 10,
-                    runSpacing: 10,
-                    children: _tags.map((t) {
-                      final sel = selectedTags.contains(t);
-                      return GestureDetector(
-                        onTap: () => setState(() {
-                          sel ? selectedTags.remove(t) : selectedTags.add(t);
-                        }),
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 14, vertical: 9),
-                          decoration: BoxDecoration(
-                            color: sel
-                                ? _teal.withValues(alpha: 0.12)
-                                : AppColors.white,
-                            borderRadius: BorderRadius.circular(24),
-                            border: Border.all(
-                                color: sel
-                                    ? _teal
-                                    : const Color(0xFFE2E8F0)),
+                  Column(
+                    children: _aspects.map((a) {
+                      final label = a.$1;
+                      final sel = selectedTags.contains(label);
+                      return Padding(
+                        padding: const EdgeInsets.only(bottom: 10),
+                        child: GestureDetector(
+                          onTap: () => setState(() {
+                            sel
+                                ? selectedTags.remove(label)
+                                : selectedTags.add(label);
+                          }),
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 14, vertical: 12),
+                            decoration: BoxDecoration(
+                              color: sel
+                                  ? _teal.withValues(alpha: 0.08)
+                                  : AppColors.white,
+                              borderRadius: BorderRadius.circular(14),
+                              border: Border.all(
+                                  color: sel ? _teal : const Color(0xFFE2E8F0),
+                                  width: sel ? 1.5 : 1),
+                            ),
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                // Checkbox box
+                                Container(
+                                  width: 22,
+                                  height: 22,
+                                  margin: const EdgeInsets.only(top: 1),
+                                  decoration: BoxDecoration(
+                                    color: sel ? _darkTeal : Colors.transparent,
+                                    borderRadius: BorderRadius.circular(6),
+                                    border: Border.all(
+                                        color: sel
+                                            ? _darkTeal
+                                            : const Color(0xFFCBD5E1),
+                                        width: 1.6),
+                                  ),
+                                  child: sel
+                                      ? const Icon(Icons.check_rounded,
+                                          size: 16, color: Colors.white)
+                                      : null,
+                                ),
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(label.tr,
+                                          style: TextStyle(
+                                              fontSize: 14.5,
+                                              fontWeight: FontWeight.w700,
+                                              color: sel
+                                                  ? _darkTeal
+                                                  : const Color(0xFF0F172A))),
+                                      const SizedBox(height: 2),
+                                      Text(a.$2.tr,
+                                          style: const TextStyle(
+                                              fontSize: 12,
+                                              height: 1.35,
+                                              color: Color(0xFF64748B))),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
-                          child: Text(sel ? '✓ ${t.tr}' : t.tr,
-                              style: TextStyle(
-                                  fontSize: 13,
-                                  fontWeight: FontWeight.w700,
-                                  color: sel
-                                      ? _darkTeal
-                                      : const Color(0xFF334155))),
                         ),
                       );
                     }).toList(),
@@ -234,12 +287,13 @@ class _RateServiceViewState extends State<RateServiceView> {
                 height: 54,
                 child: ElevatedButton(
                   onPressed: () async {
-                    final tagNote = selectedTags.join(', ');
-                    final comment = [
+                    // The ticked aspects go as structured tags (shown on their
+                    // own in the admin panel), not folded into the comment.
+                    final ok = await con.submitRating(
+                      rating,
                       _comment.text.trim(),
-                      if (tagNote.isNotEmpty) '($tagNote)',
-                    ].where((s) => s.isNotEmpty).join(' ');
-                    final ok = await con.submitRating(rating, comment);
+                      tags: selectedTags.toList(),
+                    );
                     if (!ok) return;
                     await Get.dialog(
                       const _ReorderInterestDialog(),

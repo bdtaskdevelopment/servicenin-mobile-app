@@ -15,36 +15,42 @@ import '../../../data/repositories/nagarik.repo.dart';
 import '../../../data/services/storage.service.dart';
 import '../../../routes/app_pages.dart';
 
-IconData nagarikCategoryIcon(String icon) {
-  switch (icon.toLowerCase()) {
-    case 'road':
-      return Icons.add_road_rounded;
-    case 'garbage':
-    case 'waste':
-    case 'trash':
-      return Icons.delete_outline_rounded;
-    case 'drain':
-    case 'drainage':
-    case 'water':
-      return Icons.waves_rounded;
-    case 'light':
-    case 'streetlight':
-    case 'bulb':
-      return Icons.lightbulb_outline_rounded;
-    case 'water_supply':
-    case 'tap':
-      return Icons.water_drop_outlined;
-    case 'mosquito':
-    case 'health':
-      return Icons.shield_outlined;
-    case 'tree':
-    case 'park':
-      return Icons.park_outlined;
-    case 'noise':
-      return Icons.volume_up_outlined;
-    default:
-      return Icons.report_problem_outlined;
+/// Maps a grievance category's slug (e.g. "street_lights", "drainage") to
+/// an icon that actually represents that issue. Takes the category's `key`
+/// — the backend has never sent a separate `icon` field (only `emoji`,
+/// which this app doesn't render), so passing the old `icon` field here
+/// always fell through to the generic default below for every category.
+/// Substring matching (not exact-match) so this stays correct even if an
+/// admin renames a slug slightly (e.g. "road" vs "roads").
+IconData nagarikCategoryIcon(String key) {
+  final k = key.toLowerCase();
+  if (k.contains('light') || k.contains('bulb')) {
+    return Icons.lightbulb_outline_rounded;
   }
+  if (k.contains('traffic')) return Icons.traffic_rounded;
+  if (k.contains('road')) return Icons.add_road_rounded;
+  if (k.contains('waste') || k.contains('garbage') || k.contains('trash')) {
+    return Icons.delete_outline_rounded;
+  }
+  if (k.contains('drain')) return Icons.waves_rounded;
+  if (k.contains('sewage') || k.contains('sewer')) {
+    return Icons.plumbing_rounded;
+  }
+  if (k.contains('water') || k.contains('tap')) {
+    return Icons.water_drop_outlined;
+  }
+  if (k.contains('mosquito') || k.contains('pest')) {
+    return Icons.pest_control_outlined;
+  }
+  if (k.contains('health')) return Icons.shield_outlined;
+  if (k.contains('illegal') ||
+      k.contains('occupation') ||
+      k.contains('encroach')) {
+    return Icons.block_rounded;
+  }
+  if (k.contains('tree') || k.contains('park')) return Icons.park_outlined;
+  if (k.contains('noise')) return Icons.volume_up_outlined;
+  return Icons.report_problem_outlined;
 }
 
 class NagarikController extends GetxController with LiveRefreshMixin {
@@ -132,8 +138,8 @@ class NagarikController extends GetxController with LiveRefreshMixin {
 
   Future<void> pickVerifyPhoto() async {
     try {
-      final x = await _picker.pickImage(source: ImageSource.gallery,
-          imageQuality: 70);
+      final x = await _picker.pickImage(
+          source: ImageSource.gallery, imageQuality: 70);
       if (x == null) return;
       verifyPhoto = File(x.path);
       update();
@@ -445,8 +451,8 @@ class NagarikController extends GetxController with LiveRefreshMixin {
         if (verifyComment.text.trim().isNotEmpty)
           'comment': verifyComment.text.trim(),
       };
-      final res = await _repo.verifyGrievance(g.id, payload,
-          proofPhoto: verifyPhoto);
+      final res =
+          await _repo.verifyGrievance(g.id, payload, proofPhoto: verifyPhoto);
       if (res.success) {
         SnackHelper.success(res.message.isNotEmpty
             ? res.message
@@ -553,8 +559,7 @@ class NagarikController extends GetxController with LiveRefreshMixin {
     _poll = null;
   }
 
-  Future<void> fetchMessages(String ticketId,
-      {bool showLoader = false}) async {
+  Future<void> fetchMessages(String ticketId, {bool showLoader = false}) async {
     if (showLoader) {
       loadingMessages = true;
       update();
