@@ -235,7 +235,7 @@ class _RegPhoneInput extends StatelessWidget {
               controller: con.phoneController,
               keyboardType: TextInputType.phone,
               onChanged: con.onInfoChanged,
-              maxLength: 10,
+              maxLength: 11,
               inputFormatters: [FilteringTextInputFormatter.digitsOnly],
               style: const TextStyle(
                 fontSize: 16,
@@ -245,7 +245,7 @@ class _RegPhoneInput extends StatelessWidget {
               ),
               decoration: const InputDecoration(
                 counterText: '',
-                hintText: '1XXXXXXXXX',
+                hintText: '01XXXXXXXXX',
                 hintStyle: TextStyle(
                   color: Color(0xFFB6C0CC),
                   fontWeight: FontWeight.w500,

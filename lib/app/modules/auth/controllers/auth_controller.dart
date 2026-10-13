@@ -23,11 +23,20 @@ class AuthController extends GetxController {
   // ── Phone entry ──────────────────────────────────────────────────
   final TextEditingController phoneController = TextEditingController();
 
-  static const String countryCode = '+880';
+  // The chip shows the short "+88" prefix; the customer then types the
+  // full local number the way they'd dial it domestically, leading 0 and
+  // all ("01XXXXXXXXX", 11 digits). "+88" + "01744865867" concatenates to
+  // exactly the same E.164 string ("+8801744865867") as the old "+880" +
+  // "1744865867" split did — this only changes where the UI divides the
+  // digits, not the number that's actually sent to the backend.
+  static const String countryCode = '+88';
   static const String countryIso = 'BD';
 
-  /// BD mobile numbers are 10 digits after the +880 code (e.g. 1XXXXXXXXX).
-  bool get isPhoneValid => phoneController.text.trim().length == 10;
+  /// BD mobile numbers are 11 digits after the +88 code, starting with 0
+  /// (e.g. 01XXXXXXXXX).
+  bool get isPhoneValid =>
+      phoneController.text.trim().length == 11 &&
+      phoneController.text.trim().startsWith('0');
 
   void onPhoneChanged(String _) => update();
 
@@ -38,11 +47,11 @@ class AuthController extends GetxController {
   String otpPhone = '';
 
   /// Pretty masked phone used on the OTP screen subtitle, e.g.
-  /// "+880 1744 86 5867".
+  /// "+88 01744 86 5867".
   String get displayPhone {
     final digits = phoneController.text.trim();
-    if (digits.length < 10) return fullPhone;
-    return '$countryCode ${digits.substring(0, 4)} ${digits.substring(4, 6)} ${digits.substring(6)}';
+    if (digits.length < 11) return fullPhone;
+    return '$countryCode ${digits.substring(0, 5)} ${digits.substring(5, 7)} ${digits.substring(7)}';
   }
 
   // ── OTP ──────────────────────────────────────────────────────────
@@ -152,6 +161,13 @@ class AuthController extends GetxController {
       proceedToOtp();
       // Login success snackbar hidden — not needed.
       // SnackHelper.success(res.message);
+    } else if (res.registered == false) {
+      // No account for this phone — the backend tells us so explicitly
+      // (data.registered == false) rather than sending an OTP for nothing.
+      // Surface why, then take them straight to registration with the
+      // number already filled in.
+      SnackHelper.error(res.message, title: 'Login'.tr);
+      goToRegister();
     } else {
       SnackHelper.error(res.message, title: 'Login'.tr);
     }
@@ -215,9 +231,17 @@ class AuthController extends GetxController {
       Get.offAllNamed(AuthUser.fromStorage()?.isProvider == true
           ? Routes.HS_PROVIDER
           : Routes.HOME);
+    } else if (res.success && !res.userExist) {
+      // A valid OTP but no account for this phone (needs_register) — in
+      // practice login() already blocks this before an OTP is even sent,
+      // but this keeps the OTP screen itself correct too (e.g. the account
+      // being removed between request and verify). The OTP was already
+      // consumed server-side, so just move on to registration.
+      _timer?.cancel();
+      Get.offNamed(Routes.REGISTRATION);
     } else {
-      // user_exist == false or verification failed: clear the OTP boxes so the
-      // user can re-enter, then surface the error.
+      // Wrong/expired OTP: clear the boxes so the user can re-enter, then
+      // surface the error.
       _otp = '';
       otpClearToken++;
       update();

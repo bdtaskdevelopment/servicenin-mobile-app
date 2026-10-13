@@ -60,21 +60,20 @@ class ReportIssueView extends GetView<NagarikController> {
                               color: sel ? _tile : AppColors.white,
                               borderRadius: BorderRadius.circular(14),
                               border: Border.all(
-                                  color: sel
-                                      ? _orange
-                                      : const Color(0xFFE2E8F0),
+                                  color:
+                                      sel ? _orange : const Color(0xFFE2E8F0),
                                   width: sel ? 1.6 : 1.2),
                             ),
                             child: Column(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                Icon(nagarikCategoryIcon(c.icon),
+                                Icon(nagarikCategoryIcon(c.key),
                                     size: 24,
                                     color: sel
                                         ? _orange
                                         : const Color(0xFF334155)),
                                 const SizedBox(height: 8),
-                                Text(c.label,
+                                Text(c.displayLabel,
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
                                     textAlign: TextAlign.center,
@@ -176,8 +175,7 @@ class ReportIssueView extends GetView<NagarikController> {
                   width: double.infinity,
                   height: 54,
                   child: ElevatedButton(
-                    onPressed:
-                        con.submittingReport ? null : con.submitReport,
+                    onPressed: con.submittingReport ? null : con.submitReport,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: _orange,
                       foregroundColor: Colors.white,
@@ -332,8 +330,7 @@ class _Input extends StatelessWidget {
           contentPadding: const EdgeInsets.symmetric(vertical: 10),
           border: InputBorder.none,
           hintText: hint,
-          hintStyle:
-              const TextStyle(fontSize: 14.5, color: Color(0xFFB8C0CC)),
+          hintStyle: const TextStyle(fontSize: 14.5, color: Color(0xFFB8C0CC)),
         ),
       ),
     );

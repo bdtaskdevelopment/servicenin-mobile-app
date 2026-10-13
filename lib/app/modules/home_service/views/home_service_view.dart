@@ -112,6 +112,10 @@ class HomeServiceView extends GetView<HomeServiceController> {
                   return ListView(
                     padding: const EdgeInsets.fromLTRB(16, 10, 16, 24),
                     children: [
+                      // Review prompts for just-completed + paid bookings —
+                      // persist until the customer rates or crosses them.
+                      for (final p in con.pendingReviews)
+                        _ReviewPromptCard(data: p),
                       FadeInDown(
                         duration: const Duration(milliseconds: 300),
                         child: GestureDetector(
@@ -499,6 +503,101 @@ class _ServiceCard extends StatelessWidget {
                         decoration: TextDecoration.lineThrough,
                         decorationColor: Color(0xFFEF4444))),
             ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Dashboard prompt asking the customer to review a just-completed + paid
+/// booking. Shown until they tap "Rate now" or cross (X) it.
+class _ReviewPromptCard extends StatelessWidget {
+  const _ReviewPromptCard({required this.data});
+  final Map<String, dynamic> data;
+
+  static const _darkTeal = Color(0xFF0E7C6B);
+
+  @override
+  Widget build(BuildContext context) {
+    final con = Get.find<HomeServiceController>();
+    final id = (data['id'] ?? '').toString();
+    final provider = (data['provider'] ?? '').toString();
+    final service = (data['service'] ?? '').toString();
+    final subtitle = [
+      if (provider.isNotEmpty) provider,
+      if (service.isNotEmpty) service,
+    ].join(' · ');
+    return Container(
+      margin: const EdgeInsets.only(bottom: 14),
+      padding: const EdgeInsets.fromLTRB(14, 14, 10, 14),
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          colors: [Color(0xFFEFFBF8), Color(0xFFE6F6F1)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: const Color(0xFFBFE8DE)),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            width: 44,
+            height: 44,
+            decoration: const BoxDecoration(
+                color: Color(0xFFFFF3D6), shape: BoxShape.circle),
+            child: const Icon(Icons.star_rounded,
+                color: Color(0xFFF59E0B), size: 26),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('How was your service?'.tr,
+                    style: const TextStyle(
+                        fontSize: 14.5,
+                        fontWeight: FontWeight.w800,
+                        color: Color(0xFF0F172A))),
+                const SizedBox(height: 2),
+                Text(
+                    subtitle.isNotEmpty
+                        ? subtitle
+                        : 'Rate your recent booking'.tr,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                        fontSize: 12, color: Color(0xFF5B7B74))),
+                const SizedBox(height: 10),
+                SizedBox(
+                  height: 36,
+                  child: ElevatedButton.icon(
+                    onPressed: () => con.reviewFromPrompt(id),
+                    icon: const Icon(Icons.rate_review_outlined, size: 17),
+                    label: Text('Rate now'.tr,
+                        style: const TextStyle(
+                            fontSize: 13, fontWeight: FontWeight.w800)),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: _darkTeal,
+                      foregroundColor: Colors.white,
+                      elevation: 0,
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10)),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          IconButton(
+            onPressed: () => con.dismissReviewPrompt(id),
+            visualDensity: VisualDensity.compact,
+            splashRadius: 18,
+            icon: const Icon(Icons.close_rounded,
+                size: 18, color: Color(0xFF94A3B8)),
           ),
         ],
       ),

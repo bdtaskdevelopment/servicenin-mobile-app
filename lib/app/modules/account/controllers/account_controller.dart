@@ -13,6 +13,7 @@ import '../../../data/models/response/profile_response.dart';
 import '../../../data/repositories/profile.repo.dart';
 import '../../../data/services/storage.service.dart';
 import '../../../routes/app_pages.dart';
+import '../../auth/widgets/terms_notice.dart' show termsUrl, privacyUrl;
 
 class AccountController extends GetxController {
   ProfileRepository get _repo => Get.find<ProfileRepository>();
@@ -38,10 +39,9 @@ class AccountController extends GetxController {
   }
 
   // ---- Display getters (read straight off [profile]) ----
-  String get fullName =>
-      (profile?.fullName.trim().isNotEmpty ?? false)
-          ? profile!.fullName.trim()
-          : 'ServiceNin User';
+  String get fullName => (profile?.fullName.trim().isNotEmpty ?? false)
+      ? profile!.fullName.trim()
+      : 'ServiceNin User';
 
   String get name {
     final parts = fullName.split(' ').where((p) => p.isNotEmpty);
@@ -49,8 +49,9 @@ class AccountController extends GetxController {
   }
 
   String get email => profile?.email ?? '';
-  String get address =>
-      (profile?.address?.trim().isNotEmpty ?? false) ? profile!.address!.trim() : '—';
+  String get address => (profile?.address?.trim().isNotEmpty ?? false)
+      ? profile!.address!.trim()
+      : '—';
   String? get photoUrl => profile?.photoUrl;
   bool get isVerified => profile?.isVerified ?? false;
 
@@ -84,7 +85,14 @@ class AccountController extends GetxController {
   }
 
   final List<String> bloodGroups = const [
-    'A+', 'A-', 'B+', 'B-', 'O+', 'O-', 'AB+', 'AB-',
+    'A+',
+    'A-',
+    'B+',
+    'B-',
+    'O+',
+    'O-',
+    'AB+',
+    'AB-',
   ];
   String bloodGroup = 'B+';
   void setBloodGroup(String b) {
@@ -275,12 +283,16 @@ class AccountController extends GetxController {
     fetchActivity();
     Get.toNamed(Routes.ACCOUNT_ACTIVITY);
   }
+
   void openSettings() => Get.toNamed(Routes.ACCOUNT_SETTINGS);
 
   // Terms & Privacy open the website — same targets as the login /
-  // registration Terms notice (see auth/widgets/terms_notice.dart).
-  void openPrivacy() => Helpers.launchWebsite('https://servicenin.net/privacy-policy');
-  void openTerms() => Helpers.launchWebsite('https://servicenin.net/terms');
+  // registration Terms notice (see auth/widgets/terms_notice.dart). Shared
+  // constants so the two screens can't drift onto different URLs again —
+  // they previously pointed at servicenin.net while the login screen used
+  // servicenin.com.
+  void openPrivacy() => Helpers.launchWebsite(privacyUrl);
+  void openTerms() => Helpers.launchWebsite(termsUrl);
   void openDeleteAccount() => Get.toNamed(Routes.ACCOUNT_DELETE);
 
   void deleteAccount() {

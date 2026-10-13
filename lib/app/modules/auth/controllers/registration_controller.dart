@@ -34,8 +34,11 @@ class RegistrationController extends GetxController {
 
   void onInfoChanged(String _) => update();
 
-  /// Same phone rules as the login screen: 10 local digits after +880.
-  bool get isPhoneValid => phoneController.text.trim().length == 10;
+  /// Same phone rules as the login screen: 11 local digits after +88,
+  /// starting with 0 (e.g. 01XXXXXXXXX).
+  bool get isPhoneValid =>
+      phoneController.text.trim().length == 11 &&
+      phoneController.text.trim().startsWith('0');
   String get fullPhone =>
       '${AuthController.countryCode}${phoneController.text.trim()}';
 
@@ -95,12 +98,23 @@ class RegistrationController extends GetxController {
 
   static const List<String> genders = ['পুরুষ', 'মহিলা', 'অন্যান্য'];
   static const List<String> _bnMonths = [
-    'জানুয়ারি', 'ফেব্রুয়ারি', 'মার্চ', 'এপ্রিল', 'মে', 'জুন',
-    'জুলাই', 'আগস্ট', 'সেপ্টেম্বর', 'অক্টোবর', 'নভেম্বর', 'ডিসেম্বর',
+    'জানুয়ারি',
+    'ফেব্রুয়ারি',
+    'মার্চ',
+    'এপ্রিল',
+    'মে',
+    'জুন',
+    'জুলাই',
+    'আগস্ট',
+    'সেপ্টেম্বর',
+    'অক্টোবর',
+    'নভেম্বর',
+    'ডিসেম্বর',
   ];
 
-  String get dobLabel =>
-      dob == null ? '' : '${dob!.day} ${_bnMonths[dob!.month - 1]} ${dob!.year}';
+  String get dobLabel => dob == null
+      ? ''
+      : '${dob!.day} ${_bnMonths[dob!.month - 1]} ${dob!.year}';
 
   bool get isStep1Valid =>
       nameController.text.trim().isNotEmpty && dob != null && gender != null;
@@ -244,8 +258,9 @@ class RegistrationController extends GetxController {
     if (phone.isNotEmpty) {
       StorageService.save(StorageConstants.phoneNumber, phone);
     }
-    Get.offAllNamed(
-        AuthUser.fromStorage()?.isProvider == true ? Routes.HS_PROVIDER : Routes.HOME);
+    Get.offAllNamed(AuthUser.fromStorage()?.isProvider == true
+        ? Routes.HS_PROVIDER
+        : Routes.HOME);
   }
 
   // NOTE: text/page controllers are intentionally NOT disposed here. This is a

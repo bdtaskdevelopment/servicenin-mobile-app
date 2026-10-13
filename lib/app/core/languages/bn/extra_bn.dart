@@ -2,6 +2,32 @@
 // widget subfolders, and any leftover static strings.
 // Keys are the English source text; English mode falls back to the key.
 const Map<String, String> extraBn = {
+  // ── Dashboard review prompt ─────────────────────────────────
+  'How was your service?': 'আপনার সেবা কেমন ছিল?',
+  'Rate your recent booking': 'আপনার সাম্প্রতিক বুকিং রেটিং দিন',
+  'Rate now': 'এখনই রেটিং দিন',
+
+  // ── Rate service: "what went well" checklist ────────────────
+  'Service Quality': 'কাজের মান',
+  'Problem solved correctly, with good finishing':
+      'সমস্যা সঠিকভাবে সমাধান ও কাজের ফিনিশিং',
+  'Professionalism': 'আচরণ ও পেশাদারিত্ব',
+  'Behaviour, politeness and cooperation with the customer':
+      'কাস্টমারের সঙ্গে ব্যবহার, ভদ্রতা ও সহযোগিতা',
+  'Punctuality': 'সময়ানুবর্তিতা',
+  'Arriving at the scheduled time': 'নির্ধারিত সময়ে উপস্থিত হওয়া',
+  'Technical Skill': 'দক্ষতা',
+  'Job knowledge, skill and problem-solving ability':
+      'কাজের জ্ঞান, দক্ষতা ও সমস্যা সমাধানের সক্ষমতা',
+  'Cleanliness': 'পরিচ্ছন্নতা',
+  'Keeping the area clean after the work': 'কাজ শেষে স্থান পরিষ্কার রাখা',
+  'Reliability': 'বিশ্বস্ততা',
+  'Working as promised and keeping commitments':
+      'কথা অনুযায়ী কাজ করা ও প্রতিশ্রুতি রক্ষা',
+  'Pricing Transparency': 'মূল্য ও স্বচ্ছতা',
+  'A clear idea of the service charge and any extra costs':
+      'সার্ভিস চার্জ ও অতিরিক্ত খরচ সম্পর্কে পরিষ্কার ধারণা দেওয়া',
+
   // ── Review gating (must pay before rating) ──────────────────
   'Please complete the payment before rating your provider':
       'সেবাদাতাকে রেটিং দেওয়ার আগে অনুগ্রহ করে পেমেন্ট সম্পন্ন করুন',
@@ -44,6 +70,11 @@ const Map<String, String> extraBn = {
   // ── Home service: bill summary ──────────────────────────────
   'Subtotal': 'সাবটোটাল',
   'VAT': 'ভ্যাট',
+  'Service VAT': 'সার্ভিস ভ্যাট',
+  'Item VAT': 'আইটেম ভ্যাট',
+  'Round off': 'রাউন্ড অফ',
+  'Promo discount': 'প্রোমো ছাড়',
+  'Discount': 'ছাড়',
   'Total (incl. VAT)': 'মোট (ভ্যাটসহ)',
 
   // ── Home service booking errors ─────────────────────────────
@@ -54,6 +85,9 @@ const Map<String, String> extraBn = {
   // ── Home service: variant picker page ───────────────────────
   'From': 'শুরু',
   'Choose an option': 'একটি অপশন বাছাই করুন',
+
+  // ── Home service: category list page — description/terms/FAQ ─
+  'Terms & Conditions': 'শর্তাবলী',
 
   // ── Exit-app confirmation ───────────────────────────────────
   'Are you sure?': 'আপনি কি নিশ্চিত?',
@@ -126,8 +160,7 @@ const Map<String, String> extraBn = {
   'Biometric login': 'বায়োমেট্রিক লগইন',
   'Fingerprint or face unlock': 'আঙুলের ছাপ বা ফেস আনলক',
   'Notification alerts': 'নোটিফিকেশন অ্যালার্ট',
-  'Alerts for blood and other services':
-      'রক্ত ও অন্যান্য সেবার জন্য সতর্কতা',
+  'Alerts for blood and other services': 'রক্ত ও অন্যান্য সেবার জন্য সতর্কতা',
 
   // ── Auth shared widgets ─────────────────────────────────────
   'Search...': 'খুঁজুন...',
@@ -212,8 +245,7 @@ const Map<String, String> extraBn = {
   'You verified this resolution': 'আপনি এই সমাধান যাচাই করেছেন',
   'Your proof photo': 'আপনার প্রমাণ ছবি',
   'Awaiting reporter verification.': 'রিপোর্টকারীর যাচাইয়ের অপেক্ষায়।',
-  'What\'s wrong, how long it\'s been there…':
-      'সমস্যাটি কী, কতদিন ধরে আছে…',
+  'What\'s wrong, how long it\'s been there…': 'সমস্যাটি কী, কতদিন ধরে আছে…',
 
   // ── Matchmaking subtitle ────────────────────────────────────
   'Set who you\'re looking for': 'আপনি কেমন সঙ্গী খুঁজছেন তা নির্ধারণ করুন',
@@ -222,8 +254,7 @@ const Map<String, String> extraBn = {
   'Donors you\'ve connected with': 'যাদের সাথে আপনি যুক্ত হয়েছেন',
   'We\'ll send a one-time code to verify your account.':
       'আপনার অ্যাকাউন্ট যাচাই করতে আমরা একটি এককালীন কোড পাঠাব।',
-  'You\'ll receive nearby blood requests':
-      'আপনি কাছাকাছি রক্তের অনুরোধ পাবেন',
+  'You\'ll receive nearby blood requests': 'আপনি কাছাকাছি রক্তের অনুরোধ পাবেন',
   'You\'re paused — no requests for now':
       'আপনি বিরতিতে আছেন — এখন কোনো অনুরোধ নেই',
   'Sure, just message me a few days before. I\'m usually free on weekends.':

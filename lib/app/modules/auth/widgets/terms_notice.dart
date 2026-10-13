@@ -5,8 +5,11 @@ import 'package:get/get.dart';
 import '../../../core/helpers/app_helper.dart';
 import '../../../core/values/app_colors.dart';
 
-const _termsUrl = 'https://servicenin.com/terms';
-const _privacyUrl = 'https://servicenin.com/privacy-policy';
+// Public (not file-private) so every other screen that links to the Terms
+// or Privacy Policy — e.g. the Settings screen's "About" section — points
+// at the exact same URL as here, instead of drifting to a different one.
+const termsUrl = 'https://servicenin.com/terms';
+const privacyUrl = 'https://servicenin.com/privacy-policy';
 
 /// "By continuing you agree to the Terms and Privacy Policy." with the two
 /// links tappable — shown under the primary action on both the login and
@@ -24,8 +27,8 @@ class TermsNotice extends StatelessWidget {
     final sp = tail.indexOf(' ');
     final hug = sp > 0 ? tail.substring(0, sp) : '';
     final tailRest = sp > 0 ? tail.substring(sp) : tail;
-    const linkStyle = TextStyle(
-        color: AppColors.brandOrange, fontWeight: FontWeight.w600);
+    const linkStyle =
+        TextStyle(color: AppColors.brandOrange, fontWeight: FontWeight.w600);
 
     return Center(
       child: Text.rich(
@@ -37,21 +40,21 @@ class TermsNotice extends StatelessWidget {
               text: 'Terms'.tr,
               style: linkStyle,
               recognizer: TapGestureRecognizer()
-                ..onTap = () => Helpers.launchWebsite(_termsUrl),
+                ..onTap = () => Helpers.launchWebsite(termsUrl),
             ),
             TextSpan(text: ' and '.tr),
             TextSpan(
               text: 'Privacy Policy'.tr,
               style: linkStyle,
               recognizer: TapGestureRecognizer()
-                ..onTap = () => Helpers.launchWebsite(_privacyUrl),
+                ..onTap = () => Helpers.launchWebsite(privacyUrl),
             ),
             if (hug.isNotEmpty)
               TextSpan(
                 text: hug,
                 style: linkStyle,
                 recognizer: TapGestureRecognizer()
-                  ..onTap = () => Helpers.launchWebsite(_privacyUrl),
+                  ..onTap = () => Helpers.launchWebsite(privacyUrl),
               ),
             TextSpan(text: tailRest),
           ],

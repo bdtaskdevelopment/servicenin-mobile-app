@@ -34,8 +34,8 @@ class ServiceRepository {
 
   Future<List<ServiceCategory>> fetchPopular(
       {int days = 7, int limit = 10}) async {
-    final res =
-        await provider.getData(ApiURL.servicesPopular(days: days, limit: limit));
+    final res = await provider
+        .getData(ApiURL.servicesPopular(days: days, limit: limit));
     return ServiceCategory.popularFromResponse(_payload(res));
   }
 
@@ -47,6 +47,14 @@ class ServiceRepository {
   Future<List<SubService>> fetchSubServices(String categoryId) async {
     final res = await provider.getData(ApiURL.servicesSubServices(categoryId));
     return SubService.listFromResponse(_payload(res));
+  }
+
+  /// A category's Description/Terms & Conditions/FAQs — shown below the
+  /// sub-service list on the category's list page.
+  Future<ServiceCategoryDetail> fetchCategoryDetail(String categoryId) async {
+    final res =
+        await provider.getData(ApiURL.servicesCategoryDetail(categoryId));
+    return ServiceCategoryDetail.fromResponse(_payload(res));
   }
 
   // ── Booking inputs ──────────────────────────────────────────────────
@@ -132,7 +140,8 @@ class ServiceRepository {
   Future<void> setPaymentIntent(String id, String method) async {
     final res = await provider
         .postData(ApiURL.serviceBookingPaymentIntent(id), {'method': method});
-    _payload(res); // throws on a backend error, otherwise we don't need the body
+    _payload(
+        res); // throws on a backend error, otherwise we don't need the body
   }
 
   /// Redeems a promo code against an EXISTING booking's outstanding balance
@@ -154,10 +163,13 @@ class ServiceRepository {
     throw Exception('প্রোমো কোড প্রয়োগ করা যায়নি');
   }
 
-  Future<AuthSimpleResponse> rate(
-      String id, int stars, String comment) async {
-    final res = await provider.postData(
-        ApiURL.serviceBookingRating(id), {'stars': stars, 'comment': comment});
+  Future<AuthSimpleResponse> rate(String id, int stars, String comment,
+      {List<String> tags = const []}) async {
+    final res = await provider.postData(ApiURL.serviceBookingRating(id), {
+      'stars': stars,
+      'comment': comment,
+      if (tags.isNotEmpty) 'tags': tags,
+    });
     return AuthSimpleResponse.fromMap(_payload(res));
   }
 
@@ -177,8 +189,7 @@ class ServiceRepository {
             'comment': (item['comment'] ?? '').toString(),
             // pending | approved | rejected — the provider's contact
             // options stay available until an admin APPROVES the review.
-            'moderation_status':
-                (item['moderation_status'] ?? '').toString(),
+            'moderation_status': (item['moderation_status'] ?? '').toString(),
           };
         }
       }
@@ -234,8 +245,8 @@ class ServiceRepository {
 
   Future<ServiceBooking> removeBookingTask(
       String bookingId, String itemId) async {
-    final res = await provider
-        .deleteData(ApiURL.serviceBookingTask(bookingId, itemId));
+    final res =
+        await provider.deleteData(ApiURL.serviceBookingTask(bookingId, itemId));
     return ServiceBooking.fromResponse(_payload(res));
   }
 
@@ -306,7 +317,8 @@ class ServiceRepository {
 
   Future<void> declineJob(String bookingId,
       {String? reason, String? taskId}) async {
-    final res = await provider.postData(ApiURL.hsProviderJobDecline(bookingId), {
+    final res =
+        await provider.postData(ApiURL.hsProviderJobDecline(bookingId), {
       if (reason != null && reason.isNotEmpty) 'reason': reason,
       if (taskId != null && taskId.isNotEmpty) 'task_id': taskId,
     });
@@ -325,7 +337,8 @@ class ServiceRepository {
     double? lat,
     double? lng,
   }) async {
-    final res = await provider.postData(ApiURL.serviceBookingStatus(bookingId), {
+    final res =
+        await provider.postData(ApiURL.serviceBookingStatus(bookingId), {
       'status': status,
       if (taskId != null && taskId.isNotEmpty) 'task_id': taskId,
       if (lat != null) 'lat': lat,
@@ -338,8 +351,8 @@ class ServiceRepository {
   /// live to the citizen's tracking screen via the booking's location topic.
   Future<void> pushProviderLocation(
       String bookingId, double lat, double lng) async {
-    final res = await provider
-        .postData(ApiURL.serviceBookingLocation(bookingId), {'lat': lat, 'lng': lng});
+    final res = await provider.postData(
+        ApiURL.serviceBookingLocation(bookingId), {'lat': lat, 'lng': lng});
     _payload(res);
   }
 }
