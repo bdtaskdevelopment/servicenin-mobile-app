@@ -22,9 +22,8 @@ import '../controllers/home_controller.dart';
 /// Service" itself is excluded too — its top categories (AC/Fridge/Plumbing)
 /// take the first row instead, with a "More Services" tile in its place
 /// (see [_topRowTiles]).
-final _homeServices = SnCatalog.services
-    .where((s) => !_hiddenOnHome.contains(s.name))
-    .toList();
+final _homeServices =
+    SnCatalog.services.where((s) => !_hiddenOnHome.contains(s.name)).toList();
 const _hiddenOnHome = {'Marriage', 'Jobs', 'Home Service'};
 
 const _homeServiceColor = Color(0xFFF15A24);
@@ -175,14 +174,11 @@ class _BannerCarousel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (con.loadingBanners && con.banners.isEmpty) {
-      return Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 22),
-        child: SnShimmer(
-          child: SnBone(
-            width: double.infinity,
-            height: 150,
-            radius: 20,
-          ),
+      return SnShimmer(
+        child: SnBone(
+          width: double.infinity,
+          height: 150,
+          radius: 0,
         ),
       );
     }
@@ -191,16 +187,16 @@ class _BannerCarousel extends StatelessWidget {
       children: [
         SizedBox(
           height: 150,
+          // Full-bleed, edge to edge — one banner fills the whole screen
+          // width per page rather than peeking at its neighbours either
+          // side, so the slide itself reads clearly with no clipping.
           child: PageView.builder(
             controller: con.bannerController,
             itemCount: con.banners.length,
             onPageChanged: con.setPromo,
-            itemBuilder: (_, i) => Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 6),
-              child: _BannerSlide(
-                banner: con.banners[i],
-                onTap: () => con.openBanner(con.banners[i]),
-              ),
+            itemBuilder: (_, i) => _BannerSlide(
+              banner: con.banners[i],
+              onTap: () => con.openBanner(con.banners[i]),
             ),
           ),
         ),
@@ -215,9 +211,7 @@ class _BannerCarousel extends StatelessWidget {
               width: active ? 18 : 7,
               height: 7,
               decoration: BoxDecoration(
-                color: active
-                    ? AppColors.brandOrange
-                    : const Color(0xFFD8DEE6),
+                color: active ? AppColors.brandOrange : const Color(0xFFD8DEE6),
                 borderRadius: BorderRadius.circular(4),
               ),
             );
@@ -260,63 +254,63 @@ class _BannerSlide extends StatelessWidget {
     final colors = _bannerGradients[banner.type] ??
         const [Color(0xFF0F7A52), Color(0xFF0B5E3F)];
     final img = _bannerImageUrl(banner.imageUrl);
+    // A soft shadow under the text itself (not a dark panel over the image)
+    // keeps the title legible on a bright photo without putting any black
+    // overlay on the slide — the image stays fully clear.
+    const textShadow = [
+      Shadow(color: Color(0x99000000), blurRadius: 6, offset: Offset(0, 1)),
+    ];
     return GestureDetector(
       onTap: onTap,
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(20),
-        child: Stack(
-          fit: StackFit.expand,
-          children: [
-            // Background — the banner image (full), with a brand gradient as
-            // the fallback while loading or on error.
-            if (img.isNotEmpty)
-              Image.network(
-                img,
-                fit: BoxFit.cover,
-                errorBuilder: (_, __, ___) => _gradientBox(colors),
-                loadingBuilder: (_, child, progress) =>
-                    progress == null ? child : _gradientBox(colors),
-              )
-            else
-              _gradientBox(colors),
-            // Dark scrim so the white title/subtitle stay readable over photos.
-            const DecoratedBox(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [Color(0xB3000000), Color(0x40000000)],
-                  begin: Alignment.bottomLeft,
-                  end: Alignment.topRight,
-                ),
-              ),
+      // Full-bleed to the screen edges — no rounding, no dark scrim over the
+      // image, so the slide itself stays clear and sharp. Text starts at the
+      // same 16px the rest of the page's content uses.
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          // Background — the banner image (full), with a brand gradient as
+          // the fallback while loading or on error.
+          if (img.isNotEmpty)
+            Image.network(
+              img,
+              fit: BoxFit.cover,
+              errorBuilder: (_, __, ___) => _gradientBox(colors),
+              loadingBuilder: (_, child, progress) =>
+                  progress == null ? child : _gradientBox(colors),
+            )
+          else
+            _gradientBox(colors),
+          Positioned(
+            left: 16,
+            right: 16,
+            bottom: 14,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                if (banner.title.isNotEmpty)
+                  Text(banner.title,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 18,
+                          fontWeight: FontWeight.w800,
+                          height: 1.15,
+                          shadows: textShadow)),
+                const SizedBox(height: 4),
+                if (banner.subtitle.isNotEmpty)
+                  Text(banner.subtitle,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 12,
+                          shadows: textShadow)),
+              ],
             ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(18, 16, 18, 16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  if (banner.title.isNotEmpty)
-                    Text(banner.title,
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 18,
-                            fontWeight: FontWeight.w800,
-                            height: 1.15)),
-                  const SizedBox(height: 4),
-                  if (banner.subtitle.isNotEmpty)
-                    Text(banner.subtitle,
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                            color: Colors.white.withValues(alpha: 0.9),
-                            fontSize: 12)),
-                  const Spacer(),
-                ],
-              ),
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
