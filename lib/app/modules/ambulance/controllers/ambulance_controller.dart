@@ -163,6 +163,17 @@ class AmbulanceController extends GetxController with LiveRefreshMixin {
     }
   }
 
+  /// Opens the pre-built `https://wa.me/...` link for a hotline's WhatsApp
+  /// number (see AmbulanceHotline.whatsappUrl).
+  Future<void> openWhatsApp(String url) async {
+    if (url.trim().isEmpty) return;
+    try {
+      await launchUrl(Uri.parse(url.trim()), mode: LaunchMode.externalApplication);
+    } catch (_) {
+      SnackHelper.error('হোয়াটসঅ্যাপ খোলা যায়নি');
+    }
+  }
+
   /// Defaults pickup to the device's current GPS position, reverse-geocoded
   /// to a readable address. Silently does nothing if location is unavailable
   /// or denied — the user can still search pickup manually.

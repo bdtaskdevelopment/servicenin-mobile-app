@@ -53,6 +53,7 @@ abstract class Routes {
   static const FUNERAL_REQUESTS = _Paths.FUNERAL_REQUESTS;
   static const EDUCATION = _Paths.EDUCATION;
   static const EDUCATION_CENTER = _Paths.EDUCATION_CENTER;
+  static const EDUCATION_COURSE = _Paths.EDUCATION_COURSE;
   static const EDUCATION_ENQUIRY = _Paths.EDUCATION_ENQUIRY;
   static const EDUCATION_DONE = _Paths.EDUCATION_DONE;
   static const EDUCATION_INTERESTS = _Paths.EDUCATION_INTERESTS;
@@ -210,6 +211,7 @@ abstract class _Paths {
   static const FUNERAL_REQUESTS = '/funeral-requests';
   static const EDUCATION = '/education';
   static const EDUCATION_CENTER = '/education-center';
+  static const EDUCATION_COURSE = '/education-course';
   static const EDUCATION_ENQUIRY = '/education-enquiry';
   static const EDUCATION_DONE = '/education-done';
   static const EDUCATION_INTERESTS = '/education-interests';

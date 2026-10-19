@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../../core/values/app_colors.dart';
+import '../../auth/widgets/gender_selector.dart';
 import '../controllers/funeral_controller.dart';
 
 const _charcoal = Color(0xFF332F2C);
@@ -111,6 +112,14 @@ class FuneralRequestView extends GetView<FuneralController> {
                     const SizedBox(height: 12),
                     _Field(con.phone, 'PHONE'.tr, '+8801XXXXXXXXX',
                         kb: TextInputType.phone),
+                    const SizedBox(height: 12),
+                    _Label('GENDER'.tr),
+                    const SizedBox(height: 8),
+                    GenderSelector(
+                      options: con.genders,
+                      selected: con.gender,
+                      onSelected: con.setGender,
+                    ),
                     const SizedBox(height: 12),
                     _Field(con.address, 'ADDRESS'.tr,
                         'Home / hospital address'.tr),

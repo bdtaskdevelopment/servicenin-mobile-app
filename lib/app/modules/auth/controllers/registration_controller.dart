@@ -42,11 +42,11 @@ class RegistrationController extends GetxController {
   String get fullPhone =>
       '${AuthController.countryCode}${phoneController.text.trim()}';
 
+  // Ward/holding number are no longer collected at sign-up (hidden from
+  // this form — hard for a new user to know offhand) — name and phone are
+  // the only required fields now.
   bool get isInfoValid =>
-      nameController.text.trim().isNotEmpty &&
-      isPhoneValid &&
-      wardController.text.trim().isNotEmpty &&
-      holdingController.text.trim().isNotEmpty;
+      nameController.text.trim().isNotEmpty && isPhoneValid;
 
   /// Register the account (name · phone) then go straight to the OTP screen
   /// — the register endpoint already sends the OTP for this phone, so no

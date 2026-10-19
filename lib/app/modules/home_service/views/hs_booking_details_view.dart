@@ -5,6 +5,7 @@ import '../../../core/values/app_colors.dart';
 import '../../../core/values/app_config.dart';
 import '../../../core/values/app_url.dart';
 import '../../../data/models/response/service_response.dart';
+import '../../../global_widget/home_service_status_widgets.dart';
 import '../../../global_widget/invoice_actions.dart';
 import '../controllers/home_service_controller.dart';
 
@@ -124,7 +125,8 @@ class HsBookingDetailsView extends GetView<HomeServiceController> {
                               ],
                             ),
                           ),
-                          _StatusChip(status: con.trackedBooking?.status ?? ''),
+                          HomeServiceStatusChip(
+                              status: con.trackedBooking?.status ?? ''),
                         ],
                       ),
                     ),
@@ -153,70 +155,24 @@ class HsBookingDetailsView extends GetView<HomeServiceController> {
                                 color: Color(0xFF334155))),
                       ),
                     ],
-                    // Status timeline & work proof hidden for now.
-                    /*
-                  const SizedBox(height: 18),
-                  const _Label('STATUS TIMELINE'),
-                  const SizedBox(height: 10),
-                  Container(
-                    padding: const EdgeInsets.fromLTRB(16, 16, 16, 4),
-                    decoration: BoxDecoration(
-                        color: AppColors.white,
-                        borderRadius: BorderRadius.circular(16)),
-                    child: Column(
-                      children: List.generate(con.timeline.length, (i) {
-                        final t = con.timeline[i];
-                        final last = i == con.timeline.length - 1;
-                        return IntrinsicHeight(
-                          child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Column(
-                                children: [
-                                  const Icon(Icons.check_circle,
-                                      size: 20, color: _darkTeal),
-                                  if (!last)
-                                    Expanded(
-                                      child: Container(
-                                          width: 2,
-                                          color: const Color(0xFFB6E0D7)),
-                                    ),
-                                ],
-                              ),
-                              const SizedBox(width: 12),
-                              Expanded(
-                                child: Padding(
-                                  padding:
-                                      EdgeInsets.only(bottom: last ? 8 : 18),
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Text(t.statusLabel,
-                                          style: const TextStyle(
-                                              fontSize: 14,
-                                              fontWeight: FontWeight.w700,
-                                              color: Color(0xFF0F172A))),
-                                      const SizedBox(height: 1),
-                                      if (t.note.isNotEmpty)
-                                        Text(t.note,
-                                            style: const TextStyle(
-                                                fontSize: 12,
-                                                color: Color(0xFF64748B))),
-                                      Text(t.timeLabel,
-                                          style: const TextStyle(
-                                              fontSize: 12,
-                                              color: Color(0xFFE07A1F))),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        );
-                      }),
+                    // Status timeline re-enabled: aligned with the provider
+                    // app's own 6-step stepper (see HomeServiceStatusStepper)
+                    // instead of only showing whatever ad hoc entries the
+                    // backend's timeline had posted so far.
+                    const SizedBox(height: 18),
+                    _Label('STATUS TIMELINE'.tr),
+                    const SizedBox(height: 10),
+                    HomeServiceStatusStepper(
+                      status: booking?.status ??
+                          con.trackedBooking?.status ??
+                          '',
+                      timestamps: {
+                        for (final t in con.timeline)
+                          t.status.toLowerCase(): t.timeLabel,
+                      },
                     ),
-                  ),
+                    // Work proof (before/after photos) hidden for now.
+                    /*
                   const SizedBox(height: 18),
                   Row(
                     children: const [
@@ -321,21 +277,33 @@ class HsBookingDetailsView extends GetView<HomeServiceController> {
                                 '−৳${booking.adminDiscountAmount}',
                                 valueColor: const Color(0xFFB45309)),
                           ],
-                          const Divider(height: 1, color: Color(0xFFF1F5F9)),
-                          // Rate comes from the booking — it is frozen at
-                          // booking time, so a later settings change must not
-                          // relabel an old invoice. Labelled "Service VAT" to
-                          // stay distinct from the per-part "Item VAT" below.
-                          _fee(
-                              booking != null && booking.vatRate > 0
-                                  ? '${'Service VAT'.tr} (${booking.vatRate}%)'
-                                  : 'Service VAT'.tr,
-                              '৳${booking?.vatAmount ?? con.vat}'),
-                          // Sum of every part's own VAT (set per-item by admin),
-                          // separate from the booking-wide Service VAT above.
-                          if (booking != null && booking.hasItemVat) ...[
+                          // Service VAT / Item VAT only show as their own
+                          // lines when the backend's admin setting says to
+                          // break them out — same one the web/PDF invoice
+                          // reads (ServiceBooking.showVatBreakdown). OFF
+                          // means the business absorbs VAT instead of
+                          // charging the customer for it, so Total does NOT
+                          // include these amounts — showing them here would
+                          // make the numbers look like they don't add up.
+                          if (booking == null || booking.showVatBreakdown) ...[
                             const Divider(height: 1, color: Color(0xFFF1F5F9)),
-                            _fee('Item VAT'.tr, '৳${booking.itemVatAmount}'),
+                            // Rate comes from the booking — it is frozen at
+                            // booking time, so a later settings change must
+                            // not relabel an old invoice. Labelled "Service
+                            // VAT" to stay distinct from the per-part "Item
+                            // VAT" below.
+                            _fee(
+                                booking != null && booking.vatRate > 0
+                                    ? '${'Service VAT'.tr} (${booking.vatRate}%)'
+                                    : 'Service VAT'.tr,
+                                '৳${booking?.vatAmount ?? con.vat}'),
+                            // Sum of every part's own VAT (set per-item by
+                            // admin), separate from the booking-wide Service
+                            // VAT above.
+                            if (booking != null && booking.hasItemVat) ...[
+                              const Divider(height: 1, color: Color(0xFFF1F5F9)),
+                              _fee('Item VAT'.tr, '৳${booking.itemVatAmount}'),
+                            ],
                           ],
                           // Admin-only manual adjustment on the total — shown
                           // only when one was actually applied.
@@ -346,6 +314,26 @@ class HsBookingDetailsView extends GetView<HomeServiceController> {
                                 booking.roundOffAmount > 0
                                     ? '+৳${booking.roundOffAmount}'
                                     : '−৳${-booking.roundOffAmount}'),
+                          ],
+                          // VAT was charged but the breakdown is hidden on
+                          // this deployment — disclose it with one note
+                          // instead of a separate line, same as the PDF
+                          // invoice's "Including VAT".
+                          if (booking != null && booking.hasHiddenVat) ...[
+                            Padding(
+                              padding: const EdgeInsets.only(
+                                  top: 4, bottom: 6),
+                              child: Align(
+                                alignment: Alignment.centerRight,
+                                child: Text(
+                                  'Including VAT'.tr,
+                                  style: const TextStyle(
+                                      fontSize: 11.5,
+                                      fontStyle: FontStyle.italic,
+                                      color: Color(0xFF94A3B8)),
+                                ),
+                              ),
+                            ),
                           ],
                           const Divider(height: 1, color: Color(0xFFF1F5F9)),
                           _fee('Total'.tr,
@@ -785,40 +773,6 @@ class _ProviderCard extends StatelessWidget {
             style: const TextStyle(
                 color: _teal, fontSize: 16, fontWeight: FontWeight.w800)),
       );
-}
-
-/// Status chip — same mapping as the bookings list and tracking sheet so the
-/// status shown here always matches.
-class _StatusChip extends StatelessWidget {
-  const _StatusChip({required this.status});
-  final String status;
-  @override
-  Widget build(BuildContext context) {
-    final s = status.toLowerCase();
-    final done = s == 'completed';
-    final bad = s == 'cancelled' || s == 'canceled';
-    final bg = bad
-        ? const Color(0xFFFEE2E2)
-        : done
-            ? const Color(0xFFDCFCE7)
-            : const Color(0xFFFEF3C7);
-    final fg = bad
-        ? const Color(0xFFDC2626)
-        : done
-            ? const Color(0xFF15803D)
-            : const Color(0xFFB45309);
-    final label = status.isEmpty
-        ? 'Pending'
-        : status[0].toUpperCase() + status.substring(1).replaceAll('_', ' ');
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-      decoration:
-          BoxDecoration(color: bg, borderRadius: BorderRadius.circular(20)),
-      child: Text(label,
-          style:
-              TextStyle(fontSize: 11, fontWeight: FontWeight.w800, color: fg)),
-    );
-  }
 }
 
 class _Label extends StatelessWidget {

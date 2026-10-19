@@ -42,14 +42,23 @@ class FuneralService {
 /// A support-center number the admin configured for the funeral module —
 /// the same shape the ambulance hotlines use.
 class FuneralHotline {
-  FuneralHotline({required this.label, required this.number});
+  FuneralHotline({
+    required this.label,
+    required this.number,
+    this.whatsappUrl = '',
+  });
 
   final String label;
   final String number;
 
+  /// Ready-to-open `https://wa.me/...` link, built server-side — empty when
+  /// no WhatsApp number is configured for this slot.
+  final String whatsappUrl;
+
   factory FuneralHotline.fromMap(Map<String, dynamic> j) => FuneralHotline(
         label: _str(j['label']),
         number: _str(j['number']),
+        whatsappUrl: _str(j['whatsapp_url']),
       );
 
   static List<FuneralHotline> listFromResponse(dynamic src) {

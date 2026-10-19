@@ -90,6 +90,7 @@ class EducationController extends GetxController with LiveRefreshMixin {
 
   final TextEditingController studentName = TextEditingController();
   final TextEditingController parentContact = TextEditingController();
+  final TextEditingController address = TextEditingController();
   final TextEditingController subjectNeeded = TextEditingController();
   final TextEditingController preferredTime = TextEditingController();
   final TextEditingController notes = TextEditingController();
@@ -156,11 +157,36 @@ class EducationController extends GetxController with LiveRefreshMixin {
     }
   }
 
+  // ── Course details ──────────────────────────────────────────────────
+  bool loadingCourseDetail = false;
+
+  void openCourseDetails(EduCourse c) {
+    course = c;
+    update();
+    Get.toNamed(Routes.EDUCATION_COURSE);
+    _refreshCourseDetail(c.id);
+  }
+
+  Future<void> _refreshCourseDetail(String id) async {
+    loadingCourseDetail = true;
+    update();
+    try {
+      course = await _repo.fetchCourse(id);
+    } catch (_) {
+      // Keep showing the data already in hand (from the course list) —
+      // a failed refresh shouldn't blank out a page the user is reading.
+    } finally {
+      loadingCourseDetail = false;
+      update();
+    }
+  }
+
   void enquire(EduCourse c) {
     course = c;
     gradeIndex = 2;
     studentName.clear();
     parentContact.clear();
+    address.clear();
     subjectNeeded.text = c.title;
     preferredTime.clear();
     notes.clear();
@@ -191,6 +217,7 @@ class EducationController extends GetxController with LiveRefreshMixin {
         'student_name': studentName.text.trim(),
         'student_grade': grades[gradeIndex]['value'],
         'parent_contact': parentContact.text.trim(),
+        if (address.text.trim().isNotEmpty) 'address': address.text.trim(),
         if (subjectNeeded.text.trim().isNotEmpty)
           'subject_needed': subjectNeeded.text.trim(),
         if (preferredTime.text.trim().isNotEmpty)
@@ -233,6 +260,7 @@ class EducationController extends GetxController with LiveRefreshMixin {
   void onClose() {
     studentName.dispose();
     parentContact.dispose();
+    address.dispose();
     subjectNeeded.dispose();
     preferredTime.dispose();
     notes.dispose();

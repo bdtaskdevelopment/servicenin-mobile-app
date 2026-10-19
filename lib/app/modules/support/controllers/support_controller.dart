@@ -55,4 +55,16 @@ class SupportController extends GetxController {
       SnackHelper.error('ডায়াল করা যায়নি');
     }
   }
+
+  /// Opens the pre-built `https://wa.me/...` link the backend derives from
+  /// the admin-configured WhatsApp number — same `openWhatsApp` naming as
+  /// TelemedicineController's proven pattern.
+  Future<void> openWhatsApp(String url) async {
+    if (url.trim().isEmpty) return;
+    try {
+      await launchUrl(Uri.parse(url.trim()), mode: LaunchMode.externalApplication);
+    } catch (_) {
+      SnackHelper.error('হোয়াটসঅ্যাপ খোলা যায়নি');
+    }
+  }
 }

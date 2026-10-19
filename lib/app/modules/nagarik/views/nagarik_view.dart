@@ -15,49 +15,63 @@ class NagarikView extends GetView<NagarikController> {
 
   @override
   Widget build(BuildContext context) {
-    final con = controller;
     return Scaffold(
       backgroundColor: const Color(0xFFF7F8FA),
       body: SafeArea(
-        child: Column(
-          children: [
-            // Header
-            Padding(
-              padding: const EdgeInsets.fromLTRB(8, 6, 16, 8),
-              child: Row(
-                children: [
-                  IconButton(
-                    splashRadius: 22,
-                    onPressed: () => Get.back(),
-                    icon: const Icon(
-                      Icons.arrow_back_ios_new_rounded,
-                      size: 20,
-                      color: Color(0xFF1A1A1A),
+        // Wraps the header too, not just the list below — the header's call/
+        // WhatsApp icons read con.hotlineNumber/hotlineWhatsappUrl, which are
+        // null until fetchHotlines() resolves; without this they'd be baked
+        // in from whatever was true at the first build and never update.
+        child: GetBuilder<NagarikController>(
+          builder: (con) => Column(
+            children: [
+              // Header
+              Padding(
+                padding: const EdgeInsets.fromLTRB(8, 6, 16, 8),
+                child: Row(
+                  children: [
+                    IconButton(
+                      splashRadius: 22,
+                      onPressed: () => Get.back(),
+                      icon: const Icon(
+                        Icons.arrow_back_ios_new_rounded,
+                        size: 20,
+                        color: Color(0xFF1A1A1A),
+                      ),
                     ),
-                  ),
-                  Text(
-                    'Nagarik Sheba'.tr,
-                    style: const TextStyle(
-                      fontSize: 19,
-                      fontWeight: FontWeight.w800,
-                      color: Color(0xFF0F172A),
+                    Text(
+                      'Nagarik Sheba'.tr,
+                      style: const TextStyle(
+                        fontSize: 19,
+                        fontWeight: FontWeight.w800,
+                        color: Color(0xFF0F172A),
+                      ),
                     ),
-                  ),
-                  const Spacer(),
-                  GestureDetector(
-                    onTap: () => con.callNumber(con.hotlineNumber),
-                    child: const Icon(
-                      Icons.call_outlined,
-                      color: Color(0xFF1A1A1A),
-                      size: 22,
+                    const Spacer(),
+                    if (con.hotlineWhatsappUrl.isNotEmpty) ...[
+                      GestureDetector(
+                        onTap: () => con.openWhatsApp(con.hotlineWhatsappUrl),
+                        child: const Icon(
+                          Icons.chat_rounded,
+                          color: Color(0xFF25D366),
+                          size: 22,
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                    ],
+                    GestureDetector(
+                      onTap: () => con.callNumber(con.hotlineNumber),
+                      child: const Icon(
+                        Icons.call_outlined,
+                        color: Color(0xFF1A1A1A),
+                        size: 22,
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
-            Expanded(
-              child: GetBuilder<NagarikController>(
-                builder: (con) => RefreshIndicator(
+              Expanded(
+                child: RefreshIndicator(
                   color: _orange,
                   onRefresh: () async {
                     await con.fetchHotlines();
@@ -110,8 +124,8 @@ class NagarikView extends GetView<NagarikController> {
                   ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

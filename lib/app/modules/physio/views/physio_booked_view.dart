@@ -5,8 +5,7 @@ import '../../../core/values/app_colors.dart';
 import '../../../core/values/app_url.dart';
 import '../../../global_widget/invoice_actions.dart';
 import '../controllers/physio_controller.dart';
-
-const _brown = Color(0xFF8A3E12);
+import '../physio_palette.dart';
 
 class PhysioBookedView extends GetView<PhysioController> {
   const PhysioBookedView({super.key});
@@ -14,8 +13,9 @@ class PhysioBookedView extends GetView<PhysioController> {
   @override
   Widget build(BuildContext context) {
     final con = controller;
-    final t = con.therapist;
+    final appt = con.lastAppointment;
     final center = con.center;
+    final brown = physioStyleFor(center?.id ?? '').accent;
     return Scaffold(
       backgroundColor: const Color(0xFFFDF5EC),
       body: SafeArea(
@@ -29,15 +29,15 @@ class PhysioBookedView extends GetView<PhysioController> {
                     child: Container(
                       width: 76,
                       height: 76,
-                      decoration: const BoxDecoration(
-                          color: _brown, shape: BoxShape.circle),
+                      decoration:
+                          BoxDecoration(color: brown, shape: BoxShape.circle),
                       child: const Icon(Icons.check_rounded,
                           color: Colors.white, size: 42),
                     ),
                   ),
                   const SizedBox(height: 20),
                   Center(
-                    child: Text('Session booked'.tr,
+                    child: Text('Booking confirmed'.tr,
                         style: const TextStyle(
                             fontSize: 24,
                             fontWeight: FontWeight.w800,
@@ -45,7 +45,10 @@ class PhysioBookedView extends GetView<PhysioController> {
                   ),
                   const SizedBox(height: 6),
                   Center(
-                    child: Text('Your physio session is confirmed'.tr,
+                    child: Text(
+                        'A therapist/lab technician will be assigned shortly'
+                            .tr,
+                        textAlign: TextAlign.center,
                         style: const TextStyle(
                             fontSize: 13.5, color: Color(0xFF64748B))),
                   ),
@@ -57,35 +60,26 @@ class PhysioBookedView extends GetView<PhysioController> {
                         borderRadius: BorderRadius.circular(18)),
                     child: Column(
                       children: [
-                        _row(Icons.person_outline_rounded,
-                            con.lastAppointment?.staffName.isNotEmpty == true
-                                ? con.lastAppointment!.staffName
-                                : (t?.name ?? '')),
-                        const SizedBox(height: 14),
-                        _row(Icons.meeting_room_outlined,
-                            center?.name ?? ''),
+                        _row(Icons.meeting_room_outlined, center?.name ?? '',
+                            brown),
                         const SizedBox(height: 14),
                         _row(
                             Icons.calendar_today_outlined,
-                            con.lastAppointment?.whenLabel.isNotEmpty == true
-                                ? con.lastAppointment!.whenLabel
-                                : '${con.selectedDateLabel} · ${con.selectedTime}'),
+                            appt?.whenLabel.isNotEmpty == true
+                                ? appt!.whenLabel
+                                : '${con.selectedDateLabel} · ${con.selectedTimeLabel}',
+                            brown),
                         const SizedBox(height: 14),
                         _row(
                             Icons.bolt_rounded,
                             con.sessionType == 1
-                                ? '${'Home visit'.tr} · ${con.selectedPaymentKey}'
-                                : '${'At center'.tr} · ${con.selectedPaymentKey}'),
-                        if ((con.lastAppointment?.dayCount ?? con.dayCount) >
-                            1) ...[
-                          const SizedBox(height: 14),
-                          _row(Icons.event_repeat_rounded,
-                              '${con.lastAppointment?.dayCount ?? con.dayCount} ${'Days'.tr}'),
-                        ],
+                                ? 'Home visit'.tr
+                                : 'At center'.tr,
+                            brown),
                       ],
                     ),
                   ),
-                  if (con.perDayRate > 0) ...[
+                  if (appt != null && appt.items.isNotEmpty) ...[
                     const SizedBox(height: 16),
                     Container(
                       padding: const EdgeInsets.all(18),
@@ -94,34 +88,32 @@ class PhysioBookedView extends GetView<PhysioController> {
                           borderRadius: BorderRadius.circular(18)),
                       child: Column(
                         children: [
-                          _billRow('Per day'.tr, '৳${con.perDayRate}'),
-                          const SizedBox(height: 8),
-                          _billRow('Days'.tr,
-                              '${con.lastAppointment?.dayCount ?? con.dayCount}'),
+                          ...appt.items.map((it) => Padding(
+                                padding: const EdgeInsets.only(bottom: 10),
+                                child: _billRow(
+                                    it.quantity > 1
+                                        ? '${it.serviceName} × ${it.quantity}'
+                                        : it.serviceName,
+                                    '৳${it.lineTotal}',
+                                    brown),
+                              )),
                           const Padding(
-                            padding: EdgeInsets.symmetric(vertical: 10),
+                            padding: EdgeInsets.symmetric(vertical: 6),
                             child: Divider(height: 1, color: Color(0xFFE2E8F0)),
                           ),
-                          _billRow(
-                            'Total'.tr,
-                            '৳${con.lastAppointment?.groupTotalAmount ?? con.totalPrice}',
-                            emphasize: true,
-                          ),
+                          _billRow('Total'.tr, '৳${appt.amount}', brown,
+                              emphasize: true),
                         ],
                       ),
                     ),
                   ],
-                  if (con.lastAppointment?.id.isNotEmpty ?? false) ...[
+                  if (appt?.id.isNotEmpty ?? false) ...[
                     const SizedBox(height: 16),
                     InvoiceActions(
-                      // The backend resolves the whole booking group from
-                      // any single day's appointment id, so day 1's id
-                      // (returned by book()) is all we need here.
-                      viewPath: ApiURL.physioInvoicePdf(con.lastAppointment!.id),
-                      downloadPath:
-                          ApiURL.physioInvoicePdfDownload(con.lastAppointment!.id),
-                      fileName: 'invoice-${con.lastAppointment!.id}',
-                      accent: _brown,
+                      viewPath: ApiURL.physioInvoicePdf(appt!.id),
+                      downloadPath: ApiURL.physioInvoicePdfDownload(appt.id),
+                      fileName: 'invoice-${appt.id}',
+                      accent: brown,
                     ),
                   ],
                 ],
@@ -137,13 +129,16 @@ class PhysioBookedView extends GetView<PhysioController> {
                     child: ElevatedButton(
                       onPressed: con.viewMySessions,
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: _brown,
+                        backgroundColor: brown,
                         foregroundColor: Colors.white,
                         elevation: 0,
                         shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(14)),
                       ),
-                      child: Text('View my sessions'.tr,
+                      child: Text(
+                          (appt?.isLabOnly ?? false)
+                              ? 'View my bookings'.tr
+                              : 'View my sessions'.tr,
                           style: const TextStyle(
                               fontSize: 16, fontWeight: FontWeight.w800)),
                     ),
@@ -166,9 +161,9 @@ class PhysioBookedView extends GetView<PhysioController> {
     );
   }
 
-  Widget _row(IconData icon, String value) => Row(
+  Widget _row(IconData icon, String value, Color accent) => Row(
         children: [
-          Icon(icon, size: 19, color: _brown),
+          Icon(icon, size: 19, color: accent),
           const SizedBox(width: 12),
           Expanded(
             child: Text(value,
@@ -180,21 +175,26 @@ class PhysioBookedView extends GetView<PhysioController> {
         ],
       );
 
-  Widget _billRow(String label, String value, {bool emphasize = false}) => Row(
+  Widget _billRow(String label, String value, Color accent,
+          {bool emphasize = false}) =>
+      Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(label,
-              style: TextStyle(
-                  fontSize: emphasize ? 15 : 13.5,
-                  fontWeight: emphasize ? FontWeight.w800 : FontWeight.w600,
-                  color: emphasize
-                      ? const Color(0xFF0F172A)
-                      : const Color(0xFF64748B))),
+          Expanded(
+            child: Text(label,
+                style: TextStyle(
+                    fontSize: emphasize ? 15 : 13.5,
+                    fontWeight: emphasize ? FontWeight.w800 : FontWeight.w600,
+                    color: emphasize
+                        ? const Color(0xFF0F172A)
+                        : const Color(0xFF64748B))),
+          ),
+          const SizedBox(width: 8),
           Text(value,
               style: TextStyle(
                   fontSize: emphasize ? 17 : 13.5,
                   fontWeight: FontWeight.w800,
-                  color: emphasize ? _brown : const Color(0xFF0F172A))),
+                  color: emphasize ? accent : const Color(0xFF0F172A))),
         ],
       );
 }

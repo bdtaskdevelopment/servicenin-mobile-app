@@ -10,9 +10,9 @@ import '../../../global_widget/sn_shimmer.dart';
 import '../../support/views/support_view.dart';
 import '../controllers/education_controller.dart';
 
-const _purple = Color(0xFF7C3AED);
-const _darkPurple = Color(0xFF6D28D9);
-const _tile = Color(0xFFEDE4FB);
+const _orange = AppColors.brandOrange;
+const _darkOrange = AppColors.brandOrangeDark;
+const _tile = Color(0xFFFFEDE4);
 
 class EducationView extends GetView<EducationController> {
   const EducationView({super.key});
@@ -77,140 +77,83 @@ class EducationView extends GetView<EducationController> {
                 ],
               ),
             ),
-            // Institute types
-            GetBuilder<EducationController>(
-              builder: (con) {
-                if (con.loadingInstituteTypes && con.instituteTypes.isEmpty) {
-                  return const Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 16),
-                    child: Align(
-                      alignment: Alignment.centerLeft,
-                      child: SnChipsSkeleton(count: 4),
-                    ),
-                  );
-                }
-                final count = 1 + con.instituteTypes.length; // + "All"
-                return SizedBox(
-                  height: 36,
-                  child: ListView.separated(
-                    scrollDirection: Axis.horizontal,
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    itemCount: count,
-                    separatorBuilder: (_, __) => const SizedBox(width: 8),
-                    itemBuilder: (_, i) {
-                      final sel = con.typeIndex == i;
-                      return GestureDetector(
-                        onTap: () => con.setInstituteType(i),
-                        child: Container(
-                          alignment: Alignment.center,
-                          padding: const EdgeInsets.symmetric(horizontal: 18),
-                          decoration: BoxDecoration(
-                            color: sel ? _purple : AppColors.white,
-                            borderRadius: BorderRadius.circular(20),
-                            border: Border.all(
-                              color: sel ? _purple : const Color(0xFFE2E8F0),
-                            ),
-                          ),
-                          child: Text(
-                            con.typeLabel(i),
-                            style: TextStyle(
-                              fontSize: 13,
-                              fontWeight: FontWeight.w700,
-                              color: sel ? Colors.white : const Color(0xFF334155),
-                            ),
+            // Filter — a single button that opens a picker sheet, not a
+            // row of always-visible tag chips.
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Align(
+                alignment: Alignment.centerRight,
+                child: GetBuilder<EducationController>(
+                  builder: (con) {
+                    if (con.loadingInstituteTypes &&
+                        con.instituteTypes.isEmpty) {
+                      return const SnChipsSkeleton(count: 1);
+                    }
+                    final selected = con.typeIndex > 0;
+                    return GestureDetector(
+                      onTap: () => _showFilterSheet(context, con),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 14, vertical: 9),
+                        decoration: BoxDecoration(
+                          color: selected ? _tile : AppColors.white,
+                          borderRadius: BorderRadius.circular(20),
+                          border: Border.all(
+                            color: selected
+                                ? _orange
+                                : const Color(0xFFE2E8F0),
                           ),
                         ),
-                      );
-                    },
-                  ),
-                );
-              },
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(Icons.tune_rounded,
+                                size: 16,
+                                color: selected
+                                    ? _darkOrange
+                                    : const Color(0xFF64748B)),
+                            const SizedBox(width: 6),
+                            Text(
+                              selected ? con.typeLabel(con.typeIndex) : 'Filter'.tr,
+                              style: TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w700,
+                                color: selected
+                                    ? _darkOrange
+                                    : const Color(0xFF334155),
+                              ),
+                            ),
+                            if (selected) ...[
+                              const SizedBox(width: 6),
+                              GestureDetector(
+                                onTap: () => con.setInstituteType(0),
+                                child: const Icon(Icons.close_rounded,
+                                    size: 15, color: _darkOrange),
+                              ),
+                            ],
+                          ],
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ),
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 10),
             Expanded(
               child: GetBuilder<EducationController>(
                 builder: (con) {
                   final list = con.centers;
                   return RefreshIndicator(
-                    color: _purple,
+                    color: _orange,
                     onRefresh: con.fetchCentersNear,
                     child: ListView(
-                      padding: const EdgeInsets.fromLTRB(16, 4, 16, 24),
+                      padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
                       children: [
-                        // Banner
-                        FadeInDown(
-                          duration: const Duration(milliseconds: 300),
-                          child: Container(
-                            padding: const EdgeInsets.all(18),
-                            decoration: BoxDecoration(
-                              gradient: const LinearGradient(
-                                colors: [_darkPurple, _purple],
-                                begin: Alignment.centerLeft,
-                                end: Alignment.centerRight,
-                              ),
-                              borderRadius: BorderRadius.circular(18),
-                            ),
-                            child: Stack(
-                              children: [
-                                Positioned(
-                                  right: -4,
-                                  top: -8,
-                                  child: Icon(
-                                    Icons.menu_book_rounded,
-                                    size: 84,
-                                    color: Colors.white.withValues(alpha: 0.13),
-                                  ),
-                                ),
-                                Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      'Best teachers, best future'.tr,
-                                      style: const TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 19,
-                                        fontWeight: FontWeight.w800,
-                                      ),
-                                    ),
-                                    const SizedBox(height: 8),
-                                    Text(
-                                      'Verified coaching centers, courses & home tutors near you'
-                                          .tr,
-                                      style: TextStyle(
-                                        color: Colors.white.withValues(
-                                          alpha: 0.9,
-                                        ),
-                                        fontSize: 12.5,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 22),
-                        Text(
-                          'Centers near you'.tr,
-                          style: const TextStyle(
-                            fontSize: 17,
-                            fontWeight: FontWeight.w800,
-                            color: Color(0xFF0F172A),
-                          ),
-                        ),
-                        const SizedBox(height: 2),
-                        Text(
-                          '${list.length} verified',
-                          style: const TextStyle(
-                            fontSize: 12.5,
-                            color: _purple,
-                          ),
-                        ),
-                        const SizedBox(height: 14),
                         if (con.loadingCenters && con.centers.isEmpty)
                           const SnListSkeleton(
                             padding: EdgeInsets.zero,
-                            count: 3,
+                            count: 4,
                           )
                         else if (list.isEmpty)
                           Padding(
@@ -251,6 +194,71 @@ class EducationView extends GetView<EducationController> {
       ),
     );
   }
+
+  void _showFilterSheet(BuildContext context, EducationController con) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: AppColors.white,
+      shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
+      builder: (ctx) {
+        return SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Padding(
+                padding: const EdgeInsets.fromLTRB(18, 16, 18, 8),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text('Filter by type'.tr,
+                        style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w800,
+                            color: Color(0xFF0F172A))),
+                    GestureDetector(
+                      onTap: () => Navigator.pop(ctx),
+                      child: const Icon(Icons.close_rounded,
+                          color: Color(0xFF94A3B8)),
+                    ),
+                  ],
+                ),
+              ),
+              const Divider(height: 1, color: Color(0xFFF1F5F9)),
+              ConstrainedBox(
+                constraints: BoxConstraints(
+                    maxHeight: MediaQuery.of(context).size.height * 0.55),
+                child: ListView.builder(
+                  shrinkWrap: true,
+                  padding: const EdgeInsets.symmetric(vertical: 6),
+                  itemCount: 1 + con.instituteTypes.length,
+                  itemBuilder: (_, i) {
+                    final sel = con.typeIndex == i;
+                    return ListTile(
+                      onTap: () {
+                        con.setInstituteType(i);
+                        Navigator.pop(ctx);
+                      },
+                      title: Text(con.typeLabel(i),
+                          style: TextStyle(
+                              fontSize: 14.5,
+                              fontWeight:
+                                  sel ? FontWeight.w800 : FontWeight.w600,
+                              color: sel ? _darkOrange : const Color(0xFF334155))),
+                      trailing: sel
+                          ? const Icon(Icons.check_circle_rounded,
+                              color: _orange, size: 20)
+                          : null,
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
 }
 
 class _CenterCard extends StatelessWidget {
@@ -263,11 +271,12 @@ class _CenterCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppColors.white,
         borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: _orange.withValues(alpha: 0.12)),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.03),
-            blurRadius: 10,
-            offset: const Offset(0, 3),
+            color: _orange.withValues(alpha: 0.07),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
           ),
         ],
       ),
@@ -280,8 +289,8 @@ class _CenterCard extends StatelessWidget {
               ClipRRect(
                 borderRadius: BorderRadius.circular(12),
                 child: SizedBox(
-                  width: 46,
-                  height: 46,
+                  width: 48,
+                  height: 48,
                   child: center.logoUrl.isNotEmpty
                       ? CachedNetworkImage(
                           imageUrl: center.logoUrl,
@@ -358,6 +367,8 @@ class _CenterCard extends StatelessWidget {
                   ],
                 ),
               ),
+              const Icon(Icons.chevron_right_rounded,
+                  color: Color(0xFFCBD5E1)),
             ],
           ),
           if (center.subjectTags.isNotEmpty) ...[
@@ -374,15 +385,15 @@ class _CenterCard extends StatelessWidget {
                         vertical: 5,
                       ),
                       decoration: BoxDecoration(
-                        color: const Color(0xFFF1F5F9),
+                        color: _tile,
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: Text(
                         t,
                         style: const TextStyle(
                           fontSize: 11.5,
-                          fontWeight: FontWeight.w600,
-                          color: Color(0xFF475569),
+                          fontWeight: FontWeight.w700,
+                          color: _darkOrange,
                         ),
                       ),
                     ),
@@ -400,8 +411,15 @@ class _CenterLogoIcon extends StatelessWidget {
   const _CenterLogoIcon();
   @override
   Widget build(BuildContext context) => Container(
-        color: _tile,
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            colors: [_orange, _darkOrange],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+        ),
         alignment: Alignment.center,
-        child: const Icon(Icons.menu_book_rounded, color: _purple, size: 23),
+        child: const Icon(Icons.menu_book_rounded,
+            color: Colors.white, size: 23),
       );
 }

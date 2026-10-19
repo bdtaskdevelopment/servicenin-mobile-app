@@ -297,9 +297,13 @@ class BookingCard extends StatelessWidget {
 /// from `/api/v1/ambulance/hotlines`. Tapping a card dials that number.
 class HotlineStrip extends StatelessWidget {
   const HotlineStrip(
-      {super.key, required this.hotlines, required this.onCall});
+      {super.key,
+      required this.hotlines,
+      required this.onCall,
+      this.onWhatsApp});
   final List<AmbulanceHotline> hotlines;
   final ValueChanged<String> onCall;
+  final ValueChanged<String>? onWhatsApp;
 
   @override
   Widget build(BuildContext context) {
@@ -313,7 +317,12 @@ class HotlineStrip extends StatelessWidget {
                   padding: EdgeInsets.only(
                       right: e.key == hotlines.length - 1 ? 0 : 10),
                   child: _HotlineCard(
-                      hotline: e.value, onTap: () => onCall(e.value.number)),
+                    hotline: e.value,
+                    onTap: () => onCall(e.value.number),
+                    onWhatsApp: e.value.whatsappUrl.isEmpty || onWhatsApp == null
+                        ? null
+                        : () => onWhatsApp!(e.value.whatsappUrl),
+                  ),
                 ),
               ))
           .toList(),
@@ -322,54 +331,79 @@ class HotlineStrip extends StatelessWidget {
 }
 
 class _HotlineCard extends StatelessWidget {
-  const _HotlineCard({required this.hotline, required this.onTap});
+  const _HotlineCard(
+      {required this.hotline, required this.onTap, this.onWhatsApp});
   final AmbulanceHotline hotline;
   final VoidCallback onTap;
+  final VoidCallback? onWhatsApp;
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 10),
-        decoration: BoxDecoration(
-          color: _red.withValues(alpha: 0.08),
-          borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: _red.withValues(alpha: 0.18)),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
+    return Stack(
+      clipBehavior: Clip.none,
+      children: [
+        GestureDetector(
+          onTap: onTap,
+          child: Container(
+            padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 10),
+            decoration: BoxDecoration(
+              color: _red.withValues(alpha: 0.08),
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(color: _red.withValues(alpha: 0.18)),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Icon(Icons.call_rounded, color: _red, size: 15),
-                const SizedBox(width: 5),
-                Expanded(
-                  child: Text(
-                    hotline.label,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                        fontSize: 11.5,
-                        fontWeight: FontWeight.w700,
-                        color: Color(0xFF7A1520)),
-                  ),
+                Row(
+                  children: [
+                    const Icon(Icons.call_rounded, color: _red, size: 15),
+                    const SizedBox(width: 5),
+                    Expanded(
+                      child: Text(
+                        hotline.label,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                            fontSize: 11.5,
+                            fontWeight: FontWeight.w700,
+                            color: Color(0xFF7A1520)),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  hotline.number,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                      fontSize: 14.5,
+                      fontWeight: FontWeight.w800,
+                      color: Color(0xFF0F172A)),
                 ),
               ],
             ),
-            const SizedBox(height: 4),
-            Text(
-              hotline.number,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: const TextStyle(
-                  fontSize: 14.5,
-                  fontWeight: FontWeight.w800,
-                  color: Color(0xFF0F172A)),
-            ),
-          ],
+          ),
         ),
-      ),
+        if (onWhatsApp != null)
+          Positioned(
+            right: -6,
+            top: -6,
+            child: GestureDetector(
+              onTap: onWhatsApp,
+              child: Container(
+                width: 24,
+                height: 24,
+                decoration: const BoxDecoration(
+                  color: Color(0xFF25D366),
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(Icons.chat_rounded,
+                    color: Colors.white, size: 13),
+              ),
+            ),
+          ),
+      ],
     );
   }
 }

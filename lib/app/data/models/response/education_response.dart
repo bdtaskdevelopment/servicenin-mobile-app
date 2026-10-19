@@ -127,8 +127,40 @@ class EduCourse {
   int get feeAmount => _int(raw['fee_amount']);
   String get schedule => _str(raw['schedule']);
   String get status => _str(raw['status']);
+  String get videoUrl => _str(raw['video_url']);
+  String get thumbnailUrl => _str(raw['thumbnail_url']);
 
   String get feeLabel => feeAmount > 0 ? '৳$feeAmount' : 'Free';
+
+  /// The YouTube video id parsed out of [videoUrl] — handles the common
+  /// watch/short/embed URL shapes. Empty when videoUrl isn't a YouTube
+  /// link (or is empty).
+  String get youtubeId {
+    if (videoUrl.isEmpty) return '';
+    final uri = Uri.tryParse(videoUrl);
+    if (uri == null) return '';
+    if (uri.host.contains('youtu.be')) {
+      return uri.pathSegments.isNotEmpty ? uri.pathSegments.first : '';
+    }
+    if (uri.queryParameters['v'] != null) return uri.queryParameters['v']!;
+    final seg = uri.pathSegments;
+    final i = seg.indexOf('embed');
+    if (i != -1 && seg.length > i + 1) return seg[i + 1];
+    final s = seg.indexOf('shorts');
+    if (s != -1 && seg.length > s + 1) return seg[s + 1];
+    return '';
+  }
+
+  bool get hasVideo => youtubeId.isNotEmpty;
+
+  /// Thumbnail to show on the card/details page: the admin-set image if
+  /// present, otherwise YouTube's own thumbnail for the video, otherwise
+  /// nothing (caller falls back to an icon/placeholder).
+  String get displayThumbnail {
+    if (thumbnailUrl.isNotEmpty) return thumbnailUrl;
+    if (hasVideo) return 'https://img.youtube.com/vi/$youtubeId/hqdefault.jpg';
+    return '';
+  }
 
   factory EduCourse.fromMap(Map<String, dynamic> j) => EduCourse(j);
 
@@ -156,6 +188,7 @@ class EduInterest {
   String get studentName => _str(raw['student_name']);
   String get studentGrade => _str(raw['student_grade']);
   String get parentContact => _str(raw['parent_contact']);
+  String get address => _str(raw['address']);
   String get subjectNeeded => _str(raw['subject_needed']);
   String get preferredTime => _str(raw['preferred_time']);
   String get notes => _str(raw['notes']);

@@ -54,6 +54,7 @@ import '../modules/funeral/views/funeral_requests_view.dart';
 import '../modules/education/bindings/education_binding.dart';
 import '../modules/education/views/education_view.dart';
 import '../modules/education/views/education_center_view.dart';
+import '../modules/education/views/course_details_view.dart';
 import '../modules/education/views/course_enquiry_view.dart';
 import '../modules/education/views/enquiry_done_view.dart';
 import '../modules/education/views/education_interests_view.dart';
@@ -410,6 +411,11 @@ class AppPages {
     GetPage(
       name: _Paths.EDUCATION_CENTER,
       page: () => const EducationCenterView(),
+      binding: EducationBinding(),
+    ),
+    GetPage(
+      name: _Paths.EDUCATION_COURSE,
+      page: () => const CourseDetailsView(),
       binding: EducationBinding(),
     ),
     GetPage(

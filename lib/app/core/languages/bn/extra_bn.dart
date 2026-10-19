@@ -85,6 +85,19 @@ const Map<String, String> extraBn = {
   // ── Home service: variant picker page ───────────────────────
   'From': 'শুরু',
   'Choose an option': 'একটি অপশন বাছাই করুন',
+  // ── Home service: add-a-service sheet (edit order) — variant pick ──
+  'selected': 'নির্বাচিত',
+
+  // ── Home service: status stepper (aligned with the provider app) ──
+  // Canonical step wording lives in core/utils/home_service_status.dart
+  // instead of here — 'Assigned'/'Accepted'/'Completed' are shared .tr keys
+  // used by other modules, so the stepper's Bangla text is kept separate
+  // rather than overriding those keys' translation everywhere.
+  'STATUS TIMELINE': 'স্ট্যাটাস টাইমলাইন',
+  // ── Home service: invoice VAT breakdown toggle ──────────────
+  'Including VAT': 'ভ্যাট সহ',
+  'No updates yet.': 'এখনো কোনো আপডেট নেই।',
+  'This booking was cancelled.': 'এই বুকিংটি বাতিল করা হয়েছে।',
 
   // ── Home service: category list page — description/terms/FAQ ─
   'Terms & Conditions': 'শর্তাবলী',

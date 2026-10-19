@@ -47,7 +47,9 @@ class AmbulanceView extends GetView<AmbulanceController> {
               children: [
                 if (con.hotlines.isNotEmpty) ...[
                   HotlineStrip(
-                      hotlines: con.hotlines, onCall: con.callHotline),
+                      hotlines: con.hotlines,
+                      onCall: con.callHotline,
+                      onWhatsApp: con.openWhatsApp),
                   const SizedBox(height: 22),
                 ],
                 _SectionHeader(

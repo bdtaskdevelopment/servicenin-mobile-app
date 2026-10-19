@@ -4,14 +4,24 @@ import 'dart:convert';
 /// number to dial. Every module's `GET /{module}/hotlines` returns this shape,
 /// so a single model and a single screen serve all of them.
 class SupportHotline {
-  SupportHotline({required this.label, required this.number});
+  SupportHotline({
+    required this.label,
+    required this.number,
+    this.whatsappUrl = '',
+  });
 
   final String label;
   final String number;
 
+  /// Ready-to-open `https://wa.me/...` link, already built server-side from
+  /// the admin-configured WhatsApp number — empty when none is set, in which
+  /// case the WhatsApp button simply doesn't render.
+  final String whatsappUrl;
+
   factory SupportHotline.fromMap(Map<String, dynamic> j) => SupportHotline(
         label: (j['label'] ?? '').toString().trim(),
         number: (j['number'] ?? '').toString().trim(),
+        whatsappUrl: (j['whatsapp_url'] ?? '').toString().trim(),
       );
 
   static List<SupportHotline> listFromResponse(dynamic src) {

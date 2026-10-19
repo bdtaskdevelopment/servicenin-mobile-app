@@ -6,6 +6,8 @@ import 'package:get/get.dart';
 import '../../../core/values/app_colors.dart';
 import '../../../core/values/app_config.dart';
 import '../../../data/models/response/service_response.dart';
+import '../../../global_widget/price_text.dart';
+import '../../../global_widget/rich_html_text.dart';
 import '../../../global_widget/sn_shimmer.dart';
 import '../../../routes/app_pages.dart';
 import '../controllers/home_service_controller.dart';
@@ -492,51 +494,6 @@ class _DurationPriceRow extends StatelessWidget {
   }
 }
 
-/// Price in the admin panel's style: the payable price in emerald, with the
-/// list price struck through in red beside it when a discount applies.
-class PriceText extends StatelessWidget {
-  const PriceText(
-      {super.key, required this.price, this.originalPrice, this.prefix});
-  final int price;
-  final int? originalPrice;
-  final String? prefix;
-
-  @override
-  Widget build(BuildContext context) {
-    final hasDiscount = originalPrice != null;
-    return Text.rich(
-      TextSpan(children: [
-        if (prefix != null)
-          TextSpan(
-              text: '$prefix ',
-              style: const TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
-                  color: Color(0xFF64748B))),
-        TextSpan(
-            text: '৳$price',
-            style: TextStyle(
-                fontSize: 15,
-                fontWeight: FontWeight.w800,
-                color: hasDiscount ? const Color(0xFF047857) : _darkTeal)),
-        if (hasDiscount) ...[
-          const TextSpan(text: '  '),
-          TextSpan(
-              text: '৳$originalPrice',
-              style: const TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
-                  color: Color(0xFFEF4444),
-                  decoration: TextDecoration.lineThrough,
-                  decorationColor: Color(0xFFEF4444))),
-        ],
-      ]),
-      maxLines: 1,
-      overflow: TextOverflow.ellipsis,
-    );
-  }
-}
-
 /// A sub-service that has variants (e.g. AC capacity) — summarised here with
 /// its cheapest price ("From ৳X") and an in-cart count; tapping opens
 /// [HsVariantPickerView] to actually choose one and add it.
@@ -862,9 +819,7 @@ class _InfoTextCard extends StatelessWidget {
                 color: Color(0x0A0F172A), blurRadius: 10, offset: Offset(0, 4)),
           ],
         ),
-        child: Text(text,
-            style: const TextStyle(
-                fontSize: 13.5, height: 1.5, color: Color(0xFF334155))),
+        child: RichHtmlText(text),
       );
 }
 
@@ -905,11 +860,7 @@ class _FaqCard extends StatelessWidget {
                   children: [
                     Align(
                       alignment: Alignment.centerLeft,
-                      child: Text(faqs[i].answer,
-                          style: const TextStyle(
-                              fontSize: 13.5,
-                              height: 1.5,
-                              color: Color(0xFF334155))),
+                      child: RichHtmlText(faqs[i].answer),
                     ),
                   ],
                 ),
