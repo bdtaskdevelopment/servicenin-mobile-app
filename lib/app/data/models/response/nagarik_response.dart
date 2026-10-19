@@ -58,6 +58,7 @@ class NagarikHotlinesData {
     required this.dnccPhone,
     required this.dnccEmail,
     required this.dnccWebsite,
+    this.dnccWhatsappUrl = '',
     required this.bannerTitle,
     required this.bannerSubtitle,
     required this.hotlines,
@@ -68,6 +69,10 @@ class NagarikHotlinesData {
   final String dnccPhone;
   final String dnccEmail;
   final String dnccWebsite;
+
+  /// Ready-to-open `https://wa.me/...` link, built server-side — empty when
+  /// no WhatsApp number is configured.
+  final String dnccWhatsappUrl;
   final String bannerTitle;
   final String bannerSubtitle;
   final List<NagarikHotline> hotlines;
@@ -83,6 +88,7 @@ class NagarikHotlinesData {
       dnccPhone: _str(dncc['phone']),
       dnccEmail: _str(dncc['email']),
       dnccWebsite: _str(dncc['website']),
+      dnccWhatsappUrl: _str(dncc['whatsapp_url']),
       bannerTitle: _str(m['banner_title']),
       bannerSubtitle: _str(m['banner_subtitle']),
       hotlines: list

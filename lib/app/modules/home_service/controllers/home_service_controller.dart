@@ -11,6 +11,7 @@ import '../../../core/helpers/location_helper.dart';
 import '../../../core/helpers/snack_helper.dart';
 import '../../../core/helpers/sslcommerz_helper.dart';
 import '../../../core/mixins/live_refresh_mixin.dart';
+import '../../../core/utils/utils.dart';
 import '../../../core/services/home_service_socket_service.dart';
 import '../../../data/models/response/service_response.dart';
 import '../../../data/models/sn_place.dart';
@@ -35,7 +36,31 @@ IconData hsCatIcon(String name) {
   if (n.contains('shift') || n.contains('move')) {
     return Icons.local_shipping_outlined;
   }
+  if (n.contains('carpentr')) return Icons.handyman_rounded;
+  if (n.contains('salon')) return Icons.content_cut_rounded;
+  if (n.contains('car wash')) return Icons.local_car_wash_rounded;
   return Icons.home_repair_service_outlined;
+}
+
+/// Accent color paired with [hsCatIcon] (same keyword order, so a category
+/// always gets a matching icon+color pair) — used to tint category/service
+/// tiles on the dashboard instead of the same flat teal on every one.
+Color hsCatColor(String name) {
+  final n = name.toLowerCase();
+  if (n.contains('ac')) return const Color(0xFF0EA5E9);
+  if (n.contains('clean')) return const Color(0xFFEC4899);
+  if (n.contains('plumb')) return const Color(0xFFF59E0B);
+  if (n.contains('electric')) return const Color(0xFF8B5CF6);
+  if (n.contains('appliance') || n.contains('repair')) {
+    return const Color(0xFF6366F1);
+  }
+  if (n.contains('pest')) return const Color(0xFF16A34A);
+  if (n.contains('paint')) return const Color(0xFFEF4444);
+  if (n.contains('shift') || n.contains('move')) return const Color(0xFF0891B2);
+  if (n.contains('carpentr')) return const Color(0xFFF97316);
+  if (n.contains('salon')) return const Color(0xFFD946EF);
+  if (n.contains('car wash')) return const Color(0xFF06B6D4);
+  return const Color(0xFF0E9F8E);
 }
 
 class HsCategory {
@@ -61,7 +86,10 @@ class HsCategory {
 
 class HsService {
   const HsService(this.name, this.desc, this.price, this.icon,
-      {this.id = '', this.imageUrl = '', this.originalPrice});
+      {this.id = '',
+      this.imageUrl = '',
+      this.originalPrice,
+      this.color = const Color(0xFF0E9F8E)});
   final String name;
   final String desc;
   final String price; // what the customer pays
@@ -75,16 +103,28 @@ class HsService {
   /// always fell back to the generic icon even when the category had one.
   final String imageUrl;
 
+  /// Paired with [icon] via [hsCatColor] (same keyword match on the
+  /// ENGLISH category name — [name] above may already be Bangla, which the
+  /// keyword list doesn't match) — tints this card's icon tile instead of
+  /// every "Popular this week" card using the same flat teal.
+  final Color color;
+
   factory HsService.fromApi(ServiceCategory c) => HsService(
         c.displayName, // Bangla in bn, English in en
+        // c.description may be rich-text HTML (the admin panel's Quill
+        // editor) — stripped to plain text here since this card's
+        // subtitle is a compact, single-line preview, not the dedicated
+        // category detail screen (which renders it as real formatting
+        // via RichHtmlText instead — see hs_service_list_view.dart).
         c.description.isNotEmpty
-            ? c.description
+            ? stripHtmlTags(c.description)
             : '${c.bookingCount} booked this week',
         c.priceLabel,
         hsCatIcon(c.name),
         id: c.id,
         imageUrl: c.iconUrl,
         originalPrice: c.originalPriceLabel,
+        color: hsCatColor(c.name),
       );
 }
 
@@ -1533,14 +1573,22 @@ class HomeServiceController extends GetxController with LiveRefreshMixin {
 
   /// Adds sub-services chosen in the "add job" sheet. Quantities come from
   /// the same cart map the booking flow uses, so the picker can reuse the
-  /// existing stepper widgets.
+  /// existing stepper widgets. A key is either a plain sub-service id, or
+  /// "subServiceId::variantId" for a priced variant (e.g. AC capacity) —
+  /// same convention the main booking cart keys a variant line with (see
+  /// _cartKey) — so one service can appear more than once here, each at a
+  /// different variant's price.
   Future<bool> addTasks(Map<String, int> selection) async {
     final b = orderBooking;
     if (b == null || selection.isEmpty) return false;
-    final items = selection.entries
-        .where((e) => e.value > 0)
-        .map((e) => {'sub_service_id': e.key, 'quantity': e.value})
-        .toList();
+    final items = selection.entries.where((e) => e.value > 0).map((e) {
+      final parts = e.key.split('::');
+      return {
+        'sub_service_id': parts.first,
+        if (parts.length > 1) 'variant_id': parts[1],
+        'quantity': e.value,
+      };
+    }).toList();
     if (items.isEmpty) return false;
     final ok = await _mutateOrder(
       _busyAll,

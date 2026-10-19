@@ -21,23 +21,35 @@ class PhysioServiceItem {
     required this.centerPricePerDay,
     required this.homePricePerDay,
     required this.isActive,
+    this.categoryId = '',
+    this.categoryName = '',
   });
   final String id;
   final String name;
   final String description;
+  // These are now only the service's suggested-default price, kept for
+  // back-compat display before a center is chosen — once a center is
+  // picked, PhysioCenterModel.centerPricePerDay/homePricePerDay (that
+  // center's OWN price) is the number that actually gets charged.
   final int centerPricePerDay;
   final int homePricePerDay;
   final bool isActive;
+  final String categoryId;
+  final String categoryName;
 
-  factory PhysioServiceItem.fromMap(Map<String, dynamic> j) =>
-      PhysioServiceItem(
-        id: _str(j['id']),
-        name: _str(j['name']),
-        description: _str(j['description']),
-        centerPricePerDay: _int(j['center_price_per_day']),
-        homePricePerDay: _int(j['home_price_per_day']),
-        isActive: j['is_active'] == true,
-      );
+  factory PhysioServiceItem.fromMap(Map<String, dynamic> j) {
+    final cat = j['category'] is Map ? j['category'] as Map : const {};
+    return PhysioServiceItem(
+      id: _str(j['id']),
+      name: _str(j['name']),
+      description: _str(j['description']),
+      centerPricePerDay: _int(j['center_price_per_day']),
+      homePricePerDay: _int(j['home_price_per_day']),
+      isActive: j['is_active'] == true,
+      categoryId: _str(j['category_id']),
+      categoryName: _str(cat['name']),
+    );
+  }
 
   static List<PhysioServiceItem> listFromResponse(dynamic src) {
     final d = _data(src);
@@ -114,6 +126,126 @@ class PhysioStaff {
           .toList();
 }
 
+// ── Center-scoped catalog item (new center-first flow) ────────────────
+// One center's own priced, enabled offering within one top-level kind
+// ("lab"|"patient_care") — GET /physio/centers/:id/services?kind=.
+class PhysioCatalogItem {
+  PhysioCatalogItem({
+    required this.id,
+    required this.name,
+    required this.description,
+    required this.categoryId,
+    required this.categoryName,
+    required this.centerPricePerDay,
+    required this.homePricePerDay,
+    this.centerPricePerDayDiscount,
+    this.homePricePerDayDiscount,
+  });
+  final String id;
+  final String name;
+  final String description;
+  final String categoryId;
+  final String categoryName;
+  final int centerPricePerDay;
+  final int homePricePerDay;
+  // Null means "no discount" — same convention as everywhere else in the
+  // app (struck-through original beside the discounted price).
+  final int? centerPricePerDayDiscount;
+  final int? homePricePerDayDiscount;
+
+  /// The price actually charged for [visitType] ("center"|"home").
+  int priceFor(String visitType) {
+    final discount = visitType == 'home'
+        ? homePricePerDayDiscount
+        : centerPricePerDayDiscount;
+    if (discount != null && discount > 0) return discount;
+    return visitType == 'home' ? homePricePerDay : centerPricePerDay;
+  }
+
+  /// The struck-through original price for [visitType], or null when
+  /// there's no discount to show.
+  int? originalPriceFor(String visitType) {
+    final discount = visitType == 'home'
+        ? homePricePerDayDiscount
+        : centerPricePerDayDiscount;
+    final base = visitType == 'home' ? homePricePerDay : centerPricePerDay;
+    if (discount != null && discount > 0 && discount < base) return base;
+    return null;
+  }
+
+  factory PhysioCatalogItem.fromMap(Map<String, dynamic> j) =>
+      PhysioCatalogItem(
+        id: _str(j['id']),
+        name: _str(j['name']),
+        description: _str(j['description']),
+        categoryId: _str(j['category_id']),
+        categoryName: _str(j['category_name']),
+        centerPricePerDay: _int(j['center_price_per_day']),
+        homePricePerDay: _int(j['home_price_per_day']),
+        centerPricePerDayDiscount: j['center_price_per_day_discount'] == null
+            ? null
+            : _int(j['center_price_per_day_discount']),
+        homePricePerDayDiscount: j['home_price_per_day_discount'] == null
+            ? null
+            : _int(j['home_price_per_day_discount']),
+      );
+
+  static List<PhysioCatalogItem> listFromResponse(dynamic src) {
+    final d = _data(src);
+    final list = d is List ? d : const [];
+    return list
+        .whereType<Map>()
+        .map((e) => PhysioCatalogItem.fromMap(e.cast<String, dynamic>()))
+        .toList();
+  }
+}
+
+// ── Appointment line item (cart-based booking) ─────────────────────────
+class PhysioAppointmentItem {
+  PhysioAppointmentItem({
+    required this.serviceId,
+    required this.serviceName,
+    required this.unitPrice,
+    required this.quantity,
+    this.originalPrice,
+    this.categoryKind = '',
+  });
+  final String serviceId;
+  final String serviceName;
+  final int unitPrice;
+  final int? originalPrice;
+  final int quantity;
+  // 'lab' | 'patient_care' | '' (unknown — e.g. a legacy booking with no
+  // category on its service) — read from the nested service.category.kind
+  // the backend now includes, so the app can tell a lab-only booking
+  // apart from one with therapy/patient-care items.
+  final String categoryKind;
+
+  bool get hasDiscount => originalPrice != null && originalPrice! > unitPrice;
+  int get lineTotal => unitPrice * quantity;
+
+  factory PhysioAppointmentItem.fromMap(Map<String, dynamic> j) {
+    final service = j['service'] is Map ? j['service'] as Map : const {};
+    final category =
+        service['category'] is Map ? service['category'] as Map : const {};
+    return PhysioAppointmentItem(
+      serviceId: _str(j['service_id']),
+      serviceName: _str(j['service_name']),
+      unitPrice: _int(j['unit_price']),
+      originalPrice:
+          j['original_price'] == null ? null : _int(j['original_price']),
+      quantity: j['quantity'] != null ? _int(j['quantity']) : 1,
+      categoryKind: _str(category['kind']),
+    );
+  }
+
+  static List<PhysioAppointmentItem> listFrom(dynamic list) =>
+      (list is List ? list : const [])
+          .whereType<Map>()
+          .map((e) => PhysioAppointmentItem.fromMap(e.cast<String, dynamic>()))
+          .toList();
+}
+
 // ── Center ──────────────────────────────────────────────────────────
 class PhysioCenterModel {
   PhysioCenterModel({
@@ -126,6 +258,8 @@ class PhysioCenterModel {
     required this.wardNo,
     required this.matchingTherapists,
     required this.matchCount,
+    this.centerPricePerDay = 0,
+    this.homePricePerDay = 0,
   });
 
   final String id;
@@ -137,6 +271,11 @@ class PhysioCenterModel {
   final String wardNo;
   final List<PhysioStaff> matchingTherapists;
   final int matchCount;
+  // This center's OWN price for whichever service was used to fetch it
+  // (GET /physio/services/:id/centers) — 0 when fetched from an endpoint
+  // that doesn't carry pricing (e.g. the plain centers list).
+  final int centerPricePerDay;
+  final int homePricePerDay;
 
   factory PhysioCenterModel.fromMap(Map<String, dynamic> j) =>
       PhysioCenterModel(
@@ -147,9 +286,10 @@ class PhysioCenterModel {
         email: _str(j['email']),
         description: _str(j['description']),
         wardNo: _str(j['ward_no']),
-        matchingTherapists:
-            PhysioStaff.listFrom(j['matching_therapists']),
+        matchingTherapists: PhysioStaff.listFrom(j['matching_therapists']),
         matchCount: _int(j['match_count']),
+        centerPricePerDay: _int(j['center_price_per_day']),
+        homePricePerDay: _int(j['home_price_per_day']),
       );
 
   static List<PhysioCenterModel> listFromResponse(dynamic src) {
@@ -279,6 +419,13 @@ class PhysioAppointment {
     this.dayCount = 1,
     this.bookingGroupId = '',
     this.groupTotalAmount = 0,
+    this.paidAmount = 0,
+    this.patientProfileId = '',
+    this.referralNote = '',
+    this.items = const [],
+    this.kind = '',
+    this.reportUrl = '',
+    this.reportUploadedAt,
   });
 
   final String id;
@@ -300,11 +447,40 @@ class PhysioAppointment {
   final int dayCount;
   final String bookingGroupId;
   final int groupTotalAmount;
+  // Partial-payment/free-treatment fields — additive, nullable-safe.
+  final int paidAmount;
+  final String patientProfileId;
+  final String referralNote;
+  // Cart line items — populated for the new center-first booking flow.
+  // Empty for a legacy single-service booking.
+  final List<PhysioAppointmentItem> items;
+  // The appointment's own "lab" | "patient_care" split, set once by the
+  // server at booking time (see backend models.PhysioAppointment.Kind) —
+  // authoritative over isLabOnly's items-derivation below, which only
+  // exists as a fallback for a cached/older payload with no `kind`.
+  final String kind;
+  // Uploaded lab/X-ray report file (signed URL, ready to open) — only
+  // ever set when kind == "lab".
+  final String reportUrl;
+  final DateTime? reportUploadedAt;
+
+  /// A cart booking starts with no therapist/lab technician — true until
+  /// the center assigns one (staffId becomes non-empty).
+  bool get awaitingAssignment => staffId.isEmpty;
 
   bool get upcoming {
     final s = status.toLowerCase();
     return s != 'completed' && s != 'cancelled' && s != 'canceled';
   }
+
+  /// True for a lab/X-ray booking. Prefers the server-set `kind` field;
+  /// falls back to the old items-derivation (every cart item a lab
+  /// service) only when `kind` is empty, for safety against a stale
+  /// cached response. Drives "booking" vs "session" wording, the status
+  /// pill's labels/colors, and whether a report can show up.
+  bool get isLabOnly => kind.isNotEmpty
+      ? kind == 'lab'
+      : (items.isNotEmpty && items.every((i) => i.categoryKind == 'lab'));
 
   String get whenLabel {
     final dt = scheduledAt?.toLocal();
@@ -335,6 +511,15 @@ class PhysioAppointment {
       dayCount: j['day_count'] != null ? _int(j['day_count']) : 1,
       bookingGroupId: _str(j['booking_group_id']),
       groupTotalAmount: _int(j['group_total_amount']),
+      paidAmount: _int(j['paid_amount']),
+      patientProfileId: _str(j['patient_profile_id']),
+      referralNote: _str(j['referral_note']),
+      items: PhysioAppointmentItem.listFrom(j['items']),
+      kind: _str(j['kind']),
+      reportUrl: _str(j['report_url']),
+      reportUploadedAt: j['report_uploaded_at'] == null
+          ? null
+          : DateTime.tryParse(_str(j['report_uploaded_at'])),
     );
   }
 

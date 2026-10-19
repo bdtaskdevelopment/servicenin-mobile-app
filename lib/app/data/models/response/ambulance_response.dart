@@ -153,15 +153,24 @@ class Ambulance {
 /// A hotline number from `/api/v1/ambulance/hotlines` (e.g. Hotline 1,
 /// Hotline 2, Hotline 3, configured by the admin under ambulance settings).
 class AmbulanceHotline {
-  AmbulanceHotline({required this.label, required this.number});
+  AmbulanceHotline({
+    required this.label,
+    required this.number,
+    this.whatsappUrl = '',
+  });
 
   final String label;
   final String number;
+
+  /// Ready-to-open `https://wa.me/...` link, built server-side — empty when
+  /// no WhatsApp number is configured for this slot.
+  final String whatsappUrl;
 
   factory AmbulanceHotline.fromMap(Map<String, dynamic> json) {
     return AmbulanceHotline(
       label: _str(json['label']),
       number: _str(json['number']),
+      whatsappUrl: _str(json['whatsapp_url']),
     );
   }
 

@@ -281,6 +281,27 @@ class _InfoCard extends StatelessWidget {
                   ),
                 ),
               ),
+            if (entry.whatsapp.isNotEmpty) ...[
+              const SizedBox(width: 8),
+              GestureDetector(
+                onTap: () => con.openWhatsapp(entry.whatsapp),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 8,
+                  ),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF25D366).withValues(alpha: 0.14),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: const Icon(
+                    Icons.chat_rounded,
+                    size: 18,
+                    color: Color(0xFF25D366),
+                  ),
+                ),
+              ),
+            ],
           ],
         ),
       ),

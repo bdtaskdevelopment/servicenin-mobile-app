@@ -7,8 +7,8 @@ import '../../../data/models/response/education_response.dart';
 import '../../../global_widget/sn_shimmer.dart';
 import '../controllers/education_controller.dart';
 
-const _purple = Color(0xFF7C3AED);
-const _tile = Color(0xFFEDE4FB);
+const _orange = AppColors.brandOrange;
+const _tile = Color(0xFFFFEDE4);
 const _subtitle = Color(0xFF6B7A99);
 
 class EducationInterestsView extends GetView<EducationController> {
@@ -55,7 +55,7 @@ class EducationInterestsView extends GetView<EducationController> {
                     return const _Empty();
                   }
                   return RefreshIndicator(
-                    color: _purple,
+                    color: _orange,
                     onRefresh: con.fetchMyInterests,
                     child: FadeInUp(
                       from: 18,
@@ -146,7 +146,7 @@ class _InterestCard extends StatelessWidget {
                 ),
                 child: const Icon(
                   Icons.menu_book_rounded,
-                  color: _purple,
+                  color: _orange,
                   size: 21,
                 ),
               ),
@@ -222,6 +222,10 @@ class _InterestCard extends StatelessWidget {
                 if (item.parentContact.isNotEmpty) ...[
                   const SizedBox(height: 8),
                   _row('Contact'.tr, item.parentContact),
+                ],
+                if (item.address.isNotEmpty) ...[
+                  const SizedBox(height: 8),
+                  _row('Address'.tr, item.address),
                 ],
               ],
             ),

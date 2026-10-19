@@ -33,8 +33,7 @@ class PhysioRepository {
 
   Future<List<PhysioCenterModel>> fetchCentersForService(
       String serviceId) async {
-    final res =
-        await provider.getData(ApiURL.physioServiceCenters(serviceId));
+    final res = await provider.getData(ApiURL.physioServiceCenters(serviceId));
     return PhysioCenterModel.listFromResponse(_payload(res));
   }
 
@@ -51,6 +50,15 @@ class PhysioRepository {
   Future<List<PhysioStaff>> fetchStaff(String centerId) async {
     final res = await provider.getData(ApiURL.physioCenterStaff(centerId));
     return PhysioStaff.listFromResponse(_payload(res));
+  }
+
+  /// This center's own priced catalog within one top-level kind
+  /// ("lab"|"patient_care") — the new center-first flow's catalog browse.
+  Future<List<PhysioCatalogItem>> fetchCenterCatalog(
+      String centerId, String kind) async {
+    final res =
+        await provider.getData(ApiURL.physioCenterServices(centerId, kind));
+    return PhysioCatalogItem.listFromResponse(_payload(res));
   }
 
   Future<List<PhysioOption>> fetchVisitTypes() async {

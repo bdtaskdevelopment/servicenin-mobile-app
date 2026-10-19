@@ -6,6 +6,7 @@ import 'package:latlong2/latlong.dart';
 
 import '../../../core/helpers/location_helper.dart';
 import '../../../core/helpers/snack_helper.dart';
+import '../../../core/utils/home_service_status.dart';
 import '../../../data/models/response/service_response.dart';
 import '../../../data/repositories/service.repo.dart';
 import '../../../data/services/geo_search.service.dart';
@@ -30,18 +31,12 @@ const _activeJobStatuses = {
   'in_progress',
 };
 
-String _statusLabel(String status) {
-  switch (status) {
-    case 'on_the_way':
-      return 'On the way';
-    case 'in_progress':
-      return 'In progress';
-    default:
-      return status.isEmpty
-          ? ''
-          : status[0].toUpperCase() + status.substring(1).replaceAll('_', ' ');
-  }
-}
+// Delegates to the shared helper so this embedded "become a provider" mode
+// uses the exact same wording ("Reached customer", "Work in progress") as
+// both the customer-facing tracker and the standalone provider app, instead
+// of its own slightly different label set.
+String _statusLabel(String status) =>
+    status.isEmpty ? '' : homeServiceStatusLabel(status);
 
 /// Label for the single dynamic action button shown once a job is past
 /// "assigned" (which instead shows separate Accept/Decline buttons).

@@ -100,6 +100,10 @@ class NagarikController extends GetxController with LiveRefreshMixin {
     return h.isNotEmpty ? h : '16106';
   }
 
+  /// Ready-to-open WhatsApp link for the hotline, empty when the admin
+  /// hasn't configured one — the header's WhatsApp icon hides in that case.
+  String get hotlineWhatsappUrl => hotlines?.dnccWhatsappUrl ?? '';
+
   /// Banner title/subtitle, admin-editable alongside the hotline number
   /// (falls back to the translated default copy until they load).
   String get bannerTitle {
@@ -322,6 +326,17 @@ class NagarikController extends GetxController with LiveRefreshMixin {
           mode: LaunchMode.externalApplication);
     } catch (_) {
       SnackHelper.error('ডায়াল করা যায়নি');
+    }
+  }
+
+  /// Opens the pre-built `https://wa.me/...` link for the hotline's
+  /// WhatsApp number (see hotlineWhatsappUrl).
+  Future<void> openWhatsApp(String url) async {
+    if (url.trim().isEmpty) return;
+    try {
+      await launchUrl(Uri.parse(url.trim()), mode: LaunchMode.externalApplication);
+    } catch (_) {
+      SnackHelper.error('হোয়াটসঅ্যাপ খোলা যায়নি');
     }
   }
 

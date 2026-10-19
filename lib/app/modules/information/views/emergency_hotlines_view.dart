@@ -73,34 +73,41 @@ class EmergencyHotlinesView extends GetView<InformationController> {
                         padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
                         children: [
                           // National emergency hero
-                          GestureDetector(
-                            onTap: () => con.callHotline(
-                              hero?.hotline.isNotEmpty == true
-                                  ? hero!.hotline
-                                  : '999',
-                            ),
-                            child: Container(
-                              padding: const EdgeInsets.all(16),
-                              decoration: BoxDecoration(
-                                gradient: const LinearGradient(
-                                  colors: [
-                                    Color(0xFFE8333A),
-                                    Color(0xFFC2182B),
-                                  ],
-                                  begin: Alignment.topLeft,
-                                  end: Alignment.bottomRight,
-                                ),
-                                borderRadius: BorderRadius.circular(16),
+                          Container(
+                            padding: const EdgeInsets.all(16),
+                            decoration: BoxDecoration(
+                              gradient: const LinearGradient(
+                                colors: [
+                                  Color(0xFFE8333A),
+                                  Color(0xFFC2182B),
+                                ],
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
                               ),
-                              child: Row(
-                                children: [
-                                  const Icon(
+                              borderRadius: BorderRadius.circular(16),
+                            ),
+                            child: Row(
+                              children: [
+                                GestureDetector(
+                                  onTap: () => con.callHotline(
+                                    hero?.hotline.isNotEmpty == true
+                                        ? hero!.hotline
+                                        : '999',
+                                  ),
+                                  child: const Icon(
                                     Icons.call_rounded,
                                     color: Colors.white,
                                     size: 26,
                                   ),
-                                  const SizedBox(width: 14),
-                                  Expanded(
+                                ),
+                                const SizedBox(width: 14),
+                                Expanded(
+                                  child: GestureDetector(
+                                    onTap: () => con.callHotline(
+                                      hero?.hotline.isNotEmpty == true
+                                          ? hero!.hotline
+                                          : '999',
+                                    ),
                                     child: Column(
                                       crossAxisAlignment:
                                           CrossAxisAlignment.start,
@@ -131,8 +138,27 @@ class EmergencyHotlinesView extends GetView<InformationController> {
                                       ],
                                     ),
                                   ),
-                                ],
-                              ),
+                                ),
+                                if (hero?.whatsapp.isNotEmpty == true)
+                                  GestureDetector(
+                                    onTap: () =>
+                                        con.openWhatsapp(hero!.whatsapp),
+                                    child: Container(
+                                      width: 40,
+                                      height: 40,
+                                      decoration: BoxDecoration(
+                                        color: Colors.white
+                                            .withValues(alpha: 0.18),
+                                        shape: BoxShape.circle,
+                                      ),
+                                      child: const Icon(
+                                        Icons.chat_rounded,
+                                        color: Colors.white,
+                                        size: 20,
+                                      ),
+                                    ),
+                                  ),
+                              ],
                             ),
                           ),
                           const SizedBox(height: 14),
@@ -177,86 +203,123 @@ class _HotlineRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () => con.callHotline(entry.callNumber),
-      child: Container(
-        padding: const EdgeInsets.all(12),
-        decoration: BoxDecoration(
-          color: AppColors.white,
-          borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: const Color(0xFFEDEFF2)),
-        ),
-        child: Row(
-          children: [
-            Container(
-              width: 44,
-              height: 44,
-              decoration: BoxDecoration(
-                color: const Color(0xFFFDECEC),
-                borderRadius: BorderRadius.circular(12),
+    final hasWhatsApp = entry.whatsapp.isNotEmpty;
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: AppColors.white,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: const Color(0xFFEDEFF2)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 44,
+                height: 44,
+                decoration: BoxDecoration(
+                  color: const Color(0xFFFDECEC),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: const Icon(
+                  Icons.emergency_share_rounded,
+                  color: Color(0xFFE8333A),
+                  size: 21,
+                ),
               ),
-              child: const Icon(
-                Icons.emergency_share_rounded,
-                color: Color(0xFFE8333A),
-                size: 21,
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    entry.title,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                      fontSize: 15,
-                      fontWeight: FontWeight.w700,
-                      color: Color(0xFF0F172A),
-                    ),
-                  ),
-                  if (entry.titleBn.isNotEmpty) ...[
-                    const SizedBox(height: 2),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
                     Text(
-                      entry.titleBn,
+                      entry.title,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: const TextStyle(
-                        fontSize: 12,
-                        color: Color(0xFF94A3B8),
+                        fontSize: 15,
+                        fontWeight: FontWeight.w700,
+                        color: Color(0xFF0F172A),
                       ),
                     ),
+                    if (entry.titleBn.isNotEmpty) ...[
+                      const SizedBox(height: 2),
+                      Text(
+                        entry.titleBn,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          fontSize: 12,
+                          color: Color(0xFF94A3B8),
+                        ),
+                      ),
+                    ],
+                    if (entry.callNumber.isNotEmpty) ...[
+                      const SizedBox(height: 2),
+                      Text(
+                        entry.callNumber,
+                        style: const TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w600,
+                          color: Color(0xFFE07A1F),
+                        ),
+                      ),
+                    ],
                   ],
-                  if (entry.callNumber.isNotEmpty) ...[
-                    const SizedBox(height: 2),
-                    Text(
-                      entry.callNumber,
-                      style: const TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w600,
-                        color: Color(0xFFE07A1F),
+                ),
+              ),
+            ],
+          ),
+          if (entry.callNumber.isNotEmpty) ...[
+            const SizedBox(height: 10),
+            Row(
+              children: [
+                Expanded(
+                  child: SizedBox(
+                    height: 38,
+                    child: OutlinedButton.icon(
+                      onPressed: () => con.callHotline(entry.callNumber),
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: const Color(0xFF16A34A),
+                        side: const BorderSide(color: Color(0xFF16A34A)),
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10)),
+                      ),
+                      icon: const Icon(Icons.call_rounded, size: 16),
+                      label: Text('Call'.tr,
+                          style: const TextStyle(
+                              fontSize: 12.5, fontWeight: FontWeight.w700)),
+                    ),
+                  ),
+                ),
+                if (hasWhatsApp) ...[
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: SizedBox(
+                      height: 38,
+                      child: ElevatedButton.icon(
+                        onPressed: () => con.openWhatsapp(entry.whatsapp),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFF25D366),
+                          foregroundColor: Colors.white,
+                          elevation: 0,
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10)),
+                        ),
+                        icon: const Icon(Icons.chat_rounded, size: 16),
+                        label: Text('WhatsApp'.tr,
+                            style: const TextStyle(
+                                fontSize: 12.5, fontWeight: FontWeight.w700)),
                       ),
                     ),
-                  ],
+                  ),
                 ],
-              ),
-            ),
-            Container(
-              width: 40,
-              height: 40,
-              decoration: const BoxDecoration(
-                color: Color(0xFFD9F7E6),
-                shape: BoxShape.circle,
-              ),
-              child: const Icon(
-                Icons.call_rounded,
-                color: Color(0xFF16A34A),
-                size: 20,
-              ),
+              ],
             ),
           ],
-        ),
+        ],
       ),
     );
   }

@@ -46,7 +46,9 @@ class AmbulanceSupportView extends GetView<AmbulanceController> {
                         delay: Duration(milliseconds: 70 * e.key),
                         child: _SupportHotlineRow(
                           hotline: e.value,
-                          onTap: () => con.callHotline(e.value.number),
+                          onCall: () => con.callHotline(e.value.number),
+                          onWhatsApp: () =>
+                              con.openWhatsApp(e.value.whatsappUrl),
                         ),
                       ),
                     ),
@@ -60,64 +62,109 @@ class AmbulanceSupportView extends GetView<AmbulanceController> {
 }
 
 class _SupportHotlineRow extends StatelessWidget {
-  const _SupportHotlineRow({required this.hotline, required this.onTap});
+  const _SupportHotlineRow({
+    required this.hotline,
+    required this.onCall,
+    required this.onWhatsApp,
+  });
   final AmbulanceHotline hotline;
-  final VoidCallback onTap;
+  final VoidCallback onCall;
+  final VoidCallback onWhatsApp;
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.all(14),
-        decoration: BoxDecoration(
-          color: AppColors.white,
-          borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: const Color(0xFFEDEFF2)),
-        ),
-        child: Row(
-          children: [
-            Container(
-              width: 44,
-              height: 44,
-              decoration: BoxDecoration(
-                color: _red.withValues(alpha: 0.12),
-                borderRadius: BorderRadius.circular(12),
+    final hasWhatsApp = hotline.whatsappUrl.isNotEmpty;
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: AppColors.white,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: const Color(0xFFEDEFF2)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 44,
+                height: 44,
+                decoration: BoxDecoration(
+                  color: _red.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: const Icon(Icons.support_agent_rounded,
+                    color: _red, size: 22),
               ),
-              child: const Icon(Icons.support_agent_rounded, color: _red, size: 22),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(hotline.label,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                          fontSize: 14.5,
-                          fontWeight: FontWeight.w800,
-                          color: Color(0xFF0F172A))),
-                  const SizedBox(height: 2),
-                  Text(hotline.number,
-                      style: const TextStyle(
-                          fontSize: 13,
-                          fontWeight: FontWeight.w700,
-                          color: Color(0xFFE07A1F))),
-                ],
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(hotline.label,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                            fontSize: 14.5,
+                            fontWeight: FontWeight.w800,
+                            color: Color(0xFF0F172A))),
+                    const SizedBox(height: 2),
+                    Text(hotline.number,
+                        style: const TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w700,
+                            color: Color(0xFFE07A1F))),
+                  ],
+                ),
               ),
-            ),
-            Container(
-              width: 40,
-              height: 40,
-              decoration: const BoxDecoration(
-                color: Color(0xFFD9F7E6),
-                shape: BoxShape.circle,
+            ],
+          ),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              Expanded(
+                child: SizedBox(
+                  height: 42,
+                  child: OutlinedButton.icon(
+                    onPressed: onCall,
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: const Color(0xFF16A34A),
+                      side: const BorderSide(color: Color(0xFF16A34A)),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10)),
+                    ),
+                    icon: const Icon(Icons.call_rounded, size: 17),
+                    label: Text('Call'.tr,
+                        style: const TextStyle(
+                            fontSize: 13, fontWeight: FontWeight.w700)),
+                  ),
+                ),
               ),
-              child: const Icon(Icons.call_rounded, color: Color(0xFF16A34A), size: 20),
-            ),
-          ],
-        ),
+              if (hasWhatsApp) ...[
+                const SizedBox(width: 10),
+                Expanded(
+                  child: SizedBox(
+                    height: 42,
+                    child: ElevatedButton.icon(
+                      onPressed: onWhatsApp,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF25D366),
+                        foregroundColor: Colors.white,
+                        elevation: 0,
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10)),
+                      ),
+                      icon: const Icon(Icons.chat_rounded, size: 17),
+                      label: Text('WhatsApp'.tr,
+                          style: const TextStyle(
+                              fontSize: 13, fontWeight: FontWeight.w700)),
+                    ),
+                  ),
+                ),
+              ],
+            ],
+          ),
+        ],
       ),
     );
   }

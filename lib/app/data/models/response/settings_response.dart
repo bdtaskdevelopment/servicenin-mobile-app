@@ -19,6 +19,7 @@ class AppSettings {
     this.maintenanceMessage = '',
     this.maintenanceMessageBn = '',
     this.contactPhone = '',
+    this.contactWhatsapp = '',
     this.contactEmail = '',
     this.contactWebsite = '',
     this.contactAddress = '',
@@ -58,6 +59,7 @@ class AppSettings {
 
   // Contact / app info
   final String contactPhone;
+  final String contactWhatsapp;
   final String contactEmail;
   final String contactWebsite;
   final String contactAddress;
@@ -107,6 +109,7 @@ class AppSettings {
         maintenanceMessage: _str(data, 'maintenance_message'),
         maintenanceMessageBn: _str(data, 'maintenance_message_bn'),
         contactPhone: _str(data, 'contact_phone'),
+        contactWhatsapp: _str(data, 'contact_whatsapp'),
         contactEmail: _str(data, 'contact_email'),
         contactWebsite: _str(data, 'contact_website'),
         contactAddress: _str(data, 'contact_address'),

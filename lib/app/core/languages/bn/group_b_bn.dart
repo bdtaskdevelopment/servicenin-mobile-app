@@ -11,6 +11,17 @@ const Map<String, String> groupBBn = {
   'Change': 'পরিবর্তন',
   'Setup': 'সেটআপ',
   'Add': 'যোগ করুন',
+  'Added': 'যোগ করা হয়েছে',
+  'Filter': 'ফিল্টার',
+  'Filter by type': 'ধরন অনুযায়ী ফিল্টার করুন',
+  'Course details': 'কোর্সের বিবরণ',
+  'About this course': 'এই কোর্স সম্পর্কে',
+  'Instructor': 'প্রশিক্ষক',
+  'Duration': 'মেয়াদ',
+  'Fee': 'ফি',
+  'View details': 'বিস্তারিত দেখুন',
+  'ADDRESS (OPTIONAL)': 'ঠিকানা (ঐচ্ছিক)',
+  'House/road, area, district…': 'বাসা/রাস্তা, এলাকা, জেলা…',
   'Book': 'বুক করুন',
   'Accept': 'গ্রহণ করুন',
   'Decline': 'প্রত্যাখ্যান',
@@ -45,6 +56,7 @@ const Map<String, String> groupBBn = {
   'See all →': 'সব দেখুন →',
   'No bookings yet.': 'এখনও কোনো বুকিং নেই।',
   'My bookings': 'আমার বুকিং',
+  'My Booking': 'আমার বুকিং',
   'History': 'আমার বুকিং',
   'Tap a trip to see its details': 'বিস্তারিত দেখতে একটি ট্রিপে ট্যাপ করুন',
   'Notifications': 'নোটিফিকেশন',
@@ -185,10 +197,24 @@ const Map<String, String> groupBBn = {
   'Day': 'দিন',
   'Days': 'দিন',
   'SESSION TYPE': 'সেশনের ধরন',
+  // 'At center' stays mapped for any cached/old reference, but the
+  // checkout page now uses 'Center visit' to match 'Home visit''s
+  // "___ visit" pattern.
   'At center': 'কেন্দ্রে',
+  'Center visit': 'কেন্দ্র ভিজিট',
   'Home visit': 'হোম ভিজিট',
+  'Switching to Home visit changes the price to':
+      'হোম ভিজিটে পরিবর্তন করলে মূল্য হবে',
+  "home visits include the therapist's travel cost, so the rate can differ from visiting the center.":
+      'হোম ভিজিটে থেরাপিস্টের যাতায়াত খরচ অন্তর্ভুক্ত থাকে, তাই কেন্দ্রে ভিজিটের চেয়ে মূল্য ভিন্ন হতে পারে।',
   'HOME ADDRESS': 'বাসার ঠিকানা',
   'Where should the therapist visit?': 'থেরাপিস্ট কোথায় যাবেন?',
+  'Search on map': 'ম্যাপে খুঁজুন',
+  'Search your address': 'আপনার ঠিকানা খুঁজুন',
+  'Search for your street, area or landmark.':
+      'আপনার রাস্তা, এলাকা বা ল্যান্ডমার্ক খুঁজুন।',
+  'No matching places found.': 'কোনো মিল পাওয়া যায়নি।',
+  'Select time': 'সময় নির্বাচন করুন',
   'DATE': 'তারিখ',
   'TIME': 'সময়',
   'No slots for this date.': 'এই তারিখের জন্য কোনো স্লট নেই।',
@@ -201,6 +227,11 @@ const Map<String, String> groupBBn = {
   'Session booked': 'সেশন বুক হয়েছে',
   'Your physio session is confirmed': 'আপনার ফিজিও সেশন নিশ্চিত করা হয়েছে',
   'View my sessions': 'আমার সেশন দেখুন',
+  'View my bookings': 'আমার বুকিং দেখুন',
+  // Per-card eyebrow tag on "My sessions": a lab-only request is a
+  // booking for a test, not a therapy session.
+  'Booking': 'বুকিং',
+  'Session': 'সেশন',
   'Back to Physio home': 'ফিজিও হোমে ফিরুন',
 
   // ── Home Service ──
@@ -217,7 +248,7 @@ const Map<String, String> groupBBn = {
   'All →': 'সব →',
   'Popular this week': 'এই সপ্তাহে জনপ্রিয়',
   'Tap a booking to track it': 'ট্র্যাক করতে একটি বুকিংয়ে ট্যাপ করুন',
-  'services available': 'সেবা উপলব্ধ',
+  'services available': 'সেবা পাওয়া গেছে',
   'Search services…': 'সেবা খুঁজুন…',
   'Search for a service': 'একটি সেবা খুঁজুন',
   'No services found': 'কোনো সেবা পাওয়া যায়নি',

@@ -285,6 +285,8 @@ class ApiURL {
   static String physioCenter(String id) => 'api/v1/physio/centers/$id';
   static String physioCenterStaff(String id) =>
       'api/v1/physio/centers/$id/staff';
+  static String physioCenterServices(String centerId, String kind) =>
+      'api/v1/physio/centers/$centerId/services?kind=$kind';
   static final String physioVisitTypes = 'api/v1/physio/visit-types';
   static final String physioScheduleDates = 'api/v1/physio/schedule-dates';
   static String physioTimeSlots(String staffId, String date) =>
