@@ -86,6 +86,14 @@ class SslcommerzPay {
     }
 
     // 2. Open the SSLCommerz checkout with that tran_id.
+    //
+    // success_url/fail_url/cancel_url: a LIVE store validates/requires
+    // these even though this native-SDK flow never navigates to them (the
+    // SDK's own UI reports the outcome directly) — omitting them is what
+    // made live payments fail after charging with "did not get success
+    // url". Sandbox's demo store doesn't enforce this, so it worked there
+    // with no URLs at all. These don't need to be real pages; SSLCommerz
+    // just needs well-formed URLs on file for the live store.
     final sslcommerz = Sslcommerz(
       initializer: SSLCommerzInitialization(
         store_id: _storeId,
@@ -95,6 +103,9 @@ class SslcommerzPay {
         tran_id: tranId,
         product_category: category,
         sdkType: _isLive ? SSLCSdkType.LIVE : SSLCSdkType.TESTBOX,
+        success_url: 'https://servicenin.com/payment/success',
+        fail_url: 'https://servicenin.com/payment/fail',
+        cancel_url: 'https://servicenin.com/payment/cancel',
       ),
     );
     final SSLCTransactionInfoModel res = await sslcommerz.payNow();

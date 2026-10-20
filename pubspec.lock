@@ -433,11 +433,10 @@ packages:
   flutter_sslcommerz:
     dependency: "direct main"
     description:
-      name: flutter_sslcommerz
-      sha256: "4ff960cfe989d5a18d68e5305f7a2e35c2e186a09626228345581071da9cf955"
-      url: "https://pub.dev"
-    source: hosted
-    version: "3.0.2"
+      path: "third_party/flutter_sslcommerz"
+      relative: true
+    source: path
+    version: "3.0.3"
   flutter_test:
     dependency: "direct dev"
     description: flutter
