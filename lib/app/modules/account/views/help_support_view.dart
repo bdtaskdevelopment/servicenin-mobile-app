@@ -87,6 +87,16 @@ class HelpSupportView extends StatelessWidget {
                       actionColor: _green,
                       onTap: () => _openExternal('tel:${s.contactPhone}'),
                     ),
+                  if (s.contactWhatsapp.isNotEmpty)
+                    _ContactRow(
+                      icon: Icons.chat_outlined,
+                      label: 'WhatsApp'.tr,
+                      value: s.contactWhatsapp,
+                      actionIcon: Icons.chat_rounded,
+                      actionColor: const Color(0xFF25D366),
+                      onTap: () => _openExternal(
+                          'https://wa.me/${s.contactWhatsapp.replaceAll(RegExp(r'[^0-9]'), '')}'),
+                    ),
                   if (s.contactEmail.isNotEmpty)
                     _ContactRow(
                       icon: Icons.email_outlined,

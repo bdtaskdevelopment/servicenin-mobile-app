@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 
 import '../../../core/values/app_colors.dart';
 import '../../../data/models/response/service_response.dart';
+import '../../../global_widget/price_text.dart';
 import '../controllers/home_service_controller.dart';
 
 const _teal = Color(0xFF0E9F8E);
@@ -214,6 +215,63 @@ class EditOrderView extends GetView<HomeServiceController> {
                                     height: 1, color: Color(0xFFF1F5F9)),
                                 itemBuilder: (_, i) {
                                   final s = subs[i];
+                                  // A service with priced variants (e.g. AC
+                                  // capacity in Ton) can't take a plain
+                                  // quantity here — which variant is being
+                                  // added matters for the price. Tapping it
+                                  // opens the variant sub-sheet instead of a
+                                  // direct stepper; the row itself just
+                                  // summarises what (if anything) was
+                                  // picked there.
+                                  if (s.hasVariants) {
+                                    final totalQty = s.variants
+                                        .map((v) =>
+                                            selection['${s.id}::${v.id}'] ?? 0)
+                                        .fold<int>(0, (a, b) => a + b);
+                                    return ListTile(
+                                      contentPadding: EdgeInsets.zero,
+                                      onTap: () => _openVariantSubSheet(
+                                          context, s, selection, setSheet),
+                                      title: Text(s.displayName,
+                                          style: const TextStyle(
+                                              fontSize: 14,
+                                              fontWeight: FontWeight.w700)),
+                                      subtitle: Text(
+                                          totalQty > 0
+                                              ? '$totalQty ${'selected'.tr}'
+                                              : '${'From'.tr} ৳${s.fromPrice}',
+                                          style: const TextStyle(
+                                              fontSize: 12.5,
+                                              color: Color(0xFF94A3B8))),
+                                      trailing: Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          if (totalQty > 0) ...[
+                                            Container(
+                                              padding:
+                                                  const EdgeInsets.symmetric(
+                                                      horizontal: 7,
+                                                      vertical: 3),
+                                              decoration: BoxDecoration(
+                                                  color: _darkTeal,
+                                                  borderRadius:
+                                                      BorderRadius.circular(8)),
+                                              child: Text('$totalQty',
+                                                  style: const TextStyle(
+                                                      fontSize: 11,
+                                                      fontWeight:
+                                                          FontWeight.w700,
+                                                      color: Colors.white)),
+                                            ),
+                                            const SizedBox(width: 6),
+                                          ],
+                                          const Icon(
+                                              Icons.chevron_right_rounded,
+                                              color: Color(0xFF94A3B8)),
+                                        ],
+                                      ),
+                                    );
+                                  }
                                   final qty = selection[s.id] ?? 0;
                                   return ListTile(
                                     contentPadding: EdgeInsets.zero,
@@ -271,6 +329,63 @@ class EditOrderView extends GetView<HomeServiceController> {
                         ),
             );
           },
+        ),
+      ),
+    );
+  }
+
+  /// Picks a priced variant (e.g. AC capacity in Ton) for a service in the
+  /// "add a service" sheet above. Each variant gets its own line in
+  /// [selection], keyed the same way the main booking cart keys a variant
+  /// line ("subServiceId::variantId"), so [HomeServiceController.addTasks]
+  /// can tell them apart and so two different capacities of the same
+  /// service can be added side by side.
+  void _openVariantSubSheet(BuildContext context, HsServiceItem s,
+      Map<String, int> selection, StateSetter setSheet) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) => StatefulBuilder(
+        builder: (ctx, setSub) => _Sheet(
+          title: s.displayName,
+          child: Flexible(
+            child: ListView.separated(
+              shrinkWrap: true,
+              itemCount: s.variants.length,
+              separatorBuilder: (_, __) =>
+                  const Divider(height: 1, color: Color(0xFFF1F5F9)),
+              itemBuilder: (_, i) {
+                final v = s.variants[i];
+                final key = '${s.id}::${v.id}';
+                final qty = selection[key] ?? 0;
+                return ListTile(
+                  contentPadding: EdgeInsets.zero,
+                  title: Text(v.displayName,
+                      style: const TextStyle(
+                          fontSize: 14, fontWeight: FontWeight.w700)),
+                  subtitle: PriceText(
+                      price: v.effective,
+                      originalPrice: v.discountPrice != null ? v.price : null),
+                  trailing: _Stepper(
+                    qty: qty,
+                    onMinus: qty == 0
+                        ? null
+                        : () => setSub(() => setSheet(() {
+                              if (qty <= 1) {
+                                selection.remove(key);
+                              } else {
+                                selection[key] = qty - 1;
+                              }
+                            })),
+                    onPlus: () => setSub(() => setSheet(() {
+                          selection[key] = qty + 1;
+                        })),
+                  ),
+                );
+              },
+            ),
+          ),
         ),
       ),
     );
@@ -604,15 +719,35 @@ class _TotalCard extends StatelessWidget {
         child: Column(
           children: [
             _row('Subtotal'.tr, '৳${booking.subtotal}'),
-            const SizedBox(height: 8),
-            _row(
-                booking.vatRate > 0 ? '${'VAT'.tr} (${booking.vatRate}%)' : 'VAT'.tr,
-                '৳${booking.vatAmount}'),
+            // Only shown as its own line when the backend's admin setting
+            // says to break it out (same one the web/PDF invoice reads) —
+            // see ServiceBooking.showVatBreakdown's doc comment. OFF means
+            // VAT is already excluded from `amount`, so showing it here
+            // would make the total look wrong.
+            if (booking.showVatBreakdown) ...[
+              const SizedBox(height: 8),
+              _row(
+                  booking.vatRate > 0
+                      ? '${'VAT'.tr} (${booking.vatRate}%)'
+                      : 'VAT'.tr,
+                  '৳${booking.vatAmount}'),
+            ],
             const Padding(
               padding: EdgeInsets.symmetric(vertical: 10),
               child: Divider(height: 1, color: Color(0xFFF1F5F9)),
             ),
             _row('New total'.tr, '৳${booking.amount}', bold: true),
+            if (booking.hasHiddenVat) ...[
+              const SizedBox(height: 4),
+              Align(
+                alignment: Alignment.centerRight,
+                child: Text('Including VAT'.tr,
+                    style: const TextStyle(
+                        fontSize: 11.5,
+                        fontStyle: FontStyle.italic,
+                        color: Color(0xFF94A3B8))),
+              ),
+            ],
           ],
         ),
       );

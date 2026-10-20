@@ -356,23 +356,47 @@ class InformationDetailView extends GetView<InformationController> {
               if (e.callNumber.isNotEmpty)
                 Padding(
                   padding: const EdgeInsets.fromLTRB(20, 0, 20, 16),
-                  child: SizedBox(
-                    width: double.infinity,
-                    height: 52,
-                    child: ElevatedButton.icon(
-                      onPressed: () => con.callHotline(e.callNumber),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: _red,
-                        foregroundColor: Colors.white,
-                        elevation: 0,
-                        shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(14)),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: SizedBox(
+                          height: 52,
+                          child: ElevatedButton.icon(
+                            onPressed: () => con.callHotline(e.callNumber),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: _red,
+                              foregroundColor: Colors.white,
+                              elevation: 0,
+                              shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(14)),
+                            ),
+                            icon: const Icon(Icons.call_rounded, size: 20),
+                            label: Text('Call ${e.callNumber}',
+                                style: const TextStyle(
+                                    fontSize: 16, fontWeight: FontWeight.w800)),
+                          ),
+                        ),
                       ),
-                      icon: const Icon(Icons.call_rounded, size: 20),
-                      label: Text('Call ${e.callNumber}',
-                          style: const TextStyle(
-                              fontSize: 16, fontWeight: FontWeight.w800)),
-                    ),
+                      if (e.whatsapp.isNotEmpty) ...[
+                        const SizedBox(width: 10),
+                        SizedBox(
+                          width: 52,
+                          height: 52,
+                          child: ElevatedButton(
+                            onPressed: () => con.openWhatsapp(e.whatsapp),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: const Color(0xFF25D366),
+                              foregroundColor: Colors.white,
+                              elevation: 0,
+                              padding: EdgeInsets.zero,
+                              shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(14)),
+                            ),
+                            child: const Icon(Icons.chat_rounded, size: 22),
+                          ),
+                        ),
+                      ],
+                    ],
                   ),
                 ),
             ],

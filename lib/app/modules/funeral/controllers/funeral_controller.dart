@@ -40,6 +40,15 @@ class FuneralController extends GetxController with LiveRefreshMixin {
   bool submitting = false;
   FuneralRequest? lastRequest;
 
+  // Same convention as AccountController.genders (edit profile screen) —
+  // raw English labels shown as-is, lower-cased only when sent to the API.
+  final List<String> genders = const ['Male', 'Female', 'Other'];
+  String gender = 'Male';
+  void setGender(String g) {
+    gender = g;
+    update();
+  }
+
   void selectService(String id) {
     selectedServiceId = id;
     update();
@@ -102,6 +111,17 @@ class FuneralController extends GetxController with LiveRefreshMixin {
     }
   }
 
+  /// Opens the pre-built `https://wa.me/...` link for a hotline's WhatsApp
+  /// number (see FuneralHotline.whatsappUrl).
+  Future<void> openWhatsApp(String url) async {
+    if (url.trim().isEmpty) return;
+    try {
+      await launchUrl(Uri.parse(url.trim()), mode: LaunchMode.externalApplication);
+    } catch (_) {
+      SnackHelper.error('হোয়াটসঅ্যাপ খোলা যায়নি');
+    }
+  }
+
   // ── Submit request ──────────────────────────────────────────────────
   void requestService() => Get.toNamed(Routes.FUNERAL_REQUEST);
 
@@ -131,6 +151,7 @@ class FuneralController extends GetxController with LiveRefreshMixin {
         'name': name.text.trim(),
         'address': address.text.trim(),
         'phone': phone.text.trim(),
+        'gender': gender.toLowerCase(),
         if (notes.text.trim().isNotEmpty) 'notes': notes.text.trim(),
       };
       lastRequest = await _repo.createRequest(payload);

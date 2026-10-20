@@ -64,12 +64,8 @@ class SupportView extends GetView<SupportController> {
                           delay: Duration(milliseconds: 70 * e.key),
                           child: _SupportRow(
                             hotline: e.value,
-                            onTap: () => con.call(e.value.number),
-                            onWhatsApp: con.showWhatsApp &&
-                                    SupportController.canWhatsApp(
-                                        e.value.number)
-                                ? () => con.whatsapp(e.value.number)
-                                : null,
+                            onCall: () => con.call(e.value.number),
+                            onWhatsApp: () => con.openWhatsApp(e.value.whatsappUrl),
                           ),
                         ),
                       ),
@@ -84,87 +80,110 @@ class SupportView extends GetView<SupportController> {
 }
 
 class _SupportRow extends StatelessWidget {
-  const _SupportRow(
-      {required this.hotline, required this.onTap, this.onWhatsApp});
+  const _SupportRow({
+    required this.hotline,
+    required this.onCall,
+    required this.onWhatsApp,
+  });
   final SupportHotline hotline;
-  final VoidCallback onTap;
-
-  /// When set, a WhatsApp button is shown beside the call button.
-  final VoidCallback? onWhatsApp;
+  final VoidCallback onCall;
+  final VoidCallback onWhatsApp;
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.all(14),
-        decoration: BoxDecoration(
-          color: AppColors.white,
-          borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: const Color(0xFFEDEFF2)),
-        ),
-        child: Row(
-          children: [
-            Container(
-              width: 44,
-              height: 44,
-              decoration: BoxDecoration(
-                color: const Color(0xFF334155).withValues(alpha: 0.10),
-                borderRadius: BorderRadius.circular(12),
+    final hasWhatsApp = hotline.whatsappUrl.isNotEmpty;
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: AppColors.white,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: const Color(0xFFEDEFF2)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 44,
+                height: 44,
+                decoration: BoxDecoration(
+                  color: const Color(0xFF334155).withValues(alpha: 0.10),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: const Icon(Icons.support_agent_rounded,
+                    color: Color(0xFF334155), size: 22),
               ),
-              child: const Icon(Icons.support_agent_rounded,
-                  color: Color(0xFF334155), size: 22),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(hotline.label,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                          fontSize: 14.5,
-                          fontWeight: FontWeight.w800,
-                          color: Color(0xFF0F172A))),
-                  const SizedBox(height: 2),
-                  Text(hotline.number,
-                      style: const TextStyle(
-                          fontSize: 13,
-                          fontWeight: FontWeight.w700,
-                          color: Color(0xFFE07A1F))),
-                ],
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(hotline.label,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                            fontSize: 14.5,
+                            fontWeight: FontWeight.w800,
+                            color: Color(0xFF0F172A))),
+                    const SizedBox(height: 2),
+                    Text(hotline.number,
+                        style: const TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w700,
+                            color: Color(0xFFE07A1F))),
+                  ],
+                ),
               ),
-            ),
-            if (onWhatsApp != null) ...[
-              // Own tap target so pressing it doesn't also dial via the row.
-              Semantics(
-                button: true,
-                label: 'WhatsApp'.tr,
-                child: GestureDetector(
-                  onTap: onWhatsApp,
-                  child: Image.asset(
-                    'assets/image/whatsapp.png',
-                    width: 40,
-                    height: 40,
-                    fit: BoxFit.contain,
+            ],
+          ),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              Expanded(
+                child: SizedBox(
+                  height: 42,
+                  child: OutlinedButton.icon(
+                    onPressed: onCall,
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: const Color(0xFF0F766E),
+                      side: const BorderSide(color: Color(0xFF0F766E)),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10)),
+                    ),
+                    icon: const Icon(Icons.call_rounded, size: 17),
+                    label: Text('Call'.tr,
+                        style: const TextStyle(
+                            fontSize: 13, fontWeight: FontWeight.w700)),
                   ),
                 ),
               ),
-              const SizedBox(width: 10),
+              if (hasWhatsApp) ...[
+                const SizedBox(width: 10),
+                Expanded(
+                  child: SizedBox(
+                    height: 42,
+                    child: ElevatedButton.icon(
+                      onPressed: onWhatsApp,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF25D366),
+                        foregroundColor: Colors.white,
+                        elevation: 0,
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10)),
+                      ),
+                      icon: Image.asset('assets/image/whatsapp.png',
+                          width: 17, height: 17),
+                      label: Text('WhatsApp'.tr,
+                          style: const TextStyle(
+                              fontSize: 13, fontWeight: FontWeight.w700)),
+                    ),
+                  ),
+                ),
+              ],
             ],
-            Container(
-              width: 40,
-              height: 40,
-              decoration: const BoxDecoration(
-                color: Color(0xFFD9F7E6),
-                shape: BoxShape.circle,
-              ),
-              child: const Icon(Icons.call_rounded,
-                  color: Color(0xFF16A34A), size: 20),
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
@@ -179,7 +198,6 @@ class SupportIconButton extends StatelessWidget {
     super.key,
     required this.title,
     required this.endpoint,
-    this.whatsapp = false,
     this.color = const Color(0xFF1A1A1A),
     this.size = 22,
   });
@@ -189,9 +207,6 @@ class SupportIconButton extends StatelessWidget {
 
   /// Module endpoint, e.g. 'api/v1/blood/hotlines'.
   final String endpoint;
-
-  /// Show a WhatsApp button beside each number on the support screen.
-  final bool whatsapp;
   final Color color;
   final double size;
 
@@ -205,7 +220,7 @@ class SupportIconButton extends StatelessWidget {
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       onSelected: (_) => Get.toNamed(
         '/support-center',
-        arguments: {'title': title, 'endpoint': endpoint, 'whatsapp': whatsapp},
+        arguments: {'title': title, 'endpoint': endpoint},
       ),
       itemBuilder: (context) => [
         PopupMenuItem(

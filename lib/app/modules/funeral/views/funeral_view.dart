@@ -153,6 +153,10 @@ class FuneralView extends GetView<FuneralController> {
                                   child: _SupportCard(
                                     hotline: e.value,
                                     onTap: () => con.call(e.value.number),
+                                    onWhatsApp: e.value.whatsappUrl.isEmpty
+                                        ? null
+                                        : () => con
+                                            .openWhatsApp(e.value.whatsappUrl),
                                   ),
                                 ),
                               ),
@@ -291,56 +295,81 @@ class _ServiceCard extends StatelessWidget {
 /// One tappable support-center number. Deliberately calm — dark neutral, not
 /// the ambulance module's emergency red: this screen is for a grieving family.
 class _SupportCard extends StatelessWidget {
-  const _SupportCard({required this.hotline, required this.onTap});
+  const _SupportCard(
+      {required this.hotline, required this.onTap, this.onWhatsApp});
   final FuneralHotline hotline;
   final VoidCallback onTap;
+  final VoidCallback? onWhatsApp;
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 10),
-        decoration: BoxDecoration(
-          color: _charcoal.withValues(alpha: 0.06),
-          borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: _charcoal.withValues(alpha: 0.16)),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
+    return Stack(
+      clipBehavior: Clip.none,
+      children: [
+        GestureDetector(
+          onTap: onTap,
+          child: Container(
+            padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 10),
+            decoration: BoxDecoration(
+              color: _charcoal.withValues(alpha: 0.06),
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(color: _charcoal.withValues(alpha: 0.16)),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Icon(Icons.call_rounded, color: _charcoal, size: 15),
-                const SizedBox(width: 5),
-                Expanded(
-                  child: Text(
-                    hotline.label,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                      fontSize: 11.5,
-                      fontWeight: FontWeight.w700,
-                      color: _charcoal,
+                Row(
+                  children: [
+                    const Icon(Icons.call_rounded, color: _charcoal, size: 15),
+                    const SizedBox(width: 5),
+                    Expanded(
+                      child: Text(
+                        hotline.label,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          fontSize: 11.5,
+                          fontWeight: FontWeight.w700,
+                          color: _charcoal,
+                        ),
+                      ),
                     ),
+                  ],
+                ),
+                const SizedBox(height: 5),
+                Text(
+                  hotline.number,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    fontSize: 13.5,
+                    fontWeight: FontWeight.w800,
+                    color: Color(0xFF0F172A),
                   ),
                 ),
               ],
             ),
-            const SizedBox(height: 5),
-            Text(
-              hotline.number,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: const TextStyle(
-                fontSize: 13.5,
-                fontWeight: FontWeight.w800,
-                color: Color(0xFF0F172A),
+          ),
+        ),
+        if (onWhatsApp != null)
+          Positioned(
+            right: -6,
+            top: -6,
+            child: GestureDetector(
+              onTap: onWhatsApp,
+              child: Container(
+                width: 22,
+                height: 22,
+                decoration: const BoxDecoration(
+                  color: Color(0xFF25D366),
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(Icons.chat_rounded,
+                    color: Colors.white, size: 12),
               ),
             ),
-          ],
-        ),
-      ),
+          ),
+      ],
     );
   }
 }

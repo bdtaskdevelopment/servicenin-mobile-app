@@ -50,8 +50,10 @@ class HomeController extends GetxController {
   List<HomeBanner> banners = [];
   bool loadingBanners = false;
   int promoIndex = 0;
-  final PageController bannerController =
-      PageController(viewportFraction: 0.92);
+  // 1.0 — each banner takes the full viewport width with no sliver of the
+  // next/previous slide peeking in from either edge; swiping moves fully
+  // from one complete slide to the next.
+  final PageController bannerController = PageController(viewportFraction: 1);
   Timer? _autoScroll;
 
   void setPromo(int i) {

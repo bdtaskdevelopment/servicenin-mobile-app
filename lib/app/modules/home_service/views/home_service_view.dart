@@ -11,6 +11,7 @@ import '../../support/views/support_view.dart';
 import '../controllers/home_service_controller.dart';
 
 const _teal = Color(0xFF0E9F8E);
+const _darkTeal = Color(0xFF0E7C6B);
 const _tile = Color(0xFFE0F2EF);
 
 /// Resolves an admin-uploaded icon URL, which may already be absolute (S3)
@@ -31,52 +32,69 @@ class HomeServiceView extends GetView<HomeServiceController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF7F8FA),
+      backgroundColor: const Color(0xFFF4F6F8),
       body: SafeArea(
         child: Column(
           children: [
-            // Header
-            Padding(
-              padding: const EdgeInsets.fromLTRB(8, 6, 16, 8),
+            // Header — teal gradient banner (matches My Bookings/category
+            // headers elsewhere in this module) instead of a plain white bar.
+            Container(
+              padding: const EdgeInsets.fromLTRB(4, 6, 16, 18),
+              decoration: const BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [_teal, _darkTeal],
+                ),
+                borderRadius: BorderRadius.vertical(bottom: Radius.circular(26)),
+              ),
               child: Row(
                 children: [
                   IconButton(
                     splashRadius: 22,
                     onPressed: () => Get.back(),
                     icon: const Icon(Icons.arrow_back_ios_new_rounded,
-                        size: 20, color: Color(0xFF1A1A1A)),
+                        size: 20, color: Colors.white),
                   ),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text('Home Service'.tr,
-                          style: const TextStyle(
-                              fontSize: 19,
-                              fontWeight: FontWeight.w800,
-                              color: Color(0xFF0F172A))),
-                      const SizedBox(height: 1),
-                      Text('Trusted pros · pay after service'.tr,
-                          style: const TextStyle(
-                              fontSize: 12, color: Color(0xFF94A3B8))),
-                    ],
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('Home Service'.tr,
+                            style: const TextStyle(
+                                fontSize: 19,
+                                fontWeight: FontWeight.w800,
+                                color: Colors.white)),
+                        const SizedBox(height: 1),
+                        Text('Trusted pros · pay after service'.tr,
+                            style: TextStyle(
+                                fontSize: 12,
+                                color: Colors.white.withValues(alpha: 0.82))),
+                      ],
+                    ),
                   ),
-                  const Spacer(),
                   // Cart with item-count badge → opens the cart (confirm) page.
                   GetBuilder<HomeServiceController>(
                     builder: (con) => GestureDetector(
                       onTap: con.openCart,
                       behavior: HitTestBehavior.opaque,
-                      child: Padding(
-                        padding: const EdgeInsets.all(4),
+                      child: Container(
+                        width: 40,
+                        height: 40,
+                        decoration: BoxDecoration(
+                            color: Colors.white.withValues(alpha: 0.16),
+                            borderRadius: BorderRadius.circular(12)),
                         child: Stack(
                           clipBehavior: Clip.none,
                           children: [
-                            const Icon(Icons.shopping_cart_outlined,
-                                color: Color(0xFF1A1A1A), size: 24),
+                            const Center(
+                              child: Icon(Icons.shopping_cart_outlined,
+                                  color: Colors.white, size: 21),
+                            ),
                             if (con.totalItems > 0)
                               Positioned(
-                                right: -7,
-                                top: -7,
+                                right: -4,
+                                top: -4,
                                 child: Container(
                                   padding: const EdgeInsets.all(3),
                                   constraints: const BoxConstraints(
@@ -97,11 +115,19 @@ class HomeServiceView extends GetView<HomeServiceController> {
                       ),
                     ),
                   ),
-                  const SizedBox(width: 14),
+                  const SizedBox(width: 10),
                   // Support center — admin-configured numbers for this module.
-                  SupportIconButton(
-                    title: 'Home Service Support'.tr,
-                    endpoint: ApiURL.homeServiceHotlines,
+                  Container(
+                    width: 40,
+                    height: 40,
+                    decoration: BoxDecoration(
+                        color: Colors.white.withValues(alpha: 0.16),
+                        borderRadius: BorderRadius.circular(12)),
+                    child: SupportIconButton(
+                      title: 'Home Service Support'.tr,
+                      endpoint: ApiURL.homeServiceHotlines,
+                      color: Colors.white,
+                    ),
                   ),
                 ],
               ),
@@ -218,20 +244,30 @@ class _ActiveCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-          color: AppColors.white,
-          borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: const Color(0xFFEDEFF2))),
+        color: AppColors.white,
+        borderRadius: BorderRadius.circular(18),
+        boxShadow: [
+          BoxShadow(
+              color: _teal.withValues(alpha: 0.16),
+              blurRadius: 18,
+              offset: const Offset(0, 8)),
+        ],
+      ),
       child: Row(
         children: [
           Container(
-            width: 44,
-            height: 44,
+            width: 48,
+            height: 48,
             decoration: BoxDecoration(
-                color: _tile, borderRadius: BorderRadius.circular(12)),
-            child:
-                const Icon(Icons.receipt_long_rounded, color: _teal, size: 22),
+                gradient: const LinearGradient(
+                    colors: [_teal, _darkTeal],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight),
+                borderRadius: BorderRadius.circular(14)),
+            child: const Icon(Icons.receipt_long_rounded,
+                color: Colors.white, size: 23),
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -241,7 +277,7 @@ class _ActiveCard extends StatelessWidget {
                 Text('My bookings'.tr,
                     style: const TextStyle(
                         fontSize: 14.5,
-                        fontWeight: FontWeight.w700,
+                        fontWeight: FontWeight.w800,
                         color: Color(0xFF0F172A))),
                 const SizedBox(height: 2),
                 Text('Track your service bookings'.tr,
@@ -250,7 +286,14 @@ class _ActiveCard extends StatelessWidget {
               ],
             ),
           ),
-          const Icon(Icons.chevron_right_rounded, color: Color(0xFF94A3B8)),
+          Container(
+            width: 30,
+            height: 30,
+            decoration: BoxDecoration(
+                color: _tile, borderRadius: BorderRadius.circular(10)),
+            child: const Icon(Icons.chevron_right_rounded,
+                color: _darkTeal, size: 20),
+          ),
         ],
       ),
     );
@@ -286,33 +329,43 @@ class _CatTile extends StatelessWidget {
   final HsCategory cat;
   @override
   Widget build(BuildContext context) {
+    final accent = hsCatColor(cat.en);
     return Container(
       clipBehavior: Clip.antiAlias,
       decoration: BoxDecoration(
-          color: AppColors.white,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: const Color(0xFFEDEFF2))),
+        color: AppColors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+              color: accent.withValues(alpha: 0.14),
+              blurRadius: 12,
+              offset: const Offset(0, 5)),
+        ],
+      ),
       padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          cat.imageUrl.isEmpty
-              ? Icon(cat.icon, color: _teal, size: 26)
-              : ClipRRect(
-                  borderRadius: BorderRadius.circular(8),
-                  child: SizedBox(
-                    width: 28,
-                    height: 28,
+          Container(
+            width: 38,
+            height: 38,
+            decoration: BoxDecoration(
+                color: accent.withValues(alpha: 0.14),
+                borderRadius: BorderRadius.circular(11)),
+            child: cat.imageUrl.isEmpty
+                ? Icon(cat.icon, color: accent, size: 22)
+                : ClipRRect(
+                    borderRadius: BorderRadius.circular(11),
                     child: CachedNetworkImage(
                       imageUrl: _iconUrl(cat.imageUrl),
                       fit: BoxFit.cover,
                       placeholder: (_, __) =>
-                          Icon(cat.icon, color: _teal, size: 26),
+                          Icon(cat.icon, color: accent, size: 22),
                       errorWidget: (_, __, ___) =>
-                          Icon(cat.icon, color: _teal, size: 26),
+                          Icon(cat.icon, color: accent, size: 22),
                     ),
                   ),
-                ),
+          ),
           const SizedBox(height: 6),
           Flexible(
             child: Builder(
@@ -440,29 +493,36 @@ class _ServiceCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-          color: AppColors.white,
-          borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: const Color(0xFFEDEFF2))),
+        color: AppColors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+              color: service.color.withValues(alpha: 0.14),
+              blurRadius: 14,
+              offset: const Offset(0, 6)),
+        ],
+      ),
       child: Row(
         children: [
           Container(
-            width: 44,
-            height: 44,
+            width: 46,
+            height: 46,
             alignment: Alignment.center,
             decoration: BoxDecoration(
-                color: _tile, borderRadius: BorderRadius.circular(12)),
+                color: service.color.withValues(alpha: 0.14),
+                borderRadius: BorderRadius.circular(13)),
             clipBehavior: Clip.antiAlias,
             child: service.imageUrl.isEmpty
-                ? Icon(service.icon, color: _teal, size: 22)
+                ? Icon(service.icon, color: service.color, size: 22)
                 : CachedNetworkImage(
                     imageUrl: _iconUrl(service.imageUrl),
                     fit: BoxFit.cover,
-                    width: 44,
-                    height: 44,
+                    width: 46,
+                    height: 46,
                     placeholder: (_, __) =>
-                        Icon(service.icon, color: _teal, size: 22),
+                        Icon(service.icon, color: service.color, size: 22),
                     errorWidget: (_, __, ___) =>
-                        Icon(service.icon, color: _teal, size: 22),
+                        Icon(service.icon, color: service.color, size: 22),
                   ),
           ),
           const SizedBox(width: 12),

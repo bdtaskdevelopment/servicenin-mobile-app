@@ -4,8 +4,8 @@ import 'package:get/get.dart';
 import '../../../core/values/app_colors.dart';
 import '../controllers/education_controller.dart';
 
-const _purple = Color(0xFF7C3AED);
-const _tileSel = Color(0xFFEDE4FB);
+const _orange = AppColors.brandOrange;
+const _tileSel = Color(0xFFFFEDE4);
 
 class CourseEnquiryView extends GetView<EducationController> {
   const CourseEnquiryView({super.key});
@@ -72,7 +72,7 @@ class CourseEnquiryView extends GetView<EducationController> {
                                 borderRadius: BorderRadius.circular(22),
                                 border: Border.all(
                                     color: sel
-                                        ? _purple
+                                        ? _orange
                                         : const Color(0xFFE2E8F0),
                                     width: sel ? 1.6 : 1.2),
                               ),
@@ -81,7 +81,7 @@ class CourseEnquiryView extends GetView<EducationController> {
                                       fontSize: 13.5,
                                       fontWeight: FontWeight.w700,
                                       color: sel
-                                          ? _purple
+                                          ? _orange
                                           : const Color(0xFF334155))),
                             ),
                           );
@@ -98,6 +98,11 @@ class CourseEnquiryView extends GetView<EducationController> {
                           label: 'PARENT / GUARDIAN CONTACT'.tr,
                           hint: '+880 1XXXXXXXXX',
                           keyboard: TextInputType.phone),
+                      const SizedBox(height: 12),
+                      _InputCard(
+                          controller: con.address,
+                          label: 'ADDRESS (OPTIONAL)'.tr,
+                          hint: 'House/road, area, district…'.tr),
                       const SizedBox(height: 12),
                       _InputCard(
                           controller: con.subjectNeeded,
@@ -127,7 +132,7 @@ class CourseEnquiryView extends GetView<EducationController> {
                       onPressed:
                           con.submitting ? null : con.submitEnquiry,
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: _purple,
+                        backgroundColor: _orange,
                         foregroundColor: Colors.white,
                         elevation: 0,
                         shape: RoundedRectangleBorder(

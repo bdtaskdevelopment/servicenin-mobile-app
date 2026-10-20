@@ -3,7 +3,7 @@ import 'package:get/get.dart';
 import 'package:latlong2/latlong.dart';
 
 import '../../../core/values/app_colors.dart';
-import '../../../data/models/response/service_response.dart';
+import '../../../global_widget/home_service_status_widgets.dart';
 import '../../../global_widget/sn_google_map.dart';
 import '../../../global_widget/sn_map.dart' show SnMapMarker;
 import '../../../global_widget/sn_shimmer.dart';
@@ -160,7 +160,7 @@ class HsTrackingView extends GetView<HomeServiceController> {
                                         fontWeight: FontWeight.w800,
                                         color: Color(0xFF0F172A))),
                               ),
-                              _StatusChip(
+                              HomeServiceStatusChip(
                                   status: con.trackedBooking?.status ??
                                       'pending'),
                             ],
@@ -228,7 +228,13 @@ class HsTrackingView extends GetView<HomeServiceController> {
                               showTrailing: false,
                             )
                           else
-                            _Timeline(entries: con.timeline),
+                            HomeServiceStatusStepper(
+                              status: con.trackedBooking?.status ?? 'pending',
+                              timestamps: {
+                                for (final t in con.timeline)
+                                  t.status.toLowerCase(): t.timeLabel,
+                              },
+                            ),
                           const SizedBox(height: 14),
                           SizedBox(
                             width: double.infinity,
@@ -278,102 +284,6 @@ class HsTrackingView extends GetView<HomeServiceController> {
           child: Icon(icon, size: 18, color: const Color(0xFF1A1A1A)),
         ),
       );
-}
-
-class _Timeline extends StatelessWidget {
-  const _Timeline({required this.entries});
-  final List<ServiceTimelineEntry> entries;
-  @override
-  Widget build(BuildContext context) {
-    if (entries.isEmpty) {
-      return Text('No updates yet.'.tr,
-          style: const TextStyle(fontSize: 13, color: Color(0xFF94A3B8)));
-    }
-    return Container(
-      padding: const EdgeInsets.fromLTRB(14, 14, 14, 2),
-      decoration: BoxDecoration(
-          color: const Color(0xFFF7F8FA),
-          borderRadius: BorderRadius.circular(14)),
-      child: Column(
-        children: List.generate(entries.length, (i) {
-          final e = entries[i];
-          final last = i == entries.length - 1;
-          return IntrinsicHeight(
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Column(
-                  children: [
-                    const Icon(Icons.check_circle, size: 20, color: _darkTeal),
-                    if (!last)
-                      Expanded(
-                        child: Container(
-                            width: 2, color: const Color(0xFFB6E0D7)),
-                      ),
-                  ],
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Padding(
-                    padding: EdgeInsets.only(bottom: last ? 8 : 16),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(e.statusLabel,
-                            style: const TextStyle(
-                                fontSize: 14,
-                                fontWeight: FontWeight.w700,
-                                color: Color(0xFF0F172A))),
-                        const SizedBox(height: 1),
-                        if (e.note.isNotEmpty)
-                          // Text(e.note,
-                          //     style: const TextStyle(
-                          //         fontSize: 12, color: Color(0xFF64748B))),
-                        Text(e.timeLabel,
-                            style: const TextStyle(
-                                fontSize: 11.5, color: Color(0xFFE07A1F))),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          );
-        }),
-      ),
-    );
-  }
-}
-
-class _StatusChip extends StatelessWidget {
-  const _StatusChip({required this.status});
-  final String status;
-  @override
-  Widget build(BuildContext context) {
-    final s = status.toLowerCase();
-    final done = s == 'completed';
-    final bad = s == 'cancelled' || s == 'canceled';
-    final bg = bad
-        ? const Color(0xFFFEE2E2)
-        : done
-            ? const Color(0xFFDCFCE7)
-            : const Color(0xFFFEF3C7);
-    final fg = bad
-        ? const Color(0xFFDC2626)
-        : done
-            ? const Color(0xFF15803D)
-            : const Color(0xFFB45309);
-    final label =
-        status.isEmpty ? 'Pending' : status[0].toUpperCase() + status.substring(1).replaceAll('_', ' ');
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-      decoration:
-          BoxDecoration(color: bg, borderRadius: BorderRadius.circular(20)),
-      child: Text(label,
-          style: TextStyle(
-              fontSize: 11, fontWeight: FontWeight.w800, color: fg)),
-    );
-  }
 }
 
 class _ActionBtn extends StatelessWidget {

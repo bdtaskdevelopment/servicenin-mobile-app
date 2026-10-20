@@ -5,11 +5,13 @@ import 'package:get/get.dart';
 
 import '../../../core/values/app_colors.dart';
 import '../../../data/models/response/education_response.dart';
+import '../../../global_widget/rich_html_text.dart';
 import '../../../global_widget/sn_shimmer.dart';
 import '../controllers/education_controller.dart';
 
-const _purple = Color(0xFF7C3AED);
-const _tile = Color(0xFFEDE4FB);
+const _orange = AppColors.brandOrange;
+const _darkOrange = AppColors.brandOrangeDark;
+const _tile = Color(0xFFFFEDE4);
 
 class EducationCenterView extends GetView<EducationController> {
   const EducationCenterView({super.key});
@@ -126,7 +128,7 @@ class EducationCenterView extends GetView<EducationController> {
                                     style: const TextStyle(
                                       fontSize: 12.5,
                                       fontWeight: FontWeight.w700,
-                                      color: _purple,
+                                      color: _orange,
                                     ),
                                   ),
                                 ],
@@ -184,7 +186,7 @@ class EducationCenterView extends GetView<EducationController> {
                             _ContactChip(
                                 icon: Icons.language_rounded,
                                 label: 'Website'.tr,
-                                color: _purple,
+                                color: _orange,
                                 onTap: () => con.openLink(center.website)),
                         ],
                       ),
@@ -200,7 +202,7 @@ class EducationCenterView extends GetView<EducationController> {
                       const SizedBox(height: 2),
                       Text(
                         '${con.courses.length} available',
-                        style: const TextStyle(fontSize: 12.5, color: _purple),
+                        style: const TextStyle(fontSize: 12.5, color: _orange),
                       ),
                       const SizedBox(height: 14),
                       if (con.loadingCourses && con.courses.isEmpty)
@@ -233,15 +235,15 @@ class EducationCenterView extends GetView<EducationController> {
                       Container(
                         padding: const EdgeInsets.all(14),
                         decoration: BoxDecoration(
-                          color: const Color(0xFFEAF1FB),
+                          color: _tile,
                           borderRadius: BorderRadius.circular(14),
                         ),
                         child: Row(
                           children: [
                             const Icon(
-                              Icons.verified_user_outlined,
+                              Icons.info_outline_rounded,
                               size: 18,
-                              color: Color(0xFF2563EB),
+                              color: _darkOrange,
                             ),
                             const SizedBox(width: 10),
                             Expanded(
@@ -251,7 +253,7 @@ class EducationCenterView extends GetView<EducationController> {
                                 style: const TextStyle(
                                   fontSize: 12.5,
                                   height: 1.4,
-                                  color: Color(0xFF2563EB),
+                                  color: _darkOrange,
                                 ),
                               ),
                             ),
@@ -276,7 +278,7 @@ class _LogoFallback extends StatelessWidget {
   Widget build(BuildContext context) => Container(
         color: _tile,
         alignment: Alignment.center,
-        child: const Icon(Icons.menu_book_rounded, color: _purple, size: 30),
+        child: const Icon(Icons.menu_book_rounded, color: _orange, size: 30),
       );
 }
 
@@ -347,7 +349,9 @@ class _CourseCard extends StatelessWidget {
   final EducationController con;
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return GestureDetector(
+      onTap: () => con.openCourseDetails(course),
+      child: Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
         color: AppColors.white,
@@ -356,6 +360,41 @@ class _CourseCard extends StatelessWidget {
       ),
       child: Column(
         children: [
+          if (course.displayThumbnail.isNotEmpty) ...[
+            ClipRRect(
+              borderRadius: BorderRadius.circular(12),
+              child: AspectRatio(
+                aspectRatio: 16 / 8,
+                child: Stack(
+                  fit: StackFit.expand,
+                  children: [
+                    CachedNetworkImage(
+                      imageUrl: course.displayThumbnail,
+                      fit: BoxFit.cover,
+                      placeholder: (_, __) => Container(color: _tile),
+                      errorWidget: (_, __, ___) => Container(color: _tile),
+                    ),
+                    if (course.hasVideo)
+                      Container(
+                        color: Colors.black.withValues(alpha: 0.18),
+                        alignment: Alignment.center,
+                        child: Container(
+                          width: 44,
+                          height: 44,
+                          decoration: const BoxDecoration(
+                            color: Colors.white,
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Icon(Icons.play_arrow_rounded,
+                              color: _darkOrange, size: 26),
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 12),
+          ],
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -401,7 +440,7 @@ class _CourseCard extends StatelessWidget {
                     style: const TextStyle(
                       fontSize: 11,
                       fontWeight: FontWeight.w700,
-                      color: _purple,
+                      color: _orange,
                     ),
                   ),
                 ),
@@ -431,6 +470,17 @@ class _CourseCard extends StatelessWidget {
               ],
             ),
           ],
+          if (course.description.isNotEmpty) ...[
+            const SizedBox(height: 10),
+            RichHtmlText(
+              course.description,
+              style: const TextStyle(
+                fontSize: 12.5,
+                height: 1.5,
+                color: Color(0xFF475569),
+              ),
+            ),
+          ],
           const Padding(
             padding: EdgeInsets.symmetric(vertical: 12),
             child: _DashedDivider(),
@@ -446,31 +496,21 @@ class _CourseCard extends StatelessWidget {
                 ),
               ),
               const Spacer(),
-              SizedBox(
-                height: 40,
-                child: ElevatedButton(
-                  onPressed: () => con.enquire(course),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: _purple,
-                    foregroundColor: Colors.white,
-                    elevation: 0,
-                    padding: const EdgeInsets.symmetric(horizontal: 22),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
-                  child: Text(
-                    'Register'.tr,
-                    style: const TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w800,
-                    ),
-                  ),
+              Text(
+                'View details'.tr,
+                style: const TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w700,
+                  color: _darkOrange,
                 ),
               ),
+              const SizedBox(width: 2),
+              const Icon(Icons.chevron_right_rounded,
+                  size: 18, color: _darkOrange),
             ],
           ),
         ],
+      ),
       ),
     );
   }

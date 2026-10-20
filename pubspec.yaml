@@ -19,7 +19,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 version: 1.0.6+7
 
 environment:
-  sdk: ^3.11.1
+  sdk: ">=3.0.0 <4.0.0"
 
 # Dependencies specify other packages that your package needs in order to work.
 # To automatically upgrade your package dependencies to the latest versions
@@ -33,44 +33,49 @@ dependencies:
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
-  cupertino_icons: ^1.0.8
-  get: ^4.7.3
-  dio: ^5.9.2
-  get_storage: ^2.1.1
-  firebase_core: ^4.9.0
-  animate_do: ^5.1.0
-  shimmer_animation: ^2.2.2+1
-  flutter_dotenv: ^6.0.1
-  connectivity_plus: ^7.1.1
-  flutter_easyloading: ^3.0.5
-  shared_preferences: ^2.5.5
-  path: ^1.9.1
-  path_provider: ^2.1.5
-  sqflite: ^2.4.2+1
-  cached_network_image: ^3.4.1
-  image_picker: ^1.2.2
-  file_picker: ^8.1.6
-  geolocator: ^14.0.2
-  dropdown_button2: ^3.1.0
-  fluttertoast: ^9.1.0
-  image: ^4.8.0
-  intl: ^0.20.2
-  permission_handler: ^12.0.3
-  url_launcher: ^6.3.2
-  open_filex: ^4.5.0
-  google_fonts: ^8.1.0
-  intl_phone_field: ^3.2.0
-  internet_checker_plus: ^1.0.4
-  flutter_sslcommerz: ^3.0.2
-  flutter_log_console: ^1.0.2
-  flutter_map: ^8.3.0
-  latlong2: ^0.9.1
-  google_maps_flutter: ^2.17.1
-  printing: ^5.14.2
-  youtube_player_flutter: ^10.0.1
-  firebase_messaging: ^16.4.3
-  web_socket_channel: ^3.0.3
+  cupertino_icons: ">=1.0.0 <2.0.0"
+  get: ">=4.0.0 <5.0.0"
+  dio: ">=5.0.0 <6.0.0"
+  get_storage: ">=2.0.0 <3.0.0"
+  firebase_core: ">=4.0.0 <5.0.0"
+  animate_do: ">=5.0.0 <6.0.0"
+  shimmer_animation: ">=2.0.0 <3.0.0"
+  flutter_dotenv: ">=6.0.0 <7.0.0"
+  connectivity_plus: ">=7.0.0 <8.0.0"
+  flutter_easyloading: ">=3.0.0 <4.0.0"
+  shared_preferences: ">=2.0.0 <3.0.0"
+  path: ">=1.0.0 <2.0.0"
+  path_provider: ">=2.0.0 <3.0.0"
+  sqflite: ">=2.0.0 <3.0.0"
+  cached_network_image: ">=3.0.0 <4.0.0"
+  image_picker: ">=1.0.0 <2.0.0"
+  file_picker: ">=8.0.0 <9.0.0"
+  geolocator: ">=14.0.0 <15.0.0"
+  dropdown_button2: ">=3.0.0 <4.0.0"
+  fluttertoast: any
+  image: ">=4.0.0 <5.0.0"
+  intl: ">=0.20.0 <0.21.0"
+  permission_handler: ">=12.0.0 <13.0.0"
+  url_launcher: ">=6.0.0 <7.0.0"
+  open_filex: ">=4.0.0 <5.0.0"
+  google_fonts: ">=8.0.0 <9.0.0"
+  intl_phone_field: ">=3.0.0 <4.0.0"
+  internet_checker_plus: ">=1.0.0 <2.0.0"
+  flutter_sslcommerz: ">=3.0.0 <4.0.0"
+  flutter_log_console: ">=1.0.0 <2.0.0"
+  flutter_map: ">=8.0.0 <9.0.0"
+  latlong2: ">=0.9.0 <0.10.0"
+  google_maps_flutter: ">=2.0.0 <3.0.0"
+  printing: ">=5.0.0 <6.0.0"
+  youtube_player_flutter: ">=10.0.0 <11.0.0"
+  firebase_messaging: ">=16.0.0 <17.0.0"
+  web_socket_channel: ">=3.0.0 <4.0.0"
   smart_auth: ^3.2.0
+  # Renders admin-authored rich text (category Description/Terms &
+  # Conditions/FAQ answers — written via the admin panel's Quill editor
+  # and delivered as HTML) instead of showing the raw <p>/<strong> tags.
+  # See lib/app/global_widget/rich_html_text.dart.
+  flutter_widget_from_html_core: ">=0.15.0 <0.16.0"
 
 dev_dependencies:
   flutter_test:
@@ -81,8 +86,8 @@ dev_dependencies:
   # activated in the `analysis_options.yaml` file located at the root of your
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
-  flutter_lints: ^6.0.0
-  flutter_launcher_icons: ^0.14.4
+  flutter_lints: ">=6.0.0 <7.0.0"
+  flutter_launcher_icons: ">=0.14.0 <0.15.0"
 
 # App launcher icon configuration. Run `dart run flutter_launcher_icons`
 # after changing the source image to regenerate platform icons.

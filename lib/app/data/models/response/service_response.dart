@@ -667,6 +667,7 @@ class ServiceBooking {
     this.adminDiscountByName = '',
     this.itemVatAmount = 0,
     this.roundOffAmount = 0,
+    this.showVatBreakdown = true,
     required this.settled,
     required this.servicesSummary,
     required this.categoryNames,
@@ -717,14 +718,28 @@ class ServiceBooking {
   final String adminDiscountByName;
 
   /// Sum of every extra item's own VAT — distinct from [vatAmount] (the
-  /// booking-wide "Service VAT"). Both are folded into [amount] already;
-  /// this is only for the invoice's own "Item VAT" line.
+  /// booking-wide "Service VAT"). Folded into [amount] only when
+  /// [showVatBreakdown] is true — see that field's doc comment.
   final int itemVatAmount;
 
   /// Admin-only manual adjustment on the final total, already folded into
   /// [amount]. The app never sets this — shown only when non-zero, and can
   /// be negative.
   final int roundOffAmount;
+
+  /// Mirrors the backend's live "home_service_vat_show_breakdown" admin
+  /// setting (same one the web/PDF invoice reads) — NOT a property of this
+  /// particular booking, just passed along by the API at fetch time so every
+  /// screen agrees with the invoice. When true, [vatAmount]/[itemVatAmount]
+  /// are both already added into [amount] and should be shown as their own
+  /// "Service VAT"/"Item VAT" lines. When false, the business absorbs VAT
+  /// out of its own margin instead of charging the customer: [amount]
+  /// does NOT include [vatAmount]/[itemVatAmount] (they're still populated
+  /// as informational figures), so a client must NOT show them as separate
+  /// addends — show an "Including VAT" note instead, same as the PDF
+  /// invoice, or the numbers won't add up on screen. Defaults to true for
+  /// any response that predates this field.
+  final bool showVatBreakdown;
   final bool settled;
   final String servicesSummary;
   final List<String> categoryNames;
@@ -747,6 +762,13 @@ class ServiceBooking {
   String get vatLabel => '৳$vatAmount';
   bool get hasItemVat => itemVatAmount != 0;
   bool get hasRoundOff => roundOffAmount != 0;
+
+  /// True when VAT was actually charged but [showVatBreakdown] says not to
+  /// show it as its own line — the "Including VAT" disclosure note should
+  /// render instead. False (no note at all) for a zero-VAT booking, same as
+  /// the PDF invoice.
+  bool get hasHiddenVat =>
+      !showVatBreakdown && (vatAmount != 0 || itemVatAmount != 0);
 
   String get title => subServiceName.isNotEmpty
       ? subServiceName
@@ -925,6 +947,9 @@ class ServiceBooking {
       adminDiscountByName: _str(j['admin_discount_by_name']),
       itemVatAmount: _int(j['item_vat_amount']),
       roundOffAmount: _int(j['round_off_amount']),
+      showVatBreakdown: j['show_vat_breakdown'] == null
+          ? true
+          : j['show_vat_breakdown'] == true,
       settled: _str(j['settled_at']).isNotEmpty,
       servicesSummary: _str(j['services_summary']),
       categoryNames:

@@ -1,4 +1,3 @@
-import 'package:animate_do/animate_do.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -123,40 +122,6 @@ class HomeView extends GetView<HomeController> {
                     );
                   }),
                 ),
-                // ── Popular services ──────────────────────────────
-                if (con.loadingPopular || con.popular.isNotEmpty) ...[
-                  const SizedBox(height: 24),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    child: SectionHeader(title: 'Popular Services'.tr),
-                  ),
-                  const SizedBox(height: 12),
-                  if (con.popular.isEmpty)
-                    const SnStripSkeleton(height: 120, itemWidth: 156)
-                  else
-                    FadeInUp(
-                      from: 18,
-                      duration: const Duration(milliseconds: 350),
-                      child: _ServiceStrip(services: con.popular),
-                    ),
-                ],
-                // ── Recent services ───────────────────────────────
-                if (con.loadingRecent || con.recent.isNotEmpty) ...[
-                  const SizedBox(height: 24),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    child: SectionHeader(title: 'Recent Services'.tr),
-                  ),
-                  const SizedBox(height: 12),
-                  if (con.recent.isEmpty)
-                    const SnStripSkeleton(height: 120, itemWidth: 156)
-                  else
-                    FadeInUp(
-                      from: 18,
-                      duration: const Duration(milliseconds: 350),
-                      child: _ServiceStrip(services: con.recent),
-                    ),
-                ],
               ],
             ),
           );
@@ -327,65 +292,3 @@ class _BannerSlide extends StatelessWidget {
 }
 
 // ── Horizontal service shortcut strip (popular / recent) ────────────
-class _ServiceStrip extends StatelessWidget {
-  const _ServiceStrip({required this.services});
-  final List<HomeService> services;
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      height: 120,
-      child: ListView.separated(
-        scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: 16),
-        itemCount: services.length,
-        separatorBuilder: (_, __) => const SizedBox(width: 12),
-        itemBuilder: (_, i) => _ServiceCard(service: services[i]),
-      ),
-    );
-  }
-}
-
-class _ServiceCard extends StatelessWidget {
-  const _ServiceCard({required this.service});
-  final HomeService service;
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () => ServiceNav.openByKey(service.key),
-      child: Container(
-        width: 156,
-        padding: const EdgeInsets.all(14),
-        decoration: BoxDecoration(
-          color: service.color.withValues(alpha: 0.10),
-          borderRadius: BorderRadius.circular(16),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Container(
-              width: 40,
-              height: 40,
-              decoration: BoxDecoration(
-                color: service.color.withValues(alpha: 0.16),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Icon(service.iconData, color: service.color, size: 21),
-            ),
-            const SizedBox(height: 10),
-            Text(service.name.tr,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-                style: const TextStyle(
-                    fontSize: 13,
-                    height: 1.2,
-                    fontWeight: FontWeight.w700,
-                    color: Color(0xFF0F172A))),
-          ],
-        ),
-      ),
-    );
-  }
-}
