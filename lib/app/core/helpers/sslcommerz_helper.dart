@@ -6,6 +6,7 @@ import 'package:flutter_sslcommerz/sslcommerz.dart';
 import 'package:get/get.dart';
 
 import '../../data/models/response/settings_response.dart';
+import '../../data/repositories/payment.repo.dart';
 import '../../data/services/settings.service.dart';
 
 /// Result of an SSLCommerz checkout. On success, [valId] and [tranId] are the
@@ -48,21 +49,13 @@ class SslcommerzPay {
     return k == 'sslcommerz' || k == 'online' || k == 'card';
   }
 
-  /// Opens the native SSLCommerz checkout widget directly. On success the
-  /// gateway returns a `val_id`; the returned [SslcResult] carries it plus
-  /// `tran_id` so the caller can add them (with `payment_method:
-  /// "sslcommerz"`) to the booking payload — the backend re-verifies val_id
-  /// against SSLCommerz before settling.
-  ///
-  /// IMPORTANT: this does NOT call `POST /payments/sslcommerz/initiate`
-  /// first. That endpoint creates its own SSLCommerz session server-side
-  /// (meant for a hosted-checkout/WebView flow this app doesn't use) — if
-  /// you reuse its `tran_id` here, the native SDK below creates a SECOND,
-  /// colliding session for the same tran_id. In practice that was the cause
-  /// of "bKash deducted the money but the app never showed a success page":
-  /// the customer was paying against one session while the SDK's status
-  /// check landed on the other. Always mint a fresh, local tran_id for the
-  /// single session created here.
+  /// Two-step checkout used by every paid booking:
+  ///   1. `POST /payments/sslcommerz/initiate` → the backend creates a session
+  ///      and returns the `tran_id` to use.
+  ///   2. Open the SSLCommerz checkout with that `tran_id` → on success the
+  ///      gateway returns a `val_id`.
+  /// The returned [SslcResult] carries `val_id` + `tran_id` so the caller can
+  /// add them (with `payment_method: "sslcommerz"`) to the booking payload.
   ///
   /// Throws if the SDK can't launch (e.g. plugin not registered / no native
   /// build) so callers can surface the real reason. Returns
@@ -75,10 +68,32 @@ class SslcommerzPay {
   }) async {
     if (amount <= 0) return const SslcResult();
 
-    final tranId = 'SN-${DateTime.now().millisecondsSinceEpoch}';
+    // 1. Ask the backend to create a payment session (server tran_id).
+    String tranId = '';
+    try {
+      final init = await Get.find<PaymentRepository>().initiate(
+        amount: amount,
+        productName: productName,
+        category: category,
+      );
+      tranId = init.tranId;
+    } catch (_) {
+      // If initiate fails we fall back to a locally generated id below so the
+      // user can still pay; the gateway is the source of truth for val_id.
+    }
+    if (tranId.isEmpty) {
+      tranId = 'SN-${DateTime.now().millisecondsSinceEpoch}';
+    }
 
-    // Open the SSLCommerz checkout with that tran_id — the only session
-    // created for this payment.
+    // 2. Open the SSLCommerz checkout with that tran_id.
+    //
+    // success_url/fail_url/cancel_url: a LIVE store validates/requires
+    // these even though this native-SDK flow never navigates to them (the
+    // SDK's own UI reports the outcome directly) — omitting them is what
+    // made live payments fail after charging with "did not get success
+    // url". Sandbox's demo store doesn't enforce this, so it worked there
+    // with no URLs at all. These don't need to be real pages; SSLCommerz
+    // just needs well-formed URLs on file for the live store.
     final sslcommerz = Sslcommerz(
       initializer: SSLCommerzInitialization(
         store_id: _storeId,
@@ -88,6 +103,9 @@ class SslcommerzPay {
         tran_id: tranId,
         product_category: category,
         sdkType: _isLive ? SSLCSdkType.LIVE : SSLCSdkType.TESTBOX,
+        success_url: 'https://servicenin.com/payment/success',
+        fail_url: 'https://servicenin.com/payment/fail',
+        cancel_url: 'https://servicenin.com/payment/cancel',
       ),
     );
     final SSLCTransactionInfoModel res = await sslcommerz.payNow();
