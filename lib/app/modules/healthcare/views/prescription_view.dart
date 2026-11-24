@@ -1,13 +1,15 @@
 import 'package:animate_do/animate_do.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../../core/values/app_colors.dart';
 import '../../../global_widget/sn_shimmer.dart';
 import '../controllers/prescription_controller.dart';
 
-const _green = Color(0xFF0F7A52);
-const _tile = Color(0xFFD9F7E6);
+const _green = Color(0xFF0D9383);
+const _tile = Color(0xFFE6F5F4);
+const _orange = Color(0xFFF16621);
 
 class PrescriptionView extends GetView<PrescriptionController> {
   const PrescriptionView({super.key});
@@ -15,21 +17,22 @@ class PrescriptionView extends GetView<PrescriptionController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF7F8FA),
+      backgroundColor: const Color(0xFFF4F5FA),
       body: SafeArea(
         child: GetBuilder<PrescriptionController>(
           builder: (con) => Column(
           children: [
             // Header
-            Padding(
+            Container(
+              color: AppColors.white,
               padding: const EdgeInsets.fromLTRB(8, 6, 16, 8),
               child: Row(
                 children: [
                   IconButton(
                     splashRadius: 22,
                     onPressed: () => Get.back(),
-                    icon: const Icon(Icons.arrow_back_ios_new_rounded,
-                        size: 20, color: Color(0xFF1A1A1A)),
+                    icon: const Icon(LucideIcons.chevronLeft,
+                        size: 22, color: Color(0xFF0F172A)),
                   ),
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -40,14 +43,14 @@ class PrescriptionView extends GetView<PrescriptionController> {
                               fontWeight: FontWeight.w800,
                               color: Color(0xFF0F172A))),
                       const SizedBox(height: 1),
-                      Text('${con.apptId} · ${con.date}',
+                      Text('Latest prescription'.tr,
                           style: const TextStyle(
                               fontSize: 12, color: Color(0xFF94A3B8))),
                     ],
                   ),
                   const Spacer(),
-                  const Icon(Icons.share_outlined,
-                      color: Color(0xFF1A1A1A), size: 22),
+                  const Icon(LucideIcons.share2,
+                      color: Color(0xFF0F172A), size: 20),
                 ],
               ),
             ),
@@ -66,6 +69,12 @@ class PrescriptionView extends GetView<PrescriptionController> {
                     decoration: BoxDecoration(
                       color: AppColors.white,
                       borderRadius: BorderRadius.circular(18),
+                      boxShadow: [
+                        BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.03),
+                            blurRadius: 10,
+                            offset: const Offset(0, 3)),
+                      ],
                     ),
                     child: Column(
                       children: [
@@ -75,14 +84,11 @@ class PrescriptionView extends GetView<PrescriptionController> {
                               width: 46,
                               height: 46,
                               decoration: BoxDecoration(
-                                  color: _green,
+                                  color: _tile,
                                   borderRadius: BorderRadius.circular(12)),
                               alignment: Alignment.center,
-                              child: const Text('R',
-                                  style: TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 20,
-                                      fontWeight: FontWeight.w800)),
+                              child: const Icon(LucideIcons.stethoscope,
+                                  color: _green, size: 22),
                             ),
                             const SizedBox(width: 12),
                             Expanded(
@@ -260,12 +266,12 @@ class PrescriptionView extends GetView<PrescriptionController> {
                 height: 54,
                 child: ElevatedButton.icon(
                   onPressed: con.downloading ? null : con.download,
-                  icon: const Icon(Icons.picture_as_pdf_outlined, size: 20),
+                  icon: const Icon(LucideIcons.fileText, size: 19),
                   label: Text(con.downloading ? 'Opening…'.tr : 'View PDF'.tr,
                       style:
                           const TextStyle(fontSize: 16, fontWeight: FontWeight.w800)),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: _green,
+                    backgroundColor: _orange,
                     foregroundColor: Colors.white,
                     elevation: 0,
                     shape: RoundedRectangleBorder(

@@ -56,7 +56,8 @@ class _RateServiceViewState extends State<RateServiceView> {
       body: SafeArea(
         child: Column(
           children: [
-            Padding(
+            Container(
+              color: AppColors.white,
               padding: const EdgeInsets.fromLTRB(8, 6, 16, 8),
               child: Row(
                 children: [

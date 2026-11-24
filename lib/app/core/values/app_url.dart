@@ -50,6 +50,20 @@ class ApiURL {
   static String bloodArticlesPaged({int page = 1, int limit = 10}) =>
       'api/v1/blood/articles?page=$page&limit=$limit';
   static String bloodArticleById(String id) => 'api/v1/blood/articles/$id';
+  static final String bloodStats = 'api/v1/blood/stats';
+  static String bloodBanks({String? q}) => (q == null || q.isEmpty)
+      ? 'api/v1/blood/banks'
+      : 'api/v1/blood/banks?q=${Uri.encodeQueryComponent(q)}';
+  static String bloodEvents({String scope = 'upcoming'}) =>
+      'api/v1/blood/events?scope=$scope';
+  static String bloodEventById(String id) => 'api/v1/blood/events/$id';
+  static String bloodEventJoin(String id) => 'api/v1/blood/events/$id/join';
+  static final String bloodVolunteers = 'api/v1/blood/volunteers';
+  static final String bloodDonations = 'api/v1/blood/donations';
+  static final String bloodDonationsMe = 'api/v1/blood/donations/me';
+  static String bloodRequestById(String id) => 'api/v1/blood/requests/$id';
+  static String bloodRequestClose(String id) =>
+      'api/v1/blood/requests/$id/close';
 
   //===== Our Work (video showcase) / Our News (articles)
   static final String worksCategories = 'api/v1/works/categories';
@@ -351,6 +365,7 @@ class ApiURL {
   static final String funeralServices = 'api/v1/funeral/services';
   static final String funeralRequests = 'api/v1/funeral/requests';
   static final String funeralRequestsMy = 'api/v1/funeral/requests/my';
+  static String funeralRequestDetail(String id) => 'api/v1/funeral/requests/$id';
   static final String funeralHotlines = 'api/v1/funeral/hotlines';
   // Support center numbers, one endpoint per module — all the same shape.
   static final String homeServiceHotlines = 'api/v1/services/hotlines';

@@ -91,6 +91,62 @@ class InfoEntry {
     return s.isEmpty ? '' : s[0].toUpperCase() + s.substring(1);
   }
 
+  /// The colored tag shown under an entry's name — a Bangla phrase derived
+  /// from the backend's (always-English) `subtype`/`category` slugs, since
+  /// there's no dedicated Bangla label field for them. Substring-matched so
+  /// it stays correct if an admin tweaks a slug slightly, with a sensible
+  /// per-domain fallback for anything not covered below.
+  String get tagLabel {
+    final s = '$subtype $category'.toLowerCase();
+    if (s.contains('national_emergency') || s.contains('national emergency')) {
+      return 'জাতীয় জরুরি সেবা';
+    }
+    if (s.contains('ambulance')) return 'অ্যাম্বুলেন্স সেবা';
+    if (s.contains('blood')) return 'ব্লাড ব্যাংক';
+    if (s.contains('pharmacy')) return 'ফার্মেসি';
+    if (s.contains('govt') && s.contains('hospital')) return 'সরকারি হাসপাতাল';
+    if (s.contains('private') && s.contains('hospital')) {
+      return 'বেসরকারি হাসপাতাল';
+    }
+    if (s.contains('hospital')) return 'হাসপাতাল';
+    if (s.contains('fire')) return 'ফায়ার সার্ভিস';
+    if (s.contains('rab') || s.contains('police')) return 'পুলিশ';
+    if (s.contains('women_child') || s.contains('women child')) {
+      return 'নারী ও শিশু সহায়তা';
+    }
+    if (s.contains('birth_registration') || s.contains('birth registration')) {
+      return 'জন্ম নিবন্ধন';
+    }
+    if (s.contains('dc_office') || s.contains('dc office')) {
+      return 'জেলা প্রশাসক কার্যালয়';
+    }
+    if (s.contains('land')) return 'ভূমি অফিস';
+    if (s.contains('ministry')) return 'মন্ত্রণালয়';
+    if (s.contains('passport')) return 'পাসপোর্ট অফিস';
+    if (s.contains('division_office') || s.contains('division office')) {
+      return 'বিভাগীয় কার্যালয়';
+    }
+    if (s.contains('election')) return 'নির্বাচন';
+    if (s.contains('electricity') || s.contains('desco') || s.contains('dpdc')) {
+      return 'বিদ্যুৎ';
+    }
+    if (s.contains('wasa')) return 'ওয়াসা';
+    if (s.contains('gas')) return 'গ্যাস';
+    if (s.contains('education')) return 'শিক্ষা প্রতিষ্ঠান';
+    switch (domain) {
+      case 'health':
+        return 'স্বাস্থ্যসেবা';
+      case 'emergency':
+        return 'জরুরি সেবা';
+      case 'government':
+        return 'সরকারি দপ্তর';
+      case 'utility':
+        return 'ইউটিলিটি সেবা';
+      default:
+        return 'অন্যান্য';
+    }
+  }
+
   factory InfoEntry.fromMap(Map<String, dynamic> json) {
     String str(dynamic v) => v?.toString().trim() ?? '';
     return InfoEntry(
@@ -173,6 +229,27 @@ class InfoDomain {
   final String labelBn;
   final String emoji;
   final int sortOrder;
+
+  /// Bangla label for the known domain keys — the backend's `label_bn` is
+  /// empty for every real domain today, so this is the practical source of
+  /// truth; falls back to `labelBn` then `label` for any domain admins add
+  /// later that isn't one of the five known keys.
+  String get displayLabel {
+    switch (key) {
+      case 'health':
+        return 'স্বাস্থ্য';
+      case 'emergency':
+        return 'জরুরি';
+      case 'utility':
+        return 'ইউটিলিটি';
+      case 'government':
+        return 'সরকারি';
+      case 'other':
+        return 'অন্যান্য';
+      default:
+        return labelBn.isNotEmpty ? labelBn : label;
+    }
+  }
 
   factory InfoDomain.fromMap(Map<String, dynamic> json) {
     String str(dynamic v) => v?.toString().trim() ?? '';

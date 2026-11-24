@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:latlong2/latlong.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../../core/values/app_colors.dart';
 import '../../../global_widget/sn_google_map.dart';
@@ -8,7 +9,8 @@ import '../../../global_widget/sn_map.dart' show SnMapMarker;
 import '../controllers/blood_controller.dart';
 import '../controllers/need_blood_controller.dart';
 
-const _red = Color(0xFFE11D48);
+const _red = Color(0xFFE5383B);
+const _orange = Color(0xFFEA5A0C);
 
 class NeedBloodView extends GetView<NeedBloodController> {
   const NeedBloodView({super.key});
@@ -16,17 +18,37 @@ class NeedBloodView extends GetView<NeedBloodController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF7F8FA),
+      backgroundColor: const Color(0xFFF4F5FA),
       body: SafeArea(
         child: Column(
           children: [
-            _Header(),
+            GetBuilder<NeedBloodController>(builder: (con) => _Header(isEditing: con.isEditing)),
             Expanded(
               child: GetBuilder<NeedBloodController>(
                 builder: (con) {
                   return ListView(
                     padding: const EdgeInsets.fromLTRB(16, 12, 16, 20),
                     children: [
+                      if (con.isEditing) ...[
+                        Container(
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                              color: const Color(0xFFDBEAFE), borderRadius: BorderRadius.circular(12)),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Icon(LucideIcons.info, size: 17, color: Color(0xFF1D4ED8)),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: Text(
+                                    'If the patient went elsewhere or a number was wrong, fix it here. Donors who already responded will be notified.'.tr,
+                                    style: const TextStyle(fontSize: 12, color: Color(0xFF1D4ED8), height: 1.4)),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 18),
+                      ],
                       _SectionLabel('BLOOD GROUP NEEDED'.tr),
                       const SizedBox(height: 12),
                       _GroupGrid(con: con),
@@ -45,7 +67,7 @@ class NeedBloodView extends GetView<NeedBloodController> {
                         children: [
                           Expanded(
                             child: _TapCard(
-                              icon: Icons.calendar_today_outlined,
+                              icon: LucideIcons.calendarDays,
                               label: 'DATE'.tr,
                               value: con.neededAt == null
                                   ? 'Today'.tr
@@ -56,7 +78,7 @@ class NeedBloodView extends GetView<NeedBloodController> {
                           const SizedBox(width: 12),
                           Expanded(
                             child: _TapCard(
-                              icon: Icons.access_time_rounded,
+                              icon: LucideIcons.clock,
                               label: 'TIME'.tr,
                               value: con.neededTimeLabel.isEmpty
                                   ? 'ASAP'.tr
@@ -123,25 +145,28 @@ class NeedBloodView extends GetView<NeedBloodController> {
                 },
               ),
             ),
-            // ── Broadcast button ────────────────────────────────
+            // ── Broadcast / update button ───────────────────────
             Container(
               color: AppColors.white,
               padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
               child: SizedBox(
                 width: double.infinity,
                 height: 54,
-                child: ElevatedButton(
-                  onPressed: controller.broadcast,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: _red,
-                    foregroundColor: Colors.white,
-                    elevation: 0,
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(14)),
+                child: GetBuilder<NeedBloodController>(
+                  builder: (con) => ElevatedButton.icon(
+                    onPressed: controller.broadcast,
+                    icon: const Icon(LucideIcons.send, size: 17),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: _orange,
+                      foregroundColor: Colors.white,
+                      elevation: 0,
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(14)),
+                    ),
+                    label: Text((con.isEditing ? 'Save update' : 'Send request').tr,
+                        style: const TextStyle(
+                            fontSize: 16, fontWeight: FontWeight.w800)),
                   ),
-                  child: Text('Broadcast request →'.tr,
-                      style: const TextStyle(
-                          fontSize: 16, fontWeight: FontWeight.w700)),
                 ),
               ),
             ),
@@ -154,29 +179,32 @@ class NeedBloodView extends GetView<NeedBloodController> {
 
 // ── Header ──────────────────────────────────────────────────────────
 class _Header extends StatelessWidget {
+  const _Header({required this.isEditing});
+  final bool isEditing;
+
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: const Color(0xFFF7F8FA),
+      color: AppColors.white,
       padding: const EdgeInsets.fromLTRB(8, 6, 12, 10),
       child: Row(
         children: [
           IconButton(
             splashRadius: 22,
             onPressed: () => Get.back(),
-            icon: const Icon(Icons.arrow_back_ios_new_rounded,
-                size: 20, color: Color(0xFF1A1A1A)),
+            icon: const Icon(LucideIcons.chevronLeft,
+                size: 22, color: Color(0xFF0F172A)),
           ),
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('Request blood'.tr,
+              Text((isEditing ? 'Edit request' : 'Request blood').tr,
                   style: const TextStyle(
                       fontSize: 19,
                       fontWeight: FontWeight.w800,
                       color: Color(0xFF0F172A))),
               const SizedBox(height: 1),
-              Text('Broadcast to nearby donors'.tr,
+              Text((isEditing ? 'Goes to nearby donors' : 'Broadcast to nearby donors').tr,
                   style: const TextStyle(fontSize: 12, color: Color(0xFF94A3B8))),
             ],
           ),
@@ -275,7 +303,7 @@ class _UnitsCard extends StatelessWidget {
               ],
             ),
           ),
-          _stepBtn(Icons.remove_rounded, con.decUnits, filled: false),
+          _stepBtn(LucideIcons.minus, con.decUnits, filled: false),
           SizedBox(
             width: 44,
             child: Text('${con.units}',
@@ -285,7 +313,7 @@ class _UnitsCard extends StatelessWidget {
                     fontWeight: FontWeight.w800,
                     color: Color(0xFF0F172A))),
           ),
-          _stepBtn(Icons.add_rounded, con.incUnits, filled: true),
+          _stepBtn(LucideIcons.plus, con.incUnits, filled: true),
         ],
       ),
     );
@@ -347,7 +375,7 @@ class _UrgencyRow extends StatelessWidget {
                           BoxDecoration(color: s.color, shape: BoxShape.circle),
                     ),
                     const SizedBox(width: 6),
-                    Text(s.label,
+                    Text(s.label.tr,
                         style: TextStyle(
                             fontSize: 13.5,
                             fontWeight: FontWeight.w700,
@@ -475,7 +503,7 @@ class _LocationCard extends StatelessWidget {
                         showMyLocation: true,
                         markers: [
                           SnMapMarker(
-                              point, _red, Icons.local_hospital_rounded),
+                              point, _red, LucideIcons.hospital),
                         ],
                         onTap: con.setLocationFromMapTap,
                       ),
@@ -498,7 +526,7 @@ class _LocationCard extends StatelessWidget {
                 padding: const EdgeInsets.fromLTRB(8, 8, 8, 2),
                 child: Row(
                   children: [
-                    const Icon(Icons.place_rounded, size: 16, color: _red),
+                    const Icon(LucideIcons.mapPin, size: 16, color: _red),
                     const SizedBox(width: 6),
                     Expanded(
                       child: Text(
@@ -522,7 +550,7 @@ class _LocationCard extends StatelessWidget {
                   Expanded(
                     child: TextButton.icon(
                       onPressed: con.useCurrentLocation,
-                      icon: const Icon(Icons.my_location_rounded, size: 18),
+                      icon: const Icon(LucideIcons.navigation, size: 18),
                       label: Text('Use current location'.tr,
                           maxLines: 1, overflow: TextOverflow.ellipsis),
                       style: TextButton.styleFrom(
@@ -534,7 +562,7 @@ class _LocationCard extends StatelessWidget {
                   Expanded(
                     child: TextButton.icon(
                       onPressed: con.openLocationSearch,
-                      icon: const Icon(Icons.search_rounded, size: 18),
+                      icon: const Icon(LucideIcons.search, size: 18),
                       label: Text('Search'.tr,
                           maxLines: 1, overflow: TextOverflow.ellipsis),
                       style: TextButton.styleFrom(
@@ -581,7 +609,7 @@ class _TapCard extends StatelessWidget {
               width: 42,
               height: 42,
               decoration: BoxDecoration(
-                color: const Color(0xFFFDE4E4),
+                color: const Color(0xFFFDECEC),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Icon(icon, size: 20, color: _red),
@@ -607,7 +635,7 @@ class _TapCard extends StatelessWidget {
               ),
             ),
             const SizedBox(width: 8),
-            const Icon(Icons.keyboard_arrow_down_rounded,
+            const Icon(LucideIcons.chevronDown,
                 color: Color(0xFF94A3B8)),
           ],
         ),

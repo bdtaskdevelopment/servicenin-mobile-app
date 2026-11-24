@@ -2,12 +2,56 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../core/helpers/snack_helper.dart';
 import '../../../data/models/response/info_response.dart';
 import '../../../data/repositories/info.repo.dart';
 import '../../../routes/app_pages.dart';
+
+/// Icon for a domain key — covers the five real domains confirmed live
+/// (health/emergency/utility/government/other) plus a generic fallback for
+/// anything an admin adds later. `null` key selects the "All" tile's icon.
+IconData infoDomainIcon(String? key) {
+  switch (key) {
+    case null:
+      return LucideIcons.layoutGrid;
+    case 'health':
+      return LucideIcons.clipboardPlus;
+    case 'emergency':
+      return LucideIcons.siren;
+    case 'utility':
+      return LucideIcons.plugZap;
+    case 'government':
+      return LucideIcons.landmark;
+    case 'other':
+      return LucideIcons.mapPin;
+    default:
+      return LucideIcons.info;
+  }
+}
+
+/// Tile/icon background + foreground color for a domain key, matched to the
+/// mockup's per-category palette. `null` key selects the "All" tile's color.
+(Color bg, Color fg) infoDomainColor(String? key) {
+  switch (key) {
+    case null:
+      return (const Color(0xFFE6F4FA), const Color(0xFF0183C7));
+    case 'health':
+      return (const Color(0xFFE6F5F4), const Color(0xFF0D9383));
+    case 'emergency':
+      return (const Color(0xFFFFEFEF), const Color(0xFFE4484D));
+    case 'utility':
+      return (const Color(0xFFFFF4DE), const Color(0xFFB86E00));
+    case 'government':
+      return (const Color(0xFFE7F1FD), const Color(0xFF1D6FD9));
+    case 'other':
+      return (const Color(0xFFF1ECFB), const Color(0xFF9380DB));
+    default:
+      return (const Color(0xFFF1F2F7), const Color(0xFF64748B));
+  }
+}
 
 class Guide {
   const Guide({
@@ -100,8 +144,8 @@ class InformationController extends GetxController {
   String? get selectedDomainKey => selectedDomainForList?.key;
 
   /// Header title for the category-list page.
-  String get categoryListTitle =>
-      selectedDomainForList?.label ?? (search.isNotEmpty ? 'Search results'.tr : 'All'.tr);
+  String get categoryListTitle => selectedDomainForList?.displayLabel ??
+      (search.isNotEmpty ? 'Search results'.tr : 'All'.tr);
 
   /// Opens the category-list page scoped to [domain]. Clears any leftover
   /// search text so the list starts as a clean category browse.

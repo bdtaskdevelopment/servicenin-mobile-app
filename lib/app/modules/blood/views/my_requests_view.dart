@@ -1,6 +1,7 @@
 import 'package:animate_do/animate_do.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../../core/values/app_colors.dart';
 import '../../../data/models/response/blood_request_response.dart';
@@ -8,7 +9,7 @@ import '../../../global_widget/sn_shimmer.dart';
 import '../controllers/blood_controller.dart';
 import '../widgets/blood_widgets.dart';
 
-const _red = Color(0xFFE11D48);
+const _red = Color(0xFFE5383B);
 
 /// My blood requests (`GET /api/v1/blood/requests/my`). Tap one to see the
 /// donors who responded.
@@ -18,7 +19,7 @@ class MyRequestsView extends GetView<BloodController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF7F8FA),
+      backgroundColor: const Color(0xFFF4F5FA),
       body: SafeArea(
         child: GetBuilder<BloodController>(
           builder: (con) {
@@ -32,8 +33,8 @@ class MyRequestsView extends GetView<BloodController> {
                       IconButton(
                         splashRadius: 22,
                         onPressed: () => Get.back(),
-                        icon: const Icon(Icons.arrow_back_ios_new_rounded,
-                            size: 20, color: Color(0xFF1A1A1A)),
+                        icon: const Icon(LucideIcons.chevronLeft,
+                            size: 22, color: Color(0xFF0F172A)),
                       ),
                       Text('My requests'.tr,
                           style: const TextStyle(
@@ -80,8 +81,8 @@ class MyRequestsView extends GetView<BloodController> {
                                                 bottom: 12),
                                             child: _MyRequestCard(
                                               req: e.value,
-                                              onTap: () => con
-                                                  .openResponders(e.value),
+                                              onTap: () =>
+                                                  con.viewRequest(e.value),
                                             ),
                                           ),
                                         )),
@@ -130,7 +131,7 @@ class _MyRequestCard extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                          '${req.unitsNeeded} unit${req.unitsNeeded > 1 ? 's' : ''} · ${req.bloodGroup}',
+                          '${req.unitsNeeded} ${'units'.tr} · ${req.bloodGroup}',
                           style: const TextStyle(
                               fontSize: 14.5,
                               fontWeight: FontWeight.w800,
@@ -154,7 +155,7 @@ class _MyRequestCard extends StatelessWidget {
             ),
             Row(
               children: [
-                const Icon(Icons.volunteer_activism_outlined,
+                const Icon(LucideIcons.users,
                     size: 16, color: Color(0xFF94A3B8)),
                 const SizedBox(width: 6),
                 Expanded(
@@ -165,7 +166,7 @@ class _MyRequestCard extends StatelessWidget {
                           fontWeight: FontWeight.w700,
                           color: Color(0xFF64748B))),
                 ),
-                Text('View responders →'.tr,
+                Text('View →'.tr,
                     style: const TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.w700,
@@ -186,12 +187,12 @@ class _StatusPill extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final bg = fulfilled ? const Color(0xFFDCFCE7) : const Color(0xFFFEF3C7);
-    final fg = fulfilled ? const Color(0xFF15803D) : const Color(0xFFB45309);
+    final fg = fulfilled ? const Color(0xFF16A34A) : const Color(0xFFB45309);
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       decoration:
           BoxDecoration(color: bg, borderRadius: BorderRadius.circular(20)),
-      child: Text(label.isEmpty ? 'Open' : label,
+      child: Text((label.isEmpty ? 'Open' : label).tr,
           style: TextStyle(
               fontSize: 11, fontWeight: FontWeight.w800, color: fg)),
     );

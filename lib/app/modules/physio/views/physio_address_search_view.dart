@@ -83,7 +83,8 @@ class _PhysioAddressSearchViewState extends State<PhysioAddressSearchView> {
       body: SafeArea(
         child: Column(
           children: [
-            Padding(
+            Container(
+              color: AppColors.white,
               padding: const EdgeInsets.fromLTRB(8, 6, 16, 8),
               child: Row(
                 children: [

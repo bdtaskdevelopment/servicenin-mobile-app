@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:latlong2/latlong.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../../core/values/app_colors.dart';
 import '../../../global_widget/sn_google_map.dart';
 import '../../../global_widget/sn_map.dart' show SnMapMarker;
 import '../controllers/donor_register_controller.dart';
 
-const _red = Color(0xFFE11D48);
+const _red = Color(0xFFE5383B);
+const _orange = Color(0xFFEA5A0C);
 
 /// "Register as a blood donor" form. Collects blood group, location and an
 /// optional note, then POSTs to /blood/donors/register. On success the
@@ -18,7 +20,7 @@ class DonorRegisterView extends GetView<DonorRegisterController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF7F8FA),
+      backgroundColor: const Color(0xFFF4F5FA),
       body: SafeArea(
         child: Column(
           children: [
@@ -61,6 +63,18 @@ class DonorRegisterView extends GetView<DonorRegisterController> {
                       const SizedBox(height: 12),
                       _LocationCard(con: con),
                       const SizedBox(height: 22),
+                      _SectionLabel('WHEN DID YOU LAST DONATE?'.tr),
+                      const SizedBox(height: 12),
+                      _LastDonatedChips(con: con),
+                      const SizedBox(height: 22),
+                      _SectionLabel('TOTAL DONATIONS SO FAR'.tr),
+                      const SizedBox(height: 12),
+                      _InputCard(
+                        controller: con.donationCount,
+                        hint: 'e.g. 5'.tr,
+                        keyboard: TextInputType.number,
+                      ),
+                      const SizedBox(height: 22),
                       _SectionLabel('NOTES (OPTIONAL)'.tr),
                       const SizedBox(height: 12),
                       _InputCard(
@@ -85,8 +99,8 @@ class DonorRegisterView extends GetView<DonorRegisterController> {
                   child: ElevatedButton(
                     onPressed: con.busy ? null : con.register,
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: _red,
-                      disabledBackgroundColor: _red.withValues(alpha: 0.45),
+                      backgroundColor: _orange,
+                      disabledBackgroundColor: _orange.withValues(alpha: 0.45),
                       foregroundColor: Colors.white,
                       disabledForegroundColor: Colors.white,
                       elevation: 0,
@@ -114,14 +128,14 @@ class _Header extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: const Color(0xFFF7F8FA),
+      color: AppColors.white,
       padding: const EdgeInsets.fromLTRB(8, 6, 12, 10),
       child: Row(
         children: [
           IconButton(
             splashRadius: 22,
             onPressed: () => Get.back(),
-            icon: const Icon(Icons.arrow_back_ios_new_rounded,
+            icon: const Icon(LucideIcons.chevronLeft,
                 size: 20, color: Color(0xFF1A1A1A)),
           ),
           GetBuilder<DonorRegisterController>(
@@ -174,7 +188,7 @@ class _Intro extends StatelessWidget {
               color: Colors.white.withValues(alpha: 0.18),
               borderRadius: BorderRadius.circular(13),
             ),
-            child: const Icon(Icons.volunteer_activism_rounded,
+            child: const Icon(LucideIcons.heartHandshake,
                 color: Colors.white, size: 24),
           ),
           const SizedBox(width: 14),
@@ -259,6 +273,46 @@ class _GroupGrid extends StatelessWidget {
   }
 }
 
+// ── Last-donated category chips ─────────────────────────────────────
+class _LastDonatedChips extends StatelessWidget {
+  const _LastDonatedChips({required this.con});
+  final DonorRegisterController con;
+
+  static const _options = {
+    'never': 'Never donated',
+    'over_3_months': 'Over 3 months ago',
+    'within_3_months': 'Within 3 months',
+    'unsure': 'Not sure',
+  };
+
+  @override
+  Widget build(BuildContext context) {
+    return Wrap(
+      spacing: 8,
+      runSpacing: 8,
+      children: _options.entries.map((e) {
+        final sel = con.lastDonatedCategory == e.key;
+        return GestureDetector(
+          onTap: () => con.setLastDonatedCategory(e.key),
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+            decoration: BoxDecoration(
+              color: sel ? _red : AppColors.white,
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(color: sel ? _red : const Color(0xFFE2E8F0)),
+            ),
+            child: Text(e.value.tr,
+                style: TextStyle(
+                    fontSize: 12.5,
+                    fontWeight: FontWeight.w700,
+                    color: sel ? Colors.white : const Color(0xFF334155))),
+          ),
+        );
+      }).toList(),
+    );
+  }
+}
+
 // ── Location (interactive Google map + GPS) ─────────────────────────
 class _LocationCard extends StatelessWidget {
   const _LocationCard({required this.con});
@@ -292,7 +346,7 @@ class _LocationCard extends StatelessWidget {
                         showMyLocation: true,
                         markers: [
                           SnMapMarker(
-                              point, _red, Icons.person_pin_circle_rounded),
+                              point, _red, LucideIcons.user),
                         ],
                         onTap: con.setLocationFromMapTap,
                       ),
@@ -315,7 +369,7 @@ class _LocationCard extends StatelessWidget {
                 padding: const EdgeInsets.fromLTRB(8, 8, 8, 2),
                 child: Row(
                   children: [
-                    const Icon(Icons.place_rounded, size: 16, color: _red),
+                    const Icon(LucideIcons.mapPin, size: 16, color: _red),
                     const SizedBox(width: 6),
                     Expanded(
                       child: Text(
@@ -338,7 +392,7 @@ class _LocationCard extends StatelessWidget {
                   Expanded(
                     child: TextButton.icon(
                       onPressed: con.useCurrentLocation,
-                      icon: const Icon(Icons.my_location_rounded, size: 18),
+                      icon: const Icon(LucideIcons.navigation, size: 18),
                       label: Text('Use current location'.tr,
                           maxLines: 1, overflow: TextOverflow.ellipsis),
                       style: TextButton.styleFrom(
@@ -350,7 +404,7 @@ class _LocationCard extends StatelessWidget {
                   Expanded(
                     child: TextButton.icon(
                       onPressed: con.openLocationSearch,
-                      icon: const Icon(Icons.search_rounded, size: 18),
+                      icon: const Icon(LucideIcons.search, size: 18),
                       label: Text('Search'.tr,
                           maxLines: 1, overflow: TextOverflow.ellipsis),
                       style: TextButton.styleFrom(foregroundColor: _red),

@@ -1,14 +1,16 @@
 import 'package:animate_do/animate_do.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../../core/values/app_colors.dart';
 import '../../../global_widget/sn_shimmer.dart';
 import '../controllers/booking_controller.dart';
 import '../widgets/booking_stepper.dart';
 
-const _green = Color(0xFF0F7A52);
-const _tile = Color(0xFFD9F7E6);
+const _green = Color(0xFF0D9383);
+const _tile = Color(0xFFE6F5F4);
+const _orange = Color(0xFFF16621);
 
 class ChooseSlotView extends GetView<BookingController> {
   const ChooseSlotView({super.key});
@@ -16,22 +18,23 @@ class ChooseSlotView extends GetView<BookingController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF7F8FA),
+      backgroundColor: const Color(0xFFF4F5FA),
       body: SafeArea(
         child: GetBuilder<BookingController>(
           builder: (con) {
             return Column(
               children: [
                 // Header
-                Padding(
+                Container(
+                  color: AppColors.white,
                   padding: const EdgeInsets.fromLTRB(8, 6, 16, 4),
                   child: Row(
                     children: [
                       IconButton(
                         splashRadius: 22,
                         onPressed: () => Get.back(),
-                        icon: const Icon(Icons.arrow_back_ios_new_rounded,
-                            size: 20, color: Color(0xFF1A1A1A)),
+                        icon: const Icon(LucideIcons.chevronLeft,
+                            size: 22, color: Color(0xFF0F172A)),
                       ),
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -89,7 +92,7 @@ class ChooseSlotView extends GetView<BookingController> {
                                         borderRadius:
                                             BorderRadius.circular(10)),
                                     child: const Icon(
-                                        Icons.location_on_outlined,
+                                        LucideIcons.mapPin,
                                         color: _green,
                                         size: 19),
                                   ),
@@ -341,7 +344,7 @@ class _BottomBar extends StatelessWidget {
               child: ElevatedButton(
                 onPressed: onTap,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: _green,
+                  backgroundColor: _orange,
                   foregroundColor: Colors.white,
                   disabledBackgroundColor: const Color(0xFFE2E8F0),
                   disabledForegroundColor: const Color(0xFF94A3B8),

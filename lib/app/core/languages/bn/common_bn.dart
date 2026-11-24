@@ -50,6 +50,16 @@ const Map<String, String> commonBn = {
   'Reschedule': 'পুনঃনির্ধারণ',
   'Update': 'হালনাগাদ',
   'Create': 'তৈরি করুন',
+  'Later': 'পরে',
+
+  // ── Update dialog (splash — app_version / min_app_version check) ──
+  'Update Required': 'আপডেট প্রয়োজন',
+  'Update Available': 'নতুন আপডেট এসেছে',
+  'Update Now': 'এখনই আপডেট করুন',
+  'This version of the app is no longer supported. Please update to continue.':
+      'অ্যাপের এই সংস্করণটি আর সমর্থিত নয়। চালিয়ে যেতে আপডেট করুন।',
+  'A new version of the app is available with the latest features and fixes.':
+      'অ্যাপের একটি নতুন সংস্করণ এসেছে, নতুন ফিচার ও সমাধান সহ।',
 
   // ── Common statuses ──
   'Pending': 'অপেক্ষমাণ',
@@ -58,6 +68,7 @@ const Map<String, String> commonBn = {
   'Resolved': 'সমাধান হয়েছে',
   'Open': 'খোলা',
   'Closed': 'বন্ধ',
+  'Expired': 'মেয়াদোত্তীর্ণ',
   'Cancelled': 'বাতিল',
   'Accepted': 'গৃহীত',
   'Rejected': 'প্রত্যাখ্যাত',
@@ -97,7 +108,7 @@ const Map<String, String> commonBn = {
   'Physio': 'ফিজিওথেরাপি',
   'Marriage': 'বিবাহ',
   'Jobs': 'চাকরি',
-  'Funeral': 'ফিউনারেল',
+  'Funeral': 'দাফন কাফন',
   'Education': 'শিক্ষা',
   // Module renamed education → training. 'Training' is the module label;
   // 'Education' above stays for the jobs/matchmaking qualification field.

@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../../core/values/app_colors.dart';
-import '../../../core/values/app_url.dart';
 import '../../../global_widget/sn_shimmer.dart';
-import '../../support/views/support_view.dart';
+import '../../../routes/app_pages.dart';
 import '../controllers/information_controller.dart';
 
-const _purple = Color(0xFF6366F1);
+const _blue = Color(0xFF0183C7);
+const _blueTint = Color(0xFFE6F4FA);
 
 /// Information home — search + a grid of categories ("domains"). Tapping a
 /// tile (or submitting a search) opens [InformationCategoryView] with the
@@ -19,12 +20,13 @@ class InformationView extends GetView<InformationController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF7F8FA),
+      backgroundColor: const Color(0xFFF4F5FA),
       body: SafeArea(
         child: Column(
           children: [
             // Header
-            Padding(
+            Container(
+              color: AppColors.white,
               padding: const EdgeInsets.fromLTRB(8, 6, 16, 8),
               child: Row(
                 children: [
@@ -32,16 +34,16 @@ class InformationView extends GetView<InformationController> {
                     splashRadius: 22,
                     onPressed: () => Get.back(),
                     icon: const Icon(
-                      Icons.arrow_back_ios_new_rounded,
-                      size: 20,
-                      color: Color(0xFF1A1A1A),
+                      LucideIcons.chevronLeft,
+                      size: 22,
+                      color: Color(0xFF0F172A),
                     ),
                   ),
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Information'.tr,
+                        'Information (directory)'.tr,
                         style: const TextStyle(
                           fontSize: 19,
                           fontWeight: FontWeight.w800,
@@ -59,11 +61,7 @@ class InformationView extends GetView<InformationController> {
                     ],
                   ),
                   const Spacer(),
-                  // Support center — admin-configured numbers for this module.
-                  SupportIconButton(
-                    title: 'Information Support'.tr,
-                    endpoint: ApiURL.infoHotlines,
-                  ),
+                  InfoSupportIconButton(),
                 ],
               ),
             ),
@@ -79,7 +77,7 @@ class InformationView extends GetView<InformationController> {
                     return const SnListSkeleton();
                   }
                   return RefreshIndicator(
-                    color: _purple,
+                    color: _blue,
                     onRefresh: () => con.fetchDomains(),
                     child: ListView(
                       physics: const AlwaysScrollableScrollPhysics(),
@@ -87,10 +85,9 @@ class InformationView extends GetView<InformationController> {
                       children: [
                         Text('CATEGORIES'.tr,
                             style: const TextStyle(
-                                fontSize: 12,
-                                fontWeight: FontWeight.w700,
-                                color: Color(0xFF94A3B8),
-                                letterSpacing: 0.8)),
+                                fontSize: 14.5,
+                                fontWeight: FontWeight.w800,
+                                color: Color(0xFF0F172A))),
                         const SizedBox(height: 12),
                         _CategoryGrid(con: con),
                       ],
@@ -101,6 +98,35 @@ class InformationView extends GetView<InformationController> {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+/// Header support affordance — a single headset icon that opens a dedicated
+/// Information support screen (admin-configured numbers), reusing the same
+/// shared SupportController the generic support screen uses.
+class InfoSupportIconButton extends StatelessWidget {
+  const InfoSupportIconButton({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: () => Get.toNamed(
+        Routes.INFORMATION_SUPPORT,
+        arguments: {
+          'title': 'Information Support'.tr,
+          'endpoint': 'api/v1/info/hotlines',
+        },
+      ),
+      child: Container(
+        width: 38,
+        height: 38,
+        decoration: BoxDecoration(
+          color: _blueTint,
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: const Icon(LucideIcons.headset, color: _blue, size: 19),
       ),
     );
   }
@@ -117,12 +143,13 @@ class _SearchBar extends StatelessWidget {
       height: 48,
       padding: const EdgeInsets.symmetric(horizontal: 14),
       decoration: BoxDecoration(
-        color: const Color(0xFFEDEFF2),
+        color: AppColors.white,
         borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: const Color(0xFFEDEFF2)),
       ),
       child: Row(
         children: [
-          const Icon(Icons.search_rounded, color: Color(0xFF94A3B8)),
+          const Icon(LucideIcons.search, size: 19, color: Color(0xFF94A3B8)),
           const SizedBox(width: 10),
           Expanded(
             child: TextField(
@@ -146,7 +173,7 @@ class _SearchBar extends StatelessWidget {
                 ? const SizedBox.shrink()
                 : GestureDetector(
                     onTap: con.searchCtrl.clear,
-                    child: const Icon(Icons.close_rounded,
+                    child: const Icon(LucideIcons.x,
                         size: 18, color: Color(0xFF94A3B8)),
                   ),
           ),
@@ -172,13 +199,15 @@ class _CategoryGrid extends StatelessWidget {
       childAspectRatio: 0.95,
       children: [
         _CategoryTile(
-          emoji: '📋',
+          icon: infoDomainIcon(null),
+          color: infoDomainColor(null),
           label: 'All'.tr,
           onTap: con.openAllInfo,
         ),
         ...con.domains.map((d) => _CategoryTile(
-              emoji: d.emoji.isNotEmpty ? d.emoji : '📌',
-              label: d.label,
+              icon: infoDomainIcon(d.key),
+              color: infoDomainColor(d.key),
+              label: d.displayLabel,
               onTap: () => con.openInfoCategory(d),
             )),
       ],
@@ -188,23 +217,32 @@ class _CategoryGrid extends StatelessWidget {
 
 class _CategoryTile extends StatelessWidget {
   const _CategoryTile({
-    required this.emoji,
+    required this.icon,
+    required this.color,
     required this.label,
     required this.onTap,
   });
-  final String emoji;
+  final IconData icon;
+  final (Color, Color) color;
   final String label;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
+    final (bg, fg) = color;
     return GestureDetector(
       onTap: onTap,
       child: Container(
         decoration: BoxDecoration(
           color: AppColors.white,
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: const Color(0xFFEDEFF2)),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.03),
+              blurRadius: 8,
+              offset: const Offset(0, 2),
+            ),
+          ],
         ),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -213,11 +251,8 @@ class _CategoryTile extends StatelessWidget {
               width: 46,
               height: 46,
               alignment: Alignment.center,
-              decoration: BoxDecoration(
-                color: const Color(0xFFEEF0FB),
-                shape: BoxShape.circle,
-              ),
-              child: Text(emoji, style: const TextStyle(fontSize: 22)),
+              decoration: BoxDecoration(color: bg, shape: BoxShape.circle),
+              child: Icon(icon, color: fg, size: 22),
             ),
             const SizedBox(height: 10),
             Padding(

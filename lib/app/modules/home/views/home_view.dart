@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -233,15 +234,19 @@ class _BannerSlide extends StatelessWidget {
       child: Stack(
         fit: StackFit.expand,
         children: [
-          // Background — the banner image (full), with a brand gradient as
-          // the fallback while loading or on error.
+          // Background — the banner image (full), cached so re-scrolling
+          // over an already-seen slide never re-fetches it (that re-fetch
+          // was the source of the blank/grey flash between slides). A brand
+          // gradient fills the space the instant the slide mounts, with a
+          // small loader on top while the image is still coming in, so
+          // there's never a bare/blank frame — only the fallback (quietly
+          // loading) or the fallback (permanently, on error).
           if (img.isNotEmpty)
-            Image.network(
-              img,
+            CachedNetworkImage(
+              imageUrl: img,
               fit: BoxFit.cover,
-              errorBuilder: (_, __, ___) => _gradientBox(colors),
-              loadingBuilder: (_, child, progress) =>
-                  progress == null ? child : _gradientBox(colors),
+              placeholder: (_, __) => _gradientBox(colors, loading: true),
+              errorWidget: (_, __, ___) => _gradientBox(colors),
             )
           else
             _gradientBox(colors),
@@ -280,7 +285,8 @@ class _BannerSlide extends StatelessWidget {
     );
   }
 
-  Widget _gradientBox(List<Color> colors) => DecoratedBox(
+  Widget _gradientBox(List<Color> colors, {bool loading = false}) =>
+      DecoratedBox(
         decoration: BoxDecoration(
           gradient: LinearGradient(
             colors: colors,
@@ -288,6 +294,18 @@ class _BannerSlide extends StatelessWidget {
             end: Alignment.bottomRight,
           ),
         ),
+        child: loading
+            ? const Center(
+                child: SizedBox(
+                  width: 22,
+                  height: 22,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2.2,
+                    color: Colors.white,
+                  ),
+                ),
+              )
+            : null,
       );
 }
 

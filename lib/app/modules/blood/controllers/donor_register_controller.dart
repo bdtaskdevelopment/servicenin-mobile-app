@@ -39,6 +39,18 @@ class DonorRegisterController extends GetxController {
   final TextEditingController profession = TextEditingController();
   final TextEditingController notes = TextEditingController();
 
+  // "শেষ কবে রক্ত দিয়েছেন" / "এ পর্যন্ত কতবার রক্তদান করেছেন" — mockup
+  // pages 16-17. lastDonatedCategory is one of: never, over_3_months,
+  // within_3_months, unsure (see LastDonated* consts mirrored from the
+  // backend's models.LastDonated* enum).
+  String lastDonatedCategory = 'over_3_months';
+  final TextEditingController donationCount = TextEditingController();
+
+  void setLastDonatedCategory(String value) {
+    lastDonatedCategory = value;
+    update();
+  }
+
   /// True once we know this user already has a donor profile — the screen
   /// then behaves as "update my details" instead of a fresh registration.
   bool isEditing = false;
@@ -65,6 +77,10 @@ class DonorRegisterController extends GetxController {
       if (me.age != null) age.text = me.age.toString();
       if (me.profession.isNotEmpty) profession.text = me.profession;
       if (me.notes.isNotEmpty) notes.text = me.notes;
+      if (me.lastDonatedCategory.isNotEmpty) {
+        lastDonatedCategory = me.lastDonatedCategory;
+      }
+      if (me.totalDonations > 0) donationCount.text = '${me.totalDonations}';
       loadingProfile = false;
       if (me.lat != null && me.lng != null) {
         lat = me.lat!;
@@ -165,6 +181,9 @@ class DonorRegisterController extends GetxController {
         if (int.tryParse(age.text.trim()) != null)
           'age': int.parse(age.text.trim()),
         'profession': profession.text.trim(),
+        'last_donated_category': lastDonatedCategory,
+        if (int.tryParse(donationCount.text.trim()) != null)
+          'donation_count': int.parse(donationCount.text.trim()),
       };
       final res = await Get.find<BloodRepository>().registerDonor(payload);
       if (Get.isDialogOpen ?? false) Get.back();
@@ -224,6 +243,7 @@ class DonorRegisterController extends GetxController {
     age.dispose();
     profession.dispose();
     notes.dispose();
+    donationCount.dispose();
     super.onClose();
   }
 }

@@ -5,15 +5,18 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../core/helpers/snack_helper.dart';
 import '../../../core/mixins/live_refresh_mixin.dart';
 import '../../../core/values/storage.dart';
 import '../../../data/models/response/nagarik_response.dart';
+import '../../../data/models/sn_place.dart';
 import '../../../data/repositories/nagarik.repo.dart';
 import '../../../data/services/storage.service.dart';
 import '../../../routes/app_pages.dart';
+import '../views/nagarik_address_search_view.dart';
 
 /// Maps a grievance category's slug (e.g. "street_lights", "drainage") to
 /// an icon that actually represents that issue. Takes the category's `key`
@@ -24,33 +27,77 @@ import '../../../routes/app_pages.dart';
 /// admin renames a slug slightly (e.g. "road" vs "roads").
 IconData nagarikCategoryIcon(String key) {
   final k = key.toLowerCase();
-  if (k.contains('light') || k.contains('bulb')) {
-    return Icons.lightbulb_outline_rounded;
+  if (k.contains('traffic') || k.contains('signal')) {
+    return LucideIcons.trafficCone;
   }
-  if (k.contains('traffic')) return Icons.traffic_rounded;
-  if (k.contains('road')) return Icons.add_road_rounded;
+  if (k.contains('light') || k.contains('bulb') || k.contains('lamp')) {
+    return LucideIcons.lamp;
+  }
+  if (k.contains('road') || k.contains('street')) {
+    return LucideIcons.construction;
+  }
   if (k.contains('waste') || k.contains('garbage') || k.contains('trash')) {
-    return Icons.delete_outline_rounded;
+    return LucideIcons.trash2;
   }
-  if (k.contains('drain')) return Icons.waves_rounded;
+  if (k.contains('drain')) return LucideIcons.waves;
   if (k.contains('sewage') || k.contains('sewer')) {
-    return Icons.plumbing_rounded;
+    return LucideIcons.pipette;
   }
-  if (k.contains('water') || k.contains('tap')) {
-    return Icons.water_drop_outlined;
+  if (k.contains('water') || k.contains('tap') || k.contains('supply')) {
+    return LucideIcons.droplet;
   }
   if (k.contains('mosquito') || k.contains('pest')) {
-    return Icons.pest_control_outlined;
+    return LucideIcons.bug;
   }
-  if (k.contains('health')) return Icons.shield_outlined;
   if (k.contains('illegal') ||
       k.contains('occupation') ||
       k.contains('encroach')) {
-    return Icons.block_rounded;
+    return LucideIcons.ban;
   }
-  if (k.contains('tree') || k.contains('park')) return Icons.park_outlined;
-  if (k.contains('noise')) return Icons.volume_up_outlined;
-  return Icons.report_problem_outlined;
+  if (k.contains('tree') || k.contains('park') || k.contains('garden')) {
+    return LucideIcons.recycle;
+  }
+  return LucideIcons.info;
+}
+
+/// Tile background + icon color for a category, matched to the mockup's
+/// per-category palette (same substring-matching order as [nagarikCategoryIcon]
+/// so a tile's color and icon always agree).
+(Color bg, Color fg) nagarikCategoryColor(String key) {
+  final k = key.toLowerCase();
+  if (k.contains('traffic') || k.contains('signal')) {
+    return (const Color(0xFFFDEDF5), const Color(0xFFC22F79));
+  }
+  if (k.contains('light') || k.contains('bulb') || k.contains('lamp')) {
+    return (const Color(0xFFFFF5DB), const Color(0xFFA16107));
+  }
+  if (k.contains('road') || k.contains('street')) {
+    return (const Color(0xFFFFF4DE), const Color(0xFFCA913A));
+  }
+  if (k.contains('waste') || k.contains('garbage') || k.contains('trash')) {
+    return (const Color(0xFFECF5E7), const Color(0xFF3F8A1F));
+  }
+  if (k.contains('drain')) {
+    return (const Color(0xFFE6F4FA), const Color(0xFF0183C7));
+  }
+  if (k.contains('sewage') || k.contains('sewer')) {
+    return (const Color(0xFFE6F5F4), const Color(0xFF249D8F));
+  }
+  if (k.contains('water') || k.contains('tap') || k.contains('supply')) {
+    return (const Color(0xFFE7F1FD), const Color(0xFF1D6FD9));
+  }
+  if (k.contains('mosquito') || k.contains('pest')) {
+    return (const Color(0xFFFFEFEF), const Color(0xFFE4484D));
+  }
+  if (k.contains('illegal') ||
+      k.contains('occupation') ||
+      k.contains('encroach')) {
+    return (const Color(0xFFFFF1E7), const Color(0xFFD9580E));
+  }
+  if (k.contains('tree') || k.contains('park') || k.contains('garden')) {
+    return (const Color(0xFFE9F5ED), const Color(0xFF17813E));
+  }
+  return (const Color(0xFFEDF1F5), const Color(0xFF3A4860));
 }
 
 class NagarikController extends GetxController with LiveRefreshMixin {
@@ -168,7 +215,32 @@ class NagarikController extends GetxController with LiveRefreshMixin {
   final TextEditingController reportTitle = TextEditingController();
   final TextEditingController reportDescription = TextEditingController();
   final TextEditingController reportAddress = TextEditingController();
-  final TextEditingController reportWard = TextEditingController();
+
+  /// DNCC has 54 wards; no backend ward-list endpoint exists yet, so this
+  /// is the same static 1-54 range the ward-picker bottom sheet shows.
+  static const String wardCorporationName = 'Dhaka North City Corporation';
+  static const List<int> dnccWards = [
+    1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20,
+    21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38,
+    39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54,
+  ];
+  int? selectedWard;
+
+  void setWard(int ward) {
+    selectedWard = ward;
+    update();
+  }
+
+  /// Opens the address search page and, if the user picks a result, fills
+  /// the address field — same shape as Funeral's pickAddress.
+  Future<void> pickAddress() async {
+    final place = await Get.to<SnPlace>(
+        () => const NagarikAddressSearchView(title: 'Search address'));
+    if (place == null) return;
+    reportAddress.text = place.address.isNotEmpty ? place.address : place.label;
+    update();
+  }
+
   final List<Map<String, String>> priorities = const [
     {'label': 'Low', 'value': 'low'},
     {'label': 'Medium', 'value': 'medium'},
@@ -360,7 +432,7 @@ class NagarikController extends GetxController with LiveRefreshMixin {
     reportTitle.clear();
     reportDescription.clear();
     reportAddress.clear();
-    reportWard.clear();
+    selectedWard = null;
     reportImages.clear();
     update();
     Get.toNamed(Routes.NAGARIK_REPORT_ISSUE);
@@ -372,7 +444,7 @@ class NagarikController extends GetxController with LiveRefreshMixin {
     reportTitle.clear();
     reportDescription.clear();
     reportAddress.clear();
-    reportWard.clear();
+    selectedWard = null;
     reportImages.clear();
     update();
     Get.toNamed(Routes.NAGARIK_REPORT_ISSUE);
@@ -393,6 +465,10 @@ class NagarikController extends GetxController with LiveRefreshMixin {
       SnackHelper.error('সমস্যার বিবরণ দিন');
       return;
     }
+    if (selectedWard == null) {
+      SnackHelper.error('ওয়ার্ড নম্বর নির্বাচন করুন');
+      return;
+    }
     submittingReport = true;
     update();
     try {
@@ -402,8 +478,7 @@ class NagarikController extends GetxController with LiveRefreshMixin {
         'description': reportDescription.text.trim(),
         if (reportAddress.text.trim().isNotEmpty)
           'address': reportAddress.text.trim(),
-        if (reportWard.text.trim().isNotEmpty)
-          'ward_no': reportWard.text.trim(),
+        'ward_no': selectedWard.toString(),
         'priority': priorities[priorityIndex]['value'],
       };
       final filed = await _repo.fileGrievance(payload, images: reportImages);
@@ -643,7 +718,6 @@ class NagarikController extends GetxController with LiveRefreshMixin {
     reportTitle.dispose();
     reportDescription.dispose();
     reportAddress.dispose();
-    reportWard.dispose();
     ticketSubject.dispose();
     ticketDescription.dispose();
     chatInput.dispose();

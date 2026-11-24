@@ -23,7 +23,8 @@ class PhysioView extends GetView<PhysioController> {
         child: Column(
           children: [
             // Header
-            Padding(
+            Container(
+              color: AppColors.white,
               padding: const EdgeInsets.fromLTRB(8, 6, 16, 8),
               child: Row(
                 children: [

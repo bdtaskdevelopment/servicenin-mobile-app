@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-const _green = Color(0xFF0F7A52);
+const _green = Color(0xFF0D9383);
 
 /// Slot → Patient → Confirm step indicator used across the booking flow.
 class BookingStepper extends StatelessWidget {
@@ -15,8 +15,18 @@ class BookingStepper extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: const Color(0xFFF7F8FA),
-      padding: const EdgeInsets.fromLTRB(16, 6, 16, 12),
+      margin: const EdgeInsets.fromLTRB(16, 6, 16, 12),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(14),
+        boxShadow: [
+          BoxShadow(
+              color: Colors.black.withValues(alpha: 0.03),
+              blurRadius: 8,
+              offset: const Offset(0, 2)),
+        ],
+      ),
       child: Row(
         children: List.generate(_labels.length, (i) {
           final done = i < current;

@@ -56,9 +56,10 @@ dependencies:
   image: ">=4.0.0 <5.0.0"
   intl: ">=0.20.0 <0.21.0"
   permission_handler: ">=12.0.0 <13.0.0"
+  package_info_plus: ">=9.0.0 <10.0.0"
   url_launcher: ">=6.0.0 <7.0.0"
   open_filex: ">=4.0.0 <5.0.0"
-  google_fonts: ">=8.0.0 <9.0.0"
+  lucide_icons_flutter: ">=3.0.0 <4.0.0"
   intl_phone_field: ">=3.0.0 <4.0.0"
   internet_checker_plus: ">=1.0.0 <2.0.0"
   flutter_sslcommerz: ">=3.0.0 <4.0.0"
@@ -124,6 +125,46 @@ flutter:
   assets:
     - .env
     - assets/image/
+
+  # Poppins (English/numerals) + Hind Siliguri (Bangla) as real, locally
+  # bundled multi-weight families — not fetched at runtime via google_fonts.
+  # google_fonts registers a DIFFERENT synthetic family name per weight
+  # (e.g. a separate name for Regular vs Bold), so any ad-hoc TextStyle that
+  # only overrides fontWeight while inheriting the ambient fontFamily never
+  # finds the matching weight's real face and gets a synthetically
+  # stretched/"faux bold" glyph instead — this is what made bold Bangla
+  # text look stretched ("lomba"). Declaring one real family name per font
+  # with weight-tagged assets lets Flutter's own font matching pick the
+  # correct face for ANY fontWeight, everywhere, automatically.
+  fonts:
+    - family: Poppins
+      fonts:
+        - asset: assets/fonts/Poppins/Poppins-Light.ttf
+          weight: 300
+        - asset: assets/fonts/Poppins/Poppins-Regular.ttf
+          weight: 400
+        - asset: assets/fonts/Poppins/Poppins-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/Poppins/Poppins-SemiBold.ttf
+          weight: 600
+        - asset: assets/fonts/Poppins/Poppins-Bold.ttf
+          weight: 700
+        - asset: assets/fonts/Poppins/Poppins-ExtraBold.ttf
+          weight: 800
+        - asset: assets/fonts/Poppins/Poppins-Black.ttf
+          weight: 900
+    - family: Hind Siliguri
+      fonts:
+        - asset: assets/fonts/HindSiliguri/HindSiliguri-Light.ttf
+          weight: 300
+        - asset: assets/fonts/HindSiliguri/HindSiliguri-Regular.ttf
+          weight: 400
+        - asset: assets/fonts/HindSiliguri/HindSiliguri-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/HindSiliguri/HindSiliguri-SemiBold.ttf
+          weight: 600
+        - asset: assets/fonts/HindSiliguri/HindSiliguri-Bold.ttf
+          weight: 700
 
   # To add assets to your application, add an assets section, like this:
   # assets:

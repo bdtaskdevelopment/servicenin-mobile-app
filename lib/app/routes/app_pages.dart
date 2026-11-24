@@ -51,6 +51,8 @@ import '../modules/funeral/views/funeral_view.dart';
 import '../modules/funeral/views/funeral_request_view.dart';
 import '../modules/funeral/views/funeral_done_view.dart';
 import '../modules/funeral/views/funeral_requests_view.dart';
+import '../modules/funeral/views/funeral_request_detail_view.dart';
+import '../modules/funeral/views/funeral_support_view.dart';
 import '../modules/education/bindings/education_binding.dart';
 import '../modules/education/views/education_view.dart';
 import '../modules/education/views/education_center_view.dart';
@@ -58,6 +60,7 @@ import '../modules/education/views/course_details_view.dart';
 import '../modules/education/views/course_enquiry_view.dart';
 import '../modules/education/views/enquiry_done_view.dart';
 import '../modules/education/views/education_interests_view.dart';
+import '../modules/education/views/training_support_view.dart';
 import '../modules/nagarik/bindings/nagarik_binding.dart';
 import '../modules/nagarik/views/nagarik_view.dart';
 import '../modules/nagarik/views/nagarik_reports_view.dart';
@@ -83,6 +86,7 @@ import '../modules/information/views/guide_list_view.dart';
 import '../modules/information/views/guide_detail_view.dart';
 import '../modules/information/views/information_detail_view.dart';
 import '../modules/information/views/information_category_view.dart';
+import '../modules/information/views/information_support_view.dart';
 import '../modules/healthcare/views/appointments_view.dart';
 import '../modules/healthcare/views/chat_view.dart';
 import '../modules/healthcare/views/prescription_view.dart';
@@ -133,6 +137,11 @@ import '../modules/blood/views/blog_view.dart';
 import '../modules/blood/views/blog_detail_view.dart';
 import '../modules/blood/views/blood_faq_view.dart';
 import '../modules/blood/views/blood_faq_detail_view.dart';
+import '../modules/blood/views/volunteer_register_view.dart';
+import '../modules/blood/views/blood_banks_view.dart';
+import '../modules/blood/views/blood_events_view.dart';
+import '../modules/blood/views/blood_event_detail_view.dart';
+import '../modules/blood/views/add_donation_view.dart';
 import '../modules/content/bindings/content_binding.dart';
 import '../modules/content/views/works_view.dart';
 import '../modules/content/views/work_detail_view.dart';
@@ -404,6 +413,16 @@ class AppPages {
       binding: FuneralBinding(),
     ),
     GetPage(
+      name: _Paths.FUNERAL_REQUEST_DETAIL,
+      page: () => const FuneralRequestDetailView(),
+      binding: FuneralBinding(),
+    ),
+    GetPage(
+      name: _Paths.FUNERAL_SUPPORT,
+      page: () => const FuneralSupportView(),
+      binding: FuneralBinding(),
+    ),
+    GetPage(
       name: _Paths.EDUCATION,
       page: () => const EducationView(),
       binding: EducationBinding(),
@@ -432,6 +451,11 @@ class AppPages {
       name: _Paths.EDUCATION_INTERESTS,
       page: () => const EducationInterestsView(),
       binding: EducationBinding(),
+    ),
+    GetPage(
+      name: _Paths.EDUCATION_SUPPORT,
+      page: () => const TrainingSupportView(),
+      binding: SupportBinding(),
     ),
     GetPage(
       name: _Paths.NAGARIK,
@@ -537,6 +561,11 @@ class AppPages {
       name: _Paths.INFORMATION_CATEGORY,
       page: () => const InformationCategoryView(),
       binding: InformationBinding(),
+    ),
+    GetPage(
+      name: _Paths.INFORMATION_SUPPORT,
+      page: () => const InformationSupportView(),
+      binding: SupportBinding(),
     ),
     GetPage(
       name: _Paths.HEALTHCARE_APPOINTMENTS,
@@ -773,6 +802,31 @@ class AppPages {
     GetPage(
       name: _Paths.BLOOD_FAQ_DETAIL,
       page: () => const BloodFaqDetailView(),
+      binding: BloodBinding(),
+    ),
+    GetPage(
+      name: _Paths.BLOOD_VOLUNTEER_REGISTER,
+      page: () => const VolunteerRegisterView(),
+      binding: BloodBinding(),
+    ),
+    GetPage(
+      name: _Paths.BLOOD_BANKS,
+      page: () => const BloodBanksView(),
+      binding: BloodBinding(),
+    ),
+    GetPage(
+      name: _Paths.BLOOD_EVENTS,
+      page: () => const BloodEventsView(),
+      binding: BloodBinding(),
+    ),
+    GetPage(
+      name: _Paths.BLOOD_EVENT_DETAIL,
+      page: () => const BloodEventDetailView(),
+      binding: BloodBinding(),
+    ),
+    GetPage(
+      name: _Paths.BLOOD_ADD_DONATION,
+      page: () => const AddDonationView(),
       binding: BloodBinding(),
     ),
     GetPage(

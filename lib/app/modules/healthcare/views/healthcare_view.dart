@@ -1,6 +1,7 @@
 ﻿import 'package:animate_do/animate_do.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../../core/values/app_colors.dart';
 import '../../../global_widget/sn_shimmer.dart';
@@ -9,9 +10,8 @@ import '../controllers/booking_controller.dart';
 import '../controllers/healthcare_controller.dart';
 import '../widgets/hc_doctor_card.dart';
 
-const _green = Color(0xFF16A34A);
-const _darkGreen = Color(0xFF0F7A52);
-const _tile = Color(0xFFEAF7F0);
+const _teal = Color(0xFF0D9383);
+const _tile = Color(0xFFE6F5F4);
 
 class HealthcareView extends GetView<HealthcareController> {
   const HealthcareView({super.key});
@@ -19,43 +19,44 @@ class HealthcareView extends GetView<HealthcareController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF7F8FA),
+      backgroundColor: const Color(0xFFF4F5FA),
       body: SafeArea(
         child: Column(
           children: [
             // Header
-            Padding(
+            Container(
+              color: AppColors.white,
               padding: const EdgeInsets.fromLTRB(8, 6, 16, 8),
               child: Row(
                 children: [
                   IconButton(
                     splashRadius: 22,
                     onPressed: () => Get.back(),
-                    icon: const Icon(Icons.arrow_back_ios_new_rounded,
-                        size: 20, color: Color(0xFF1A1A1A)),
+                    icon: const Icon(LucideIcons.chevronLeft,
+                        size: 22, color: Color(0xFF0F172A)),
                   ),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                          controller.selectedCenter?.name.isNotEmpty == true
-                              ? controller.selectedCenter!.name
-                              : 'Healthcare'.tr,
-                          style: const TextStyle(
-                              fontSize: 19,
-                              fontWeight: FontWeight.w800,
-                              color: Color(0xFF0F172A))),
-                      const SizedBox(height: 1),
-                      Text(controller.selectedCenter?.address ?? '',
-                          style: const TextStyle(
-                              fontSize: 12, color: Color(0xFF94A3B8))),
-                    ],
-                  ),
-                  const Spacer(),
-                  GestureDetector(
-                    onTap: () => Get.toNamed(Routes.HEALTHCARE_APPOINTMENTS),
-                    child: const Icon(Icons.calendar_today_outlined,
-                        color: Color(0xFF1A1A1A), size: 20),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                            controller.selectedCenter?.name.isNotEmpty == true
+                                ? controller.selectedCenter!.name
+                                : 'Healthcare'.tr,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                                fontSize: 19,
+                                fontWeight: FontWeight.w800,
+                                color: Color(0xFF0F172A))),
+                        const SizedBox(height: 1),
+                        Text(controller.selectedCenter?.address ?? '',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                                fontSize: 12, color: Color(0xFF94A3B8))),
+                      ],
+                    ),
                   ),
                 ],
               ),
@@ -102,7 +103,7 @@ class HealthcareView extends GetView<HealthcareController> {
                                     style: const TextStyle(
                                         fontSize: 13,
                                         fontWeight: FontWeight.w700,
-                                        color: _green)),
+                                        color: _teal)),
                               ),
                           ],
                         ),
@@ -147,7 +148,7 @@ class HealthcareView extends GetView<HealthcareController> {
                               width: 22,
                               height: 22,
                               child: CircularProgressIndicator(
-                                  strokeWidth: 2.4, color: _green),
+                                  strokeWidth: 2.4, color: _teal),
                             ),
                           ),
                         ),
@@ -170,11 +171,7 @@ class _Hero extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [_darkGreen, Color(0xFF0B5E3F)],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
+        color: _teal,
         borderRadius: BorderRadius.circular(20),
       ),
       child: Stack(
@@ -182,7 +179,7 @@ class _Hero extends StatelessWidget {
           Positioned(
             right: -8,
             top: -8,
-            child: Icon(Icons.medical_services_outlined,
+            child: Icon(LucideIcons.stethoscope,
                 size: 84, color: Colors.white.withValues(alpha: 0.10)),
           ),
           Column(
@@ -194,7 +191,9 @@ class _Hero extends StatelessWidget {
                       fontSize: 22,
                       fontWeight: FontWeight.w800)),
               const SizedBox(height: 6),
-              Text('In-person & video consults · transparent fees · BMDC-verified'.tr,
+              Text(
+                  'In-person & video consults · transparent fees · BMDC-verified'
+                      .tr,
                   style: TextStyle(
                       color: Colors.white.withValues(alpha: 0.9),
                       fontSize: 12.5,
@@ -203,21 +202,26 @@ class _Hero extends StatelessWidget {
               GestureDetector(
                 onTap: () => Get.toNamed(Routes.HC_DOCTORS),
                 child: Container(
-                height: 50,
-                padding: const EdgeInsets.symmetric(horizontal: 14),
-                decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(12)),
-                child: Row(
-                  children: [
-                    const Icon(Icons.search_rounded, color: Color(0xFF94A3B8)),
-                    const SizedBox(width: 10),
-                    Text('Search doctor, specialty, symptom…'.tr,
-                        style: const TextStyle(
-                            color: Color(0xFF94A3B8), fontSize: 13.5)),
-                  ],
+                  height: 50,
+                  padding: const EdgeInsets.symmetric(horizontal: 14),
+                  decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(12)),
+                  child: Row(
+                    children: [
+                      const Icon(LucideIcons.search,
+                          color: Color(0xFF94A3B8), size: 19),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Text('Search doctor, specialty, symptom…'.tr,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                                color: Color(0xFF94A3B8), fontSize: 13.5)),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
               ),
             ],
           ),
@@ -244,10 +248,10 @@ class _ModeToggle extends StatelessWidget {
             height: 50,
             margin: EdgeInsets.only(right: i == 0 ? 6 : 0, left: i == 1 ? 6 : 0),
             decoration: BoxDecoration(
-              color: sel ? _green : AppColors.white,
+              color: sel ? _teal : AppColors.white,
               borderRadius: BorderRadius.circular(12),
               border: Border.all(
-                  color: sel ? _green : const Color(0xFFE2E8F0)),
+                  color: sel ? _teal : const Color(0xFFE2E8F0)),
             ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -315,7 +319,7 @@ class _QuickGrid extends StatelessWidget {
                         decoration: BoxDecoration(
                             color: _tile,
                             borderRadius: BorderRadius.circular(12)),
-                        child: Icon(it.$1, color: _green, size: 22),
+                        child: Icon(it.$1, color: _teal, size: 22),
                       ),
                       if (it.$3)
                         const Positioned(

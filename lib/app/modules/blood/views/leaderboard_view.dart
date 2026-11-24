@@ -1,26 +1,37 @@
+import 'dart:convert';
+
 import 'package:animate_do/animate_do.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../../core/values/app_colors.dart';
+import '../../../core/values/storage.dart';
 import '../../../data/models/response/donor_response.dart';
+import '../../../data/services/storage.service.dart';
 import '../../../global_widget/sn_shimmer.dart';
 import '../controllers/donation_flow_controller.dart';
 
-const _red = Color(0xFFE11D48);
-const _navy = Color(0xFF1E2A4A);
-
-const List<Color> _palette = [
-  Color(0xFFE11D48),
-  Color(0xFFF59E0B),
-  Color(0xFF6366F1),
-  Color(0xFF14B8A6),
-  Color(0xFFEC4899),
-  Color(0xFF0EA5E9),
-];
+const _red = Color(0xFFE5383B);
+const _maroon = Color(0xFF8E1B2C);
+const _pinkTile = Color(0xFFFDECEC);
+const _gold = Color(0xFFFBBF24);
 
 String _displayName(DonorEntry d) =>
     d.fullName.isNotEmpty ? d.fullName : 'Donor'.tr;
+
+/// The logged-in user's id, read from stored auth info — used to highlight
+/// "আপনি" (you) in the ranked list below the podium.
+String? _currentUserId() {
+  final raw = StorageService.read(StorageConstants.userInfo);
+  if (raw is String && raw.trim().isNotEmpty) {
+    try {
+      final map = jsonDecode(raw);
+      if (map is Map) return map['id']?.toString();
+    } catch (_) {}
+  }
+  return null;
+}
 
 class LeaderboardView extends GetView<DonationFlowController> {
   const LeaderboardView({super.key});
@@ -28,7 +39,7 @@ class LeaderboardView extends GetView<DonationFlowController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF7F8FA),
+      backgroundColor: const Color(0xFFF4F5FA),
       body: GetBuilder<DonationFlowController>(
         initState: (_) =>
             Get.find<DonationFlowController>().fetchLeaderboard(),
@@ -48,19 +59,19 @@ class LeaderboardView extends GetView<DonationFlowController> {
                         IconButton(
                           splashRadius: 22,
                           onPressed: () => Get.back(),
-                          icon: const Icon(Icons.arrow_back_ios_new_rounded,
-                              size: 20, color: Colors.white),
+                          icon: const Icon(LucideIcons.chevronLeft,
+                              size: 22, color: Colors.white),
                         ),
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text('Donor leaderboard'.tr,
+                            Text('Top donors (Blood heroes)'.tr,
                                 style: const TextStyle(
                                     fontSize: 19,
                                     fontWeight: FontWeight.w800,
                                     color: Colors.white)),
                             const SizedBox(height: 1),
-                            Text('Top donors · ServiceNin'.tr,
+                            Text('Most donations by our donors'.tr,
                                 style: const TextStyle(
                                     fontSize: 12, color: Color(0xFFFFD9DC))),
                           ],
@@ -90,12 +101,12 @@ class LeaderboardView extends GetView<DonationFlowController> {
                   ),
                 )
               else ...[
-                // Navy podium (top 3)
+                // Maroon podium (top 3)
                 FadeInDown(
                   duration: const Duration(milliseconds: 300),
                   child: Container(
                   width: double.infinity,
-                  color: _navy,
+                  color: _maroon,
                   padding: const EdgeInsets.fromLTRB(20, 16, 20, 22),
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.end,
@@ -179,8 +190,7 @@ class _Podium extends StatelessWidget {
         SizedBox(
           height: 22,
           child: crowned
-              ? const Icon(Icons.workspace_premium_rounded,
-                  color: Color(0xFFFBBF24), size: 22)
+              ? const Icon(LucideIcons.crown, color: _gold, size: 22)
               : null,
         ),
         Container(
@@ -217,7 +227,7 @@ class _Podium extends StatelessWidget {
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(Icons.water_drop_rounded,
+            const Icon(LucideIcons.droplet,
                 size: 12, color: Color(0xFFFF6B81)),
             const SizedBox(width: 3),
             Text('${donor.totalDonations}',
@@ -255,16 +265,16 @@ class _RankRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = _palette[rank % _palette.length];
+    final isMe = donor.userId.isNotEmpty && donor.userId == _currentUserId();
     final subtitle = donor.bloodGroup.isNotEmpty
         ? '${donor.bloodGroup} donor'
         : 'Donor'.tr;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
       decoration: BoxDecoration(
-        color: AppColors.white,
+        color: isMe ? const Color(0xFFFFF4E8) : AppColors.white,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFFEDEFF2)),
+        border: Border.all(color: isMe ? const Color(0xFFEA5A0C) : const Color(0xFFEDEFF2)),
       ),
       child: Row(
         children: [
@@ -281,11 +291,11 @@ class _RankRow extends StatelessWidget {
             width: 40,
             height: 40,
             decoration: BoxDecoration(
-                color: color.withValues(alpha: 0.14), shape: BoxShape.circle),
+                color: isMe ? const Color(0xFFEA5A0C) : _pinkTile, shape: BoxShape.circle),
             alignment: Alignment.center,
             child: Text(donor.initials,
                 style: TextStyle(
-                    color: color,
+                    color: isMe ? Colors.white : _red,
                     fontSize: 13,
                     fontWeight: FontWeight.w800)),
           ),
@@ -294,7 +304,7 @@ class _RankRow extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(_displayName(donor),
+                Text(isMe ? '${'You'.tr} · ${_displayName(donor)}' : _displayName(donor),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: const TextStyle(
@@ -317,7 +327,7 @@ class _RankRow extends StatelessWidget {
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Icon(Icons.water_drop_rounded, size: 13, color: _red),
+                const Icon(LucideIcons.droplet, size: 13, color: _red),
                 const SizedBox(width: 4),
                 Text('${donor.totalDonations}',
                     style: const TextStyle(

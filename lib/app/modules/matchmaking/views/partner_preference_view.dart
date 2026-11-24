@@ -18,7 +18,8 @@ class PartnerPreferenceView extends GetView<MatchmakingController> {
         child: GetBuilder<MatchmakingController>(
           builder: (con) => Column(
             children: [
-              Padding(
+              Container(
+                color: AppColors.white,
                 padding: const EdgeInsets.fromLTRB(8, 6, 16, 4),
                 child: Row(
                   children: [

@@ -1,13 +1,14 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../../core/values/app_colors.dart';
 import '../../../data/models/response/chat_message_response.dart';
 import '../../../global_widget/sn_shimmer.dart';
 import '../controllers/blood_chat_controller.dart';
 
-const _red = Color(0xFFE11D48);
+const _red = Color(0xFFE5383B);
 
 class BloodChatView extends StatefulWidget {
   const BloodChatView({super.key});
@@ -66,7 +67,7 @@ class _BloodChatViewState extends State<BloodChatView> {
                       IconButton(
                         splashRadius: 22,
                         onPressed: () => Get.back(),
-                        icon: const Icon(Icons.arrow_back_ios_new_rounded,
+                        icon: const Icon(LucideIcons.chevronLeft,
                             size: 20, color: Color(0xFF1A1A1A)),
                       ),
                       _Avatar(

@@ -1,16 +1,19 @@
 import 'package:animate_do/animate_do.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../../core/values/app_colors.dart';
 import '../../../core/values/app_url.dart';
 import '../../../data/models/response/healthcare_response.dart';
 import '../../../global_widget/invoice_actions.dart';
 import '../../../global_widget/sn_shimmer.dart';
+import '../../../routes/app_pages.dart';
 import '../controllers/appointments_controller.dart';
 
-const _green = Color(0xFF15803D);
-const _tile = Color(0xFFD9F7E6);
+const _green = Color(0xFF0D9383);
+const _tile = Color(0xFFE6F5F4);
+const _orange = Color(0xFFF16621);
 
 class AppointmentsView extends GetView<AppointmentsController> {
   const AppointmentsView({super.key});
@@ -20,7 +23,7 @@ class AppointmentsView extends GetView<AppointmentsController> {
     return DefaultTabController(
       length: 3,
       child: Scaffold(
-        backgroundColor: const Color(0xFFF7F8FA),
+        backgroundColor: const Color(0xFFF4F5FA),
         appBar: AppBar(
           backgroundColor: AppColors.white,
           surfaceTintColor: AppColors.white,
@@ -29,8 +32,8 @@ class AppointmentsView extends GetView<AppointmentsController> {
           titleSpacing: 0,
           leading: IconButton(
             onPressed: () => Get.back(),
-            icon: const Icon(Icons.arrow_back_ios_new_rounded,
-                size: 20, color: Color(0xFF1A1A1A)),
+            icon: const Icon(LucideIcons.chevronLeft,
+                size: 22, color: Color(0xFF0F172A)),
           ),
           title: Text('My appointments'.tr,
               style: const TextStyle(
@@ -46,8 +49,8 @@ class AppointmentsView extends GetView<AppointmentsController> {
             unselectedLabelStyle:
                 const TextStyle(fontSize: 14.5, fontWeight: FontWeight.w600),
             tabs: [
-              Tab(text: 'Upcoming'.tr),
-              Tab(text: 'Completed'.tr),
+              Tab(text: 'Upcoming (hc)'.tr),
+              Tab(text: 'Completed (hc)'.tr),
               Tab(text: 'Cancelled'.tr),
             ],
           ),
@@ -83,10 +86,53 @@ class _List extends StatelessWidget {
         onRefresh: Get.find<AppointmentsController>().fetchMine,
         child: ListView(
           children: [
-            const SizedBox(height: 140),
+            const SizedBox(height: 90),
+            Center(
+              child: Container(
+                width: 72,
+                height: 72,
+                decoration: BoxDecoration(
+                  color: _green,
+                  borderRadius: BorderRadius.circular(20),
+                  boxShadow: [
+                    BoxShadow(
+                        color: _green.withValues(alpha: 0.3),
+                        blurRadius: 16,
+                        offset: const Offset(0, 6)),
+                  ],
+                ),
+                child: const Icon(LucideIcons.calendarDays,
+                    color: Colors.white, size: 32),
+              ),
+            ),
+            const SizedBox(height: 18),
             Center(
               child: Text('No appointments'.tr,
-                  style: const TextStyle(color: Color(0xFF94A3B8))),
+                  style: const TextStyle(
+                      fontSize: 14.5,
+                      fontWeight: FontWeight.w700,
+                      color: Color(0xFF334155))),
+            ),
+            const SizedBox(height: 18),
+            Center(
+              child: SizedBox(
+                height: 50,
+                child: ElevatedButton.icon(
+                  onPressed: () => Get.toNamed(Routes.HC_DOCTORS),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: _orange,
+                    foregroundColor: Colors.white,
+                    elevation: 0,
+                    padding: const EdgeInsets.symmetric(horizontal: 22),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(25)),
+                  ),
+                  icon: const Icon(LucideIcons.search, size: 18),
+                  label: Text('Find a doctor'.tr,
+                      style: const TextStyle(
+                          fontSize: 14.5, fontWeight: FontWeight.w800)),
+                ),
+              ),
             ),
           ],
         ),
@@ -199,8 +245,8 @@ class _ApptCard extends StatelessWidget {
             children: [
               Icon(
                   appt.isVideo
-                      ? Icons.videocam_outlined
-                      : Icons.location_on_outlined,
+                      ? LucideIcons.video
+                      : LucideIcons.mapPin,
                   size: 16,
                   color: const Color(0xFF94A3B8)),
               const SizedBox(width: 6),
@@ -233,7 +279,7 @@ class _ApptCard extends StatelessWidget {
               viewPath: ApiURL.hcInvoicePdf(appt.id),
               downloadPath: ApiURL.hcInvoicePdfDownload(appt.id),
               fileName: 'invoice-${appt.id}',
-              accent: const Color(0xFF0F7A52),
+              accent: _green,
             ),
           ],
         ],

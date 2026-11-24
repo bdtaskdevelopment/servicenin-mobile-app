@@ -1,13 +1,15 @@
 import 'package:animate_do/animate_do.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../../core/values/app_colors.dart';
 import '../../../data/models/response/info_response.dart';
 import '../../../global_widget/sn_shimmer.dart';
 import '../controllers/information_controller.dart';
+import 'information_view.dart' show InfoSupportIconButton;
 
-const _purple = Color(0xFF6366F1);
+const _blue = Color(0xFF0183C7);
 
 /// One category's (or a search's) directory results — opened from a tap on
 /// a grid tile / search submit on [InformationView]. Paginated, backed by
@@ -18,7 +20,7 @@ class InformationCategoryView extends GetView<InformationController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF7F8FA),
+      backgroundColor: const Color(0xFFF4F5FA),
       body: SafeArea(
         child: Column(
           children: [
@@ -38,7 +40,7 @@ class InformationCategoryView extends GetView<InformationController> {
                     return const SnListSkeleton();
                   }
                   return RefreshIndicator(
-                    color: _purple,
+                    color: _blue,
                     onRefresh: () => con.fetchDirectory(reset: true),
                     child: NotificationListener<ScrollNotification>(
                       onNotification: (n) {
@@ -49,22 +51,7 @@ class InformationCategoryView extends GetView<InformationController> {
                         return false;
                       },
                       child: con.directoryCards.isEmpty
-                          ? ListView(
-                              physics: const AlwaysScrollableScrollPhysics(),
-                              children: [
-                                Padding(
-                                  padding:
-                                      const EdgeInsets.symmetric(vertical: 80),
-                                  child: Center(
-                                    child: Text(
-                                      'No entries found.'.tr,
-                                      style: const TextStyle(
-                                          color: Color(0xFF94A3B8)),
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            )
+                          ? const _EmptyResults()
                           : ListView(
                               padding:
                                   const EdgeInsets.fromLTRB(16, 0, 16, 24),
@@ -88,7 +75,7 @@ class InformationCategoryView extends GetView<InformationController> {
                                         EdgeInsets.symmetric(vertical: 12),
                                     child: Center(
                                         child: CircularProgressIndicator(
-                                            strokeWidth: 2.4, color: _purple)),
+                                            strokeWidth: 2.4, color: _blue)),
                                   ),
                               ],
                             ),
@@ -111,6 +98,8 @@ class _Header extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final domain = con.selectedDomainForList;
+    final isPureSearch = domain == null && con.search.isNotEmpty;
+    final (bg, fg) = infoDomainColor(domain?.key);
     return Padding(
       padding: const EdgeInsets.fromLTRB(8, 6, 16, 0),
       child: Row(
@@ -118,18 +107,32 @@ class _Header extends StatelessWidget {
           IconButton(
             splashRadius: 22,
             onPressed: () => Get.back(),
-            icon: const Icon(Icons.arrow_back_ios_new_rounded,
-                size: 20, color: Color(0xFF1A1A1A)),
+            icon: const Icon(LucideIcons.chevronLeft,
+                size: 22, color: Color(0xFF0F172A)),
           ),
-          if (domain != null && domain.emoji.isNotEmpty) ...[
-            Text(domain.emoji, style: const TextStyle(fontSize: 20)),
-            const SizedBox(width: 8),
+          if (!isPureSearch) ...[
+            Container(
+              width: 32,
+              height: 32,
+              alignment: Alignment.center,
+              margin: const EdgeInsets.only(right: 8),
+              decoration: BoxDecoration(
+                color: bg,
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Icon(infoDomainIcon(domain?.key), color: fg, size: 17),
+            ),
           ],
-          Text(con.categoryListTitle,
-              style: const TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w800,
-                  color: Color(0xFF0F172A))),
+          Expanded(
+            child: Text(con.categoryListTitle,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w800,
+                    color: Color(0xFF0F172A))),
+          ),
+          const InfoSupportIconButton(),
         ],
       ),
     );
@@ -147,12 +150,13 @@ class _SearchBar extends StatelessWidget {
       height: 46,
       padding: const EdgeInsets.symmetric(horizontal: 14),
       decoration: BoxDecoration(
-        color: const Color(0xFFEDEFF2),
+        color: AppColors.white,
         borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: const Color(0xFFEDEFF2)),
       ),
       child: Row(
         children: [
-          const Icon(Icons.search_rounded, color: Color(0xFF94A3B8)),
+          const Icon(LucideIcons.search, size: 19, color: Color(0xFF94A3B8)),
           const SizedBox(width: 10),
           Expanded(
             child: TextField(
@@ -176,12 +180,58 @@ class _SearchBar extends StatelessWidget {
                 ? const SizedBox.shrink()
                 : GestureDetector(
                     onTap: con.clearSearch,
-                    child: const Icon(Icons.close_rounded,
+                    child: const Icon(LucideIcons.x,
                         size: 18, color: Color(0xFF94A3B8)),
                   ),
           ),
         ],
       ),
+    );
+  }
+}
+
+class _EmptyResults extends StatelessWidget {
+  const _EmptyResults();
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView(
+      physics: const AlwaysScrollableScrollPhysics(),
+      children: [
+        const SizedBox(height: 100),
+        Center(
+          child: Container(
+            width: 64,
+            height: 64,
+            decoration: BoxDecoration(
+              color: _blue,
+              borderRadius: BorderRadius.circular(18),
+              boxShadow: [
+                BoxShadow(
+                    color: _blue.withValues(alpha: 0.3),
+                    blurRadius: 16,
+                    offset: const Offset(0, 6)),
+              ],
+            ),
+            child: const Icon(LucideIcons.searchX,
+                color: Colors.white, size: 28),
+          ),
+        ),
+        const SizedBox(height: 18),
+        Center(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 32),
+            child: Text(
+              'No entries found.'.tr,
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                  fontSize: 13.5,
+                  fontWeight: FontWeight.w600,
+                  color: Color(0xFF334155)),
+            ),
+          ),
+        ),
+      ],
     );
   }
 }
@@ -194,11 +244,7 @@ class _InfoCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final domain = con.domainFor(entry.domain);
-    final subtitle = [
-      entry.typeLabel,
-      entry.address,
-    ].where((s) => s.isNotEmpty).join(' · ');
+    final (bg, fg) = infoDomainColor(entry.domain);
     return GestureDetector(
       onTap: () => con.openInfo(entry),
       child: Container(
@@ -206,30 +252,25 @@ class _InfoCard extends StatelessWidget {
         decoration: BoxDecoration(
           color: AppColors.white,
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: const Color(0xFFEDEFF2)),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.03),
+              blurRadius: 10,
+              offset: const Offset(0, 3),
+            ),
+          ],
         ),
         child: Row(
           children: [
             Container(
-              width: 44,
-              height: 44,
+              width: 46,
+              height: 46,
               alignment: Alignment.center,
               decoration: BoxDecoration(
-                color: entry.isEmergency
-                    ? const Color(0xFFFDECEC)
-                    : const Color(0xFFEEF0FB),
+                color: bg,
                 borderRadius: BorderRadius.circular(12),
               ),
-              child: (domain?.emoji.isNotEmpty ?? false)
-                  ? Text(domain!.emoji, style: const TextStyle(fontSize: 20))
-                  : Icon(
-                      entry.isEmergency
-                          ? Icons.emergency_share_rounded
-                          : Icons.account_balance_outlined,
-                      color:
-                          entry.isEmergency ? const Color(0xFFE8333A) : _purple,
-                      size: 22,
-                    ),
+              child: Icon(infoDomainIcon(entry.domain), color: fg, size: 21),
             ),
             const SizedBox(width: 12),
             Expanded(
@@ -238,7 +279,7 @@ class _InfoCard extends StatelessWidget {
                 children: [
                   Text(
                     entry.title,
-                    maxLines: 1,
+                    maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                     style: const TextStyle(
                       fontSize: 14.5,
@@ -246,18 +287,25 @@ class _InfoCard extends StatelessWidget {
                       color: Color(0xFF0F172A),
                     ),
                   ),
-                  if (subtitle.isNotEmpty) ...[
-                    const SizedBox(height: 2),
-                    Text(
-                      subtitle,
-                      maxLines: 2,
+                  const SizedBox(height: 6),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 8, vertical: 3),
+                    decoration: BoxDecoration(
+                      color: bg,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Text(
+                      entry.tagLabel,
+                      maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                        fontSize: 12,
-                        color: Color(0xFF94A3B8),
+                      style: TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w700,
+                        color: fg,
                       ),
                     ),
-                  ],
+                  ),
                 ],
               ),
             ),
@@ -266,42 +314,20 @@ class _InfoCard extends StatelessWidget {
               GestureDetector(
                 onTap: () => con.callHotline(entry.callNumber),
                 child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 8,
-                  ),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFD9F7E6),
-                    borderRadius: BorderRadius.circular(10),
+                  width: 42,
+                  height: 42,
+                  alignment: Alignment.center,
+                  decoration: const BoxDecoration(
+                    color: _blue,
+                    shape: BoxShape.circle,
                   ),
                   child: const Icon(
-                    Icons.call_rounded,
+                    LucideIcons.phone,
                     size: 18,
-                    color: Color(0xFF16A34A),
+                    color: Colors.white,
                   ),
                 ),
               ),
-            if (entry.whatsapp.isNotEmpty) ...[
-              const SizedBox(width: 8),
-              GestureDetector(
-                onTap: () => con.openWhatsapp(entry.whatsapp),
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 8,
-                  ),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF25D366).withValues(alpha: 0.14),
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: const Icon(
-                    Icons.chat_rounded,
-                    size: 18,
-                    color: Color(0xFF25D366),
-                  ),
-                ),
-              ),
-            ],
           ],
         ),
       ),
