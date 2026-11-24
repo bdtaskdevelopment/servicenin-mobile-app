@@ -15,6 +15,7 @@ import '../controllers/fare_controller.dart';
 import '../widgets/ambulance_widgets.dart' show ambulanceStatusLabel;
 
 const _navy = Color(0xFF1E2A4A);
+const _orange = Color(0xFFF16621);
 const _red = Color(0xFFE23744);
 const _green = Color(0xFF16A34A);
 const _routeBlue = Color(0xFF4285F4);
@@ -312,7 +313,7 @@ class BookingConfirmedView extends GetView<AmbulanceController> {
                                     icon: const Icon(Icons.star_rounded,
                                         size: 20),
                                     style: ElevatedButton.styleFrom(
-                                      backgroundColor: _navy,
+                                      backgroundColor: _orange,
                                       foregroundColor: Colors.white,
                                       elevation: 0,
                                       shape: RoundedRectangleBorder(
@@ -350,7 +351,7 @@ class BookingConfirmedView extends GetView<AmbulanceController> {
                             Get.offNamed(Routes.AMBULANCE_FARE);
                           },
                           style: OutlinedButton.styleFrom(
-                            foregroundColor: _navy,
+                            foregroundColor: _orange,
                             side: const BorderSide(color: Color(0xFFE2E8F0)),
                             shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(14)),

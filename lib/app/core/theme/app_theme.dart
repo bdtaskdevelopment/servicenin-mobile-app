@@ -1,10 +1,27 @@
 import 'package:servicenin/app/core/theme/text_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../values/app_colors.dart';
 import '../values/app_fond_sized.dart';
+
+// Poppins for English/numerals, Hind Siliguri as the fallback so Bangla
+// glyphs in the same string render correctly — no locale branching needed,
+// Flutter picks the fallback automatically per-glyph.
+//
+// Both are bundled locally (pubspec `fonts:`) as real multi-weight families
+// with weight-tagged assets, NOT fetched at runtime via google_fonts.
+// google_fonts registers a DIFFERENT synthetic family name per weight, so
+// any ad-hoc TextStyle that only overrides fontWeight while inheriting this
+// ambient fontFamily/fontFamilyFallback never finds the matching weight's
+// real face and gets a synthetically stretched "faux bold" glyph instead —
+// that's what made bold Bangla text look stretched ("lomba") app-wide. A
+// single real family name per font lets Flutter's own font matching pick
+// the correct weight for ANY TextStyle, anywhere, with no per-call-site fix.
+TextStyle _appFont(TextStyle textStyle) => textStyle.copyWith(
+      fontFamily: 'Poppins',
+      fontFamilyFallback: const ['Hind Siliguri'],
+    );
 
 class AppTheme {
   /// Light Theme
@@ -14,45 +31,19 @@ class AppTheme {
     cardColor: AppColors.white,
     cardTheme: CardThemeData(color: AppColors.white),
     textTheme: TextTheme(
-      displayLarge: GoogleFonts.poppins(
-        textStyle: AppTextStyleLight.displayLarge,
-      ),
-      displayMedium: GoogleFonts.poppins(
-        textStyle: AppTextStyleLight.displayMedium,
-      ),
-      displaySmall: GoogleFonts.poppins(
-        textStyle: AppTextStyleLight.displaySmall,
-      ),
-      headlineMedium: GoogleFonts.poppins(
-        textStyle: AppTextStyleLight.headlineMedium,
-      ),
-      headlineSmall: GoogleFonts.poppins(
-        textStyle: AppTextStyleLight.headlineSmall,
-      ),
-      titleLarge: GoogleFonts.poppins(
-        textStyle: AppTextStyleLight.titleLarge,
-      ),
-      titleMedium: GoogleFonts.poppins(
-        textStyle: AppTextStyleLight.titleMedium,
-      ),
-      titleSmall: GoogleFonts.poppins(
-        textStyle: AppTextStyleLight.titleSmall,
-      ),
-      bodyLarge: GoogleFonts.poppins(
-        textStyle: AppTextStyleLight.bodyLarge,
-      ),
-      bodyMedium: GoogleFonts.poppins(
-        textStyle: AppTextStyleLight.bodyMedium,
-      ),
-      bodySmall: GoogleFonts.poppins(
-        textStyle: AppTextStyleLight.bodySmall,
-      ),
-      labelLarge: GoogleFonts.poppins(
-        textStyle: AppTextStyleLight.labelLarge,
-      ),
-      labelSmall: GoogleFonts.poppins(
-        textStyle: AppTextStyleLight.labelSmall,
-      ),
+      displayLarge: _appFont(AppTextStyleLight.displayLarge),
+      displayMedium: _appFont(AppTextStyleLight.displayMedium),
+      displaySmall: _appFont(AppTextStyleLight.displaySmall),
+      headlineMedium: _appFont(AppTextStyleLight.headlineMedium),
+      headlineSmall: _appFont(AppTextStyleLight.headlineSmall),
+      titleLarge: _appFont(AppTextStyleLight.titleLarge),
+      titleMedium: _appFont(AppTextStyleLight.titleMedium),
+      titleSmall: _appFont(AppTextStyleLight.titleSmall),
+      bodyLarge: _appFont(AppTextStyleLight.bodyLarge),
+      bodyMedium: _appFont(AppTextStyleLight.bodyMedium),
+      bodySmall: _appFont(AppTextStyleLight.bodySmall),
+      labelLarge: _appFont(AppTextStyleLight.labelLarge),
+      labelSmall: _appFont(AppTextStyleLight.labelSmall),
     ),
     elevatedButtonTheme: ElevatedButtonThemeData(
       style: ElevatedButton.styleFrom(
@@ -73,7 +64,11 @@ class AppTheme {
     ),
     appBarTheme: AppBarTheme(
       backgroundColor: AppColors.white,
-      titleTextStyle: TextStyle(color: AppColors.white, fontSize: 18),
+      titleTextStyle: TextStyle(
+        color: AppColors.white,
+        fontSize: 18,
+        fontWeight: FontWeight.bold,
+      ),
       iconTheme: IconThemeData(color: AppColors.white),
       systemOverlayStyle: SystemUiOverlayStyle(
         statusBarColor: AppColors.white,
@@ -109,42 +104,19 @@ class AppTheme {
     cardColor: AppColors.black,
     cardTheme: CardThemeData(color: AppColors.red),
     textTheme: TextTheme(
-      displayLarge:
-          GoogleFonts.poppins(textStyle: AppTextStyleDark.displayLarge),
-      displayMedium: GoogleFonts.poppins(
-        textStyle: AppTextStyleDark.displayMedium,
-      ),
-      displaySmall:
-          GoogleFonts.poppins(textStyle: AppTextStyleDark.displaySmall),
-      headlineMedium: GoogleFonts.poppins(
-        textStyle: AppTextStyleDark.headlineMedium,
-      ),
-      headlineSmall: GoogleFonts.poppins(
-        textStyle: AppTextStyleDark.headlineSmall,
-      ),
-      titleLarge: GoogleFonts.poppins(
-        textStyle: AppTextStyleDark.titleLarge,
-      ),
-      titleMedium:
-          GoogleFonts.poppins(textStyle: AppTextStyleDark.titleMedium),
-      titleSmall: GoogleFonts.poppins(
-        textStyle: AppTextStyleDark.titleSmall,
-      ),
-      bodyLarge: GoogleFonts.poppins(
-        textStyle: AppTextStyleDark.bodyLarge,
-      ),
-      bodyMedium: GoogleFonts.poppins(
-        textStyle: AppTextStyleDark.bodyMedium,
-      ),
-      bodySmall: GoogleFonts.poppins(
-        textStyle: AppTextStyleDark.bodySmall,
-      ),
-      labelLarge: GoogleFonts.poppins(
-        textStyle: AppTextStyleDark.labelLarge,
-      ),
-      labelSmall: GoogleFonts.poppins(
-        textStyle: AppTextStyleDark.labelSmall,
-      ),
+      displayLarge: _appFont(AppTextStyleDark.displayLarge),
+      displayMedium: _appFont(AppTextStyleDark.displayMedium),
+      displaySmall: _appFont(AppTextStyleDark.displaySmall),
+      headlineMedium: _appFont(AppTextStyleDark.headlineMedium),
+      headlineSmall: _appFont(AppTextStyleDark.headlineSmall),
+      titleLarge: _appFont(AppTextStyleDark.titleLarge),
+      titleMedium: _appFont(AppTextStyleDark.titleMedium),
+      titleSmall: _appFont(AppTextStyleDark.titleSmall),
+      bodyLarge: _appFont(AppTextStyleDark.bodyLarge),
+      bodyMedium: _appFont(AppTextStyleDark.bodyMedium),
+      bodySmall: _appFont(AppTextStyleDark.bodySmall),
+      labelLarge: _appFont(AppTextStyleDark.labelLarge),
+      labelSmall: _appFont(AppTextStyleDark.labelSmall),
     ),
     iconTheme: IconThemeData(color: AppColors.white, size: 25.0),
     buttonTheme: ButtonThemeData(
@@ -153,7 +125,8 @@ class AppTheme {
     ),
     appBarTheme: AppBarTheme(
       backgroundColor: AppColors.black,
-      titleTextStyle: TextStyle(color: AppColors.white),
+      titleTextStyle:
+          TextStyle(color: AppColors.white, fontWeight: FontWeight.bold),
     ),
     drawerTheme: DrawerThemeData(
       backgroundColor: AppColors.grey,

@@ -10,6 +10,9 @@ import '../../../core/helpers/location_helper.dart';
 import '../../../core/helpers/snack_helper.dart';
 import '../../../core/mixins/live_refresh_mixin.dart';
 import '../../../core/values/storage.dart';
+import '../../../data/models/response/blood_bank_response.dart';
+import '../../../data/models/response/blood_donation_response.dart';
+import '../../../data/models/response/blood_event_response.dart';
 import '../../../data/models/response/blood_request_response.dart';
 import '../../../data/services/geo_search.service.dart';
 import '../../../data/models/response/blood_responder_response.dart';
@@ -32,15 +35,15 @@ extension BloodSeverityX on BloodSeverity {
       };
 
   Color get color => switch (this) {
-        BloodSeverity.critical => const Color(0xFFE11D48),
-        BloodSeverity.urgent => const Color(0xFFB45309),
-        BloodSeverity.routine => const Color(0xFF2563EB),
+        BloodSeverity.critical => const Color(0xFFE5383B),
+        BloodSeverity.urgent => const Color(0xFF92400E),
+        BloodSeverity.routine => const Color(0xFF1D4ED8),
       };
 
   Color get bg => switch (this) {
-        BloodSeverity.critical => const Color(0xFFFEE2E2),
+        BloodSeverity.critical => const Color(0xFFFDECEC),
         BloodSeverity.urgent => const Color(0xFFFEF3C7),
-        BloodSeverity.routine => const Color(0xFFDBEAFE),
+        BloodSeverity.routine => const Color(0xFFE0EBFF),
       };
 }
 
@@ -99,6 +102,17 @@ class BloodController extends GetxController with LiveRefreshMixin {
     }
   }
 
+  /// Re-points [viewingRequest] at the freshly-fetched copy of [id], if any.
+  /// Used after an edit-save so the detail screen the user lands back on
+  /// shows the just-updated fields instead of the stale pre-edit object.
+  void syncViewingRequest(String id) {
+    final fresh = _findRequestById(id);
+    if (fresh != null) {
+      viewingRequest = fresh;
+      update();
+    }
+  }
+
   BloodRequestEntry? _findRequestById(String id) {
     for (final r in [...myRequests, ...requestList]) {
       if (r.id == id) return r;
@@ -138,8 +152,167 @@ class BloodController extends GetxController with LiveRefreshMixin {
     fetchMyDonorStatus();
     fetchMyRequests();
     fetchRequests();
+    fetchCommunityStats();
+    fetchEvents();
     startLiveRefresh();
   }
+
+  // ── Community impact stats (home screen maroon card) ─────────────────
+  Map<String, int> communityStats = const {};
+  Future<void> fetchCommunityStats() async {
+    communityStats = await _repo.fetchCommunityStats();
+    update();
+  }
+
+  // ── Nearby donors with a distance radius (repurposed "all donors" screen,
+  // route BLOOD_DONORS — the old unbounded fetchAllDonors() had zero
+  // callers; this screen is now the mockup's "কাছাকাছি ডোনার" list) ───────
+  int donorRadiusKm = 10; // one of 10/20/50/0 ("all")
+
+  void setDonorRadius(int km) {
+    donorRadiusKm = km;
+    update();
+  }
+
+  void _applyDonorDistances() {
+    final la = userLat, lo = userLng;
+    if (la == null || lo == null) return;
+    for (final d in nearestDonors) {
+      if (d.lat != null && d.lng != null) {
+        d.distanceKm = _haversineKm(la, lo, d.lat!, d.lng!);
+      }
+    }
+  }
+
+  List<DonorEntry> get visibleNearestDonors {
+    final list = nearestDonors.where((d) {
+      if (donorRadiusKm <= 0) return true; // "all over"
+      final dist = d.distanceKm;
+      return dist == null || dist <= donorRadiusKm;
+    }).toList();
+    list.sort((a, b) =>
+        (a.distanceKm ?? double.infinity).compareTo(b.distanceKm ?? double.infinity));
+    return list;
+  }
+
+  void openNearbyDonors() {
+    fetchNearestDonors();
+    Get.toNamed(Routes.BLOOD_DONORS);
+  }
+
+  // ── Blood bank directory ──────────────────────────────────────────────
+  List<BloodBank> banks = [];
+  bool loadingBanks = false;
+  String bankSearch = '';
+
+  Future<void> fetchBanks({String? q}) async {
+    loadingBanks = true;
+    update();
+    try {
+      banks = await _repo.fetchBanks(q: q);
+    } catch (e) {
+      SnackHelper.error(e.toString().replaceFirst('Exception: ', ''));
+    } finally {
+      loadingBanks = false;
+      update();
+    }
+  }
+
+  void searchBanks(String q) {
+    bankSearch = q;
+    fetchBanks(q: q);
+  }
+
+  void openBanks() {
+    fetchBanks();
+    Get.toNamed(Routes.BLOOD_BANKS);
+  }
+
+  // ── Events / campaigns ─────────────────────────────────────────────────
+  List<BloodEvent> upcomingEvents = [];
+  List<BloodEvent> pastEvents = [];
+  bool loadingEvents = false;
+
+  Future<void> fetchEvents() async {
+    loadingEvents = true;
+    update();
+    try {
+      final results = await Future.wait([
+        _repo.fetchEvents(scope: 'upcoming'),
+        _repo.fetchEvents(scope: 'past'),
+      ]);
+      upcomingEvents = results[0];
+      pastEvents = results[1];
+    } catch (e) {
+      SnackHelper.error(e.toString().replaceFirst('Exception: ', ''));
+    } finally {
+      loadingEvents = false;
+      update();
+    }
+  }
+
+  void openEvents() {
+    fetchEvents();
+    Get.toNamed(Routes.BLOOD_EVENTS);
+  }
+
+  BloodEvent? viewingEvent;
+  Future<void> openEvent(BloodEvent e) async {
+    viewingEvent = e;
+    update();
+    Get.toNamed(Routes.BLOOD_EVENT_DETAIL);
+    final fresh = await _repo.fetchEvent(e.id);
+    if (fresh != null) {
+      viewingEvent = fresh;
+      update();
+    }
+  }
+
+  bool joiningEvent = false;
+  Future<void> toggleJoinEvent(BloodEvent e) async {
+    if (joiningEvent) return;
+    joiningEvent = true;
+    update();
+    try {
+      final res = e.hasJoined
+          ? await _repo.leaveEvent(e.id)
+          : await _repo.joinEvent(e.id);
+      if (res.success) {
+        final fresh = await _repo.fetchEvent(e.id);
+        if (fresh != null) {
+          viewingEvent = fresh;
+          final idx = upcomingEvents.indexWhere((x) => x.id == e.id);
+          if (idx >= 0) upcomingEvents[idx] = fresh;
+        }
+      } else {
+        SnackHelper.error(res.message);
+      }
+    } catch (ex) {
+      SnackHelper.error(ex.toString().replaceFirst('Exception: ', ''));
+    } finally {
+      joiningEvent = false;
+      update();
+    }
+  }
+
+  // ── Donation history ("আমার রক্তদান" — the 2nd tab on My Responses) ────
+  List<BloodDonation> myDonations = [];
+  bool loadingDonations = false;
+
+  Future<void> fetchMyDonations() async {
+    loadingDonations = true;
+    update();
+    try {
+      myDonations = await _repo.fetchMyDonations();
+    } catch (e) {
+      SnackHelper.error(e.toString().replaceFirst('Exception: ', ''));
+    } finally {
+      loadingDonations = false;
+      update();
+    }
+  }
+
+  void openAddDonation() => Get.toNamed(Routes.BLOOD_ADD_DONATION);
 
   // ── Viewer's current location (drives "requests near you" matching) ───
   double? userLat;
@@ -161,6 +334,7 @@ class BloodController extends GetxController with LiveRefreshMixin {
       // backend applies the "near you" radius filter (the first load in
       // onInit ran before GPS resolved).
       fetchRequests();
+      _applyDonorDistances();
       update();
       final resolved =
           await GeoSearchService.instance.reverse(LatLng(pos.latitude, pos.longitude));
@@ -219,6 +393,8 @@ class BloodController extends GetxController with LiveRefreshMixin {
       fetchMyDonorStatus(),
       fetchMyRequests(),
       fetchRequests(),
+      fetchCommunityStats(),
+      fetchEvents(),
     ]);
   }
 
@@ -248,6 +424,7 @@ class BloodController extends GetxController with LiveRefreshMixin {
     update();
     try {
       nearestDonors = await _repo.fetchNearestDonors();
+      _applyDonorDistances();
     } catch (e) {
       SnackHelper.error(e.toString().replaceFirst('Exception: ', ''));
     } finally {
@@ -323,6 +500,43 @@ class BloodController extends GetxController with LiveRefreshMixin {
     return list;
   }
 
+  // ── Requests-list filter chips (সব/আ্যাকটিভ/ডোনেশন/রিজেক্ট) — these read
+  // the viewer's OWN response status on each request (from the already-
+  // fetched [myResponses]), not the request's own open/fulfilled status. An
+  // open request the viewer hasn't responded to yet still counts as Active.
+  String requestFilter = 'all'; // all | active | donation | reject
+
+  void setRequestFilter(String value) {
+    requestFilter = value;
+    update();
+  }
+
+  /// The viewer's own fulfillment status for [requestId], or null when they
+  /// haven't responded to it.
+  String? myResponseStatusFor(String requestId) {
+    for (final r in myResponses) {
+      if (r.requestId == requestId) return r.status;
+    }
+    return null;
+  }
+
+  List<BloodRequestEntry> get filteredRequestEntries {
+    if (requestFilter == 'all') return visibleRequestEntries;
+    return visibleRequestEntries.where((r) {
+      final status = myResponseStatusFor(r.id);
+      switch (requestFilter) {
+        case 'donation':
+          return status == 'donated';
+        case 'reject':
+          return status == 'declined';
+        case 'active':
+          return status == null || status == 'pending' || status == 'accepted';
+        default:
+          return true;
+      }
+    }).toList();
+  }
+
   Future<void> fetchRequests() async {
     loadingRequests = true;
     update();
@@ -346,12 +560,21 @@ class BloodController extends GetxController with LiveRefreshMixin {
     Get.toNamed(Routes.BLOOD_REQUESTS);
   }
 
-  /// The request tapped to view in detail.
+  /// The request tapped to view in detail. For the viewer's own request,
+  /// this also loads the responders list inline (the detail screen's
+  /// `isMyRequest` branch absorbs what used to be a separate
+  /// BLOOD_RESPONDERS screen — see [openResponders]).
   BloodRequestEntry? viewingRequest;
   void viewRequest(BloodRequestEntry request) {
     viewingRequest = request;
     update();
     Get.toNamed(Routes.BLOOD_REQUEST_DETAIL);
+    if (isMyRequest(request)) {
+      selectedMyRequest = request;
+      responders = [];
+      update();
+      fetchResponders();
+    }
   }
 
   // ── My responses (respond + GET /api/v1/blood/responses/my) ─────────
@@ -428,6 +651,7 @@ class BloodController extends GetxController with LiveRefreshMixin {
 
   void openMyResponses() {
     fetchMyResponses();
+    fetchMyDonations();
     Get.toNamed(Routes.BLOOD_MY_RESPONSES);
   }
 
@@ -477,6 +701,45 @@ class BloodController extends GetxController with LiveRefreshMixin {
   bool get requestCompleted =>
       (selectedMyRequest?.isFulfilled ?? false) ||
       confirmedCount >= unitsNeededForSelected;
+
+  /// Requester cancels their own still-open request ("রিজেক্ট" on the
+  /// owner's request-detail screen).
+  bool closingRequest = false;
+  Future<void> closeRequest(BloodRequestEntry r) async {
+    final ok = await Get.dialog<bool>(
+      AlertDialog(
+        title: Text('Cancel this request?'.tr),
+        content: Text('Donors will no longer be able to respond.'.tr),
+        actions: [
+          TextButton(
+              onPressed: () => Get.back(result: false), child: Text('No'.tr)),
+          TextButton(
+              onPressed: () => Get.back(result: true), child: Text('Yes, cancel'.tr)),
+        ],
+      ),
+    );
+    if (ok != true || closingRequest) return;
+    closingRequest = true;
+    update();
+    try {
+      final res = await _repo.closeRequest(r.id);
+      if (res.success) {
+        SnackHelper.success(res.message);
+        await fetchMyRequests();
+        // Get.until (not Get.back()) — a plain back() after an awaited
+        // refresh's update() has been observed to silently no-op here, same
+        // race as the edit-request and add-donation save flows.
+        Get.until((route) => route.settings.name == Routes.BLOOD_MY_REQUESTS);
+      } else {
+        SnackHelper.error(res.message);
+      }
+    } catch (e) {
+      SnackHelper.error(e.toString().replaceFirst('Exception: ', ''));
+    } finally {
+      closingRequest = false;
+      update();
+    }
+  }
 
   void openResponders(BloodRequestEntry r) {
     selectedMyRequest = r;

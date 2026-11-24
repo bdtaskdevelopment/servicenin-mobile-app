@@ -1,26 +1,16 @@
 import 'package:animate_do/animate_do.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../../data/models/response/healthcare_response.dart';
 import '../../../global_widget/sn_shimmer.dart';
 import '../../../routes/app_pages.dart';
 import '../controllers/centers_controller.dart';
 
-/// Gradient for the "Telemedicine Call Center" card — a solid, saturated red
-/// (unlike the pastel tints below) so it reads as its own section, not just
-/// another center in the list.
-const _telemedGradient = [Color(0xFFEF4444), Color(0xFFB91C1C)];
-
-/// One accent per card — (card background, icon-tile/badge background, icon
-/// & badge text color). Four medical-themed tints, cycled by index so
-/// consecutive centers in the list are visually distinct.
-const _cardAccents = [
-  (Color(0xFFEAF2FF), Color(0xFFD6E7FF), Color(0xFF1D4ED8)), // clinical blue
-  (Color(0xFFE8F8F2), Color(0xFFCFF1E4), Color(0xFF0F766E)), // wellness mint
-  (Color(0xFFF1EEFB), Color(0xFFE3DBF7), Color(0xFF6D28D9)), // pharmacy lavender
-  (Color(0xFFFDECEC), Color(0xFFFBD9D9), Color(0xFFDC2626)), // cardio coral
-];
+const _teal = Color(0xFF0D9383);
+const _tealTint = Color(0xFFE6F5F4);
+const _tealTile = Color(0xFF3FA99D);
 
 class HealthcareCentersView extends GetView<HealthcareCentersController> {
   const HealthcareCentersView({super.key});
@@ -28,19 +18,20 @@ class HealthcareCentersView extends GetView<HealthcareCentersController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF7F8FA),
+      backgroundColor: const Color(0xFFF4F5FA),
       body: SafeArea(
         child: Column(
           children: [
-            Padding(
+            Container(
+              color: Colors.white,
               padding: const EdgeInsets.fromLTRB(8, 6, 16, 8),
               child: Row(
                 children: [
                   IconButton(
                     splashRadius: 22,
                     onPressed: () => Get.back(),
-                    icon: const Icon(Icons.arrow_back_ios_new_rounded,
-                        size: 20, color: Color(0xFF1A1A1A)),
+                    icon: const Icon(LucideIcons.chevronLeft,
+                        size: 22, color: Color(0xFF0F172A)),
                   ),
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -66,6 +57,7 @@ class HealthcareCentersView extends GetView<HealthcareCentersController> {
                     return const SnListSkeleton(count: 5);
                   }
                   return RefreshIndicator(
+                    color: _teal,
                     onRefresh: con.fetchCenters,
                     child: ListView.builder(
                       padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
@@ -98,7 +90,6 @@ class HealthcareCentersView extends GetView<HealthcareCentersController> {
                             padding: const EdgeInsets.only(bottom: 12),
                             child: _CenterCard(
                               center: con.centers[ci],
-                              accent: _cardAccents[ci % _cardAccents.length],
                               onTap: () => con.openCenter(con.centers[ci]),
                             ),
                           ),
@@ -126,11 +117,7 @@ class _TelemedicineCard extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
-          gradient: const LinearGradient(
-            colors: _telemedGradient,
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
+          color: _teal,
           borderRadius: BorderRadius.circular(16),
         ),
         child: Row(
@@ -138,10 +125,10 @@ class _TelemedicineCard extends StatelessWidget {
             Container(
               width: 52,
               height: 52,
+              alignment: Alignment.center,
               decoration: BoxDecoration(
                   color: Colors.white, borderRadius: BorderRadius.circular(14)),
-              child: const Icon(Icons.support_agent_rounded,
-                  color: Color(0xFFB91C1C), size: 28),
+              child: const Icon(LucideIcons.headset, color: _teal, size: 26),
             ),
             const SizedBox(width: 12),
             Expanded(
@@ -158,12 +145,23 @@ class _TelemedicineCard extends StatelessWidget {
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
-                          fontSize: 12, color: Colors.white.withValues(alpha: 0.9))),
+                          fontSize: 12,
+                          color: Colors.white.withValues(alpha: 0.9))),
                 ],
               ),
             ),
             const SizedBox(width: 6),
-            const Icon(Icons.chevron_right_rounded, color: Colors.white),
+            Container(
+              width: 30,
+              height: 30,
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.2),
+                shape: BoxShape.circle,
+              ),
+              child:
+                  const Icon(LucideIcons.chevronRight, color: Colors.white, size: 18),
+            ),
           ],
         ),
       ),
@@ -172,33 +170,35 @@ class _TelemedicineCard extends StatelessWidget {
 }
 
 class _CenterCard extends StatelessWidget {
-  const _CenterCard(
-      {required this.center, required this.accent, required this.onTap});
+  const _CenterCard({required this.center, required this.onTap});
   final HealthcareCenter center;
-  final (Color, Color, Color) accent;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    final (cardColor, tileColor, accentColor) = accent;
     return GestureDetector(
       onTap: onTap,
       child: Container(
         padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
-          color: cardColor,
+          color: Colors.white,
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: accentColor.withValues(alpha: 0.12)),
+          boxShadow: [
+            BoxShadow(
+                color: Colors.black.withValues(alpha: 0.03),
+                blurRadius: 8,
+                offset: const Offset(0, 2)),
+          ],
         ),
         child: Row(
           children: [
             Container(
               width: 52,
               height: 52,
+              alignment: Alignment.center,
               decoration: BoxDecoration(
-                  color: tileColor, borderRadius: BorderRadius.circular(14)),
-              child: Icon(Icons.local_hospital_rounded,
-                  color: accentColor, size: 26),
+                  color: _tealTint, borderRadius: BorderRadius.circular(14)),
+              child: const Icon(LucideIcons.building2, color: _tealTile, size: 24),
             ),
             const SizedBox(width: 12),
             Expanded(
@@ -214,31 +214,48 @@ class _CenterCard extends StatelessWidget {
                           color: Color(0xFF0F172A))),
                   if (center.address.isNotEmpty) ...[
                     const SizedBox(height: 3),
-                    Text(center.address,
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
-                            fontSize: 12.5, color: Color(0xFF94A3B8))),
+                    Row(
+                      children: [
+                        const Icon(LucideIcons.mapPin,
+                            size: 12, color: Color(0xFF94A3B8)),
+                        const SizedBox(width: 4),
+                        Expanded(
+                          child: Text(center.address,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(
+                                  fontSize: 12.5, color: Color(0xFF94A3B8))),
+                        ),
+                      ],
+                    ),
                   ],
                   const SizedBox(height: 6),
                   Container(
                     padding: const EdgeInsets.symmetric(
                         horizontal: 8, vertical: 3),
                     decoration: BoxDecoration(
-                        color: tileColor,
+                        color: _tealTint,
                         borderRadius: BorderRadius.circular(20)),
-                    child: Text(
-                        '${center.doctorCount} ${'doctors'.tr}',
-                        style: TextStyle(
-                            fontSize: 11,
-                            fontWeight: FontWeight.w700,
-                            color: accentColor)),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(LucideIcons.stethoscope,
+                            size: 11, color: _teal),
+                        const SizedBox(width: 4),
+                        Text('${center.doctorCount} ${'doctors'.tr}',
+                            style: const TextStyle(
+                                fontSize: 11,
+                                fontWeight: FontWeight.w700,
+                                color: _teal)),
+                      ],
+                    ),
                   ),
                 ],
               ),
             ),
             const SizedBox(width: 6),
-            const Icon(Icons.chevron_right_rounded, color: Color(0xFF94A3B8)),
+            const Icon(LucideIcons.chevronRight,
+                size: 18, color: Color(0xFF94A3B8)),
           ],
         ),
       ),

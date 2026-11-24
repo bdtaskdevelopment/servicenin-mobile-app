@@ -5,8 +5,10 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../../core/helpers/snack_helper.dart';
 import '../../../core/mixins/live_refresh_mixin.dart';
 import '../../../data/models/response/funeral_response.dart';
+import '../../../data/models/sn_place.dart';
 import '../../../data/repositories/funeral.repo.dart';
 import '../../../routes/app_pages.dart';
+import '../views/funeral_address_search_view.dart';
 
 class FuneralController extends GetxController with LiveRefreshMixin {
   FuneralRepository get _repo => Get.find<FuneralRepository>();
@@ -36,12 +38,14 @@ class FuneralController extends GetxController with LiveRefreshMixin {
   final TextEditingController name = TextEditingController();
   final TextEditingController address = TextEditingController();
   final TextEditingController phone = TextEditingController();
+  final TextEditingController relationship = TextEditingController();
   final TextEditingController notes = TextEditingController();
   bool submitting = false;
   FuneralRequest? lastRequest;
 
   // Same convention as AccountController.genders (edit profile screen) —
-  // raw English labels shown as-is, lower-cased only when sent to the API.
+  // raw English labels shown as-is (translated via `.tr` in the UI), only
+  // lower-cased when sent to the API.
   final List<String> genders = const ['Male', 'Female', 'Other'];
   String gender = 'Male';
   void setGender(String g) {
@@ -122,6 +126,18 @@ class FuneralController extends GetxController with LiveRefreshMixin {
     }
   }
 
+  /// Opens the address search page and, if the user picks a result, fills
+  /// the address field — same shape as the other modules' pickAddress, just
+  /// without lat/lng capture since the backend only stores a free-text
+  /// address for a funeral request.
+  Future<void> pickAddress() async {
+    final place = await Get.to<SnPlace>(
+        () => const FuneralAddressSearchView(title: 'Search address'));
+    if (place == null) return;
+    address.text = place.address.isNotEmpty ? place.address : place.label;
+    update();
+  }
+
   // ── Submit request ──────────────────────────────────────────────────
   void requestService() => Get.toNamed(Routes.FUNERAL_REQUEST);
 
@@ -133,6 +149,10 @@ class FuneralController extends GetxController with LiveRefreshMixin {
     }
     if (name.text.trim().isEmpty) {
       SnackHelper.error('নাম দিন');
+      return;
+    }
+    if (relationship.text.trim().isEmpty) {
+      SnackHelper.error('Please tell us your relationship to the deceased'.tr);
       return;
     }
     if (address.text.trim().isEmpty) {
@@ -152,6 +172,7 @@ class FuneralController extends GetxController with LiveRefreshMixin {
         'address': address.text.trim(),
         'phone': phone.text.trim(),
         'gender': gender.toLowerCase(),
+        'relationship': relationship.text.trim(),
         if (notes.text.trim().isNotEmpty) 'notes': notes.text.trim(),
       };
       lastRequest = await _repo.createRequest(payload);
@@ -170,6 +191,12 @@ class FuneralController extends GetxController with LiveRefreshMixin {
     Get.toNamed(Routes.FUNERAL_REQUESTS);
   }
 
+  /// Direct single-tap open of Funeral's own support screen from the
+  /// header's headset icon — a dedicated screen (not the generic
+  /// cross-module `SupportView`) since this module's mockup has its own
+  /// banner + per-hotline card layout.
+  void openSupport() => Get.toNamed(Routes.FUNERAL_SUPPORT);
+
   Future<void> fetchMyRequests() async {
     loadingRequests = true;
     update();
@@ -183,6 +210,39 @@ class FuneralController extends GetxController with LiveRefreshMixin {
     }
   }
 
+  // ── Single booking detail (mockup "আমার বুকিং") ─────────────────────
+  FuneralRequest? viewingRequest;
+  bool loadingRequestDetail = false;
+
+  Future<void> openRequestDetail(String id) async {
+    if (lastRequest != null && lastRequest!.id == id) {
+      viewingRequest = lastRequest;
+      update();
+      Get.toNamed(Routes.FUNERAL_REQUEST_DETAIL);
+      return;
+    }
+    loadingRequestDetail = true;
+    viewingRequest = null;
+    update();
+    try {
+      viewingRequest = await _repo.fetchRequestById(id);
+    } catch (e) {
+      SnackHelper.error(e.toString().replaceFirst('Exception: ', ''));
+    } finally {
+      loadingRequestDetail = false;
+      update();
+    }
+    if (viewingRequest != null) Get.toNamed(Routes.FUNERAL_REQUEST_DETAIL);
+  }
+
+  /// "View my booking" on the confirmation screen — opens the detail
+  /// screen for the request that was just submitted.
+  void viewLastBooking() {
+    final r = lastRequest;
+    if (r == null) return;
+    openRequestDetail(r.id);
+  }
+
   void done() => Get.until((r) => r.settings.name == Routes.FUNERAL);
 
   @override
@@ -190,6 +250,7 @@ class FuneralController extends GetxController with LiveRefreshMixin {
     name.dispose();
     address.dispose();
     phone.dispose();
+    relationship.dispose();
     notes.dispose();
     super.onClose();
   }

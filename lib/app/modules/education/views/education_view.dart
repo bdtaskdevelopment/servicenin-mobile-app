@@ -7,12 +7,37 @@ import '../../../core/values/app_colors.dart';
 import '../../../core/values/app_url.dart';
 import '../../../data/models/response/education_response.dart';
 import '../../../global_widget/sn_shimmer.dart';
-import '../../support/views/support_view.dart';
+import '../../../routes/app_pages.dart';
 import '../controllers/education_controller.dart';
 
-const _orange = AppColors.brandOrange;
-const _darkOrange = AppColors.brandOrangeDark;
-const _tile = Color(0xFFFFEDE4);
+const _violet = Color(0xFF7C3AED);
+const _violetDark = Color(0xFF6D28D9);
+const _tile = Color(0xFFF3EEFC);
+const _amberBg = Color(0xFFFEF3C7);
+const _amberText = Color(0xFFB45309);
+
+/// Icons for the filter sheet rows — index 0 is "All"; the rest line up with
+/// the 6 canonical institute-type slugs the backend seeds on boot.
+const Map<String, IconData> _typeIcons = {
+  'training_center': Icons.school_rounded,
+  'private_batch': Icons.groups_rounded,
+  'admission_coaching': Icons.auto_stories_rounded,
+  'skill_development': Icons.build_rounded,
+  'language_center': Icons.translate_rounded,
+  'online_academy': Icons.laptop_mac_rounded,
+};
+
+/// Flat pastel palette for a center's avatar fallback, picked by its
+/// position in the list — the mockup uses a different flat color per card
+/// rather than tying color to institute type.
+const List<Color> _avatarPalette = [
+  Color(0xFF2563EB),
+  Color(0xFFF97316),
+  Color(0xFF0D9488),
+  Color(0xFF7C3AED),
+  Color(0xFFDB2777),
+  Color(0xFF16A34A),
+];
 
 class EducationView extends GetView<EducationController> {
   const EducationView({super.key});
@@ -25,7 +50,8 @@ class EducationView extends GetView<EducationController> {
         child: Column(
           children: [
             // Header
-            Padding(
+            Container(
+              color: AppColors.white,
               padding: const EdgeInsets.fromLTRB(8, 6, 16, 8),
               child: Row(
                 children: [
@@ -51,7 +77,7 @@ class EducationView extends GetView<EducationController> {
                       ),
                       const SizedBox(height: 1),
                       Text(
-                        'Coaching centers & tutors'.tr,
+                        'Training centers & courses'.tr,
                         style: const TextStyle(
                           fontSize: 12,
                           color: Color(0xFF94A3B8),
@@ -60,27 +86,27 @@ class EducationView extends GetView<EducationController> {
                     ],
                   ),
                   const Spacer(),
-                  GestureDetector(
+                  _HeaderIconButton(
+                    icon: Icons.receipt_long_outlined,
                     onTap: controller.openMyInterests,
-                    child: const Icon(
-                      Icons.receipt_long_outlined,
-                      color: Color(0xFF1A1A1A),
-                      size: 22,
-                    ),
                   ),
-                  const SizedBox(width: 14),
-                  // Support center — admin-configured numbers for this module.
-                  SupportIconButton(
-                    title: 'Training Support'.tr,
-                    endpoint: ApiURL.trainingHotlines,
+                  const SizedBox(width: 10),
+                  _HeaderIconButton(
+                    icon: Icons.headset_mic_rounded,
+                    onTap: () => Get.toNamed(
+                      Routes.EDUCATION_SUPPORT,
+                      arguments: {
+                        'title': 'Training Support'.tr,
+                        'endpoint': ApiURL.trainingHotlines,
+                      },
+                    ),
                   ),
                 ],
               ),
             ),
-            // Filter — a single button that opens a picker sheet, not a
-            // row of always-visible tag chips.
+            // Filter — a single button that opens a picker sheet.
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
+              padding: const EdgeInsets.fromLTRB(16, 10, 16, 0),
               child: Align(
                 alignment: Alignment.centerRight,
                 child: GetBuilder<EducationController>(
@@ -100,7 +126,7 @@ class EducationView extends GetView<EducationController> {
                           borderRadius: BorderRadius.circular(20),
                           border: Border.all(
                             color: selected
-                                ? _orange
+                                ? _violet
                                 : const Color(0xFFE2E8F0),
                           ),
                         ),
@@ -110,7 +136,7 @@ class EducationView extends GetView<EducationController> {
                             Icon(Icons.tune_rounded,
                                 size: 16,
                                 color: selected
-                                    ? _darkOrange
+                                    ? _violetDark
                                     : const Color(0xFF64748B)),
                             const SizedBox(width: 6),
                             Text(
@@ -119,7 +145,7 @@ class EducationView extends GetView<EducationController> {
                                 fontSize: 13,
                                 fontWeight: FontWeight.w700,
                                 color: selected
-                                    ? _darkOrange
+                                    ? _violetDark
                                     : const Color(0xFF334155),
                               ),
                             ),
@@ -128,7 +154,7 @@ class EducationView extends GetView<EducationController> {
                               GestureDetector(
                                 onTap: () => con.setInstituteType(0),
                                 child: const Icon(Icons.close_rounded,
-                                    size: 15, color: _darkOrange),
+                                    size: 15, color: _violetDark),
                               ),
                             ],
                           ],
@@ -145,7 +171,7 @@ class EducationView extends GetView<EducationController> {
                 builder: (con) {
                   final list = con.centers;
                   return RefreshIndicator(
-                    color: _orange,
+                    color: _violet,
                     onRefresh: con.fetchCentersNear,
                     child: ListView(
                       padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
@@ -156,18 +182,7 @@ class EducationView extends GetView<EducationController> {
                             count: 4,
                           )
                         else if (list.isEmpty)
-                          Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 40),
-                            child: Center(
-                              child: Text(
-                                'No centers found.'.tr,
-                                style: const TextStyle(
-                                  fontSize: 13,
-                                  color: Color(0xFF94A3B8),
-                                ),
-                              ),
-                            ),
-                          )
+                          const _EmptyState()
                         else
                           ...list.toList().asMap().entries.map(
                             (e) => FadeInUp(
@@ -178,7 +193,8 @@ class EducationView extends GetView<EducationController> {
                                 padding: const EdgeInsets.only(bottom: 12),
                                 child: GestureDetector(
                                   onTap: () => con.openCenter(e.value),
-                                  child: _CenterCard(center: e.value),
+                                  child: _CenterCard(
+                                      center: e.value, index: e.key),
                                 ),
                               ),
                             ),
@@ -199,6 +215,7 @@ class EducationView extends GetView<EducationController> {
     showModalBottomSheet(
       context: context,
       backgroundColor: AppColors.white,
+      isScrollControlled: true,
       shape: const RoundedRectangleBorder(
           borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
       builder: (ctx) {
@@ -230,29 +247,74 @@ class EducationView extends GetView<EducationController> {
                     maxHeight: MediaQuery.of(context).size.height * 0.55),
                 child: ListView.builder(
                   shrinkWrap: true,
-                  padding: const EdgeInsets.symmetric(vertical: 6),
+                  padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 10),
                   itemCount: 1 + con.instituteTypes.length,
                   itemBuilder: (_, i) {
                     final sel = con.typeIndex == i;
-                    return ListTile(
-                      onTap: () {
-                        con.setInstituteType(i);
-                        Navigator.pop(ctx);
-                      },
-                      title: Text(con.typeLabel(i),
-                          style: TextStyle(
-                              fontSize: 14.5,
-                              fontWeight:
-                                  sel ? FontWeight.w800 : FontWeight.w600,
-                              color: sel ? _darkOrange : const Color(0xFF334155))),
-                      trailing: sel
-                          ? const Icon(Icons.check_circle_rounded,
-                              color: _orange, size: 20)
-                          : null,
+                    final icon = i == 0
+                        ? Icons.grid_view_rounded
+                        : (_typeIcons[con.instituteTypes[i - 1].slug] ??
+                            Icons.school_rounded);
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 4),
+                      child: Material(
+                        color: Colors.transparent,
+                        child: InkWell(
+                          borderRadius: BorderRadius.circular(14),
+                          onTap: () {
+                            con.setInstituteType(i);
+                            Navigator.pop(ctx);
+                          },
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 12, vertical: 12),
+                            decoration: BoxDecoration(
+                              color: sel ? _tile : Colors.transparent,
+                              borderRadius: BorderRadius.circular(14),
+                            ),
+                            child: Row(
+                              children: [
+                                Container(
+                                  width: 36,
+                                  height: 36,
+                                  decoration: BoxDecoration(
+                                    color: sel
+                                        ? _violet
+                                        : const Color(0xFFF1F5F9),
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                  alignment: Alignment.center,
+                                  child: Icon(icon,
+                                      size: 18,
+                                      color: sel
+                                          ? Colors.white
+                                          : const Color(0xFF64748B)),
+                                ),
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: Text(con.typeLabel(i),
+                                      style: TextStyle(
+                                          fontSize: 14.5,
+                                          fontWeight: sel
+                                              ? FontWeight.w800
+                                              : FontWeight.w600,
+                                          color: sel
+                                              ? _violetDark
+                                              : const Color(0xFF334155))),
+                                ),
+                                if (sel)
+                                  const Icon(Icons.check_circle_rounded,
+                                      color: _violet, size: 20),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
                     );
                   },
                 ),
               ),
+              const SizedBox(height: 6),
             ],
           ),
         );
@@ -261,9 +323,73 @@ class EducationView extends GetView<EducationController> {
   }
 }
 
+class _HeaderIconButton extends StatelessWidget {
+  const _HeaderIconButton({required this.icon, required this.onTap});
+  final IconData icon;
+  final VoidCallback onTap;
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: 38,
+        height: 38,
+        decoration: BoxDecoration(
+          color: _tile,
+          borderRadius: BorderRadius.circular(12),
+        ),
+        alignment: Alignment.center,
+        child: Icon(icon, size: 19, color: _violet),
+      ),
+    );
+  }
+}
+
+class _EmptyState extends StatelessWidget {
+  const _EmptyState();
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 60),
+      child: Column(
+        children: [
+          Container(
+            width: 64,
+            height: 64,
+            decoration: const BoxDecoration(
+              color: _violet,
+              shape: BoxShape.circle,
+            ),
+            alignment: Alignment.center,
+            child: const Icon(Icons.apartment_rounded,
+                color: Colors.white, size: 30),
+          ),
+          const SizedBox(height: 16),
+          Text(
+            'No training centers of this type found.'.tr,
+            textAlign: TextAlign.center,
+            style: const TextStyle(
+              fontSize: 13.5,
+              fontWeight: FontWeight.w700,
+              color: Color(0xFF334155),
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            'Try choosing a different type.'.tr,
+            textAlign: TextAlign.center,
+            style: const TextStyle(fontSize: 12.5, color: Color(0xFF94A3B8)),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 class _CenterCard extends StatelessWidget {
-  const _CenterCard({required this.center});
+  const _CenterCard({required this.center, required this.index});
   final EduCenter center;
+  final int index;
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -271,10 +397,10 @@ class _CenterCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppColors.white,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: _orange.withValues(alpha: 0.12)),
+        border: Border.all(color: const Color(0xFFEDEFF2)),
         boxShadow: [
           BoxShadow(
-            color: _orange.withValues(alpha: 0.07),
+            color: Colors.black.withValues(alpha: 0.03),
             blurRadius: 12,
             offset: const Offset(0, 4),
           ),
@@ -296,9 +422,10 @@ class _CenterCard extends StatelessWidget {
                           imageUrl: center.logoUrl,
                           fit: BoxFit.cover,
                           placeholder: (_, __) => Container(color: _tile),
-                          errorWidget: (_, __, ___) => const _CenterLogoIcon(),
+                          errorWidget: (_, __, ___) =>
+                              _InitialsAvatar(center: center, index: index),
                         )
-                      : const _CenterLogoIcon(),
+                      : _InitialsAvatar(center: center, index: index),
                 ),
               ),
               const SizedBox(width: 12),
@@ -325,16 +452,24 @@ class _CenterCard extends StatelessWidget {
                               vertical: 3,
                             ),
                             decoration: BoxDecoration(
-                              color: const Color(0xFFFEF3C7),
+                              color: _amberBg,
                               borderRadius: BorderRadius.circular(8),
                             ),
-                            child: Text(
-                              'Featured'.tr,
-                              style: const TextStyle(
-                                fontSize: 10.5,
-                                fontWeight: FontWeight.w800,
-                                color: Color(0xFFB45309),
-                              ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                const Icon(Icons.star_rounded,
+                                    size: 12, color: _amberText),
+                                const SizedBox(width: 2),
+                                Text(
+                                  'Featured'.tr,
+                                  style: const TextStyle(
+                                    fontSize: 10.5,
+                                    fontWeight: FontWeight.w800,
+                                    color: _amberText,
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
                       ],
@@ -393,7 +528,7 @@ class _CenterCard extends StatelessWidget {
                         style: const TextStyle(
                           fontSize: 11.5,
                           fontWeight: FontWeight.w700,
-                          color: _darkOrange,
+                          color: _violetDark,
                         ),
                       ),
                     ),
@@ -407,19 +542,36 @@ class _CenterCard extends StatelessWidget {
   }
 }
 
-class _CenterLogoIcon extends StatelessWidget {
-  const _CenterLogoIcon();
+class _InitialsAvatar extends StatelessWidget {
+  const _InitialsAvatar({required this.center, required this.index});
+  final EduCenter center;
+  final int index;
+
+  String get _initials {
+    final words = center.name
+        .trim()
+        .split(RegExp(r'\s+'))
+        .where((w) => w.isNotEmpty)
+        .toList();
+    if (words.isEmpty) return '?';
+    if (words.length == 1) return words.first[0].toUpperCase();
+    return (words[0][0] + words[1][0]).toUpperCase();
+  }
+
   @override
-  Widget build(BuildContext context) => Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            colors: [_orange, _darkOrange],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
+  Widget build(BuildContext context) {
+    final color = _avatarPalette[index % _avatarPalette.length];
+    return Container(
+      color: color.withValues(alpha: 0.14),
+      alignment: Alignment.center,
+      child: Text(
+        _initials,
+        style: TextStyle(
+          fontSize: 16,
+          fontWeight: FontWeight.w800,
+          color: color,
         ),
-        alignment: Alignment.center,
-        child: const Icon(Icons.menu_book_rounded,
-            color: Colors.white, size: 23),
-      );
+      ),
+    );
+  }
 }

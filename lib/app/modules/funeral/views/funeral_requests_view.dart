@@ -1,14 +1,15 @@
 import 'package:animate_do/animate_do.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../../core/values/app_colors.dart';
 import '../../../data/models/response/funeral_response.dart';
 import '../../../global_widget/sn_shimmer.dart';
 import '../controllers/funeral_controller.dart';
 
-const _charcoal = Color(0xFF332F2C);
-const _greenTile = Color(0xFFD6F5E3);
+const _forest = Color(0xFF2E6A5E);
+const _greenTile = Color(0xFFE7F0ED);
 const _grayTile = Color(0xFFE8EAED);
 const _subtitle = Color(0xFF6B7A99);
 
@@ -18,11 +19,12 @@ class FuneralRequestsView extends GetView<FuneralController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF4F5F7),
+      backgroundColor: const Color(0xFFF5F6FA),
       body: SafeArea(
         child: Column(
           children: [
-            Padding(
+            Container(
+              color: AppColors.white,
               padding: const EdgeInsets.fromLTRB(8, 6, 16, 8),
               child: Row(
                 children: [
@@ -30,15 +32,15 @@ class FuneralRequestsView extends GetView<FuneralController> {
                     splashRadius: 22,
                     onPressed: () => Get.back(),
                     icon: const Icon(
-                      Icons.arrow_back_ios_new_rounded,
-                      size: 20,
+                      LucideIcons.chevronLeft,
+                      size: 22,
                       color: Color(0xFF1A1A1A),
                     ),
                   ),
                   Text(
                     'My requests'.tr,
                     style: const TextStyle(
-                      fontSize: 19,
+                      fontSize: 16.5,
                       fontWeight: FontWeight.w800,
                       color: Color(0xFF0F172A),
                     ),
@@ -56,7 +58,7 @@ class FuneralRequestsView extends GetView<FuneralController> {
                     return const _Empty();
                   }
                   return RefreshIndicator(
-                    color: _charcoal,
+                    color: _forest,
                     onRefresh: con.fetchMyRequests,
                     child: FadeInUp(
                       from: 18,
@@ -90,7 +92,7 @@ class _Empty extends StatelessWidget {
       children: [
         const SizedBox(height: 120),
         Icon(
-          Icons.receipt_long_outlined,
+          LucideIcons.receiptText,
           size: 56,
           color: Colors.black.withValues(alpha: 0.18),
         ),
@@ -99,7 +101,7 @@ class _Empty extends StatelessWidget {
           child: Text(
             'No requests yet'.tr,
             style: const TextStyle(
-              fontSize: 16,
+              fontSize: 14.5,
               fontWeight: FontWeight.w800,
               color: Color(0xFF0F172A),
             ),
@@ -109,7 +111,7 @@ class _Empty extends StatelessWidget {
         Center(
           child: Text(
             'Your funeral service requests will appear here.'.tr,
-            style: const TextStyle(fontSize: 13, color: _subtitle),
+            style: const TextStyle(fontSize: 12, color: _subtitle),
           ),
         ),
       ],
@@ -144,7 +146,7 @@ class _RequestCard extends StatelessWidget {
                       ? req.serviceName
                       : 'Funeral request'.tr,
                   style: const TextStyle(
-                    fontSize: 13,
+                    fontSize: 12,
                     fontWeight: FontWeight.w800,
                     color: Color(0xFF334155),
                   ),
@@ -162,11 +164,11 @@ class _RequestCard extends StatelessWidget {
                 child: Text(
                   req.statusLabel,
                   style: TextStyle(
-                    fontSize: 11,
+                    fontSize: 10.5,
                     fontWeight: FontWeight.w700,
                     color: _isPending
                         ? const Color(0xFFB45309)
-                        : const Color(0xFF15803D),
+                        : _forest,
                   ),
                 ),
               ),
@@ -176,44 +178,36 @@ class _RequestCard extends StatelessWidget {
           Text(
             req.name,
             style: const TextStyle(
-              fontSize: 16,
+              fontSize: 14.5,
               fontWeight: FontWeight.w800,
               color: Color(0xFF0F172A),
             ),
           ),
-          if (req.address.isNotEmpty) ...[
-            const SizedBox(height: 4),
-            Row(
-              children: [
-                const Icon(
-                  Icons.location_on_outlined,
-                  size: 15,
-                  color: _subtitle,
-                ),
-                const SizedBox(width: 4),
-                Expanded(
-                  child: Text(
-                    req.address,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(fontSize: 12.5, color: _subtitle),
-                  ),
-                ),
-              ],
-            ),
-          ],
           const SizedBox(height: 12),
           Container(
-            padding: const EdgeInsets.all(12),
+            padding: const EdgeInsets.symmetric(horizontal: 12),
             decoration: BoxDecoration(
-              color: _grayTile.withValues(alpha: 0.4),
+              color: AppColors.white,
               borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: const Color(0xFFF1F2F4)),
             ),
             child: Column(
               children: [
                 _row('Phone'.tr, req.phone),
+                if (req.relationship.isNotEmpty) ...[
+                  _rowDivider(),
+                  _row('Relationship'.tr, req.relationship),
+                ],
+                if (req.genderLabel.isNotEmpty) ...[
+                  _rowDivider(),
+                  _row("DECEASED'S GENDER".tr, req.genderLabel.tr),
+                ],
+                if (req.address.isNotEmpty) ...[
+                  _rowDivider(),
+                  _row('ADDRESS'.tr, req.address),
+                ],
                 if (req.notes.isNotEmpty) ...[
-                  const SizedBox(height: 8),
+                  _rowDivider(),
                   _row('Notes'.tr, req.notes),
                 ],
               ],
@@ -230,7 +224,7 @@ class _RequestCard extends StatelessWidget {
             const SizedBox(height: 10),
             Text(
               'Requested ${req.createdLabel}',
-              style: const TextStyle(fontSize: 11.5, color: _subtitle),
+              style: const TextStyle(fontSize: 11, color: _subtitle),
             ),
           ],
         ],
@@ -238,32 +232,35 @@ class _RequestCard extends StatelessWidget {
     );
   }
 
-  Widget _row(String k, String v) => Row(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
-      SizedBox(
-        width: 80,
-        child: Text(
-          k,
-          style: const TextStyle(
-            fontSize: 12.5,
-            fontWeight: FontWeight.w600,
-            color: _subtitle,
-          ),
+  Widget _rowDivider() => const Divider(height: 1, color: Color(0xFFF1F2F4));
+
+  Widget _row(String k, String v) => Padding(
+        padding: const EdgeInsets.symmetric(vertical: 11),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              k,
+              style: const TextStyle(
+                fontSize: 11.5,
+                color: _subtitle,
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                v,
+                textAlign: TextAlign.right,
+                style: const TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w700,
+                  color: Color(0xFF0F172A),
+                ),
+              ),
+            ),
+          ],
         ),
-      ),
-      Expanded(
-        child: Text(
-          v,
-          style: const TextStyle(
-            fontSize: 12.5,
-            fontWeight: FontWeight.w700,
-            color: Color(0xFF0F172A),
-          ),
-        ),
-      ),
-    ],
-  );
+      );
 }
 
 /// The person handling this request: photo, name, designation and a call
@@ -288,9 +285,9 @@ class _AssignedStaff extends StatelessWidget {
           Text(
             'Assigned staff'.tr,
             style: const TextStyle(
-              fontSize: 11.5,
+              fontSize: 11,
               fontWeight: FontWeight.w700,
-              color: Color(0xFF15803D),
+              color: _forest,
             ),
           ),
           const SizedBox(height: 8),
@@ -307,7 +304,7 @@ class _AssignedStaff extends StatelessWidget {
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: const TextStyle(
-                        fontSize: 14.5,
+                        fontSize: 13.5,
                         fontWeight: FontWeight.w800,
                         color: Color(0xFF0F172A),
                       ),
@@ -318,13 +315,13 @@ class _AssignedStaff extends StatelessWidget {
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: const TextStyle(
-                            fontSize: 11.5, color: _subtitle),
+                            fontSize: 11, color: _subtitle),
                       ),
                     if (req.staffPhone.isNotEmpty)
                       Text(
                         req.staffPhone,
                         style: const TextStyle(
-                          fontSize: 12.5,
+                          fontSize: 12,
                           fontWeight: FontWeight.w700,
                           color: Color(0xFF334155),
                         ),
@@ -339,19 +336,19 @@ class _AssignedStaff extends StatelessWidget {
                     padding: const EdgeInsets.symmetric(
                         horizontal: 14, vertical: 9),
                     decoration: BoxDecoration(
-                      color: const Color(0xFF15803D),
+                      color: _forest,
                       borderRadius: BorderRadius.circular(10),
                     ),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        const Icon(Icons.call_rounded,
+                        const Icon(LucideIcons.phone,
                             size: 15, color: Colors.white),
                         const SizedBox(width: 5),
                         Text(
                           'Call'.tr,
                           style: const TextStyle(
-                            fontSize: 12.5,
+                            fontSize: 12,
                             fontWeight: FontWeight.w800,
                             color: Colors.white,
                           ),
@@ -384,7 +381,7 @@ class _Avatar extends StatelessWidget {
         color: _grayTile,
         borderRadius: BorderRadius.circular(size / 2),
       ),
-      child: const Icon(Icons.person_rounded, color: Color(0xFF94A3B8)),
+      child: const Icon(LucideIcons.user, color: Color(0xFF94A3B8)),
     );
     if (url.isEmpty) return placeholder;
     return ClipRRect(

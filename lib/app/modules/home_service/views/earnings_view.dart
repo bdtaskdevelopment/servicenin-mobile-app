@@ -20,7 +20,8 @@ class EarningsView extends GetView<ProviderController> {
           builder: (con) {
             return Column(
               children: [
-                Padding(
+                Container(
+                  color: AppColors.white,
                   padding: const EdgeInsets.fromLTRB(8, 6, 16, 8),
                   child: Row(
                     children: [

@@ -210,7 +210,7 @@ const Map<String, String> extraBn = {
   'Chief complaint': 'প্রধান সমস্যা',
   'Advice': 'পরামর্শ',
   'Investigations': 'পরীক্ষা-নিরীক্ষা',
-  'Follow-up': 'পরবর্তী সাক্ষাৎ',
+  'Follow-up': 'ফলো-আপ',
   'Download': 'ডাউনলোড',
   'View invoice': 'ইনভয়েস দেখুন',
   'Rate your visit': 'আপনার সেবার মূল্যায়ন দিন',

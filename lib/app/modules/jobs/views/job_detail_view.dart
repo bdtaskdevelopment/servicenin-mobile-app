@@ -22,7 +22,8 @@ class JobDetailView extends GetView<JobsController> {
             if (j == null) return const SizedBox.shrink();
             return Column(
               children: [
-                Padding(
+                Container(
+                  color: AppColors.white,
                   padding: const EdgeInsets.fromLTRB(8, 6, 16, 4),
                   child: Row(
                     children: [

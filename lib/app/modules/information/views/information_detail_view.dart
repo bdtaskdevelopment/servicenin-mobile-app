@@ -1,15 +1,17 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../../core/values/app_colors.dart';
 import '../../../core/values/app_config.dart';
 import '../../../data/models/response/info_response.dart';
 import '../controllers/information_controller.dart';
+import 'information_view.dart' show InfoSupportIconButton;
 
-const _purple = Color(0xFF6366F1);
-const _red = Color(0xFFE8333A);
+const _blue = Color(0xFF0183C7);
 const _green = Color(0xFF16A34A);
+const _orange = Color(0xFFF16621);
 
 String _mediaUrl(String path) {
   if (path.isEmpty) return '';
@@ -20,24 +22,6 @@ String _mediaUrl(String path) {
   return path.startsWith('/') ? '$base$path' : '$base/$path';
 }
 
-/// Hero background gradient — a soft, light indigo for emergency entries
-/// (matches the app's primary accent, used consistently across the page's
-/// quick actions and tags), otherwise a color keyed off the entry's domain
-/// so different categories feel distinct.
-List<Color> _heroColors(String domain, bool isEmergency) {
-  if (isEmergency) return const [Color(0xFF93A5FD), Color(0xFF7C8EF5)];
-  switch (domain) {
-    case 'health':
-      return const [Color(0xFF5EEAD4), Color(0xFF2DD4BF)];
-    case 'government':
-      return const [Color(0xFF93A5FD), Color(0xFF7C8EF5)];
-    case 'utility':
-      return const [Color(0xFFFCD34D), Color(0xFFFBBF24)];
-    default:
-      return const [Color(0xFFB0BAC9), Color(0xFF94A3B8)];
-  }
-}
-
 /// Full directory-entry detail page — opened from a tap on a directory
 /// card, backed by GET /api/v1/info/:id.
 class InformationDetailView extends GetView<InformationController> {
@@ -46,7 +30,7 @@ class InformationDetailView extends GetView<InformationController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF7F8FA),
+      backgroundColor: const Color(0xFFF4F5FA),
       body: GetBuilder<InformationController>(
         builder: (con) {
           final e = con.selected;
@@ -55,11 +39,10 @@ class InformationDetailView extends GetView<InformationController> {
                 child: Center(child: CircularProgressIndicator()));
           }
           final logo = _mediaUrl(e.logoUrl);
-          final emoji = con.domainFor(e.domain)?.emoji ?? '📌';
+          final (iconBg, iconFg) = infoDomainColor(e.domain);
           final location = [e.upazila, e.district, e.division]
               .where((s) => s.isNotEmpty)
               .join(', ');
-          final heroColors = _heroColors(e.domain, e.isEmergency);
 
           return Column(
             children: [
@@ -71,13 +54,9 @@ class InformationDetailView extends GetView<InformationController> {
                     Container(
                       padding: EdgeInsets.fromLTRB(
                           20, MediaQuery.of(context).padding.top + 8, 20, 22),
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          colors: heroColors,
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                        ),
-                        borderRadius: const BorderRadius.only(
+                      decoration: const BoxDecoration(
+                        color: _blue,
+                        borderRadius: BorderRadius.only(
                           bottomLeft: Radius.circular(28),
                           bottomRight: Radius.circular(28),
                         ),
@@ -96,20 +75,22 @@ class InformationDetailView extends GetView<InformationController> {
                                     color: Colors.white.withValues(alpha: 0.18),
                                     shape: BoxShape.circle,
                                   ),
-                                  child: const Icon(
-                                      Icons.arrow_back_ios_new_rounded,
-                                      size: 16,
-                                      color: Colors.white),
+                                  child: const Icon(LucideIcons.chevronLeft,
+                                      size: 18, color: Colors.white),
                                 ),
                               ),
                               const Spacer(),
                               if (con.detailLoading)
-                                const SizedBox(
-                                  width: 16,
-                                  height: 16,
-                                  child: CircularProgressIndicator(
-                                      strokeWidth: 2, color: Colors.white),
+                                const Padding(
+                                  padding: EdgeInsets.only(right: 8),
+                                  child: SizedBox(
+                                    width: 16,
+                                    height: 16,
+                                    child: CircularProgressIndicator(
+                                        strokeWidth: 2, color: Colors.white),
+                                  ),
                                 ),
+                              const InfoSupportIconButton(),
                             ],
                           ),
                           const SizedBox(height: 16),
@@ -120,12 +101,9 @@ class InformationDetailView extends GetView<InformationController> {
                                 width: 60,
                                 height: 60,
                                 alignment: Alignment.center,
-                                decoration: BoxDecoration(
+                                decoration: const BoxDecoration(
                                   color: Colors.white,
                                   shape: BoxShape.circle,
-                                  border: Border.all(
-                                      color: Colors.white.withValues(alpha: 0.7),
-                                      width: 2),
                                 ),
                                 child: logo.isNotEmpty
                                     ? ClipOval(
@@ -136,14 +114,14 @@ class InformationDetailView extends GetView<InformationController> {
                                           fit: BoxFit.cover,
                                           placeholder: (_, u) =>
                                               const SizedBox.shrink(),
-                                          errorWidget: (_, u, err) => Text(
-                                              emoji,
-                                              style: const TextStyle(
-                                                  fontSize: 26)),
+                                          errorWidget: (_, u, err) => Icon(
+                                              infoDomainIcon(e.domain),
+                                              color: iconFg,
+                                              size: 28),
                                         ),
                                       )
-                                    : Text(emoji,
-                                        style: const TextStyle(fontSize: 26)),
+                                    : Icon(infoDomainIcon(e.domain),
+                                        color: iconFg, size: 28),
                               ),
                               const SizedBox(width: 14),
                               Expanded(
@@ -177,9 +155,8 @@ class InformationDetailView extends GetView<InformationController> {
                                       children: [
                                         if (e.verified)
                                           _HeroTag('Verified'.tr,
-                                              Icons.verified_rounded),
-                                        if (e.typeLabel.isNotEmpty)
-                                          _HeroTag(e.typeLabel, null),
+                                              LucideIcons.badgeCheck),
+                                        _HeroTag(e.tagLabel, null),
                                       ],
                                     ),
                                   ],
@@ -215,69 +192,80 @@ class InformationDetailView extends GetView<InformationController> {
                               e.phone.isNotEmpty ||
                               e.phone2.isNotEmpty ||
                               e.hotline.isNotEmpty ||
-                              e.fax.isNotEmpty ||
+                              e.whatsapp.isNotEmpty ||
                               e.email.isNotEmpty ||
                               e.website.isNotEmpty ||
-                              e.whatsapp.isNotEmpty) ...[
+                              e.fax.isNotEmpty) ...[
                             const SizedBox(height: 18),
-                            _Section(
-                              title: 'CONTACT'.tr,
-                              children: [
-                                if (e.contactPerson.isNotEmpty)
-                                  _InfoRow(Icons.person_outline_rounded,
-                                      e.contactPerson),
-                                if (e.hotline.isNotEmpty)
-                                  _ActionRow(
-                                    icon: Icons.support_agent_rounded,
-                                    text: e.hotline,
-                                    actionIcon: Icons.call_rounded,
-                                    actionColor: _green,
-                                    onTap: () => con.callHotline(e.hotline),
-                                  ),
-                                if (e.phone.isNotEmpty)
-                                  _ActionRow(
-                                    icon: Icons.call_outlined,
-                                    text: e.phone,
-                                    actionIcon: Icons.call_rounded,
-                                    actionColor: _green,
-                                    onTap: () => con.callHotline(e.phone),
-                                  ),
-                                if (e.phone2.isNotEmpty)
-                                  _ActionRow(
-                                    icon: Icons.call_outlined,
-                                    text: e.phone2,
-                                    actionIcon: Icons.call_rounded,
-                                    actionColor: _green,
-                                    onTap: () => con.callHotline(e.phone2),
-                                  ),
-                                if (e.whatsapp.isNotEmpty)
-                                  _ActionRow(
-                                    icon: Icons.chat_outlined,
-                                    text: e.whatsapp,
-                                    actionIcon: Icons.arrow_outward_rounded,
-                                    actionColor: _green,
-                                    onTap: () => con.openWhatsapp(e.whatsapp),
-                                  ),
-                                if (e.email.isNotEmpty)
-                                  _ActionRow(
-                                    icon: Icons.email_outlined,
-                                    text: e.email,
-                                    actionIcon: Icons.arrow_outward_rounded,
-                                    actionColor: _purple,
-                                    onTap: () => con.openEmail(e.email),
-                                  ),
-                                if (e.website.isNotEmpty)
-                                  _ActionRow(
-                                    icon: Icons.language_rounded,
-                                    text: e.website,
-                                    actionIcon: Icons.arrow_outward_rounded,
-                                    actionColor: _purple,
-                                    onTap: () => con.openExternal(e.website),
-                                  ),
-                                if (e.fax.isNotEmpty)
-                                  _InfoRow(Icons.print_outlined, e.fax),
-                              ],
-                            ),
+                            Text('CONTACT'.tr,
+                                style: const TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w700,
+                                    color: Color(0xFF94A3B8),
+                                    letterSpacing: 0.6)),
+                            const SizedBox(height: 10),
+                            if (e.hotline.isNotEmpty) ...[
+                              _ContactRow(
+                                  number: e.hotline,
+                                  onTap: () => con.callHotline(e.hotline)),
+                              const SizedBox(height: 10),
+                            ],
+                            if (e.phone.isNotEmpty) ...[
+                              _ContactRow(
+                                  number: e.phone,
+                                  onTap: () => con.callHotline(e.phone)),
+                              const SizedBox(height: 10),
+                            ],
+                            if (e.phone2.isNotEmpty) ...[
+                              _ContactRow(
+                                  number: e.phone2,
+                                  onTap: () => con.callHotline(e.phone2)),
+                              const SizedBox(height: 10),
+                            ],
+                            if (e.contactPerson.isNotEmpty ||
+                                e.whatsapp.isNotEmpty ||
+                                e.email.isNotEmpty ||
+                                e.website.isNotEmpty ||
+                                e.fax.isNotEmpty)
+                              _Card(
+                                child: Column(
+                                  crossAxisAlignment:
+                                      CrossAxisAlignment.start,
+                                  children: [
+                                    if (e.contactPerson.isNotEmpty)
+                                      _InfoRow(
+                                          LucideIcons.user, e.contactPerson),
+                                    if (e.whatsapp.isNotEmpty)
+                                      _ActionRow(
+                                        icon: LucideIcons.messageCircle,
+                                        text: e.whatsapp,
+                                        actionIcon: LucideIcons.arrowUpRight,
+                                        actionColor: _green,
+                                        onTap: () =>
+                                            con.openWhatsapp(e.whatsapp),
+                                      ),
+                                    if (e.email.isNotEmpty)
+                                      _ActionRow(
+                                        icon: LucideIcons.mail,
+                                        text: e.email,
+                                        actionIcon: LucideIcons.arrowUpRight,
+                                        actionColor: _blue,
+                                        onTap: () => con.openEmail(e.email),
+                                      ),
+                                    if (e.website.isNotEmpty)
+                                      _ActionRow(
+                                        icon: LucideIcons.globe,
+                                        text: e.website,
+                                        actionIcon: LucideIcons.arrowUpRight,
+                                        actionColor: _blue,
+                                        onTap: () =>
+                                            con.openExternal(e.website),
+                                      ),
+                                    if (e.fax.isNotEmpty)
+                                      _InfoRow(LucideIcons.printer, e.fax),
+                                  ],
+                                ),
+                              ),
                           ],
 
                           // ── Location ────────────────────────────
@@ -290,19 +278,18 @@ class InformationDetailView extends GetView<InformationController> {
                               title: 'LOCATION'.tr,
                               children: [
                                 if (e.address.isNotEmpty)
-                                  _InfoRow(
-                                      Icons.location_on_outlined, e.address),
+                                  _InfoRow(LucideIcons.mapPin, e.address),
                                 if (location.isNotEmpty)
-                                  _InfoRow(Icons.map_outlined, location),
+                                  _InfoRow(LucideIcons.map, location),
                                 if (e.wardNo.isNotEmpty)
-                                  _InfoRow(Icons.pin_drop_outlined,
+                                  _InfoRow(LucideIcons.locateFixed,
                                       '${'Ward'.tr} ${e.wardNo}'),
                                 if (e.mapUrl.isNotEmpty)
                                   _ActionRow(
-                                    icon: Icons.map_rounded,
+                                    icon: LucideIcons.map,
                                     text: 'View on map'.tr,
-                                    actionIcon: Icons.arrow_outward_rounded,
-                                    actionColor: _purple,
+                                    actionIcon: LucideIcons.arrowUpRight,
+                                    actionColor: _blue,
                                     onTap: () => con.openExternal(e.mapUrl),
                                   ),
                               ],
@@ -321,26 +308,23 @@ class InformationDetailView extends GetView<InformationController> {
                               title: 'ADDITIONAL INFO'.tr,
                               children: [
                                 if (e.officeHours.isNotEmpty)
-                                  _InfoRow(
-                                      Icons.schedule_rounded, e.officeHours),
+                                  _InfoRow(LucideIcons.clock, e.officeHours),
                                 if (e.ministry.isNotEmpty)
-                                  _InfoRow(Icons.account_balance_outlined,
-                                      e.ministry),
+                                  _InfoRow(LucideIcons.landmark, e.ministry),
                                 if (e.specialization.isNotEmpty)
-                                  _InfoRow(Icons.medical_services_outlined,
+                                  _InfoRow(LucideIcons.stethoscope,
                                       e.specialization),
                                 if (e.serviceArea.isNotEmpty)
-                                  _InfoRow(
-                                      Icons.explore_outlined, e.serviceArea),
+                                  _InfoRow(LucideIcons.compass, e.serviceArea),
                                 if (e.availableServices.isNotEmpty)
-                                  _InfoRow(Icons.checklist_rounded,
+                                  _InfoRow(LucideIcons.listChecks,
                                       e.availableServices),
                                 if (e.emergencyContact.isNotEmpty)
                                   _ActionRow(
-                                    icon: Icons.emergency_share_rounded,
+                                    icon: LucideIcons.siren,
                                     text: e.emergencyContact,
-                                    actionIcon: Icons.call_rounded,
-                                    actionColor: _red,
+                                    actionIcon: LucideIcons.phone,
+                                    actionColor: const Color(0xFFE4484D),
                                     onTap: () =>
                                         con.callHotline(e.emergencyContact),
                                   ),
@@ -364,14 +348,14 @@ class InformationDetailView extends GetView<InformationController> {
                           child: ElevatedButton.icon(
                             onPressed: () => con.callHotline(e.callNumber),
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: _red,
+                              backgroundColor: _orange,
                               foregroundColor: Colors.white,
                               elevation: 0,
                               shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(14)),
                             ),
-                            icon: const Icon(Icons.call_rounded, size: 20),
-                            label: Text('Call ${e.callNumber}',
+                            icon: const Icon(LucideIcons.phone, size: 19),
+                            label: Text('Call'.tr,
                                 style: const TextStyle(
                                     fontSize: 16, fontWeight: FontWeight.w800)),
                           ),
@@ -392,7 +376,8 @@ class InformationDetailView extends GetView<InformationController> {
                               shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(14)),
                             ),
-                            child: const Icon(Icons.chat_rounded, size: 22),
+                            child:
+                                const Icon(LucideIcons.messageCircle, size: 22),
                           ),
                         ),
                       ],
@@ -417,19 +402,19 @@ class _QuickActionsRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final actions = <_QuickAction>[
       if (e.callNumber.isNotEmpty)
-        _QuickAction('Call'.tr, Icons.call_rounded, _green,
+        _QuickAction('Call'.tr, LucideIcons.phone, _green,
             () => con.callHotline(e.callNumber)),
       if (e.whatsapp.isNotEmpty)
-        _QuickAction('WhatsApp'.tr, Icons.chat_rounded, _green,
+        _QuickAction('WhatsApp'.tr, LucideIcons.messageCircle, _green,
             () => con.openWhatsapp(e.whatsapp)),
       if (e.email.isNotEmpty)
-        _QuickAction('Email'.tr, Icons.email_rounded, _purple,
+        _QuickAction('Email'.tr, LucideIcons.mail, _blue,
             () => con.openEmail(e.email)),
       if (e.website.isNotEmpty)
-        _QuickAction('Website'.tr, Icons.language_rounded, _purple,
+        _QuickAction('Website'.tr, LucideIcons.globe, _blue,
             () => con.openExternal(e.website)),
       if (e.mapUrl.isNotEmpty)
-        _QuickAction('Map'.tr, Icons.map_rounded, const Color(0xFFF59E0B),
+        _QuickAction('Map'.tr, LucideIcons.map, const Color(0xFFB86E00),
             () => con.openExternal(e.mapUrl)),
     ];
     if (actions.isEmpty) return const SizedBox.shrink();
@@ -447,7 +432,7 @@ class _QuickActionsRow extends StatelessWidget {
                           color: a.color.withValues(alpha: 0.12),
                           shape: BoxShape.circle,
                         ),
-                        child: Icon(a.icon, color: a.color, size: 22),
+                        child: Icon(a.icon, color: a.color, size: 20),
                       ),
                       const SizedBox(height: 6),
                       Text(a.label,
@@ -496,6 +481,69 @@ class _HeroTag extends StatelessWidget {
                   fontSize: 10.5,
                   fontWeight: FontWeight.w700,
                   color: Colors.white)),
+        ],
+      ),
+    );
+  }
+}
+
+/// Phone-number pill matching the mockup's "যোগাযোগ" row exactly: a light
+/// rounded bar with a phone glyph, the number, and a solid blue call button.
+class _ContactRow extends StatelessWidget {
+  const _ContactRow({required this.number, required this.onTap});
+  final String number;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: 54,
+      padding: const EdgeInsets.symmetric(horizontal: 8),
+      decoration: BoxDecoration(
+        color: AppColors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+              color: Colors.black.withValues(alpha: 0.04),
+              blurRadius: 8,
+              offset: const Offset(0, 2)),
+        ],
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 36,
+            height: 36,
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              color: const Color(0xFFE6F4FA),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: const Icon(LucideIcons.phone, size: 17, color: _blue),
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Text(number,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(
+                    fontSize: 14.5,
+                    fontWeight: FontWeight.w800,
+                    color: Color(0xFF0F172A))),
+          ),
+          GestureDetector(
+            onTap: onTap,
+            child: Container(
+              width: 38,
+              height: 38,
+              alignment: Alignment.center,
+              decoration: const BoxDecoration(
+                color: _blue,
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(LucideIcons.phone, size: 16, color: Colors.white),
+            ),
+          ),
         ],
       ),
     );

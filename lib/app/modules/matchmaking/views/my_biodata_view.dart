@@ -19,7 +19,8 @@ class MyBiodataView extends GetView<MatchmakingController> {
           builder: (con) => Column(
             children: [
               // Header
-              Padding(
+              Container(
+                color: AppColors.white,
                 padding: const EdgeInsets.fromLTRB(8, 6, 16, 4),
                 child: Row(
                   children: [

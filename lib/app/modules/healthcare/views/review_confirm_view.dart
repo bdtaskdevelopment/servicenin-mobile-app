@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../../core/values/app_colors.dart';
 import '../../../global_widget/sn_shimmer.dart';
 import '../controllers/booking_controller.dart';
 import '../widgets/booking_stepper.dart';
 
-const _green = Color(0xFF0F7A52);
+const _green = Color(0xFF0D9383);
 const _tile = Color(0xFFD9F7E6);
 
 class ReviewConfirmView extends GetView<BookingController> {
@@ -21,14 +22,15 @@ class ReviewConfirmView extends GetView<BookingController> {
           builder: (con) {
             return Column(
               children: [
-                Padding(
+                Container(
+                  color: AppColors.white,
                   padding: const EdgeInsets.fromLTRB(8, 6, 16, 4),
                   child: Row(
                     children: [
                       IconButton(
                         splashRadius: 22,
                         onPressed: () => Get.back(),
-                        icon: const Icon(Icons.arrow_back_ios_new_rounded,
+                        icon: const Icon(LucideIcons.chevronLeft,
                             size: 20, color: Color(0xFF1A1A1A)),
                       ),
                       Text('Review & confirm'.tr,
@@ -93,9 +95,9 @@ class ReviewConfirmView extends GetView<BookingController> {
                               child:
                                   Divider(height: 1, color: Color(0xFFF1F5F9)),
                             ),
-                            _line(Icons.location_on_outlined, con.venueName),
+                            _line(LucideIcons.mapPin, con.venueName),
                             const SizedBox(height: 10),
-                            _line(Icons.calendar_today_outlined,
+                            _line(LucideIcons.calendarDays,
                                 con.whenSummary),
                             const SizedBox(height: 10),
                             _line(Icons.person_outline_rounded,
@@ -299,7 +301,7 @@ class _Label extends StatelessWidget {
 IconData _hcPayIcon(String key) {
   switch (key) {
     case 'cash':
-      return Icons.payments_outlined;
+      return LucideIcons.banknote;
     case 'sslcommerz':
     case 'card':
       return Icons.credit_card_rounded;
@@ -307,7 +309,7 @@ IconData _hcPayIcon(String key) {
     case 'nagad':
       return Icons.account_balance_wallet_outlined;
     default:
-      return Icons.payment_rounded;
+      return LucideIcons.creditCard;
   }
 }
 
@@ -359,7 +361,7 @@ class _PayCard extends StatelessWidget {
               ),
             ),
             if (selected)
-              const Icon(Icons.check_circle, size: 18, color: _green),
+              const Icon(LucideIcons.circleCheck, size: 18, color: _green),
           ],
         ),
       ),

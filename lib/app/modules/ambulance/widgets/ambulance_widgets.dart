@@ -7,8 +7,8 @@ import '../../../data/models/response/ambulance_booking_response.dart';
 import '../../../data/models/response/ambulance_response.dart';
 
 const _red = Color(0xFFE23744);
-const _navy = Color(0xFF1E2A4A);
 const _green = Color(0xFF16A34A);
+const _orange = Color(0xFFF16621);
 
 /// Turns a raw backend status like `driver_on_way` into `Driver On Way` —
 /// every word capitalized, underscores replaced with spaces.
@@ -73,7 +73,7 @@ class BookingThankYouDialog extends StatelessWidget {
               child: ElevatedButton(
                 onPressed: () => Get.back(),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: _navy,
+                  backgroundColor: _orange,
                   foregroundColor: Colors.white,
                   elevation: 0,
                   shape:

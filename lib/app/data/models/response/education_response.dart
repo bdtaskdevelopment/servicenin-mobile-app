@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 
 dynamic _dec(dynamic src) => src is String ? jsonDecode(src) : src;
@@ -10,6 +11,26 @@ int _int(dynamic v) =>
 dynamic _data(dynamic src) {
   final d = _dec(src);
   return d is Map && d.containsKey('data') ? d['data'] : d;
+}
+
+/// Bangla label for the 6 canonical institute-type slugs the backend seeds
+/// on boot (`SeedInstituteTypes`). Admins can add further custom types at
+/// runtime — those fall back to a capitalized form of the slug since there's
+/// no server-side Bangla label field to translate from.
+const Map<String, String> _instituteTypeLabelsBn = {
+  'training_center': 'ট্রেনিং সেন্টার',
+  'private_batch': 'প্রাইভেট ব্যাচ',
+  'admission_coaching': 'ভর্তি কোচিং',
+  'skill_development': 'দক্ষতা উন্নয়ন প্রতিষ্ঠান',
+  'language_center': 'ল্যাঙ্গুয়েজ সেন্টার',
+  'online_academy': 'অনলাইন একাডেমি',
+};
+
+String instituteTypeLabelBn(String slug) {
+  final known = _instituteTypeLabelsBn[slug];
+  if (known != null) return known;
+  final s = slug.replaceAll('_', ' ');
+  return s.isEmpty ? '' : s[0].toUpperCase() + s.substring(1);
 }
 
 // ── Institute type (admin-managed — /api/v1/education/institute-types) ──
@@ -86,10 +107,7 @@ class EduCenter {
       .where((s) => s.isNotEmpty)
       .toList();
 
-  String get typeLabel {
-    final s = instituteType.replaceAll('_', ' ');
-    return s.isEmpty ? '' : s[0].toUpperCase() + s.substring(1);
-  }
+  String get typeLabel => instituteTypeLabelBn(instituteType);
 
   List<String> get subjectTags => subjects
       .split(RegExp(r'[,/]'))
@@ -130,7 +148,7 @@ class EduCourse {
   String get videoUrl => _str(raw['video_url']);
   String get thumbnailUrl => _str(raw['thumbnail_url']);
 
-  String get feeLabel => feeAmount > 0 ? '৳$feeAmount' : 'Free';
+  String get feeLabel => feeAmount > 0 ? '৳$feeAmount' : 'Free'.tr;
 
   /// The YouTube video id parsed out of [videoUrl] — handles the common
   /// watch/short/embed URL shapes. Empty when videoUrl isn't a YouTube
@@ -201,7 +219,8 @@ class EduInterest {
 
   String get statusLabel {
     final s = status.replaceAll('_', ' ');
-    return s.isEmpty ? 'Pending' : s[0].toUpperCase() + s.substring(1);
+    final label = s.isEmpty ? 'Pending' : s[0].toUpperCase() + s.substring(1);
+    return label.tr;
   }
 
   String get createdLabel {

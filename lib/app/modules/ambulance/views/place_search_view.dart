@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:latlong2/latlong.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../../core/values/app_colors.dart';
 import '../../../data/models/sn_place.dart';
@@ -11,9 +12,9 @@ import '../../../global_widget/sn_google_map.dart';
 import '../../../global_widget/sn_map.dart' show SnMapMarker;
 import '../controllers/ambulance_controller.dart';
 
-const _navy = Color(0xFF1E2A4A);
-const _green = Color(0xFF16A34A);
-const _red = Color(0xFFE23744);
+const _orange = Color(0xFFF16621);
+const _blue = Color(0xFF1D6FD9);
+const _red = Color(0xFFE4484D);
 
 /// Full-screen "search for an address" page backed by Google Places
 /// Autocomplete. Pop with an [SnPlace] when the user picks a result, or
@@ -86,15 +87,16 @@ class _PlaceSearchViewState extends State<PlaceSearchView> {
       body: SafeArea(
         child: Column(
           children: [
-            Padding(
+            Container(
+              color: AppColors.white,
               padding: const EdgeInsets.fromLTRB(8, 6, 16, 8),
               child: Row(
                 children: [
                   IconButton(
                     splashRadius: 22,
                     onPressed: () => Get.back(),
-                    icon: const Icon(Icons.arrow_back_ios_new_rounded,
-                        size: 20, color: Color(0xFF1A1A1A)),
+                    icon: const Icon(LucideIcons.chevronLeft,
+                        size: 22, color: Color(0xFF1A1A1A)),
                   ),
                   Expanded(
                     child: Container(
@@ -102,38 +104,44 @@ class _PlaceSearchViewState extends State<PlaceSearchView> {
                       padding: const EdgeInsets.symmetric(horizontal: 14),
                       decoration: BoxDecoration(
                         color: AppColors.white,
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: const Color(0xFFE2E8F0)),
+                        borderRadius: BorderRadius.circular(23),
+                        border: Border.all(color: _orange, width: 1.4),
                       ),
-                      child: Center(
-                        child: TextField(
-                          controller: _ctrl,
-                          focusNode: _focus,
-                          onChanged: _onChanged,
-                          textInputAction: TextInputAction.search,
-                          decoration: InputDecoration(
-                            isCollapsed: true,
-                            border: InputBorder.none,
-                            hintText: widget.title,
-                            hintStyle: const TextStyle(
-                                fontSize: 14, color: Color(0xFF94A3B8)),
-                            suffixIcon: _ctrl.text.isEmpty
-                                ? null
-                                : IconButton(
-                                    splashRadius: 16,
-                                    icon: const Icon(Icons.close_rounded,
-                                        size: 18, color: Color(0xFF94A3B8)),
-                                    onPressed: () {
-                                      _ctrl.clear();
-                                      _onChanged('');
-                                    },
-                                  ),
+                      child: Row(
+                        children: [
+                          const Icon(LucideIcons.search,
+                              size: 18, color: Color(0xFF94A3B8)),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: TextField(
+                              controller: _ctrl,
+                              focusNode: _focus,
+                              onChanged: _onChanged,
+                              textInputAction: TextInputAction.search,
+                              decoration: InputDecoration(
+                                isCollapsed: true,
+                                border: InputBorder.none,
+                                hintText: widget.title,
+                                hintStyle: const TextStyle(
+                                    fontSize: 14, color: Color(0xFF94A3B8)),
+                              ),
+                              style: const TextStyle(
+                                  fontSize: 14.5,
+                                  fontWeight: FontWeight.w600,
+                                  color: Color(0xFF0F172A)),
+                            ),
                           ),
-                          style: const TextStyle(
-                              fontSize: 14.5,
-                              fontWeight: FontWeight.w600,
-                              color: Color(0xFF0F172A)),
-                        ),
+                          if (_ctrl.text.isNotEmpty)
+                            IconButton(
+                              splashRadius: 16,
+                              icon: const Icon(LucideIcons.x,
+                                  size: 18, color: Color(0xFF94A3B8)),
+                              onPressed: () {
+                                _ctrl.clear();
+                                _onChanged('');
+                              },
+                            ),
+                        ],
                       ),
                     ),
                   ),
@@ -158,7 +166,7 @@ class _PlaceSearchViewState extends State<PlaceSearchView> {
       return const Center(
         child: Padding(
           padding: EdgeInsets.only(top: 40),
-          child: CircularProgressIndicator(strokeWidth: 2.4, color: _navy),
+          child: CircularProgressIndicator(strokeWidth: 2.4, color: _orange),
         ),
       );
     }
@@ -178,7 +186,7 @@ class _PlaceSearchViewState extends State<PlaceSearchView> {
         final p = _results[i];
         return ListTile(
           onTap: () => _pick(p),
-          leading: const Icon(Icons.location_on_outlined,
+          leading: const Icon(LucideIcons.mapPin,
               color: Color(0xFF94A3B8), size: 22),
           title: Text(p.mainText,
               maxLines: 1,
@@ -253,7 +261,7 @@ class _PreviewMapState extends State<_PreviewMap> {
               route: hasRoute ? amb.routePoints : const [],
               onTap: _onTap,
               markers: [
-                SnMapMarker(p, _green, Icons.my_location_rounded),
+                SnMapMarker(p, _blue, Icons.my_location_rounded),
                 if (tapped != null)
                   SnMapMarker(tapped, _red, Icons.location_on_rounded)
                 else if (amb.dropPlace != null)
@@ -310,7 +318,7 @@ class _ConfirmPickCard extends StatelessWidget {
             children: [
               const Padding(
                 padding: EdgeInsets.only(top: 2),
-                child: Icon(Icons.location_on_rounded, color: _red, size: 20),
+                child: Icon(LucideIcons.mapPin, color: _red, size: 20),
               ),
               const SizedBox(width: 8),
               Expanded(
@@ -334,7 +342,7 @@ class _ConfirmPickCard extends StatelessWidget {
             child: ElevatedButton(
               onPressed: loading ? null : onConfirm,
               style: ElevatedButton.styleFrom(
-                backgroundColor: _navy,
+                backgroundColor: _orange,
                 foregroundColor: Colors.white,
                 elevation: 0,
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),

@@ -7,12 +7,14 @@ import 'package:latlong2/latlong.dart';
 import '../../../core/helpers/location_helper.dart';
 import '../../../core/helpers/snack_helper.dart';
 import '../../../core/values/storage.dart';
+import '../../../data/models/response/blood_request_response.dart';
 import '../../../data/models/sn_place.dart';
 import '../../../data/repositories/blood.repo.dart';
 import '../../../data/services/geo_search.service.dart';
 import '../../../data/services/storage.service.dart';
 import '../../../routes/app_pages.dart';
 import '../../home_service/views/hs_address_search_view.dart';
+import '../widgets/blood_widgets.dart';
 import 'blood_controller.dart';
 
 class NeedBloodController extends GetxController {
@@ -31,6 +33,47 @@ class NeedBloodController extends GetxController {
   int units = 2;
   BloodSeverity severity = BloodSeverity.critical;
   int radiusKm = 10;
+
+  /// Non-null while editing an existing (still-open) request — see
+  /// [startEdit] — instead of creating a new one. "অনুরোধ এডিট করুন".
+  BloodRequestEntry? editingRequest;
+  bool get isEditing => editingRequest != null;
+
+  /// Pre-fills the form from [r] and switches [broadcast] into edit mode.
+  /// Called from the request-detail screen's Edit button.
+  void startEdit(BloodRequestEntry r) {
+    editingRequest = r;
+    group = r.bloodGroup.isNotEmpty ? r.bloodGroup : group;
+    units = r.unitsNeeded > 0 ? r.unitsNeeded : units;
+    severity = severityFromUrgency(r.urgency);
+    radiusKm = r.searchRadiusKm;
+    hospitalName.text = r.hospitalName;
+    hospitalAddress.text = r.hospitalAddress;
+    if (r.lat != null && r.lng != null) {
+      lat = r.lat!;
+      lng = r.lng!;
+    }
+    name.text = r.contactName;
+    email.text = r.contactEmail;
+    phone.text = r.contactPhone;
+    address.text = r.contactAddress;
+    description.text = r.notes;
+    if (r.neededAt != null) {
+      neededAt = r.neededAt;
+      neededTime = TimeOfDay.fromDateTime(r.neededAt!.toLocal());
+    }
+    _refreshNeededLabel();
+    update();
+  }
+
+  /// Clears any in-progress edit session before starting a fresh "need
+  /// blood" request — this controller is a long-lived singleton, so without
+  /// this a stale [editingRequest] from a previous edit would silently turn
+  /// the next new request into an unintended update.
+  void startNew() {
+    editingRequest = null;
+    update();
+  }
 
   void setRadius(int km) {
     radiusKm = km;
@@ -258,17 +301,32 @@ class NeedBloodController extends GetxController {
         'contact_address': address.text.trim(),
         'notes': description.text.trim(),
       };
-      final res = await Get.find<BloodRepository>().createRequest(payload);
+      final repo = Get.find<BloodRepository>();
+      final res = isEditing
+          ? await repo.updateRequest(editingRequest!.id, payload)
+          : await repo.createRequest(payload);
       if (Get.isDialogOpen ?? false) Get.back();
       busy = false;
       update();
       if (res.success) {
         SnackHelper.success(res.message);
-        // Recall the "requests near you" API so the just-created request shows
-        // up, then redirect to that list (replacing the form) so the user can
-        // track it in realtime.
-        Get.find<BloodController>().fetchRequests();
-        Get.offNamed(Routes.BLOOD_REQUESTS);
+        if (isEditing) {
+          // Back to the request detail; refresh my-requests and re-point
+          // viewingRequest so the detail screen shows the edited fields
+          // instead of the stale pre-edit object. Using Get.until (not a
+          // second Get.back()) avoids racing the dialog-close pop.
+          final id = editingRequest!.id;
+          final bloodCon = Get.find<BloodController>();
+          await bloodCon.fetchMyRequests();
+          bloodCon.syncViewingRequest(id);
+          Get.until((route) => route.settings.name == Routes.BLOOD_REQUEST_DETAIL);
+        } else {
+          // Recall the "requests near you" API so the just-created request
+          // shows up, then redirect to that list (replacing the form) so the
+          // user can track it in realtime.
+          Get.find<BloodController>().fetchRequests();
+          Get.offNamed(Routes.BLOOD_REQUESTS);
+        }
       } else {
         SnackHelper.error(res.message);
       }

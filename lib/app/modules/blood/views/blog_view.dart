@@ -4,6 +4,7 @@ import 'package:animate_do/animate_do.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../../core/values/app_colors.dart';
 import '../../../core/values/app_config.dart';
@@ -11,7 +12,7 @@ import '../../../data/models/response/blood_content_response.dart';
 import '../../../global_widget/sn_shimmer.dart';
 import '../controllers/blog_controller.dart';
 
-const _red = Color(0xFFE11D48);
+const _red = Color(0xFFE5383B);
 
 String _mediaUrl(String path) {
   if (path.isEmpty) return '';
@@ -30,7 +31,7 @@ class BlogView extends GetView<BlogController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF7F8FA),
+      backgroundColor: const Color(0xFFF4F5FA),
       body: SafeArea(
         child: Column(
           children: [
@@ -123,7 +124,7 @@ class _Header extends StatelessWidget {
           IconButton(
             splashRadius: 22,
             onPressed: () => Get.back(),
-            icon: const Icon(Icons.arrow_back_ios_new_rounded,
+            icon: const Icon(LucideIcons.chevronLeft,
                 size: 20, color: Color(0xFF1A1A1A)),
           ),
           Column(

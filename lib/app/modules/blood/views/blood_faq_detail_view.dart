@@ -1,11 +1,12 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../../core/values/app_config.dart';
 import '../controllers/blood_faq_controller.dart';
 
-const _red = Color(0xFFE11D48);
+const _red = Color(0xFFE5383B);
 
 String _mediaUrl(String path) {
   if (path.isEmpty) return '';
@@ -24,7 +25,7 @@ class BloodFaqDetailView extends GetView<BloodFaqController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF7F8FA),
+      backgroundColor: const Color(0xFFF4F5FA),
       body: SafeArea(
         child: GetBuilder<BloodFaqController>(
           builder: (con) {
@@ -41,7 +42,7 @@ class BloodFaqDetailView extends GetView<BloodFaqController> {
                   child: IconButton(
                     splashRadius: 22,
                     onPressed: () => Get.back(),
-                    icon: const Icon(Icons.arrow_back_ios_new_rounded,
+                    icon: const Icon(LucideIcons.chevronLeft,
                         size: 20, color: Color(0xFF1A1A1A)),
                   ),
                 ),

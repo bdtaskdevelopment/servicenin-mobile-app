@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 
 dynamic _decode(dynamic src) => src is String ? jsonDecode(src) : src;
@@ -16,6 +17,7 @@ class BloodRequestEntry {
     required this.contactName,
     required this.contactPhone,
     required this.contactEmail,
+    this.contactAddress = '',
     required this.urgency,
     required this.status,
     required this.notes,
@@ -40,6 +42,7 @@ class BloodRequestEntry {
   final String contactName;
   final String contactPhone;
   final String contactEmail;
+  final String contactAddress;
   final String urgency; // critical / urgent / routine
   final String status; // open / fulfilled / ...
   final String notes;
@@ -61,7 +64,7 @@ class BloodRequestEntry {
     final now = DateTime.now();
     final sameDay =
         dt.year == now.year && dt.month == now.month && dt.day == now.day;
-    final datePart = sameDay ? 'Today' : DateFormat('d MMM').format(dt);
+    final datePart = sameDay ? 'Today'.tr : DateFormat('d MMM').format(dt);
     return '$datePart, ${DateFormat('h:mm a').format(dt)}';
   }
 
@@ -86,7 +89,7 @@ class BloodRequestEntry {
 
   /// Best display name for the contact person.
   String get contactDisplay =>
-      contactName.isNotEmpty ? contactName : (requesterName.isNotEmpty ? requesterName : 'Requester');
+      contactName.isNotEmpty ? contactName : (requesterName.isNotEmpty ? requesterName : 'Requester'.tr);
 
   /// Best phone to reach the requester.
   String get phone => contactPhone.isNotEmpty ? contactPhone : requesterPhone;
@@ -97,10 +100,10 @@ class BloodRequestEntry {
     if (dt == null) return '';
     final now = DateTime.now();
     final diff = now.difference(dt);
-    if (diff.inMinutes < 1) return 'Just now';
-    if (diff.inMinutes < 60) return '${diff.inMinutes} min ago';
-    if (diff.inHours < 24) return '${diff.inHours} hr ago';
-    if (diff.inDays < 7) return '${diff.inDays} d ago';
+    if (diff.inMinutes < 1) return 'Just now'.tr;
+    if (diff.inMinutes < 60) return '${diff.inMinutes} ${'min ago'.tr}';
+    if (diff.inHours < 24) return '${diff.inHours} ${'hr ago'.tr}';
+    if (diff.inDays < 7) return '${diff.inDays} ${'d ago'.tr}';
     return DateFormat('d MMM').format(dt);
   }
 
@@ -129,6 +132,7 @@ class BloodRequestEntry {
       contactName: str(json['contact_name']),
       contactPhone: str(json['contact_phone']),
       contactEmail: str(json['contact_email']),
+      contactAddress: str(json['contact_address']),
       urgency: str(json['urgency']).toLowerCase(),
       status: str(json['status']).toLowerCase(),
       notes: str(json['notes']),

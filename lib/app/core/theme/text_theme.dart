@@ -28,17 +28,17 @@ abstract class AppTextStyleLight {
   );
   //title textStyle
   static final TextStyle titleLarge = TextStyle(
-    fontWeight: FontWeight.w400,
+    fontWeight: FontWeight.bold,
     color: AppColors.black,
     fontSize: AppFontSize.fontSize18,
   );
   static final TextStyle titleMedium = TextStyle(
-    fontWeight: FontWeight.w400,
+    fontWeight: FontWeight.bold,
     color: AppColors.black,
     fontSize: AppFontSize.fontSize14,
   );
   static final TextStyle titleSmall = TextStyle(
-    fontWeight: FontWeight.w300,
+    fontWeight: FontWeight.bold,
     color: AppColors.black,
     fontSize: AppFontSize.fontSize12,
   );
@@ -98,17 +98,17 @@ abstract class AppTextStyleDark {
   );
   //title textStyle
   static final TextStyle titleLarge = TextStyle(
-    fontWeight: FontWeight.w400,
+    fontWeight: FontWeight.bold,
     color: AppColors.white,
     fontSize: AppFontSize.fontSize18,
   );
   static final TextStyle titleMedium = TextStyle(
-    fontWeight: FontWeight.w400,
+    fontWeight: FontWeight.bold,
     color: AppColors.white,
     fontSize: AppFontSize.fontSize16,
   );
   static final TextStyle titleSmall = TextStyle(
-    fontWeight: FontWeight.w300,
+    fontWeight: FontWeight.bold,
     color: AppColors.white,
     fontSize: AppFontSize.fontSize14,
   );

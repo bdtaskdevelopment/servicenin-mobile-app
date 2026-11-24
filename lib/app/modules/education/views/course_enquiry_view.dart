@@ -4,8 +4,8 @@ import 'package:get/get.dart';
 import '../../../core/values/app_colors.dart';
 import '../controllers/education_controller.dart';
 
-const _orange = AppColors.brandOrange;
-const _tileSel = Color(0xFFFFEDE4);
+const _violet = Color(0xFF7C3AED);
+const _tileSel = Color(0xFFF3EEFC);
 
 class CourseEnquiryView extends GetView<EducationController> {
   const CourseEnquiryView({super.key});
@@ -21,7 +21,8 @@ class CourseEnquiryView extends GetView<EducationController> {
             return Column(
               children: [
                 // Header
-                Padding(
+                Container(
+                  color: AppColors.white,
                   padding: const EdgeInsets.fromLTRB(8, 6, 16, 8),
                   child: Row(
                     children: [
@@ -72,16 +73,16 @@ class CourseEnquiryView extends GetView<EducationController> {
                                 borderRadius: BorderRadius.circular(22),
                                 border: Border.all(
                                     color: sel
-                                        ? _orange
+                                        ? _violet
                                         : const Color(0xFFE2E8F0),
                                     width: sel ? 1.6 : 1.2),
                               ),
-                              child: Text(con.grades[i]['label']!,
+                              child: Text(con.grades[i]['label']!.tr,
                                   style: TextStyle(
                                       fontSize: 13.5,
                                       fontWeight: FontWeight.w700,
                                       color: sel
-                                          ? _orange
+                                          ? _violet
                                           : const Color(0xFF334155))),
                             ),
                           );
@@ -107,7 +108,8 @@ class CourseEnquiryView extends GetView<EducationController> {
                       _InputCard(
                           controller: con.subjectNeeded,
                           label: 'SUBJECT NEEDED'.tr,
-                          hint: 'e.g. Physics, Chemistry'.tr),
+                          hint: 'e.g. Physics, Chemistry'.tr,
+                          locked: true),
                       const SizedBox(height: 12),
                       _InputCard(
                           controller: con.preferredTime,
@@ -132,7 +134,7 @@ class CourseEnquiryView extends GetView<EducationController> {
                       onPressed:
                           con.submitting ? null : con.submitEnquiry,
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: _orange,
+                        backgroundColor: _violet,
                         foregroundColor: Colors.white,
                         elevation: 0,
                         shape: RoundedRectangleBorder(
@@ -180,6 +182,7 @@ class _InputCard extends StatelessWidget {
     this.hint,
     this.maxLines = 1,
     this.keyboard,
+    this.locked = false,
   });
   final TextEditingController controller;
   final String label;
@@ -187,12 +190,17 @@ class _InputCard extends StatelessWidget {
   final int maxLines;
   final TextInputType? keyboard;
 
+  /// When true the field is shown as a read-only, grey-tinted field with a
+  /// trailing lock glyph — used for the course/subject field, which is
+  /// already fixed by whichever course the user tapped "Register" from.
+  final bool locked;
+
   @override
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.fromLTRB(16, 12, 16, 6),
       decoration: BoxDecoration(
-          color: AppColors.white,
+          color: locked ? const Color(0xFFF8FAFC) : AppColors.white,
           borderRadius: BorderRadius.circular(14),
           border: Border.all(color: const Color(0xFFEDEFF2))),
       child: Column(
@@ -204,24 +212,37 @@ class _InputCard extends StatelessWidget {
                   fontWeight: FontWeight.w700,
                   color: Color(0xFF94A3B8),
                   letterSpacing: 0.6)),
-          TextField(
-            controller: controller,
-            maxLines: maxLines,
-            keyboardType: keyboard,
-            style: const TextStyle(
-                fontSize: 15.5,
-                fontWeight: FontWeight.w700,
-                color: Color(0xFF0F172A)),
-            decoration: InputDecoration(
-              isDense: true,
-              contentPadding: const EdgeInsets.symmetric(vertical: 8),
-              border: InputBorder.none,
-              hintText: hint,
-              hintStyle: const TextStyle(
-                  fontSize: 15.5,
-                  fontWeight: FontWeight.w500,
-                  color: Color(0xFFB8C0CC)),
-            ),
+          Row(
+            children: [
+              Expanded(
+                child: TextField(
+                  controller: controller,
+                  maxLines: maxLines,
+                  keyboardType: keyboard,
+                  enabled: !locked,
+                  style: TextStyle(
+                      fontSize: 15.5,
+                      fontWeight: FontWeight.w700,
+                      color: locked
+                          ? const Color(0xFF64748B)
+                          : const Color(0xFF0F172A)),
+                  decoration: InputDecoration(
+                    isDense: true,
+                    contentPadding: const EdgeInsets.symmetric(vertical: 8),
+                    border: InputBorder.none,
+                    disabledBorder: InputBorder.none,
+                    hintText: hint,
+                    hintStyle: const TextStyle(
+                        fontSize: 15.5,
+                        fontWeight: FontWeight.w500,
+                        color: Color(0xFFB8C0CC)),
+                  ),
+                ),
+              ),
+              if (locked)
+                const Icon(Icons.lock_outline_rounded,
+                    size: 17, color: Color(0xFF94A3B8)),
+            ],
           ),
         ],
       ),

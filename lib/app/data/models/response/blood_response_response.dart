@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 
 import 'blood_request_response.dart';
@@ -40,7 +41,7 @@ class BloodResponseEntry {
   String get respondedLabel {
     final dt = createdAt?.toLocal();
     if (dt == null) return '';
-    return 'Responded ${DateFormat('d MMM, h:mm a').format(dt)}';
+    return '${'Responded'.tr} ${DateFormat('d MMM, h:mm a').format(dt)}';
   }
 
   factory BloodResponseEntry.fromMap(Map<String, dynamic> json) {

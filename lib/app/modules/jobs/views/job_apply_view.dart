@@ -17,7 +17,8 @@ class JobApplyView extends GetView<JobsController> {
         child: GetBuilder<JobsController>(
           builder: (con) => Column(
             children: [
-              Padding(
+              Container(
+                color: AppColors.white,
                 padding: const EdgeInsets.fromLTRB(8, 6, 16, 4),
                 child: Row(
                   children: [
