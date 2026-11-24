@@ -4,14 +4,16 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../../core/values/app_colors.dart';
+import '../../../core/values/app_url.dart';
 import '../../../data/models/response/education_response.dart';
 import '../../../global_widget/rich_html_text.dart';
 import '../../../global_widget/sn_shimmer.dart';
+import '../../../routes/app_pages.dart';
 import '../controllers/education_controller.dart';
 
-const _orange = AppColors.brandOrange;
-const _darkOrange = AppColors.brandOrangeDark;
-const _tile = Color(0xFFFFEDE4);
+const _violet = Color(0xFF7C3AED);
+const _violetDark = Color(0xFF6D28D9);
+const _tile = Color(0xFFF3EEFC);
 
 class EducationCenterView extends GetView<EducationController> {
   const EducationCenterView({super.key});
@@ -30,7 +32,8 @@ class EducationCenterView extends GetView<EducationController> {
             return Column(
               children: [
                 // Header
-                Padding(
+                Container(
+                  color: AppColors.white,
                   padding: const EdgeInsets.fromLTRB(8, 6, 16, 4),
                   child: Row(
                     children: [
@@ -43,12 +46,34 @@ class EducationCenterView extends GetView<EducationController> {
                           color: Color(0xFF1A1A1A),
                         ),
                       ),
-                      Text(
-                        'Center'.tr,
-                        style: const TextStyle(
-                          fontSize: 19,
-                          fontWeight: FontWeight.w800,
-                          color: Color(0xFF0F172A),
+                      Expanded(
+                        child: Text(
+                          'Training center details'.tr,
+                          style: const TextStyle(
+                            fontSize: 19,
+                            fontWeight: FontWeight.w800,
+                            color: Color(0xFF0F172A),
+                          ),
+                        ),
+                      ),
+                      GestureDetector(
+                        onTap: () => Get.toNamed(
+                          Routes.EDUCATION_SUPPORT,
+                          arguments: {
+                            'title': 'Training Support'.tr,
+                            'endpoint': ApiURL.trainingHotlines,
+                          },
+                        ),
+                        child: Container(
+                          width: 36,
+                          height: 36,
+                          decoration: BoxDecoration(
+                            color: _tile,
+                            borderRadius: BorderRadius.circular(11),
+                          ),
+                          alignment: Alignment.center,
+                          child: const Icon(Icons.headset_mic_rounded,
+                              size: 18, color: _violet),
                         ),
                       ),
                     ],
@@ -76,77 +101,110 @@ class EducationCenterView extends GetView<EducationController> {
                         ),
                         const SizedBox(height: 14),
                       ],
-                      // Identity
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          ClipRRect(
-                            borderRadius: BorderRadius.circular(16),
-                            child: SizedBox(
-                              width: 64,
-                              height: 64,
-                              child: center.logoUrl.isNotEmpty
-                                  ? CachedNetworkImage(
-                                      imageUrl: center.logoUrl,
-                                      fit: BoxFit.cover,
-                                      placeholder: (_, __) =>
-                                          Container(color: _tile),
-                                      errorWidget: (_, __, ___) =>
-                                          const _LogoFallback(),
-                                    )
-                                  : const _LogoFallback(),
-                            ),
+                      // Identity — violet gradient card
+                      Container(
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          gradient: const LinearGradient(
+                            colors: [_violet, _violetDark],
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
                           ),
-                          const SizedBox(width: 14),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  center.name,
-                                  style: const TextStyle(
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.w800,
-                                    color: Color(0xFF0F172A),
-                                  ),
-                                ),
-                                const SizedBox(height: 3),
-                                Text(
-                                  [
-                                    center.typeLabel,
-                                    center.locationLabel,
-                                  ].where((s) => s.isNotEmpty).join(' · '),
-                                  style: const TextStyle(
-                                    fontSize: 12.5,
-                                    color: Color(0xFF94A3B8),
-                                  ),
-                                ),
-                                if (center.targetGrades.isNotEmpty) ...[
-                                  const SizedBox(height: 5),
+                          borderRadius: BorderRadius.circular(18),
+                        ),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            ClipRRect(
+                              borderRadius: BorderRadius.circular(14),
+                              child: SizedBox(
+                                width: 56,
+                                height: 56,
+                                child: center.logoUrl.isNotEmpty
+                                    ? CachedNetworkImage(
+                                        imageUrl: center.logoUrl,
+                                        fit: BoxFit.cover,
+                                        placeholder: (_, __) => Container(
+                                            color: Colors.white
+                                                .withValues(alpha: 0.15)),
+                                        errorWidget: (_, __, ___) =>
+                                            const _LogoFallback(),
+                                      )
+                                    : const _LogoFallback(),
+                              ),
+                            ),
+                            const SizedBox(width: 14),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
                                   Text(
-                                    'Grades: ${center.targetGrades}',
+                                    center.name,
                                     style: const TextStyle(
-                                      fontSize: 12.5,
-                                      fontWeight: FontWeight.w700,
-                                      color: _orange,
+                                      fontSize: 17,
+                                      fontWeight: FontWeight.w800,
+                                      color: Colors.white,
                                     ),
                                   ),
+                                  const SizedBox(height: 3),
+                                  Text(
+                                    [
+                                      center.typeLabel,
+                                      center.locationLabel,
+                                    ].where((s) => s.isNotEmpty).join(' · '),
+                                    style: TextStyle(
+                                      fontSize: 12.5,
+                                      color: Colors.white.withValues(alpha: 0.85),
+                                    ),
+                                  ),
+                                  if (center.targetGrades.isNotEmpty) ...[
+                                    const SizedBox(height: 5),
+                                    Text(
+                                      '${'Grades'.tr}: ${center.targetGrades}',
+                                      style: const TextStyle(
+                                        fontSize: 12.5,
+                                        fontWeight: FontWeight.w700,
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                                  ],
                                 ],
-                              ],
+                              ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
                       // Meta rows (established / owner / timing) — new fields
-                      if (center.establishedYear > 0)
-                        _MetaRow(Icons.event_available_rounded,
-                            '${'Established'.tr} ${center.establishedYear}'),
-                      if (center.ownerName.isNotEmpty)
-                        _MetaRow(Icons.person_outline_rounded, center.ownerName),
-                      if (center.officeTiming.isNotEmpty)
-                        _MetaRow(Icons.schedule_rounded, center.officeTiming),
-                      if (center.address.isNotEmpty)
-                        _MetaRow(Icons.location_on_outlined, center.address),
+                      if (center.establishedYear > 0 ||
+                          center.ownerName.isNotEmpty ||
+                          center.officeTiming.isNotEmpty ||
+                          center.address.isNotEmpty) ...[
+                        const SizedBox(height: 12),
+                        Container(
+                          decoration: BoxDecoration(
+                            color: AppColors.white,
+                            borderRadius: BorderRadius.circular(14),
+                            border: Border.all(color: const Color(0xFFEDEFF2)),
+                          ),
+                          child: Column(
+                            children: [
+                              if (center.establishedYear > 0)
+                                _MetaRow(Icons.event_available_rounded,
+                                    '${'Established'.tr}: ${center.establishedYear}'),
+                              if (center.ownerName.isNotEmpty)
+                                _MetaRow(Icons.person_outline_rounded,
+                                    center.ownerName),
+                              if (center.officeTiming.isNotEmpty)
+                                _MetaRow(
+                                    Icons.schedule_rounded, center.officeTiming),
+                              if (center.address.isNotEmpty)
+                                _MetaRow(Icons.location_on_outlined,
+                                    center.address,
+                                    last: true),
+                            ],
+                          ),
+                        ),
+                      ],
                       if (center.description.isNotEmpty) ...[
                         const SizedBox(height: 14),
                         Text(
@@ -186,23 +244,39 @@ class EducationCenterView extends GetView<EducationController> {
                             _ContactChip(
                                 icon: Icons.language_rounded,
                                 label: 'Website'.tr,
-                                color: _orange,
+                                color: _violet,
                                 onTap: () => con.openLink(center.website)),
                         ],
                       ),
                       const SizedBox(height: 22),
-                      Text(
-                        'Courses & batches'.tr,
-                        style: const TextStyle(
-                          fontSize: 17,
-                          fontWeight: FontWeight.w800,
-                          color: Color(0xFF0F172A),
-                        ),
-                      ),
-                      const SizedBox(height: 2),
-                      Text(
-                        '${con.courses.length} available',
-                        style: const TextStyle(fontSize: 12.5, color: _orange),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            'Courses & batches'.tr,
+                            style: const TextStyle(
+                              fontSize: 17,
+                              fontWeight: FontWeight.w800,
+                              color: Color(0xFF0F172A),
+                            ),
+                          ),
+                          if (con.courses.isNotEmpty)
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 10, vertical: 5),
+                              decoration: BoxDecoration(
+                                color: _tile,
+                                borderRadius: BorderRadius.circular(20),
+                              ),
+                              child: Text(
+                                '${con.courses.length}${'courses'.tr}',
+                                style: const TextStyle(
+                                    fontSize: 11.5,
+                                    fontWeight: FontWeight.w800,
+                                    color: _violetDark),
+                              ),
+                            ),
+                        ],
                       ),
                       const SizedBox(height: 14),
                       if (con.loadingCourses && con.courses.isEmpty)
@@ -243,7 +317,7 @@ class EducationCenterView extends GetView<EducationController> {
                             const Icon(
                               Icons.info_outline_rounded,
                               size: 18,
-                              color: _darkOrange,
+                              color: _violetDark,
                             ),
                             const SizedBox(width: 10),
                             Expanded(
@@ -253,7 +327,7 @@ class EducationCenterView extends GetView<EducationController> {
                                 style: const TextStyle(
                                   fontSize: 12.5,
                                   height: 1.4,
-                                  color: _darkOrange,
+                                  color: _violetDark,
                                 ),
                               ),
                             ),
@@ -276,29 +350,51 @@ class _LogoFallback extends StatelessWidget {
   const _LogoFallback();
   @override
   Widget build(BuildContext context) => Container(
-        color: _tile,
+        color: Colors.white.withValues(alpha: 0.18),
         alignment: Alignment.center,
-        child: const Icon(Icons.menu_book_rounded, color: _orange, size: 30),
+        child: const Icon(Icons.menu_book_rounded,
+            color: Colors.white, size: 28),
       );
 }
 
 class _MetaRow extends StatelessWidget {
-  const _MetaRow(this.icon, this.text);
+  const _MetaRow(this.icon, this.text, {this.last = false});
   final IconData icon;
   final String text;
+  final bool last;
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(top: 8),
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: last
+          ? null
+          : const BoxDecoration(
+              border: Border(
+                  bottom: BorderSide(color: Color(0xFFF1F5F9), width: 1)),
+            ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(icon, size: 15, color: const Color(0xFF94A3B8)),
-          const SizedBox(width: 8),
+          Container(
+            width: 30,
+            height: 30,
+            decoration: BoxDecoration(
+              color: _tile,
+              borderRadius: BorderRadius.circular(9),
+            ),
+            alignment: Alignment.center,
+            child: Icon(icon, size: 15, color: _violet),
+          ),
+          const SizedBox(width: 10),
           Expanded(
-            child: Text(text,
-                style: const TextStyle(
-                    fontSize: 12.5, color: Color(0xFF475569))),
+            child: Padding(
+              padding: const EdgeInsets.only(top: 6),
+              child: Text(text,
+                  style: const TextStyle(
+                      fontSize: 12.5,
+                      fontWeight: FontWeight.w600,
+                      color: Color(0xFF334155))),
+            ),
           ),
         ],
       ),
@@ -386,7 +482,7 @@ class _CourseCard extends StatelessWidget {
                             shape: BoxShape.circle,
                           ),
                           child: const Icon(Icons.play_arrow_rounded,
-                              color: _darkOrange, size: 26),
+                              color: _violetDark, size: 26),
                         ),
                       ),
                   ],
@@ -440,7 +536,7 @@ class _CourseCard extends StatelessWidget {
                     style: const TextStyle(
                       fontSize: 11,
                       fontWeight: FontWeight.w700,
-                      color: _orange,
+                      color: _violet,
                     ),
                   ),
                 ),
@@ -501,12 +597,12 @@ class _CourseCard extends StatelessWidget {
                 style: const TextStyle(
                   fontSize: 13,
                   fontWeight: FontWeight.w700,
-                  color: _darkOrange,
+                  color: _violetDark,
                 ),
               ),
               const SizedBox(width: 2),
               const Icon(Icons.chevron_right_rounded,
-                  size: 18, color: _darkOrange),
+                  size: 18, color: _violetDark),
             ],
           ),
         ],

@@ -7,8 +7,8 @@ import '../../../data/models/response/education_response.dart';
 import '../../../global_widget/sn_shimmer.dart';
 import '../controllers/education_controller.dart';
 
-const _orange = AppColors.brandOrange;
-const _tile = Color(0xFFFFEDE4);
+const _violet = Color(0xFF7C3AED);
+const _tile = Color(0xFFF3EEFC);
 const _subtitle = Color(0xFF6B7A99);
 
 class EducationInterestsView extends GetView<EducationController> {
@@ -21,7 +21,8 @@ class EducationInterestsView extends GetView<EducationController> {
       body: SafeArea(
         child: Column(
           children: [
-            Padding(
+            Container(
+              color: AppColors.white,
               padding: const EdgeInsets.fromLTRB(8, 6, 16, 8),
               child: Row(
                 children: [
@@ -55,7 +56,7 @@ class EducationInterestsView extends GetView<EducationController> {
                     return const _Empty();
                   }
                   return RefreshIndicator(
-                    color: _orange,
+                    color: _violet,
                     onRefresh: con.fetchMyInterests,
                     child: FadeInUp(
                       from: 18,
@@ -146,7 +147,7 @@ class _InterestCard extends StatelessWidget {
                 ),
                 child: const Icon(
                   Icons.menu_book_rounded,
-                  color: _orange,
+                  color: _violet,
                   size: 21,
                 ),
               ),
@@ -233,7 +234,7 @@ class _InterestCard extends StatelessWidget {
           if (item.createdLabel.isNotEmpty) ...[
             const SizedBox(height: 10),
             Text(
-              'Requested ${item.createdLabel}',
+              '${'Requested'.tr} ${item.createdLabel}',
               style: const TextStyle(fontSize: 11.5, color: _subtitle),
             ),
           ],

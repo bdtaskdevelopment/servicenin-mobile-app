@@ -8,7 +8,7 @@ import '../../../global_widget/sn_shimmer.dart';
 import '../controllers/blood_controller.dart';
 import '../widgets/blood_widgets.dart';
 
-const _red = Color(0xFFE11D48);
+const _red = Color(0xFFE5383B);
 const _green = Color(0xFF15803D);
 
 /// Donors who responded to a chosen request
@@ -47,7 +47,7 @@ class BloodRespondersView extends GetView<BloodController> {
                                   fontWeight: FontWeight.w800,
                                   color: Color(0xFF0F172A))),
                           if (req != null)
-                            Text('${req.bloodGroup} · ${req.unitsNeeded} unit${req.unitsNeeded > 1 ? 's' : ''}',
+                            Text('${req.bloodGroup} · ${req.unitsNeeded} ${'units'.tr}',
                                 style: const TextStyle(
                                     fontSize: 12, color: Color(0xFF94A3B8))),
                         ],

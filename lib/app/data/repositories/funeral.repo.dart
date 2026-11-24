@@ -49,4 +49,9 @@ class FuneralRepository {
     final res = await provider.getData(ApiURL.funeralRequestsMy);
     return FuneralRequest.listFromResponse(_payload(res));
   }
+
+  Future<FuneralRequest> fetchRequestById(String id) async {
+    final res = await provider.getData(ApiURL.funeralRequestDetail(id));
+    return FuneralRequest.fromResponse(_payload(res));
+  }
 }

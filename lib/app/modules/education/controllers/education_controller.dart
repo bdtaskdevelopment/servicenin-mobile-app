@@ -55,7 +55,9 @@ class EducationController extends GetxController with LiveRefreshMixin {
           : null;
 
   /// Chip label at [i] — index 0 is always "All".
-  String typeLabel(int i) => i == 0 ? 'All'.tr : instituteTypes[i - 1].label;
+  String typeLabel(int i) => i == 0
+      ? 'All'.tr
+      : instituteTypeLabelBn(instituteTypes[i - 1].slug);
 
   void setInstituteType(int i) {
     typeIndex = i;

@@ -87,6 +87,23 @@ class FuneralRequest {
   String get phone => _str(raw['phone']);
   String get notes => _str(raw['notes']);
   String get status => _str(raw['status']);
+  String get gender => _str(raw['gender']);
+  String get relationship => _str(raw['relationship']);
+
+  /// 'male'/'female'/'other' as stored → the capitalized English label the
+  /// app's translation keys ('Male'/'Female'/'Other') are keyed on.
+  String get genderLabel {
+    switch (gender.toLowerCase()) {
+      case 'male':
+        return 'Male';
+      case 'female':
+        return 'Female';
+      case 'other':
+        return 'Other';
+      default:
+        return '';
+    }
+  }
 
   // ── Assigned staff ────────────────────────────────────────────────
   //

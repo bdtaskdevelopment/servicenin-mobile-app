@@ -3,6 +3,8 @@ import 'package:get/get.dart';
 
 import '../../../data/services/settings.service.dart';
 
+import '../../../core/values/app_colors.dart';
+
 /// Terms of service — content sourced from the admin's Settings → App
 /// Configuration → "Terms of Service (full text)" (GET /api/v1/settings,
 /// already loaded by [SettingsService] at app startup). Falls back to a
@@ -32,7 +34,8 @@ class TermsView extends StatelessWidget {
         child: Column(
           children: [
             // Header
-            Padding(
+            Container(
+              color: AppColors.white,
               padding: const EdgeInsets.fromLTRB(8, 6, 16, 8),
               child: Row(
                 children: [

@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 
 dynamic _decode(dynamic src) => src is String ? jsonDecode(src) : src;
@@ -24,6 +25,7 @@ class DonorEntry {
     this.lng,
     this.age,
     this.profession = '',
+    this.lastDonatedCategory = '',
   });
 
   final String id;
@@ -39,6 +41,11 @@ class DonorEntry {
   final double? lng;
   final int? age;
   final String profession;
+  final String lastDonatedCategory;
+
+  /// Distance from the viewer, in km — stamped client-side (like
+  /// [BloodRequestEntry.distanceKm]), not part of the API payload.
+  double? distanceKm;
 
   // Flattened from `user` / `user.profile`.
   final String fullName;
@@ -58,7 +65,7 @@ class DonorEntry {
   String get lastDonatedLabel {
     final dt = lastDonatedAt?.toLocal();
     if (dt == null) return '';
-    return 'Last donated ${DateFormat('d MMM yyyy').format(dt)}';
+    return '${'Last donated'.tr} ${DateFormat('d MMM yyyy').format(dt)}';
   }
 
   factory DonorEntry.fromMap(Map<String, dynamic> json) {
@@ -89,6 +96,7 @@ class DonorEntry {
           ? json['age'] as int
           : int.tryParse(str(json['age'])),
       profession: str(json['profession']),
+      lastDonatedCategory: str(json['last_donated_category']),
       fullName: str(profile['full_name']),
       fullNameBn: str(profile['full_name_bn']),
       phone: str(user['phone']),

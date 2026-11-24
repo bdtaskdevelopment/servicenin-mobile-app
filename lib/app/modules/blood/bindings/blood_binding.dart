@@ -1,8 +1,10 @@
 import 'package:get/get.dart';
 
+import '../controllers/add_donation_controller.dart';
 import '../controllers/blood_chat_controller.dart';
 import '../controllers/blood_controller.dart';
 import '../controllers/blood_faq_controller.dart';
+import '../controllers/blood_volunteer_controller.dart';
 import '../controllers/blog_controller.dart';
 import '../controllers/donation_flow_controller.dart';
 import '../controllers/donor_register_controller.dart';
@@ -20,5 +22,8 @@ class BloodBinding extends Bindings {
     Get.lazyPut<BloodChatController>(() => BloodChatController(), fenix: true);
     Get.lazyPut<BlogController>(() => BlogController(), fenix: true);
     Get.lazyPut<BloodFaqController>(() => BloodFaqController(), fenix: true);
+    Get.lazyPut<BloodVolunteerController>(() => BloodVolunteerController(),
+        fenix: true);
+    Get.lazyPut<AddDonationController>(() => AddDonationController(), fenix: true);
   }
 }

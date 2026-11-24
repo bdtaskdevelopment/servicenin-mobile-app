@@ -58,6 +58,7 @@ const Map<String, String> commonBn = {
   'Resolved': 'সমাধান হয়েছে',
   'Open': 'খোলা',
   'Closed': 'বন্ধ',
+  'Expired': 'মেয়াদোত্তীর্ণ',
   'Cancelled': 'বাতিল',
   'Accepted': 'গৃহীত',
   'Rejected': 'প্রত্যাখ্যাত',
@@ -97,7 +98,7 @@ const Map<String, String> commonBn = {
   'Physio': 'ফিজিওথেরাপি',
   'Marriage': 'বিবাহ',
   'Jobs': 'চাকরি',
-  'Funeral': 'ফিউনারেল',
+  'Funeral': 'দাফন কাফন',
   'Education': 'শিক্ষা',
   // Module renamed education → training. 'Training' is the module label;
   // 'Education' above stays for the jobs/matchmaking qualification field.

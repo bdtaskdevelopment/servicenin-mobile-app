@@ -1,14 +1,18 @@
 import 'package:animate_do/animate_do.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../../core/values/app_colors.dart';
 import '../../../data/models/response/healthcare_response.dart';
 import '../../../global_widget/sn_shimmer.dart';
 import '../controllers/telemedicine_controller.dart';
 
-const _teal = Color(0xFF0F766E);
-const _tealTile = Color(0xFFD6F1EE);
+const _teal = Color(0xFF0D9383);
+const _tealTile = Color(0xFFE6F5F4);
+const _amberTint = Color(0xFFFFF4DE);
+const _amberText = Color(0xFFB86E00);
+const _green = Color(0xFF12A14F);
 
 class TelemedicineView extends GetView<TelemedicineController> {
   const TelemedicineView({super.key});
@@ -16,19 +20,20 @@ class TelemedicineView extends GetView<TelemedicineController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF7F8FA),
+      backgroundColor: const Color(0xFFF4F5FA),
       body: SafeArea(
         child: Column(
           children: [
-            Padding(
+            Container(
+              color: AppColors.white,
               padding: const EdgeInsets.fromLTRB(8, 6, 16, 8),
               child: Row(
                 children: [
                   IconButton(
                     splashRadius: 22,
                     onPressed: () => Get.back(),
-                    icon: const Icon(Icons.arrow_back_ios_new_rounded,
-                        size: 20, color: Color(0xFF1A1A1A)),
+                    icon: const Icon(LucideIcons.chevronLeft,
+                        size: 22, color: Color(0xFF0F172A)),
                   ),
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -61,6 +66,7 @@ class TelemedicineView extends GetView<TelemedicineController> {
                     );
                   }
                   return RefreshIndicator(
+                    color: _teal,
                     onRefresh: con.fetchDesks,
                     child: ListView.builder(
                       padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
@@ -98,7 +104,12 @@ class _DeskCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppColors.white,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFFEDEFF2)),
+        boxShadow: [
+          BoxShadow(
+              color: Colors.black.withValues(alpha: 0.03),
+              blurRadius: 8,
+              offset: const Offset(0, 2)),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -108,50 +119,34 @@ class _DeskCard extends StatelessWidget {
               Container(
                 width: 44,
                 height: 44,
+                alignment: Alignment.center,
                 decoration: BoxDecoration(
                     color: _tealTile, borderRadius: BorderRadius.circular(12)),
-                child: const Icon(Icons.support_agent_rounded,
-                    color: _teal, size: 24),
+                child: const Icon(LucideIcons.headset, color: _teal, size: 22),
               ),
               const SizedBox(width: 12),
               Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(desk.name,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
-                            fontSize: 14.5,
-                            fontWeight: FontWeight.w800,
-                            color: Color(0xFF0F172A))),
-                    if (desk.timeLabel.isNotEmpty) ...[
-                      const SizedBox(height: 2),
-                      Text(desk.timeLabel,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(
-                              fontSize: 12, color: Color(0xFF94A3B8))),
-                    ],
-                  ],
-                ),
+                child: Text(desk.name,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                        fontSize: 14.5,
+                        fontWeight: FontWeight.w800,
+                        color: Color(0xFF0F172A))),
               ),
+              const SizedBox(width: 8),
               Container(
                 padding:
                     const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                 decoration: BoxDecoration(
-                    color: desk.isOpenNow
-                        ? const Color(0xFFDCFCE7)
-                        : const Color(0xFFFEE2E2),
+                    color:
+                        desk.isOpenNow ? const Color(0xFFE7F6ED) : _amberTint,
                     borderRadius: BorderRadius.circular(20)),
-                child: Text(
-                    desk.isOpenNow ? 'Open now'.tr : 'Closed'.tr,
+                child: Text(desk.isOpenNow ? 'Open now'.tr : 'Closed'.tr,
                     style: TextStyle(
                         fontSize: 10.5,
                         fontWeight: FontWeight.w700,
-                        color: desk.isOpenNow
-                            ? const Color(0xFF15803D)
-                            : const Color(0xFFDC2626))),
+                        color: desk.isOpenNow ? _green : _amberText)),
               ),
             ],
           ),
@@ -176,7 +171,7 @@ class _DeskCard extends StatelessWidget {
                         shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(10)),
                       ),
-                      icon: const Icon(Icons.call_rounded, size: 17),
+                      icon: const Icon(LucideIcons.phone, size: 16),
                       label: Text('Call'.tr,
                           style: const TextStyle(
                               fontSize: 13, fontWeight: FontWeight.w700)),
@@ -192,13 +187,13 @@ class _DeskCard extends StatelessWidget {
                     child: ElevatedButton.icon(
                       onPressed: () => con.openWhatsApp(desk.whatsappUrl),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF25D366),
+                        backgroundColor: _green,
                         foregroundColor: Colors.white,
                         elevation: 0,
                         shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(10)),
                       ),
-                      icon: const Icon(Icons.chat_rounded, size: 17),
+                      icon: const Icon(LucideIcons.messageCircle, size: 16),
                       label: Text('WhatsApp'.tr,
                           style: const TextStyle(
                               fontSize: 13, fontWeight: FontWeight.w700)),

@@ -19,7 +19,8 @@ class GuideDetailView extends GetView<InformationController> {
         child: Column(
           children: [
             // Header
-            Padding(
+            Container(
+              color: Colors.white,
               padding: const EdgeInsets.fromLTRB(8, 6, 16, 8),
               child: Row(
                 children: [

@@ -2,6 +2,7 @@ import 'package:animate_do/animate_do.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import '../../../core/values/app_colors.dart';
 import '../../../global_widget/sn_shimmer.dart';
 import '../controllers/ambulance_controller.dart';
 import '../widgets/ambulance_widgets.dart';
@@ -19,7 +20,8 @@ class AllAmbulancesView extends GetView<AmbulanceController> {
         child: Column(
           children: [
             // Header
-            Padding(
+            Container(
+              color: AppColors.white,
               padding: const EdgeInsets.fromLTRB(8, 6, 16, 8),
               child: Row(
                 children: [

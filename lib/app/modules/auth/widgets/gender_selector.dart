@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
 import '../../../core/values/app_colors.dart';
 
@@ -42,7 +43,7 @@ class GenderSelector extends StatelessWidget {
                   ),
                 ),
                 child: Text(
-                  option,
+                  option.tr,
                   style: TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w600,

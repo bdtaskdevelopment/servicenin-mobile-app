@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../../core/values/app_colors.dart';
 import '../../../data/models/response/blood_request_response.dart';
 import '../../../data/models/response/donor_response.dart';
 import '../controllers/blood_controller.dart';
 
-const _red = Color(0xFFE11D48);
+const _red = Color(0xFFE5383B);
 
 /// Maps the API `urgency` string to the local severity enum.
 BloodSeverity severityFromUrgency(String urgency) {
@@ -61,7 +62,7 @@ class BloodRequestApiCard extends StatelessWidget {
                         crossAxisAlignment: WrapCrossAlignment.center,
                         children: [
                           Text(
-                            '${req.unitsNeeded} unit${req.unitsNeeded > 1 ? 's' : ''} · ${req.bloodGroup}',
+                            '${req.unitsNeeded} ${'units'.tr} · ${req.bloodGroup}',
                             style: const TextStyle(
                                 fontSize: 14.5,
                                 fontWeight: FontWeight.w800,
@@ -80,14 +81,14 @@ class BloodRequestApiCard extends StatelessWidget {
                         Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            const Icon(Icons.near_me_rounded,
-                                size: 13, color: Color(0xFFE11D48)),
+                            const Icon(LucideIcons.navigation,
+                                size: 13, color: _red),
                             const SizedBox(width: 4),
                             Text(req.distanceLabel,
                                 style: const TextStyle(
                                     fontSize: 12,
                                     fontWeight: FontWeight.w700,
-                                    color: Color(0xFFE11D48))),
+                                    color: _red)),
                           ],
                         ),
                       ],
@@ -96,7 +97,7 @@ class BloodRequestApiCard extends StatelessWidget {
                         Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            const Icon(Icons.schedule_rounded,
+                            const Icon(LucideIcons.clock,
                                 size: 13, color: Color(0xFF64748B)),
                             const SizedBox(width: 4),
                             Text('${'Needed'.tr}: ${req.neededLabel}',
@@ -123,7 +124,7 @@ class BloodRequestApiCard extends StatelessWidget {
             ),
             Row(
               children: [
-                const Icon(Icons.person_outline_rounded,
+                const Icon(LucideIcons.user,
                     size: 16, color: Color(0xFF94A3B8)),
                 const SizedBox(width: 6),
                 Expanded(
@@ -138,7 +139,7 @@ class BloodRequestApiCard extends StatelessWidget {
                     style: const TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.w700,
-                        color: Color(0xFFE11D48))),
+                        color: _red)),
               ],
             ),
           ],
@@ -222,7 +223,7 @@ class DonorCard extends StatelessWidget {
                         ),
                         if (donor.isVerified) ...[
                           const SizedBox(width: 5),
-                          const Icon(Icons.verified_rounded,
+                          const Icon(LucideIcons.badgeCheck,
                               size: 15, color: Color(0xFF16A34A)),
                         ],
                       ],
@@ -246,10 +247,10 @@ class DonorCard extends StatelessWidget {
           const SizedBox(height: 10),
           Row(
             children: [
-              const Icon(Icons.water_drop_outlined,
+              const Icon(LucideIcons.droplet,
                   size: 15, color: Color(0xFF94A3B8)),
               const SizedBox(width: 5),
-              Text('${donor.totalDonations} donations',
+              Text('${donor.totalDonations} ${'donations'.tr}',
                   style: const TextStyle(
                       fontSize: 12, color: Color(0xFF64748B))),
               if (donor.badgeLevel.isNotEmpty) ...[
@@ -323,7 +324,7 @@ class DonorCard extends StatelessWidget {
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      const Icon(Icons.call_rounded, size: 14, color: Colors.white),
+                      const Icon(LucideIcons.phone, size: 14, color: Colors.white),
                       const SizedBox(width: 6),
                       Text('Call'.tr,
                           style: const TextStyle(
@@ -355,7 +356,7 @@ class BloodGroupBadge extends StatelessWidget {
       width: size,
       height: size,
       decoration: BoxDecoration(
-        color: const Color(0xFFFDE4E4),
+        color: const Color(0xFFFDECEC),
         borderRadius: BorderRadius.circular(12),
       ),
       alignment: Alignment.center,
@@ -363,7 +364,7 @@ class BloodGroupBadge extends StatelessWidget {
           style: const TextStyle(
               fontSize: 15,
               fontWeight: FontWeight.w800,
-              color: Color(0xFFE11D48))),
+              color: _red)),
     );
   }
 }
@@ -391,7 +392,7 @@ class BloodSeverityPill extends StatelessWidget {
                 BoxDecoration(color: severity.color, shape: BoxShape.circle),
           ),
           const SizedBox(width: 5),
-          Text(severity.label,
+          Text(severity.label.tr,
               style: TextStyle(
                   fontSize: 11,
                   fontWeight: FontWeight.w700,
@@ -432,7 +433,7 @@ class BloodRequestCard extends StatelessWidget {
                     Row(
                       children: [
                         Text(
-                          '${req.units} unit${req.units > 1 ? 's' : ''} · ${req.group}',
+                          '${req.units} ${'units'.tr} · ${req.group}',
                           style: const TextStyle(
                               fontSize: 14.5,
                               fontWeight: FontWeight.w800,
@@ -484,10 +485,10 @@ class BloodRequestCard extends StatelessWidget {
           ),
           Row(
             children: [
-              const Icon(Icons.people_alt_outlined,
+              const Icon(LucideIcons.users,
                   size: 16, color: Color(0xFF94A3B8)),
               const SizedBox(width: 6),
-              Text('${req.responded} donors responded',
+              Text('${req.responded} ${'donors responded'.tr}',
                   style: const TextStyle(
                       fontSize: 12.5, color: Color(0xFF64748B))),
               const Spacer(),
@@ -497,7 +498,7 @@ class BloodRequestCard extends StatelessWidget {
                     style: const TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.w700,
-                        color: Color(0xFFE11D48))),
+                        color: _red)),
               ),
             ],
           ),

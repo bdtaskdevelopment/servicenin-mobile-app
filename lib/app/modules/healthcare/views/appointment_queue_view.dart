@@ -2,13 +2,14 @@ import 'package:animate_do/animate_do.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../../core/values/app_colors.dart';
 import '../../../data/models/response/healthcare_response.dart';
 import '../../../global_widget/sn_shimmer.dart';
 import '../controllers/appointments_controller.dart';
 
-const _green = Color(0xFF16A34A);
+const _green = Color(0xFF0D9383);
 const _tile = Color(0xFFD9F7E6);
 
 class AppointmentQueueView extends GetView<AppointmentsController> {
@@ -27,14 +28,15 @@ class AppointmentQueueView extends GetView<AppointmentsController> {
             return Column(
               children: [
                 // Header
-                Padding(
+                Container(
+                  color: AppColors.white,
                   padding: const EdgeInsets.fromLTRB(8, 6, 16, 8),
                   child: Row(
                     children: [
                       IconButton(
                         splashRadius: 22,
                         onPressed: () => Get.back(),
-                        icon: const Icon(Icons.arrow_back_ios_new_rounded,
+                        icon: const Icon(LucideIcons.chevronLeft,
                             size: 20, color: Color(0xFF1A1A1A)),
                       ),
                       Column(
@@ -115,13 +117,13 @@ class AppointmentQueueView extends GetView<AppointmentsController> {
                                   Border.all(color: const Color(0xFFEDEFF2))),
                           child: Column(
                             children: [
-                              _row(Icons.calendar_today_outlined, 'When'.tr,
+                              _row(LucideIcons.calendarDays, 'When'.tr,
                                   a.whenLabel),
                               const _Div(),
                               _row(
                                   a.isVideo
-                                      ? Icons.videocam_outlined
-                                      : Icons.location_on_outlined,
+                                      ? LucideIcons.video
+                                      : LucideIcons.mapPin,
                                   'Venue'.tr,
                                   a.venueName.isNotEmpty ? a.venueName : '—'),
                               const _Div(),

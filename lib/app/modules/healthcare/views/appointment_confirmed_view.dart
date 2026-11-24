@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../../core/values/app_colors.dart';
 import '../controllers/booking_controller.dart';
 
-const _green = Color(0xFF0F7A52);
+const _green = Color(0xFF0D9383);
 const _tile = Color(0xFFD9F7E6);
 
 class AppointmentConfirmedView extends GetView<BookingController> {
@@ -107,10 +108,10 @@ class AppointmentConfirmedView extends GetView<BookingController> {
                           padding: EdgeInsets.symmetric(vertical: 12),
                           child: Divider(height: 1, color: Color(0xFFF1F5F9)),
                         ),
-                        _row(Icons.calendar_today_outlined, 'Date & time'.tr,
+                        _row(LucideIcons.calendarDays, 'Date & time'.tr,
                             con.whenSummary),
                         const SizedBox(height: 12),
-                        _row(Icons.location_on_outlined, 'Venue'.tr, con.venueName),
+                        _row(LucideIcons.mapPin, 'Venue'.tr, con.venueName),
                         const SizedBox(height: 12),
                         _row(Icons.person_outline_rounded, 'Patient'.tr,
                             con.patientName),

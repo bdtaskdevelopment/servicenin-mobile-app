@@ -4,13 +4,12 @@ import 'package:get/get.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 
 import '../../../core/values/app_colors.dart';
-import '../../../global_widget/primary_button.dart';
 import '../../../global_widget/rich_html_text.dart';
 import '../controllers/education_controller.dart';
 
-const _orange = AppColors.brandOrange;
-const _darkOrange = AppColors.brandOrangeDark;
-const _tile = Color(0xFFFFEDE4);
+const _violet = Color(0xFF7C3AED);
+const _violetDark = Color(0xFF6D28D9);
+const _tile = Color(0xFFF3EEFC);
 
 /// Course details — the page the center-view's course cards open into.
 /// Shows the admin-set YouTube video (if any) playing inline, or a static
@@ -30,7 +29,8 @@ class CourseDetailsView extends GetView<EducationController> {
             if (course == null) return const SizedBox.shrink();
             return Column(
               children: [
-                Padding(
+                Container(
+                  color: AppColors.white,
                   padding: const EdgeInsets.fromLTRB(8, 6, 16, 4),
                   child: Row(
                     children: [
@@ -56,7 +56,7 @@ class CourseDetailsView extends GetView<EducationController> {
                           width: 16,
                           height: 16,
                           child: CircularProgressIndicator(
-                              strokeWidth: 2, color: _orange),
+                              strokeWidth: 2, color: _violet),
                         ),
                     ],
                   ),
@@ -114,36 +114,45 @@ class CourseDetailsView extends GetView<EducationController> {
                                   style: const TextStyle(
                                       fontSize: 11,
                                       fontWeight: FontWeight.w700,
-                                      color: _darkOrange)),
+                                      color: _violetDark)),
                             ),
                           ],
                         ],
                       ),
-                      const SizedBox(height: 14),
-                      Container(
-                        padding: const EdgeInsets.all(14),
-                        decoration: BoxDecoration(
-                          color: AppColors.white,
-                          borderRadius: BorderRadius.circular(14),
-                          border: Border.all(color: const Color(0xFFEDEFF2)),
-                        ),
-                        child: Column(
+                      if (course.instructor.isNotEmpty) ...[
+                        const SizedBox(height: 10),
+                        Row(
                           children: [
-                            if (course.instructor.isNotEmpty)
-                              _InfoRow(Icons.person_outline_rounded,
-                                  'Instructor'.tr, course.instructor),
-                            if (course.durationText.isNotEmpty)
-                              _InfoRow(Icons.timelapse_rounded,
-                                  'Duration'.tr, course.durationText),
-                            if (course.schedule.isNotEmpty)
-                              _InfoRow(Icons.schedule_rounded,
-                                  'Schedule'.tr, course.schedule),
-                            _InfoRow(Icons.payments_outlined, 'Fee'.tr,
-                                course.feeLabel,
-                                last: true),
+                            const Icon(Icons.person_outline_rounded,
+                                size: 15, color: Color(0xFF94A3B8)),
+                            const SizedBox(width: 6),
+                            Text(course.instructor,
+                                style: const TextStyle(
+                                    fontSize: 12.5, color: Color(0xFF64748B))),
                           ],
                         ),
+                      ],
+                      const SizedBox(height: 14),
+                      Row(
+                        children: [
+                          if (course.durationText.isNotEmpty)
+                            Expanded(
+                              child: _StatBox(Icons.timelapse_rounded,
+                                  'Duration'.tr, course.durationText),
+                            ),
+                          if (course.durationText.isNotEmpty)
+                            const SizedBox(width: 10),
+                          Expanded(
+                            child: _StatBox(Icons.payments_outlined, 'Fee'.tr,
+                                course.feeLabel),
+                          ),
+                        ],
                       ),
+                      if (course.schedule.isNotEmpty) ...[
+                        const SizedBox(height: 10),
+                        _StatBox(Icons.schedule_rounded, 'Schedule'.tr,
+                            course.schedule, fullWidth: true),
+                      ],
                       if (course.description.isNotEmpty) ...[
                         const SizedBox(height: 16),
                         Text('About this course'.tr,
@@ -163,9 +172,23 @@ class CourseDetailsView extends GetView<EducationController> {
                 ),
                 Padding(
                   padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
-                  child: PrimaryButton(
-                    label: 'Register'.tr,
-                    onPressed: () => con.enquire(course),
+                  child: SizedBox(
+                    width: double.infinity,
+                    height: 54,
+                    child: ElevatedButton.icon(
+                      onPressed: () => con.enquire(course),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: _violet,
+                        foregroundColor: Colors.white,
+                        elevation: 0,
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(14)),
+                      ),
+                      icon: const Icon(Icons.send_rounded, size: 18),
+                      label: Text('Register'.tr,
+                          style: const TextStyle(
+                              fontSize: 16, fontWeight: FontWeight.w800)),
+                    ),
                   ),
                 ),
               ],
@@ -177,33 +200,42 @@ class CourseDetailsView extends GetView<EducationController> {
   }
 }
 
-class _InfoRow extends StatelessWidget {
-  const _InfoRow(this.icon, this.label, this.value, {this.last = false});
+class _StatBox extends StatelessWidget {
+  const _StatBox(this.icon, this.label, this.value, {this.fullWidth = false});
   final IconData icon;
   final String label;
   final String value;
-  final bool last;
+  final bool fullWidth;
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: EdgeInsets.only(bottom: last ? 0 : 12),
-      child: Row(
+    return Container(
+      width: fullWidth ? double.infinity : null,
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: AppColors.white,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: const Color(0xFFEDEFF2)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(icon, size: 17, color: _darkOrange),
-          const SizedBox(width: 10),
-          Text(label,
-              style: const TextStyle(fontSize: 13, color: Color(0xFF94A3B8))),
-          const Spacer(),
-          Flexible(
-            child: Text(value,
-                textAlign: TextAlign.right,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-                style: const TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w700,
-                    color: Color(0xFF0F172A))),
+          Row(
+            children: [
+              Icon(icon, size: 16, color: _violet),
+              const SizedBox(width: 6),
+              Text(label,
+                  style: const TextStyle(
+                      fontSize: 12, color: Color(0xFF94A3B8))),
+            ],
           ),
+          const SizedBox(height: 6),
+          Text(value,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w700,
+                  color: Color(0xFF0F172A))),
         ],
       ),
     );

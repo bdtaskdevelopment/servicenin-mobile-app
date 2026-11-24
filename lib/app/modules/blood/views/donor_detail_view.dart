@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../../core/values/app_colors.dart';
 import '../controllers/blood_controller.dart';
 import '../widgets/blood_widgets.dart';
 
-const _red = Color(0xFFE11D48);
+const _red = Color(0xFFE5383B);
 const _label = Color(0xFF14B8A6);
 
 class DonorDetailView extends GetView<BloodController> {
@@ -16,7 +17,7 @@ class DonorDetailView extends GetView<BloodController> {
     final donor = controller.viewingDonor;
     if (donor == null) {
       return Scaffold(
-        backgroundColor: const Color(0xFFF7F8FA),
+        backgroundColor: const Color(0xFFF4F5FA),
         body: SafeArea(
           child: Column(
             children: [
@@ -35,7 +36,7 @@ class DonorDetailView extends GetView<BloodController> {
 
     final name = donor.fullName.isNotEmpty ? donor.fullName : 'ServiceNin Donor';
     return Scaffold(
-      backgroundColor: const Color(0xFFF7F8FA),
+      backgroundColor: const Color(0xFFF4F5FA),
       body: SafeArea(
         child: Column(
           children: [
@@ -220,7 +221,7 @@ class DonorDetailView extends GetView<BloodController> {
                                   style: const TextStyle(
                                       fontSize: 13.5,
                                       fontWeight: FontWeight.w700,
-                                      color: Color(0xFFE11D48))),
+                                      color: Color(0xFFE5383B))),
                             )
                           : ElevatedButton.icon(
                               onPressed: () => controller.callPhone(donor.phone),
@@ -263,7 +264,7 @@ class _BackBar extends StatelessWidget {
           IconButton(
             splashRadius: 22,
             onPressed: () => Get.back(),
-            icon: const Icon(Icons.arrow_back_ios_new_rounded,
+            icon: const Icon(LucideIcons.chevronLeft,
                 size: 20, color: Color(0xFF1A1A1A)),
           ),
           Column(

@@ -1,6 +1,7 @@
 import 'package:animate_do/animate_do.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../../global_widget/sn_shimmer.dart';
 import '../../../routes/app_pages.dart';
@@ -8,7 +9,9 @@ import '../controllers/booking_controller.dart';
 import '../controllers/healthcare_controller.dart';
 import '../widgets/hc_doctor_card.dart';
 
-const _green = Color(0xFF15803D);
+import '../../../core/values/app_colors.dart';
+
+const _teal = Color(0xFF0D9383);
 
 class AllAvailableDoctorsView extends StatefulWidget {
   const AllAvailableDoctorsView({super.key});
@@ -32,19 +35,20 @@ class _AllAvailableDoctorsViewState extends State<AllAvailableDoctorsView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF7F8FA),
+      backgroundColor: const Color(0xFFF4F5FA),
       body: SafeArea(
         child: Column(
           children: [
             // Header
-            Padding(
+            Container(
+              color: AppColors.white,
               padding: const EdgeInsets.fromLTRB(8, 6, 16, 8),
               child: Row(
                 children: [
                   IconButton(
                     splashRadius: 22,
                     onPressed: () => Get.back(),
-                    icon: const Icon(Icons.arrow_back_ios_new_rounded,
+                    icon: const Icon(LucideIcons.chevronLeft,
                         size: 20, color: Color(0xFF1A1A1A)),
                   ),
                   Column(
@@ -66,7 +70,7 @@ class _AllAvailableDoctorsViewState extends State<AllAvailableDoctorsView> {
             ),
             Expanded(
               child: RefreshIndicator(
-                color: _green,
+                color: _teal,
                 onRefresh: () => controller.initAvailableList(force: true),
                 child: GetBuilder<HealthcareController>(
                   builder: (con) {
@@ -119,7 +123,7 @@ class _AllAvailableDoctorsViewState extends State<AllAvailableDoctorsView> {
                                 width: 22,
                                 height: 22,
                                 child: CircularProgressIndicator(
-                                    strokeWidth: 2.4, color: _green),
+                                    strokeWidth: 2.4, color: _teal),
                               ),
                             ),
                           ),

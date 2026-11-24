@@ -1,6 +1,11 @@
+import 'dart:io';
+
 import '../../core/values/app_url.dart';
 import '../models/response/auth_response.dart';
+import '../models/response/blood_bank_response.dart';
 import '../models/response/blood_content_response.dart';
+import '../models/response/blood_donation_response.dart';
+import '../models/response/blood_event_response.dart';
 import '../models/response/blood_request_response.dart';
 import '../models/response/blood_responder_response.dart';
 import '../models/response/blood_response_response.dart';
@@ -154,5 +159,90 @@ class BloodRepository {
   Future<List<BloodFaq>> fetchFaqs() async {
     final res = await provider.getData(ApiURL.bloodFaqs);
     return BloodFaq.listFromResponse(_payload(res));
+  }
+
+  /// GET /api/v1/blood/stats — small community-impact summary for the home
+  /// screen. Returns zeros on any failure rather than throwing, since it's
+  /// a non-critical decorative card.
+  Future<Map<String, int>> fetchCommunityStats() async {
+    try {
+      final res = await provider.getData(ApiURL.bloodStats);
+      final body = _payload(res);
+      final data = body is Map ? body['data'] : null;
+      if (data is! Map) return const {};
+      int n(dynamic v) => v is int ? v : int.tryParse(v?.toString() ?? '') ?? 0;
+      return {
+        'donors': n(data['TotalDonors']),
+        'bags': n(data['TotalDonationBags']),
+        'camps': n(data['CampCount']),
+        'grouping': n(data['GroupingCount']),
+      };
+    } catch (_) {
+      return const {};
+    }
+  }
+
+  /// GET /api/v1/blood/banks — the blood-bank directory, optionally
+  /// filtered by a name/area search.
+  Future<List<BloodBank>> fetchBanks({String? q}) async {
+    final res = await provider.getData(ApiURL.bloodBanks(q: q));
+    return BloodBank.listFromResponse(_payload(res));
+  }
+
+  /// GET /api/v1/blood/events — upcoming or past events.
+  Future<List<BloodEvent>> fetchEvents({String scope = 'upcoming'}) async {
+    final res = await provider.getData(ApiURL.bloodEvents(scope: scope));
+    return BloodEvent.listFromResponse(_payload(res));
+  }
+
+  /// GET /api/v1/blood/events/:id — a single event's detail.
+  Future<BloodEvent?> fetchEvent(String id) async {
+    final res = await provider.getData(ApiURL.bloodEventById(id));
+    return BloodEvent.fromResponse(_payload(res));
+  }
+
+  /// POST /api/v1/blood/events/:id/join
+  Future<AuthSimpleResponse> joinEvent(String id) async {
+    final res = await provider.postData(ApiURL.bloodEventJoin(id), {});
+    return AuthSimpleResponse.fromMap(_payload(res));
+  }
+
+  /// DELETE /api/v1/blood/events/:id/join
+  Future<AuthSimpleResponse> leaveEvent(String id) async {
+    final res = await provider.deleteData(ApiURL.bloodEventJoin(id));
+    return AuthSimpleResponse.fromMap(_payload(res));
+  }
+
+  /// POST /api/v1/blood/volunteers — submit a volunteer application.
+  Future<AuthSimpleResponse> registerVolunteer(Map<String, dynamic> payload) async {
+    final res = await provider.postData(ApiURL.bloodVolunteers, payload);
+    return AuthSimpleResponse.fromMap(_payload(res));
+  }
+
+  /// POST /api/v1/blood/donations — log a completed donation, with up to a
+  /// few photos attached in the same multipart request.
+  Future<AuthSimpleResponse> logDonation(
+      Map<String, dynamic> payload, List<File> photos) async {
+    final res = await provider.postMultipart(ApiURL.bloodDonations, payload, photos);
+    return AuthSimpleResponse.fromMap(_payload(res));
+  }
+
+  /// GET /api/v1/blood/donations/me — my donation history.
+  Future<List<BloodDonation>> fetchMyDonations() async {
+    final res = await provider.getData(ApiURL.bloodDonationsMe);
+    return BloodDonation.listFromResponse(_payload(res));
+  }
+
+  /// PATCH /api/v1/blood/requests/:id — edit a still-open request.
+  Future<AuthSimpleResponse> updateRequest(
+      String id, Map<String, dynamic> payload) async {
+    final res = await provider.patchData(ApiURL.bloodRequestById(id), payload);
+    return AuthSimpleResponse.fromMap(_payload(res));
+  }
+
+  /// POST /api/v1/blood/requests/:id/close — cancel a still-open request.
+  Future<AuthSimpleResponse> closeRequest(String id) async {
+    final res = await provider.postData(ApiURL.bloodRequestClose(id), {});
+    return AuthSimpleResponse.fromMap(_payload(res));
   }
 }
