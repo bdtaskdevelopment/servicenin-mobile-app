@@ -29,6 +29,8 @@ class AppSettings {
     this.appName = 'ServiceNin',
     this.appVersion = '',
     this.minAppVersion = '',
+    this.playstoreUrl = '',
+    this.appstoreUrl = '',
     this.mapApiKey = '',
   });
 
@@ -69,6 +71,8 @@ class AppSettings {
   final String appName;
   final String appVersion;
   final String minAppVersion;
+  final String playstoreUrl;
+  final String appstoreUrl;
 
   // Google Maps API key (Places + Directions), configured server-side
   // under the "map" settings group.
@@ -119,6 +123,8 @@ class AppSettings {
         appName: _str(data, 'app_name', 'ServiceNin'),
         appVersion: _str(data, 'app_version'),
         minAppVersion: _str(data, 'min_app_version'),
+        playstoreUrl: _str(data, 'playstore_url'),
+        appstoreUrl: _str(data, 'appstore_url'),
         mapApiKey: _str(data, 'map_api_key'),
       );
 }
